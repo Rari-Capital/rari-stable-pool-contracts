@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>FarmerFund - Wallet</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-sm-8 col-sm-push-2">
+          <h1 class="text-center">FarmerFund</h1>
+          <hr/>
+          <br/>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6 col-md-5 col-md-push-1 col-lg-4 col-lg-push-2">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">My FarmerFund</h3>
+            </div>
+            <div class="panel-body">
+              <h4 style="margin-top: 0;">Balance</h4>
+              <span id="MyDAIBalance">?</span> DAI<br /><br />
+              <h4>Deposit</h4>
+              <div class="form-group"><input type="text" class="form-control" id="DAIDepositAmount" placeholder="Amount" /></div>
+              <button class="btn btn-success" id="depositButton" type="button" disabled>Deposit</button><br /><br />
+              <h4>Withdraw</h4>
+              <div class="form-group"><input type="text" class="form-control" id="DAIWithdrawAmount" placeholder="Amount" /></div>
+              <button class="btn btn-danger" id="withdrawButton" type="button" disabled>Withdraw</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-md-5 col-md-push-1 col-lg-4 col-lg-push-2">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">FarmerFund</h3>
+            </div>
+            <div class="panel-body">
+              <h4 style="margin-top: 0;">Balance</h4>
+              <span id="DAIBalance">?</span> DAI
+            </div>
+          </div>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">My FarmerFundToken Wallet</h3>
+            </div>
+            <div class="panel-body">
+              <h4 style="margin-top: 0;">Balance</h4>
+              <span id="FFTBalance">?</span> FFT<br /><br />
+              <h4>Transfer</h4>
+              <div class="form-group"><input type="text" class="form-control" id="FFTTransferAddress" placeholder="Address" /></div>
+              <div class="form-group"><input type="text" class="form-control" id="FFTTransferAmount" placeholder="Amount" /></div>
+              <button class="btn btn-primary" id="transferButton" type="button" disabled>Transfer</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+      </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/erc20-abi.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
