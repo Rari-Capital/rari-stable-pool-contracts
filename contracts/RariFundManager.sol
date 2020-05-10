@@ -43,6 +43,16 @@ contract RariFundManager is Ownable {
     address private _rariFundTokenContract;
 
     /**
+     * @dev Address of the rebalancer.
+     */
+    address private _rariFundRebalancerAddress;
+
+    /**
+     * @dev Maps ERC20 token contract addresses to their currency codes.
+     */
+    string[] private _supportedCurrencies;
+
+    /**
      * @dev Maps ERC20 token contract addresses to their currency codes.
      */
     mapping(string => address) private _erc20Contracts;
@@ -69,6 +79,9 @@ contract RariFundManager is Ownable {
      * @dev Constructor that sets supported ERC20 token contract addresses and supported pools for each supported token.
      */
     constructor () public {
+        // Add supported currency codes to array
+        _supportedCurrencies.push("DAI");
+
         // Map ERC20 token contract addresses and supported pools to DAI
         _erc20Contracts["DAI"] = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
         _poolsByCurrency["DAI"].push(0); // dYdX
@@ -91,25 +104,37 @@ contract RariFundManager is Ownable {
     event FundTokenSet(address newContract);
 
     /**
+     * @dev Emitted when the rebalancer of the RariFundManager is set.
+     */
+    event FundRebalancerSet(address newAddress);
+
+    /**
      * @dev Upgrades RariFundManager.
      * @param newContract The address of the new RariFundManager contract.
      */
     function upgradeFundManager(address newContract) external onlyOwner {
-        require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
-
         // Update RariFundToken minter
-        RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
-        rariFundToken.addMinter(newContract);
-        rariFundToken.renounceMinter();
+        if (_rariFundTokenContract != address(0)) {
+            RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
+            rariFundToken.addMinter(newContract);
+            rariFundToken.renounceMinter();
+        }
 
-        // Withdraw all from all pools
-        for (uint256 i = 0; i < _poolsByCurrency["DAI"].length; i++)
-            if (RariFundController.getPoolBalance(_poolsByCurrency["DAI"][i], _erc20Contracts["DAI"]) > 0)
-                RariFundController.withdrawAllFromPool(_poolsByCurrency["DAI"][i], _erc20Contracts["DAI"]);
+        // Withdraw all tokens from all pools and transfers them to new FundManager
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
+            string currencyCode = _supportedCurrencies[i];
 
-        // Transfer all tokens
-        ERC20 token = ERC20(_erc20Contracts["DAI"]);
-        token.transfer(newContract, token.balanceOf(address(this)));
+            for (uint256 j = 0; j < _poolsByCurrency[currencyCode].length; j++)
+                if (RariFundController.getPoolBalance(_poolsByCurrency[currencyCode][j], _erc20Contracts[currencyCode]) > 0)
+                    RariFundController.withdrawAllFromPool(_poolsByCurrency[currencyCode][j], _erc20Contracts[currencyCode]);
+
+            ERC20 token = ERC20(_erc20Contracts[currencyCode]);
+            uint256 balance = token.balanceOf(address(this));
+            if (balance > 0) require(token.transfer(newContract, balance), "Failed to transfer tokens to new FundManager.");
+        }
+
+        // Forward ETH to new FundManager
+        newContract.transfer(address(this).balance);
 
         emit FundManagerUpgraded(newContract);
     }
@@ -121,6 +146,23 @@ contract RariFundManager is Ownable {
     function setFundToken(address newContract) external onlyOwner {
         _rariFundTokenContract = newContract;
         emit FundTokenSet(newContract);
+    }
+
+    /**
+     * @dev Sets or upgrades the rebalancer of the RariFundManager.
+     * @param newAddress The Ethereum address of the new rebalancer server.
+     */
+    function setFundRebalancer(address newAddress) external onlyOwner {
+        _rariFundRebalancerAddress = newAddress;
+        emit FundRebalancerSet(newAddress);
+    }
+
+    /**
+     * @dev Throws if called by any account other than the rebalancer.
+     */
+    modifier onlyRebalancer() {
+        require(_rariFundRebalancerAddress == msg.sender, "Caller is not the rebalancer.");
+        _;
     }
 
     /**
@@ -315,7 +357,7 @@ contract RariFundManager is Ownable {
      * @param currencyCode The currency code of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
      */
-    function depositToPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyOwner returns (bool) {
+    function depositToPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(RariFundController.depositToPool(pool, erc20Contract, amount), "Pool deposit failed.");
@@ -328,7 +370,7 @@ contract RariFundManager is Ownable {
      * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
      */
-    function withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyOwner returns (bool) {
+    function withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(RariFundController.withdrawFromPool(pool, erc20Contract, amount), "Pool withdrawal failed.");
@@ -340,7 +382,7 @@ contract RariFundManager is Ownable {
      * @param pool The name of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
      */
-    function withdrawAllFromPool(uint8 pool, string calldata currencyCode) external onlyOwner returns (bool) {
+    function withdrawAllFromPool(uint8 pool, string calldata currencyCode) external onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(RariFundController.withdrawAllFromPool(pool, erc20Contract), "Pool withdrawal failed.");
