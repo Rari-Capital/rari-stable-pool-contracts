@@ -1,3 +1,17 @@
+/**
+ * @file
+ * @author David Lucid <david@rari.capital>
+ *
+ * @section LICENSE
+ *
+ * All rights reserved to David Lucid of David Lucid LLC.
+ * Any disclosure, reproduction, distribution or other use of this code by any individual or entity other than David Lucid of David Lucid LLC, unless given explicit permission by David Lucid of David Lucid LLC, is prohibited.
+ *
+ * @section DESCRIPTION
+ *
+ * This file includes the Ethereum contract code for CompoundPoolController, a library handling deposits to and withdrawals from dYdX liquidity pools.
+ */
+
 pragma solidity ^0.5.7;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -17,7 +31,7 @@ library CompoundPoolController {
      * @param erc20Contract The ERC20 contract address of the token.
      */
     function getCErc20Address(address erc20Contract) private pure returns (address) {
-        if (erc20Contract == 0x6B175474E89094C44Da98b954EedeAC495271d0F) return 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643;
+        if (erc20Contract == 0x6B175474E89094C44Da98b954EedeAC495271d0F) return 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643; // DAI => cDAI
         else revert("Supported Compound cToken address not found for this token address.");
     }
 

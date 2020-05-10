@@ -1,3 +1,17 @@
+/**
+ * @file
+ * @author David Lucid <david@rari.capital>
+ *
+ * @section LICENSE
+ *
+ * All rights reserved to David Lucid of David Lucid LLC.
+ * Any disclosure, reproduction, distribution or other use of this code by any individual or entity other than David Lucid of David Lucid LLC, unless given explicit permission by David Lucid of David Lucid LLC, is prohibited.
+ *
+ * @section DESCRIPTION
+ *
+ * This file includes the Ethereum contract code for RariFundManager, the primary contract powering Rari Capital's RariFund.
+ */
+
 pragma solidity ^0.5.7;
 pragma experimental ABIEncoderV2;
 
@@ -55,9 +69,10 @@ contract RariFundManager is Ownable {
      * @dev Constructor that sets supported ERC20 token contract addresses and supported pools for each supported token.
      */
     constructor () public {
+        // Map ERC20 token contract addresses and supported pools to DAI
         _erc20Contracts["DAI"] = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-        _poolsByCurrency["DAI"].push(0);
-        _poolsByCurrency["DAI"].push(1);
+        _poolsByCurrency["DAI"].push(0); // dYdX
+        _poolsByCurrency["DAI"].push(1); // Compound
     }
 
     /**
@@ -208,7 +223,7 @@ contract RariFundManager is Ownable {
             rftAmount = rftDecimals >= tokenDecimals ? amount.mul(10 ** (rftDecimals.sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(rftDecimals)));
         }
 
-        // The user must approve the transfer of tokens before calling this function
+        // TODO: Make sure the user must approve the transfer of tokens before calling the deposit function
         require(token.transferFrom(msg.sender, address(this), amount), "Failed to transfer input tokens.");
 
         require(rariFundToken.mint(msg.sender, rftAmount), "Failed to mint output tokens.");
@@ -237,7 +252,7 @@ contract RariFundManager is Ownable {
         require(rftAmount <= rariFundToken.balanceOf(msg.sender), "Your RFT balance is too low for a withdrawal of this amount.");
         require(amount <= totalBalance, "Fund DAI balance is too low for a withdrawal of this amount.");
 
-        // TODO: The user must approve the burning of tokens before calling this function
+        // TODO: Make sure the user must approve the burning of tokens before calling the withdraw function
         rariFundToken.burnFrom(msg.sender, rftAmount);
 
         if (amount <= contractBalance) {

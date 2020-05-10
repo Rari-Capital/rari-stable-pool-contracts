@@ -1,3 +1,17 @@
+/**
+ * @file
+ * @author David Lucid <david@rari.capital>
+ *
+ * @section LICENSE
+ *
+ * All rights reserved to David Lucid of David Lucid LLC.
+ * Any disclosure, reproduction, distribution or other use of this code by any individual or entity other than David Lucid of David Lucid LLC, unless given explicit permission by David Lucid of David Lucid LLC, is prohibited.
+ *
+ * @section DESCRIPTION
+ *
+ * This file includes the Ethereum contract code for RariFundController, our library handling deposits to and withdrawals from the liquidity pools that power RariFund.
+ */
+
 pragma solidity ^0.5.7;
 pragma experimental ABIEncoderV2;
 
