@@ -212,9 +212,9 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Calculates the fund's total balance of the specified currency.
+     * @dev Calculates the fund's raw total balance (investor funds + unclaimed fees) of the specified currency.
      */
-    function getTotalBalance(string memory currencyCode) public returns (uint256) {
+    function getRawTotalBalance(string memory currencyCode) public returns (uint256) {
         require(_poolsByCurrency[currencyCode].length > 0, "Invalid currency code.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
@@ -267,9 +267,8 @@ contract RariFundManager is Ownable {
 
         // TODO: Make sure the user must approve the transfer of tokens before calling the deposit function
         require(token.transferFrom(msg.sender, address(this), amount), "Failed to transfer input tokens.");
-
+        _netDeposits = _netDeposits.add(amount); // TODO: Support multiple currencies with _netDeposits
         require(rariFundToken.mint(msg.sender, rftAmount), "Failed to mint output tokens.");
-
         emit Deposit(currencyCode, msg.sender, amount);
         return true;
     }
@@ -296,6 +295,7 @@ contract RariFundManager is Ownable {
 
         // TODO: Make sure the user must approve the burning of tokens before calling the withdraw function
         rariFundToken.burnFrom(msg.sender, rftAmount);
+        _netDeposits = _netDeposits.sub(amount); // TODO: Support multiple currencies with _netDeposits
 
         if (amount <= contractBalance) {
             require(token.transfer(msg.sender, amount), "Failed to transfer output tokens.");
@@ -386,6 +386,200 @@ contract RariFundManager is Ownable {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(RariFundController.withdrawAllFromPool(pool, erc20Contract), "Pool withdrawal failed.");
+        return true;
+    }
+    
+    /**
+     * @dev Fund's public balance: combined balance of all users of the fund (does not include unclaimed interest fees; on the other hand, getTotalBalanceRaw() does)
+     */
+    function getTotalBalance() public view returns (uint256) {
+        return getRawTotalBalance().sub(getInterestFeesUnclaimed());
+    }
+
+    /**
+     * @dev The net quantity of deposits (i.e., deposits - withdrawals).
+     * On deposit, amount deposited is added to _netDeposits; on withdrawal, amount withdrawn is subtracted from _netDeposits.
+     */
+    uint256 private _netDeposits;
+    
+    /**
+     * @dev The total amount of interest accrued (including the fees paid on interest).
+     */
+    function getRawInterestAccrued() internal view returns (uint256) {
+        return getRawTotalBalance() - _netDeposits + _interestFeesClaimed
+    }
+    
+    /**
+     * @dev The amount of interest accrued by investors (excluding the fees taken on interest).
+     */
+    function getInterestAccrued() public view returns (uint256) {
+        return getTotalBalance() - _netDeposits
+    }
+
+    /**
+     * @dev The proportion of interest accrued that is taken as a service fee (scaled by 1e18).
+     */
+    uint256 private _interestFeeRate;
+
+    /**
+     * @dev Claims all fees, updates _interestAccruedAtLastFeeRateChange and _interestFeesGeneratedAtLastFeeRateChange, then sets the interest fee rate.
+     * @param beneficiary The master beneficiary of fees on interest; i.e., the recipient of all unshared fees on interest.
+     */
+    function setInterestFeeRate(address rate) external onlyOwner {
+        require(rate != _interestFeeRate, "This is already the current interest fee rate.");
+        for (var i = 0; i < _interestFeeShareBeneficiaries.length; i++) claimFees(_interestFeeShareBeneficiaries);
+        _interestFeesGeneratedAtLastFeeRateChange = getInterestFeesGenerated(); // MUST update this first before updating _rawInterestAccruedAtLastFeeRateChange since it depends on it 
+        _rawInterestAccruedAtLastFeeRateChange = getRawInterestAccrued();
+        _interestFeeRate = rate;
+    }
+
+    /**
+     * @dev The amount of interest fees accrued by beneficiaries.
+     */
+    function getInterestFeeRate() public view returns (uint256) {
+        return _interestFeeRate;
+    }
+
+    /**
+     * @dev The amount of interest accrued at the time of the most recent change to the fee rate.
+     */
+    uint256 private _interestAccruedAtLastFeeRateChange = 0;
+
+    /**
+     * @dev The amount of fees generated on interest at the time of the most recent change to the fee rate.
+     */
+    uint256 private _interestFeesGeneratedAtLastFeeRateChange = 0;
+
+    /**
+     * @dev The amount of interest fees accrued by beneficiaries.
+     */
+    function getInterestFeesGenerated() public view returns (uint256) {
+        return _interestFeesGeneratedAtLastFeeRateChange.add(getRawInterestAccrued().sub(_rawInterestAccruedAtLastFeeRateChange).mul(_interestFeeRate).div(1e18));
+    }
+
+    /**
+     * @dev The total claimed amount of interest fees (shared + unshared).
+     */
+    uint256 private _interestFeesClaimed;
+
+    /**
+     * @dev Returns the total unclaimed amount of interest fees (shared + unshared).
+     */
+    function getInterestFeesUnclaimed() internal view returns (uint256) {
+        return getInterestFeesGenerated() - _interestFeesClaimed;
+    }
+
+    /**
+     * @dev Struct for an active share of interest fees.
+     */
+    struct InterestFeeShare { 
+        uint256 shareProportion; // Proportion of interest fees shared/awarded to a beneficiary (scaled by 1e18); value of interest fees awarded = shareProportion * (getInterestFeesGenerated() - feesGeneratedWhenShareLastChanged)
+        uint256 feesClaimedSinceShareLastChanged; // Claimed amount of fees on interest since share was created
+        uint256 feesGeneratedWhenShareLastChanged; // getInterestFeesGenerated() at the time of creation of each share
+    }
+
+    /**
+     * @dev Array of beneficiaries with active shares of interest fees.
+     */
+    address[] private _interestFeeShareBeneficiaries;
+
+    /**
+     * @dev Mapping of active shares of interest fees to beneficiaries.
+     */
+    mapping(address => InterestFeeShare) private _interestFeeShares;
+
+    /**
+     * @dev Emitted when an interest fee share is updated.
+     */
+    event InterestFeeShareUpdated(address beneficiary, uint256 shareProportion);
+
+    /**
+     * @dev Updates _interestFeeShareBeneficiaries and _interestFeesShares, running claimFees() and resetting feesClaimedSinceShareLastChanged and feesGeneratedWhenShareLastChanged when changing a share proportion.
+     * @param beneficiary The recipient of the fees.
+     * @param shareProportion The proportion of interest fees that will be shared/awarded to the beneficiary (scaled by 1e18).
+     */
+    function updateInterestFeeShare(address beneficiary, uint256 shareProportion) external onlyOwner {
+        require(shareProportion >= 0, "Share proportion cannot be negative.")
+        require(shareProportion != _interestFeeShares[beneficiary].shareProportion, "This share proportion is already set for this beneficary.");
+
+        // If beneficiary has existing share proportion, claim their unclaimed fees and, if we are removing them, update the array; otherwise, add them to the array
+        if (_interestFeeShares[beneficiary].shareProportion > 0) {
+            claimFees(beneficiary);
+
+            if (shareProportion == 0) {
+                // Get index of beneficiary
+                for (uint256 i = 0; i < _interestFeeShareBeneficiaries.length; i++) if (_interestFeeShareBeneficiaries[i] == beneficiary) {
+                    // Remove beneficiary
+                    for (uint256 j = i; j < _interestFeeShareBeneficiaries.length - 1; j++) _interestFeeShareBeneficiaries[j] = _interestFeeShareBeneficiaries[j + 1];
+                    _interestFeeShareBeneficiaries.length--;
+                }
+            }
+        } else _interestFeeShareBeneficiaries.push(beneficiary);
+
+        // Set data in storage and emit event
+        _interestFeeShares[beneficiary] = InterestFeeShare(shareProportion, 0, getInterestFeesGenerated());
+        emit InterestFeeShareUpdated(beneficiary, shareProportion);
+    }
+
+    /**
+     * @dev Returns the total unclaimed amount of shared interest fees.
+     */
+    function getSharedInterestFeesUnclaimed() internal view returns (uint256) {
+        uint256 sharedInterestFeesUnclaimed = 0;
+        for (var i = 0; i < _interestFeeShareBeneficiaries.length; i++) sharedInterestFeesUnclaimed = sharedInterestFeesUnclaimed.add(getBeneficiarySharedInterestFeesUnclaimed(_interestFeeShareBeneficiaries[i]));
+        return sharedInterestFeesUnclaimed;
+    }
+
+    /**
+     * @dev Returns the unclaimed amount of shared interest fees belonging to a given beneficiary.
+     * @param beneficiary The recipient of the fees.
+     */
+    function getBeneficiarySharedInterestFeesUnclaimed(address beneficiary) internal view returns (uint256) {
+        if (_interestFeeShares[beneficiary].shareProportion == 0) return 0;
+        uint256 feesAwarded = getInterestFeesGenerated() - _interestFeeShares[beneficiary].feesGeneratedWhenShareLastChanged) * _interestFeesShares[beneficiary] / 1e18;
+        return feesAwarded - _interestFeeShares[beneficiary].feesClaimedSinceShareLastChanged;
+    }
+
+    /**
+     * @dev The master beneficiary of fees on interest; i.e., the recipient of all unshared fees on interest.
+     */
+    address private _interestFeeMasterBeneficiary;
+
+    /**
+     * @dev Sets the master beneficiary of interest fees.
+     * @param beneficiary The master beneficiary of fees on interest; i.e., the recipient of all unshared fees on interest.
+     */
+    function setInterestFeeMasterBeneficiary(address beneficiary) external onlyOwner {
+        require(beneficiary != address(0), "Interest fee master beneficiary cannot be the zero address.");
+        _interestFeeMasterBeneficiary = beneficiary;
+    }
+
+    /**
+     * @dev Returns the unclaimed amount of unshared interest fees (i.e., those belonging to the master beneficiary).
+     */
+    function getMasterBeneficiaryInterestFeesUnclaimed() internal view returns (uint256) {
+        return getInterestFeesUnclaimed().sub(getSharedInterestFeesUnclaimed());
+    }
+
+    /**
+     * @dev Emitted when fees on interest are withdrawn.
+     */
+    event InterestFeesClaimed(address beneficiary, uint256 amount);
+
+    /**
+     * @dev Withdraws all accrued fees on interest to a valid beneficiary.
+     * @param beneficiary The recipient of the fees.
+     */
+    function claimFees(address beneficiary) external returns (bool) {
+        require(beneficiary != address(0), "Beneficiary cannot be the zero address.");
+        uint256 sharedFeesToClaim = getBeneficiarySharedInterestFeesUnclaimed(beneficiary);
+        uint256 masterBeneficiaryInterestFeesUnclaimed = beneficiary == _interestFeeMasterBeneficiary ? getMasterBeneficiaryInterestFeesUnclaimed() : 0;
+        uint256 feesToClaim = sharedFeesToClaim.add(masterBeneficiaryInterestFeesUnclaimed);
+        require(feesToClaim > 0, "No new fees are available for this beneficiary to claim.");
+        _interestFeesClaimed = _interestFeesClaimed.add(feesToClaim);
+        if (_interestFeeShares[beneficiary].shareProportion > 0) _interestFeeShares[beneficiary].feesClaimedSinceShareLastChanged = _interestFeeShares[beneficiary].feesClaimedSinceShareLastChanged.add(sharedFeesToClaim);        
+        require(ERC20(_erc20Contracts["DAI"]).transfer(beneficiary, feesToClaim));
+        emit InterestFeesClaimed(beneficiary, feesToClaim);
         return true;
     }
 }
