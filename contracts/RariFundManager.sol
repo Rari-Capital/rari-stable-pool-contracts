@@ -122,7 +122,7 @@ contract RariFundManager is Ownable {
      * @dev Disables deposits to and withdrawals from this RariFundManager while contract(s) are upgraded.
      */
     function disableFund() external onlyOwner {
-        require(!_fundDisabled);
+        require(!_fundDisabled, "Fund already disabled.");
         _fundDisabled = true;
         emit FundDisabled();
     }
@@ -131,7 +131,7 @@ contract RariFundManager is Ownable {
      * @dev Enables deposits to and withdrawals from this RariFundManager once contract(s) are upgraded.
      */
     function enableFund() external onlyOwner {
-        require(_fundDisabled);
+        require(_fundDisabled, "Fund already enabled.");
         _fundDisabled = false;
         emit FundEnabled();
     }
