@@ -205,7 +205,7 @@ contract RariFundManager is Ownable {
         } else {
             uint256 rftDecimals = rariFundToken.decimals();
             uint256 tokenDecimals = token.decimals();
-            rftAmount = rftDecimals >= tokenDecimals ? amount.mul(10 ** (rftDecimals - tokenDecimals)) : amount.div(10 ** (tokenDecimals - rftDecimals));
+            rftAmount = rftDecimals >= tokenDecimals ? amount.mul(10 ** (rftDecimals.sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(rftDecimals)));
         }
 
         // The user must approve the transfer of tokens before calling this function
