@@ -7,10 +7,10 @@ import "./pools/DydxPoolController.sol";
 import "./pools/CompoundPoolController.sol";
 
 /**
- * @title FarmerFundController
- * @dev This library handles deposits to and withdrawals from the liquidity pools that power FarmerFund.
+ * @title RariFundController
+ * @dev This library handles deposits to and withdrawals from the liquidity pools that power RariFund.
  */
-library FarmerFundController {
+library RariFundController {
     using SafeMath for uint256;
 
     /**

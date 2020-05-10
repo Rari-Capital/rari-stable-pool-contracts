@@ -5,10 +5,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>FarmerFund - Wallet</title>
+    <title>Dashboard | Rari Capital</title>
 
     <!-- Bootstrap -->
-    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -16,22 +16,23 @@
       <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
+    <link href="css/app.css" rel="stylesheet">
   </head>
   <body>
     <div class="container">
       <div class="row">
-        <div class="col-xs-12 col-sm-8 col-sm-push-2">
-          <h1 class="text-center">FarmerFund</h1>
-          <hr/>
-          <br/>
+        <div class="col-12">
+          <h1 class="text-center">Get Started</h1>
+          <p class="text-center">You might as well get started now. The longer you wait, the less money you'll make. Just do it now.</p>
         </div>
       </div>
 
       <div class="row">
-        <div class="col-sm-6 col-md-5 col-md-push-1 col-lg-4 col-lg-push-2">
+        <div class="col-sm-6 col-md-5 offset-md-1 col-lg-4 offset-lg-2">
           <div class="panel panel-default">
             <div class="panel-heading">
-              <h3 class="panel-title">My FarmerFund</h3>
+              <h3 class="panel-title">My Stablecoin Balances</h3>
             </div>
             <div class="panel-body">
               <h4 style="margin-top: 0;">Balance</h4>
@@ -45,10 +46,10 @@
             </div>
           </div>
         </div>
-        <div class="col-sm-6 col-md-5 col-md-push-1 col-lg-4 col-lg-push-2">
+        <div class="col-sm-6 col-md-5 col-lg-4">
           <div class="panel panel-default">
             <div class="panel-heading">
-              <h3 class="panel-title">FarmerFund</h3>
+              <h3 class="panel-title">Fund Stablecoin Balances</h3>
             </div>
             <div class="panel-body">
               <h4 style="margin-top: 0;">Balance</h4>
@@ -57,14 +58,14 @@
           </div>
           <div class="panel panel-default">
             <div class="panel-heading">
-              <h3 class="panel-title">My FarmerFundToken Wallet</h3>
+              <h3 class="panel-title">My RariFundToken Wallet</h3>
             </div>
             <div class="panel-body">
               <h4 style="margin-top: 0;">Balance</h4>
-              <span id="FFTBalance">?</span> FFT<br /><br />
+              <span id="RFTBalance">?</span> RFT<br /><br />
               <h4>Transfer</h4>
-              <div class="form-group"><input type="text" class="form-control" id="FFTTransferAddress" placeholder="Address" /></div>
-              <div class="form-group"><input type="text" class="form-control" id="FFTTransferAmount" placeholder="Amount" /></div>
+              <div class="form-group"><input type="text" class="form-control" id="RFTTransferAddress" placeholder="Address" /></div>
+              <div class="form-group"><input type="text" class="form-control" id="RFTTransferAmount" placeholder="Amount" /></div>
               <button class="btn btn-primary" id="transferButton" type="button" disabled>Transfer</button>
             </div>
           </div>

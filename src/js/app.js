@@ -17,8 +17,8 @@ App = {
       if (typeof window.ethereum !== 'undefined') {
         ethereum.enable().then(function(accounts) {
           App.account = accounts[0];
-          if (App.contracts.FarmerFundManager) App.getMyFundBalances();
-          if (App.contracts.FarmerFundToken) App.getTokenBalances();
+          if (App.contracts.RariFundManager) App.getMyFundBalances();
+          if (App.contracts.RariFundToken) App.getTokenBalances();
           App.enableActions();
         }).catch(function(err) {
           console.error(err);
@@ -30,14 +30,14 @@ App = {
   },
 
   initContract: function() {
-    $.getJSON('FarmerFundManager.json', function(data) {
-      App.contracts.FarmerFundManager = new web3.eth.Contract(data, "0xCa3187F301920877795EfD16B5f920aABC7a9cC2");
+    $.getJSON('RariFundManager.json', function(data) {
+      App.contracts.RariFundManager = new web3.eth.Contract(data, "0xCa3187F301920877795EfD16B5f920aABC7a9cC2");
       App.getFundBalances();
       if (App.account) App.getMyFundBalances();
     });
 
-    $.getJSON('FarmerFundToken.json', function(data) {
-      App.contracts.FarmerFundToken = new web3.eth.Contract(data, "0x946a1c5415a41abfbcbc8d60d302f6df4d8911c3");
+    $.getJSON('RariFundToken.json', function(data) {
+      App.contracts.RariFundToken = new web3.eth.Contract(data, "0x946a1c5415a41abfbcbc8d60d302f6df4d8911c3");
       if (App.account) App.getTokenBalances();
     });
 
@@ -63,11 +63,11 @@ App = {
 
     var dai = new web3.eth.Contract(erc20Abi, "0x6B175474E89094C44Da98b954EedeAC495271d0F");;
 
-    dai.methods.allowance(App.account, App.contracts.FarmerFundManager.options.address).call().then(function(result) {
+    dai.methods.allowance(App.account, App.contracts.RariFundManager.options.address).call().then(function(result) {
       if (result >= amount) return;
-      return dai.methods.approve(App.contracts.FarmerFundManager.options.address, web3.utils.toBN(amount * 1e18)).send({ from: App.account });
+      return dai.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(amount * 1e18)).send({ from: App.account });
     }).then(function(result) {
-      return App.contracts.FarmerFundManager.methods.deposit("DAI", web3.utils.toBN(amount * 1e18)).send({ from: App.account });
+      return App.contracts.RariFundManager.methods.deposit("DAI", web3.utils.toBN(amount * 1e18)).send({ from: App.account });
     }).then(function(result) {
       alert('Deposit Successful!');
       App.getFundBalances();
@@ -85,11 +85,11 @@ App = {
 
     console.log('Withdraw ' + amount + ' DAI');
 
-    App.contracts.FarmerFundToken.methods.allowance(App.account, App.contracts.FarmerFundManager.options.address).call().then(function(result) {
+    App.contracts.RariFundToken.methods.allowance(App.account, App.contracts.RariFundManager.options.address).call().then(function(result) {
       if (result >= amount) return;
-      return App.contracts.FarmerFundToken.methods.approve(App.contracts.FarmerFundManager.options.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1)).send({ from: App.account });
+      return App.contracts.RariFundToken.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1)).send({ from: App.account });
     }).then(function(result) {
-      return App.contracts.FarmerFundManager.methods.withdraw("DAI", web3.utils.toBN(amount * 1e18)).send({ from: App.account });
+      return App.contracts.RariFundManager.methods.withdraw("DAI", web3.utils.toBN(amount * 1e18)).send({ from: App.account });
     }).then(function(result) {
       alert('Withdrawal Successful!');
       App.getFundBalances();
@@ -103,7 +103,7 @@ App = {
   getFundBalances: function() {
     console.log('Getting fund balances...');
 
-    App.contracts.FarmerFundManager.methods.getTotalBalance("DAI").call().then(function(result) {
+    App.contracts.RariFundManager.methods.getTotalBalance("DAI").call().then(function(result) {
       balance = result / 1e18;
       $('#DAIBalance').text(balance);
     }).catch(function(err) {
@@ -114,7 +114,7 @@ App = {
   getMyFundBalances: function() {
     console.log('Getting my fund balances...');
 
-    App.contracts.FarmerFundManager.methods.balanceOf("DAI", App.account).call().then(function(result) {
+    App.contracts.RariFundManager.methods.balanceOf("DAI", App.account).call().then(function(result) {
       balance = result / 1e18;
       $('#MyDAIBalance').text(balance);
     }).catch(function(err) {
@@ -130,7 +130,7 @@ App = {
 
     console.log('Transfer ' + amount + ' FFT to ' + toAddress);
 
-    App.contracts.FarmerFundToken.methods.transfer(toAddress, amount * 1e18).send({ from: App.account }).then(function(result) {
+    App.contracts.RariFundToken.methods.transfer(toAddress, amount * 1e18).send({ from: App.account }).then(function(result) {
       alert('Transfer Successful!');
       return App.getTokenBalances();
     }).catch(function(err) {
@@ -141,7 +141,7 @@ App = {
   getTokenBalances: function() {
     console.log('Getting token balances...');
 
-    App.contracts.FarmerFundToken.methods.balanceOf(App.account).call().then(function(result) {
+    App.contracts.RariFundToken.methods.balanceOf(App.account).call().then(function(result) {
       balance = result / 1e18;
       $('#FFTBalance').text(balance);
     }).catch(function(err) {

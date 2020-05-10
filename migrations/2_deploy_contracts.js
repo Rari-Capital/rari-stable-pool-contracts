@@ -1,21 +1,21 @@
-var FarmerFundManager = artifacts.require("./FarmerFundManager.sol");
-var FarmerFundToken = artifacts.require("./FarmerFundToken.sol");
+var RariFundManager = artifacts.require("./RariFundManager.sol");
+var RariFundToken = artifacts.require("./RariFundToken.sol");
 
 module.exports = function(deployer) {
-  var farmerFundToken = null;
+  var rariFundToken = null;
 
-  deployer.deploy(FarmerFundManager).then(function() {
-    return deployer.deploy(FarmerFundToken);
+  deployer.deploy(RariFundManager).then(function() {
+    return deployer.deploy(RariFundToken);
   }).then(function() {
-    return FarmerFundToken.deployed();
-  }).then(function(_farmerFundToken) {
-    farmerFundToken = _farmerFundToken;
-    return farmerFundToken.addMinter(FarmerFundManager.address);
+    return RariFundToken.deployed();
+  }).then(function(_rariFundToken) {
+    rariFundToken = _rariFundToken;
+    return rariFundToken.addMinter(RariFundManager.address);
   }).then(function() {
-    return farmerFundToken.renounceMinter();
+    return rariFundToken.renounceMinter();
   }).then(function() {
-    return FarmerFundManager.deployed();
-  }).then(function(farmerFundManager) {
-    return farmerFundManager.setFundToken(FarmerFundToken.address);
+    return RariFundManager.deployed();
+  }).then(function(rariFundManager) {
+    return rariFundManager.setFundToken(RariFundToken.address);
   });
 };

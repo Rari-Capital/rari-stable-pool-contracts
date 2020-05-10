@@ -6,27 +6,27 @@ import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 
-import "./lib/FarmerFundController.sol";
-import "./FarmerFundToken.sol";
+import "./lib/RariFundController.sol";
+import "./RariFundToken.sol";
 
 /**
- * @title FarmerFundManager
- * @dev This contract is the primary contract powering FarmerFund.
+ * @title RariFundManager
+ * @dev This contract is the primary contract powering RariFund.
  * Anyone can deposit to the fund with deposit(string currencyCode, uint256 amount)
  * Anyone can withdraw their funds (with interest) from the fund with withdraw(string currencyCode, uint256 amount)
  */
-contract FarmerFundManager is Ownable {
+contract RariFundManager is Ownable {
     using SafeMath for uint256;
 
     /**
-     * @dev Boolean that, if true, disables deposits to and withdrawals from this FarmerFundManager.
+     * @dev Boolean that, if true, disables deposits to and withdrawals from this RariFundManager.
      */
     bool private _fundDisabled;
 
     /**
-     * @dev Address of the FarmerFundToken.
+     * @dev Address of the RariFundToken.
      */
-    address private _farmerFundTokenContract;
+    address private _rariFundTokenContract;
 
     /**
      * @dev Maps ERC20 token contract addresses to their currency codes.
@@ -66,31 +66,31 @@ contract FarmerFundManager is Ownable {
     function() external payable { }
 
     /**
-     * @dev Emitted when FarmerFundManager is upgraded.
+     * @dev Emitted when RariFundManager is upgraded.
      */
     event FundManagerUpgraded(address newContract);
 
     /**
-     * @dev Emitted when the FarmerFundToken of the FarmerFundManager is set.
+     * @dev Emitted when the RariFundToken of the RariFundManager is set.
      */
     event FundTokenSet(address newContract);
 
     /**
-     * @dev Upgrades FarmerFundManager.
-     * @param newContract The address of the new FarmerFundManager contract.
+     * @dev Upgrades RariFundManager.
+     * @param newContract The address of the new RariFundManager contract.
      */
     function upgradeFundManager(address newContract) external onlyOwner {
-        require(_farmerFundTokenContract != address(0), "FarmerFundToken contract not set.");
+        require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
 
-        // Update FarmerFundToken minter
-        FarmerFundToken farmerFundToken = FarmerFundToken(_farmerFundTokenContract);
-        farmerFundToken.addMinter(newContract);
-        farmerFundToken.renounceMinter();
+        // Update RariFundToken minter
+        RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
+        rariFundToken.addMinter(newContract);
+        rariFundToken.renounceMinter();
 
         // Withdraw all from all pools
         for (uint256 i = 0; i < _poolsByCurrency["DAI"].length; i++)
-            if (FarmerFundController.getPoolBalance(_poolsByCurrency["DAI"][i], _erc20Contracts["DAI"]) > 0)
-                FarmerFundController.withdrawAllFromPool(_poolsByCurrency["DAI"][i], _erc20Contracts["DAI"]);
+            if (RariFundController.getPoolBalance(_poolsByCurrency["DAI"][i], _erc20Contracts["DAI"]) > 0)
+                RariFundController.withdrawAllFromPool(_poolsByCurrency["DAI"][i], _erc20Contracts["DAI"]);
 
         // Transfer all tokens
         ERC20 token = ERC20(_erc20Contracts["DAI"]);
@@ -100,26 +100,26 @@ contract FarmerFundManager is Ownable {
     }
 
     /**
-     * @dev Sets or upgrades the FarmerFundToken of the FarmerFundManager.
-     * @param newContract The address of the new FarmerFundToken contract.
+     * @dev Sets or upgrades the RariFundToken of the RariFundManager.
+     * @param newContract The address of the new RariFundToken contract.
      */
     function setFundToken(address newContract) external onlyOwner {
-        _farmerFundTokenContract = newContract;
+        _rariFundTokenContract = newContract;
         emit FundTokenSet(newContract);
     }
 
     /**
-     * @dev Emitted when deposits to and withdrawals from this FarmerFundManager have been disabled.
+     * @dev Emitted when deposits to and withdrawals from this RariFundManager have been disabled.
      */
     event FundDisabled();
 
     /**
-     * @dev Emitted when deposits to and withdrawals from this FarmerFundManager have been enabled.
+     * @dev Emitted when deposits to and withdrawals from this RariFundManager have been enabled.
      */
     event FundEnabled();
 
     /**
-     * @dev Disables deposits to and withdrawals from this FarmerFundManager while contract(s) are upgraded.
+     * @dev Disables deposits to and withdrawals from this RariFundManager while contract(s) are upgraded.
      */
     function disableFund() external onlyOwner {
         require(!_fundDisabled);
@@ -128,7 +128,7 @@ contract FarmerFundManager is Ownable {
     }
 
     /**
-     * @dev Enables deposits to and withdrawals from this FarmerFundManager once contract(s) are upgraded.
+     * @dev Enables deposits to and withdrawals from this RariFundManager once contract(s) are upgraded.
      */
     function enableFund() external onlyOwner {
         require(_fundDisabled);
@@ -140,16 +140,16 @@ contract FarmerFundManager is Ownable {
      * @dev Calculates an account's total balance of the specified currency.
      */
     function balanceOf(string calldata currencyCode, address account) external returns (uint256) {
-        require(_farmerFundTokenContract != address(0), "FarmerFundToken contract not set.");
+        require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
 
-        FarmerFundToken farmerFundToken = FarmerFundToken(_farmerFundTokenContract);
-        uint256 fftTotalSupply = farmerFundToken.totalSupply();
-        if (fftTotalSupply == 0) return 0;
-        uint256 fftBalance = farmerFundToken.balanceOf(account);
+        RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
+        uint256 rftTotalSupply = rariFundToken.totalSupply();
+        if (rftTotalSupply == 0) return 0;
+        uint256 rftBalance = rariFundToken.balanceOf(account);
         uint256 totalBalance = this.getTotalBalance(currencyCode);
-        uint256 tokenBalance = fftBalance.mul(totalBalance).div(fftTotalSupply);
+        uint256 tokenBalance = rftBalance.mul(totalBalance).div(rftTotalSupply);
 
         return tokenBalance;
     }
@@ -164,81 +164,81 @@ contract FarmerFundManager is Ownable {
 
         ERC20 token = ERC20(erc20Contract);
         uint256 totalBalance = token.balanceOf(address(this));
-        for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++) totalBalance = totalBalance.add(FarmerFundController.getPoolBalance(_poolsByCurrency[currencyCode][i], erc20Contract));
+        for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++) totalBalance = totalBalance.add(RariFundController.getPoolBalance(_poolsByCurrency[currencyCode][i], erc20Contract));
         for (uint256 i = 0; i < _withdrawalQueues[currencyCode].length; i++) totalBalance = totalBalance.sub(_withdrawalQueues[currencyCode][i].amount);
 
         return totalBalance;
     }
 
     /**
-     * @dev Emitted when funds have been deposited to FarmerFund.
+     * @dev Emitted when funds have been deposited to RariFund.
      */
     event Deposit(string indexed currencyCode, address indexed sender, uint256 amount);
 
     /**
-     * @dev Emitted when funds have been withdrawn from FarmerFund.
+     * @dev Emitted when funds have been withdrawn from RariFund.
      */
     event Withdrawal(string indexed currencyCode, address indexed payee, uint256 amount);
 
     /**
-     * @dev Emitted when funds have been queued for withdrawal from FarmerFund.
+     * @dev Emitted when funds have been queued for withdrawal from RariFund.
      */
     event WithdrawalQueued(string indexed currencyCode, address indexed payee, uint256 amount);
 
     /**
-     * @dev Deposits funds to FarmerFund in exchange for FFT.
+     * @dev Deposits funds to RariFund in exchange for RFT.
      * @param currencyCode The current code of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
      */
     function deposit(string calldata currencyCode, uint256 amount) external returns (bool) {
-        require(_farmerFundTokenContract != address(0), "FarmerFundToken contract not set.");
+        require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
 
         ERC20Detailed token = ERC20Detailed(erc20Contract);
-        FarmerFundToken farmerFundToken = FarmerFundToken(_farmerFundTokenContract);
-        uint256 fftTotalSupply = farmerFundToken.totalSupply();
-        uint256 fftAmount = 0;
+        RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
+        uint256 rftTotalSupply = rariFundToken.totalSupply();
+        uint256 rftAmount = 0;
 
-        if (fftTotalSupply > 0) {
-            fftAmount = amount.mul(fftTotalSupply).div(this.getTotalBalance(currencyCode));
+        if (rftTotalSupply > 0) {
+            rftAmount = amount.mul(rftTotalSupply).div(this.getTotalBalance(currencyCode));
         } else {
-            uint256 fftDecimals = farmerFundToken.decimals();
+            uint256 rftDecimals = rariFundToken.decimals();
             uint256 tokenDecimals = token.decimals();
-            fftAmount = fftDecimals >= tokenDecimals ? amount.mul(10 ** (fftDecimals - tokenDecimals)) : amount.div(10 ** (tokenDecimals - fftDecimals));
+            rftAmount = rftDecimals >= tokenDecimals ? amount.mul(10 ** (rftDecimals - tokenDecimals)) : amount.div(10 ** (tokenDecimals - rftDecimals));
         }
 
         // The user must approve the transfer of tokens before calling this function
         require(token.transferFrom(msg.sender, address(this), amount), "Failed to transfer input tokens.");
 
-        require(farmerFundToken.mint(msg.sender, fftAmount), "Failed to mint output tokens.");
+        require(rariFundToken.mint(msg.sender, rftAmount), "Failed to mint output tokens.");
 
         emit Deposit(currencyCode, msg.sender, amount);
         return true;
     }
 
     /**
-     * @dev Withdraws funds from FarmerFund in exchange for FFT.
+     * @dev Withdraws funds from RariFund in exchange for RFT.
      * @param currencyCode The current code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
      */
     function withdraw(string calldata currencyCode, uint256 amount) external returns (bool) {
-        require(_farmerFundTokenContract != address(0), "FarmerFundToken contract not set.");
+        require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
 
         ERC20 token = ERC20(erc20Contract);
         uint256 contractBalance = token.balanceOf(address(this));
 
-        FarmerFundToken farmerFundToken = FarmerFundToken(_farmerFundTokenContract);
-        uint256 fftTotalSupply = farmerFundToken.totalSupply();
+        RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
+        uint256 rftTotalSupply = rariFundToken.totalSupply();
         uint256 totalBalance = this.getTotalBalance(currencyCode);
-        uint256 fftAmount = amount.mul(fftTotalSupply).div(totalBalance);
-        require(fftAmount <= farmerFundToken.balanceOf(msg.sender), "Your FFT balance is too low for a withdrawal of this amount.");
+        uint256 rftAmount = amount.mul(rftTotalSupply).div(totalBalance);
+        require(rftAmount <= rariFundToken.balanceOf(msg.sender), "Your RFT balance is too low for a withdrawal of this amount.");
         require(amount <= totalBalance, "Fund DAI balance is too low for a withdrawal of this amount.");
 
         // TODO: The user must approve the burning of tokens before calling this function
-        farmerFundToken.burnFrom(msg.sender, fftAmount);
+        rariFundToken.burnFrom(msg.sender, rftAmount);
 
         if (amount <= contractBalance) {
             require(token.transfer(msg.sender, amount), "Failed to transfer output tokens.");
@@ -303,7 +303,7 @@ contract FarmerFundManager is Ownable {
     function depositToPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyOwner returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        require(FarmerFundController.depositToPool(pool, erc20Contract, amount), "Pool deposit failed.");
+        require(RariFundController.depositToPool(pool, erc20Contract, amount), "Pool deposit failed.");
         return true;
     }
 
@@ -316,7 +316,7 @@ contract FarmerFundManager is Ownable {
     function withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyOwner returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        require(FarmerFundController.withdrawFromPool(pool, erc20Contract, amount), "Pool withdrawal failed.");
+        require(RariFundController.withdrawFromPool(pool, erc20Contract, amount), "Pool withdrawal failed.");
         return true;
     }
 
@@ -328,7 +328,7 @@ contract FarmerFundManager is Ownable {
     function withdrawAllFromPool(uint8 pool, string calldata currencyCode) external onlyOwner returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        require(FarmerFundController.withdrawAllFromPool(pool, erc20Contract), "Pool withdrawal failed.");
+        require(RariFundController.withdrawAllFromPool(pool, erc20Contract), "Pool withdrawal failed.");
         return true;
     }
 }
