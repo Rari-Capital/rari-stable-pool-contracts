@@ -31,7 +31,7 @@ library DydxPoolController {
     using SafeMath for uint256;
 
     address constant private SOLO_MARGIN_CONTRACT = 0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e;
-    SoloMargin constant private _soloMargin = SoloMargin(DYDX_SOLO_MARGIN_CONTRACT);
+    SoloMargin constant private _soloMargin = SoloMargin(SOLO_MARGIN_CONTRACT);
 
     /**
      * @dev Returns a token's dYdX market ID given its ERC20 contract address.
@@ -69,7 +69,7 @@ library DydxPoolController {
         uint256 marketId = getMarketId(erc20Contract); // TODO: Make sure this reverts if an invalid address is supplied
 
         ERC20 underlying = ERC20(erc20Contract);
-        require(underlying.approve(_dydxContract, amount), "Approval of tokens failed."); // TODO: Execute infinite approval once instead of approving every time we deposit so we don't waste gas?
+        require(underlying.approve(SOLO_MARGIN_CONTRACT, amount), "Approval of tokens failed."); // TODO: Execute infinite approval once instead of approving every time we deposit so we don't waste gas?
 
         Account.Info memory account = Account.Info(address(this), 0);
         Account.Info[] memory accounts = new Account.Info[](1);
