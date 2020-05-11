@@ -16,29 +16,52 @@ body {
   background: black;
   color: white;
   font-family: Avenir-Book, sans-serif;
-  padding: 50px 0;
+  padding: 30px 0;
   display: flex;
 }
 
+@media (min-width: 576px) {
+  body {
+    padding: 50px 0;
+  }
+}
+
 .container {
-    margin: auto;
+  margin: auto;
 }
 
 h1 {
-  margin: 0 0 20px;
+  margin: 0 0 10px;
   text-transform: uppercase;
   font-family: Avenir-Black, sans-serif;
   color: #f5f5f7;
-  font-size: 72px;
   font-weight: 600;
 }
 
 p {
   font-family: Avenir-Book, sans-serif;
   color: #aaa;
-  font-size: 24px;
   font-weight: 600;
-  margin: 0 0 40px;
+  margin: 0 0 10px;
+}
+
+p:last-child {
+  margin: 0 0 30px;
+}
+
+@media (min-width: 576px) {
+  h1 {
+    font-size: 72px;
+  }
+
+  p {
+    font-size: 24px;
+    margin: 0 0 20px;
+  }
+
+  p:last-child {
+    margin: 0 0 40px;
+  }
 }
 
 .panel-default {
@@ -65,12 +88,55 @@ p {
   padding: 15px;
 }
 
-.form-control {
+@media (min-width: 768px) {
+  .panel-horizontal {
+    display: flex;
+  }
+}
+
+.panel-horizontal > .panel-heading {
+  display: flex;
+}
+
+.panel-horizontal > .panel-heading .panel-title {
+  margin: auto 0;
+}
+
+.panel-horizontal > .panel-body {
+  flex-grow: 1;
+}
+
+.form-control, .custom-select {
   border: none;
   border-radius: 0;
+}
+
+.input-group-append, .input-group>.custom-file+.custom-file, .input-group>.custom-file+.custom-select, .input-group>.custom-file+.form-control, .input-group>.custom-select+.custom-file, .input-group>.custom-select+.custom-select, .input-group>.custom-select+.form-control, .input-group>.form-control+.custom-file, .input-group>.form-control+.custom-select, .input-group>.form-control+.form-control, .input-group>.form-control-plaintext+.custom-file, .input-group>.form-control-plaintext+.custom-select, .input-group>.form-control-plaintext+.form-control {
+  margin-left: 0;
+  border-left: 1px solid black;
 }
 
 .btn {
   border-radius: 0;
   border: none;
+}
+
+#DepositToken, #WithdrawToken {
+  flex-grow: 0.5;
+}
+
+@media (min-width: 992px) {
+  #DepositToken, #WithdrawToken {
+    flex-grow: 0.33333333;
+  }
+}
+
+@media (min-width: 1200px) {
+  #DepositToken, #WithdrawToken {
+    flex-grow: 0.25;
+  }
+}
+
+kbd {
+  border-radius: 0;
 }
