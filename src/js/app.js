@@ -13,8 +13,207 @@ App = {
   contracts: {},
 
   init: function() {
+    App.initChartColors();
+    App.initAprChart();
     App.initWeb3();
     App.bindEvents();
+  },
+
+  initChartColors: function() {
+    window.chartColors = {
+      red: 'rgb(255, 99, 132)',
+      orange: 'rgb(255, 159, 64)',
+      yellow: 'rgb(255, 205, 86)',
+      green: 'rgb(75, 192, 192)',
+      blue: 'rgb(54, 162, 235)',
+      purple: 'rgb(153, 102, 255)',
+      grey: 'rgb(201, 203, 207)'
+    };
+  },
+
+  initAprChart: function() {
+    var compoundData = {};
+    var dydxData = {};
+    var epoch = Math.floor((new Date()).getTime() / 1000);
+    var epochOneYearAgo = epoch - (86400 * 365);
+
+    Promise.all([
+      $.getJSON("dydx-aprs.json"),
+      $.getJSON("https://api.compound.finance/api/v2/market_history/graph?asset=0x5d3a536e4d6dbd6114cc1ead35777bab948e3643&min_block_timestamp=" + epochOneYearAgo + "&max_block_timestamp=" + epoch + "&num_buckets=365"),
+      $.getJSON("https://api.compound.finance/api/v2/market_history/graph?asset=0x39aa39c021dfbae8fac545936693ac917d5e7563&min_block_timestamp=" + epochOneYearAgo + "&max_block_timestamp=" + epoch + "&num_buckets=365"),
+      $.getJSON("https://api.compound.finance/api/v2/market_history/graph?asset=0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9&min_block_timestamp=" + epochOneYearAgo + "&max_block_timestamp=" + epoch + "&num_buckets=365")
+    ]).then(function(values) {
+      var ourData = {};
+
+      var dydxAvgs = [];
+
+      for (var i = 0; i < values[0].length; i++) {
+        // dYdX graph
+        dydxAvgs.push({ t: new Date(parseInt(values[0][i].t)), y: values[0][i].y });
+
+        // Calculate max for Rari graph
+        ourData[Math.floor(values[0][i].t / 86400 / 1000) * 86400 * 1000] = values[0][i].y / 100;
+      }
+
+      for (var i = 0; i < values[1].supply_rates.length; i++) {
+        var rateEpoch = values[1].supply_rates[i].block_timestamp * 1000;
+        if (compoundData[rateEpoch] === undefined) compoundData[rateEpoch] = [];
+        compoundData[rateEpoch].push(values[1].supply_rates[i].rate);
+      }
+      
+      for (var i = 0; i < values[2].supply_rates.length; i++) {
+        var rateEpoch = values[2].supply_rates[i].block_timestamp * 1000;
+        if (compoundData[rateEpoch] === undefined) compoundData[rateEpoch] = [];
+        compoundData[rateEpoch].push(values[2].supply_rates[i].rate);
+      }
+
+      for (var i = 0; i < values[3].supply_rates.length; i++) {
+        var rateEpoch = values[3].supply_rates[i].block_timestamp * 1000;
+        if (compoundData[rateEpoch] === undefined) compoundData[rateEpoch] = [];
+        compoundData[rateEpoch].push(values[3].supply_rates[i].rate);
+      }
+
+      var compoundAvgs = [];
+      var epochs = Object.keys(compoundData).sort();
+
+      for (var i = 0; i < epochs.length; i++) {
+        // Calculate average for Compound graph
+        var sum = 0;
+        for (var j = 0; j < compoundData[epochs[i]].length; j++) sum += compoundData[epochs[i]][j];
+        var avg =  sum / compoundData[epochs[i]].length;
+        compoundAvgs.push({ t: new Date(parseInt(epochs[i])), y: avg * 100 });
+
+        // Also use avg for Rari graph
+        // TODO: Replace use of avg with max once stablecoin conversions have been implemented
+        var flooredEpoch = Math.floor(epochs[i] / 86400 / 1000) * 86400 * 1000;
+        // var max = Math.max(Math.max.apply(null, compoundData[epochs[i]]));
+        // if (ourData[flooredEpoch] === undefined || max > ourData[flooredEpoch]) ourData[flooredEpoch] = max;
+        if (ourData[flooredEpoch] === undefined || avg > ourData[flooredEpoch]) ourData[flooredEpoch] = avg;
+      }
+
+      // Turn Rari data into object for graph
+      var ourAvgs = [];
+      var epochs = Object.keys(ourData).sort();
+      for (var i = 0; i < epochs.length; i++) ourAvgs.push({ t: new Date(parseInt(epochs[i])), y: ourData[epochs[i]] * 100 });
+
+      // console.log(values, compoundData, compoundAvgs, ourData, ourAvgs)
+
+      // Init chart
+      var ctx = document.getElementById('chart-aprs').getContext('2d');
+      ctx.canvas.width = 1000;
+      ctx.canvas.height = 300;
+
+      var color = Chart.helpers.color;
+      var cfg = {
+        data: {
+          datasets: [{
+            label: 'Rari',
+            backgroundColor: color(window.chartColors.green).alpha(0.5).rgbString(),
+            borderColor: window.chartColors.green,
+            data: ourAvgs,
+            type: 'line',
+            pointRadius: 0,
+            fill: false,
+            lineTension: 0,
+            borderWidth: 2
+          }, {
+            label: 'dYdX',
+            backgroundColor: color(window.chartColors.blue).alpha(0.5).rgbString(),
+            borderColor: window.chartColors.blue,
+            data: dydxAvgs,
+            type: 'line',
+            pointRadius: 0,
+            fill: false,
+            lineTension: 0,
+            borderWidth: 2
+          }, {
+            label: 'Compound',
+            backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+            borderColor: window.chartColors.red,
+            data: compoundAvgs,
+            type: 'line',
+            pointRadius: 0,
+            fill: false,
+            lineTension: 0,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          animation: {
+            duration: 0
+          },
+          scales: {
+            xAxes: [{
+              type: 'time',
+              distribution: 'series',
+              offset: true,
+              ticks: {
+                major: {
+                  enabled: true,
+                  fontStyle: 'bold'
+                },
+                source: 'data',
+                autoSkip: true,
+                autoSkipPadding: 75,
+                maxRotation: 0,
+                sampleSize: 100
+              },
+              afterBuildTicks: function(scale, ticks) {
+                var majorUnit = scale._majorUnit;
+                var firstTick = ticks[0];
+                var i, ilen, val, tick, currMajor, lastMajor;
+
+                val = moment(ticks[0].value);
+                if ((majorUnit === 'minute' && val.second() === 0)
+                    || (majorUnit === 'hour' && val.minute() === 0)
+                    || (majorUnit === 'day' && val.hour() === 9)
+                    || (majorUnit === 'month' && val.date() <= 3 && val.isoWeekday() === 1)
+                    || (majorUnit === 'year' && val.month() === 0)) {
+                  firstTick.major = true;
+                } else {
+                  firstTick.major = false;
+                }
+                lastMajor = val.get(majorUnit);
+
+                for (i = 1, ilen = ticks.length; i < ilen; i++) {
+                  tick = ticks[i];
+                  val = moment(tick.value);
+                  currMajor = val.get(majorUnit);
+                  tick.major = currMajor !== lastMajor;
+                  lastMajor = currMajor;
+                }
+                return ticks;
+              }
+            }],
+            yAxes: [{
+              gridLines: {
+                drawBorder: false
+              },
+              scaleLabel: {
+                display: true,
+                labelString: 'APR'
+              }
+            }]
+          },
+          tooltips: {
+            intersect: false,
+            mode: 'index',
+            callbacks: {
+              label: function(tooltipItem, myData) {
+                var label = myData.datasets[tooltipItem.datasetIndex].label || '';
+                if (label) {
+                  label += ': ';
+                }
+                label += parseFloat(tooltipItem.value).toFixed(2) + "%";
+                return label;
+              }
+            }
+          }
+        }
+      };
+
+      var chart = new Chart(ctx, cfg);
+    });
   },
 
   /**
