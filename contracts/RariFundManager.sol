@@ -312,7 +312,7 @@ contract RariFundManager is Ownable {
      * @dev Processes pending withdrawals in the queue for the specified currency.
      * @param currencyCode The currency code of the token for which to process pending withdrawals.
      */
-    function processPendingWithdrawals(string calldata currencyCode) external onlyOwner returns (bool) {
+    function processPendingWithdrawals(string calldata currencyCode) external returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         ERC20 token = ERC20(erc20Contract);
