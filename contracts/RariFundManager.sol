@@ -219,7 +219,7 @@ contract RariFundManager is Ownable {
      * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by RariFundController.getPoolBalance) potentially modifies the state.
      * @param currencyCode The currency code of the balance to be calculated.
      */
-    function getRawTotalBalance(string memory currencyCode) public returns (uint256) {
+    function getRawTotalBalance(string memory currencyCode) internal returns (uint256) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
 
@@ -414,8 +414,8 @@ contract RariFundManager is Ownable {
     mapping(string => uint256) private _netDeposits;
     
     /**
-     * @dev Returns the raw total amount of interest accrued (including the fees paid on interest).
-     * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
+     * @notice Returns the raw total amount of interest accrued (including the fees paid on interest).
+     * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getRawInterestAccrued(string memory currencyCode) public returns (uint256) {
         return getRawTotalBalance(currencyCode).sub(_netDeposits[currencyCode]).add(_interestFeesClaimed[currencyCode]);
@@ -469,8 +469,8 @@ contract RariFundManager is Ownable {
     mapping(string => uint256) private _interestFeesGeneratedAtLastFeeRateChange;
 
     /**
-     * @dev Returns the amount of interest fees accrued by beneficiaries.
-     * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
+     * @notice Returns the amount of interest fees accrued by beneficiaries.
+     * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getInterestFeesGenerated(string memory currencyCode) public returns (uint256) {
         return _interestFeesGeneratedAtLastFeeRateChange[currencyCode].add(getRawInterestAccrued(currencyCode).sub(_rawInterestAccruedAtLastFeeRateChange[currencyCode]).mul(_interestFeeRate).div(1e18));
