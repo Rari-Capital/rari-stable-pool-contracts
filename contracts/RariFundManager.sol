@@ -176,7 +176,7 @@ contract RariFundManager is Ownable {
     event FundEnabled();
 
     /**
-     * @dev Disables deposits to and withdrawals from this RariFundManager while contract(s) are upgraded.
+     * @dev Disables deposits to and withdrawals from this RariFundManager so contract(s) can be upgraded.
      */
     function disableFund() external onlyOwner {
         require(!_fundDisabled, "Fund already disabled.");
@@ -194,8 +194,10 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Calculates an account's total balance of the specified currency.
-     * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
+     * @notice Returns an account's total balance of the specified currency.
+     * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
+     * @param currencyCode The currency code of the balance to be calculated.
+     * @param account The account whose balance we are calculating.
      */
     function balanceOf(string calldata currencyCode, address account) external returns (uint256) {
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
@@ -213,8 +215,9 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Calculates the fund's raw total balance (investor funds + unclaimed fees) of the specified currency.
+     * @dev Returns the fund's raw total balance (investor funds + unclaimed fees) of the specified currency.
      * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by RariFundController.getPoolBalance) potentially modifies the state.
+     * @param currencyCode The currency code of the balance to be calculated.
      */
     function getRawTotalBalance(string memory currencyCode) public returns (uint256) {
         address erc20Contract = _erc20Contracts[currencyCode];
@@ -244,9 +247,10 @@ contract RariFundManager is Ownable {
     event WithdrawalQueued(string indexed currencyCode, address indexed payee, uint256 amount);
 
     /**
-     * @dev Deposits funds to RariFund in exchange for RFT.
+     * @notice Deposits funds to RariFund in exchange for RFT.
      * @param currencyCode The current code of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
+     * @return Boolean indicating success.
      */
     function deposit(string calldata currencyCode, uint256 amount) external returns (bool) {
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
@@ -275,9 +279,10 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Withdraws funds from RariFund in exchange for RFT.
+     * @notice Withdraws funds from RariFund in exchange for RFT.
      * @param currencyCode The current code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
+     * @return Boolean indicating success.
      */
     function withdraw(string calldata currencyCode, uint256 amount) external returns (bool) {
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
@@ -312,6 +317,7 @@ contract RariFundManager is Ownable {
     /**
      * @dev Processes pending withdrawals in the queue for the specified currency.
      * @param currencyCode The currency code of the token for which to process pending withdrawals.
+     * @return Boolean indicating success.
      */
     function processPendingWithdrawals(string calldata currencyCode) external returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
@@ -332,21 +338,21 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Counts the number of pending withdrawals in the queue for the specified currency.
+     * @notice Returns the number of pending withdrawals in the queue of the specified currency.
      */
     function countPendingWithdrawals(string calldata currencyCode) external view returns (uint256) {
         return _withdrawalQueues[currencyCode].length;
     }
 
     /**
-     * @dev Returns the payee of a pending withdrawal for the specified currency.
+     * @notice Returns the payee of a pending withdrawal of the specified currency.
      */
     function getPendingWithdrawalPayee(string calldata currencyCode, uint256 index) external view returns (address) {
         return _withdrawalQueues[currencyCode][index].payee;
     }
 
     /**
-     * @dev Returns the amount of a pending withdrawal for the specified currency.
+     * @notice Returns the amount of a pending withdrawal of the specified currency.
      */
     function getPendingWithdrawalAmount(string calldata currencyCode, uint256 index) external view returns (uint256) {
         return _withdrawalQueues[currencyCode][index].amount;
@@ -357,6 +363,7 @@ contract RariFundManager is Ownable {
      * @param pool The name of the pool.
      * @param currencyCode The currency code of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
+     * @return Boolean indicating success.
      */
     function depositToPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
@@ -370,6 +377,7 @@ contract RariFundManager is Ownable {
      * @param pool The name of the pool.
      * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
+     * @return Boolean indicating success.
      */
     function withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
@@ -382,6 +390,7 @@ contract RariFundManager is Ownable {
      * @dev Withdraws all funds from any supported pool.
      * @param pool The name of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
+     * @return Boolean indicating success.
      */
     function withdrawAllFromPool(uint8 pool, string calldata currencyCode) external onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
@@ -391,8 +400,8 @@ contract RariFundManager is Ownable {
     }
     
     /**
-     * @dev Fund's public balance: combined balance of all users of the fund (does not include unclaimed interest fees; on the other hand, getRawTotalBalance does).
-     * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
+     * @notice Returns the fund's total investor balance (combined balance of all users of the fund; unlike getRawTotalBalance, excludes unclaimed interest fees) of the specified currency.
+     * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getTotalBalance(string memory currencyCode) public returns (uint256) {
         return getRawTotalBalance(currencyCode).sub(getInterestFeesUnclaimed(currencyCode));
@@ -405,7 +414,7 @@ contract RariFundManager is Ownable {
     mapping(string => uint256) private _netDeposits;
     
     /**
-     * @dev The total amount of interest accrued (including the fees paid on interest).
+     * @dev Returns the raw total amount of interest accrued (including the fees paid on interest).
      * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getRawInterestAccrued(string memory currencyCode) public returns (uint256) {
@@ -413,8 +422,8 @@ contract RariFundManager is Ownable {
     }
     
     /**
-     * @dev The amount of interest accrued by investors (excluding the fees taken on interest).
-     * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
+     * @notice Returns the amount of interest accrued by investors (excluding the fees taken on interest).
+     * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getInterestAccrued(string memory currencyCode) public returns (uint256) {
         return getTotalBalance(currencyCode).sub(_netDeposits[currencyCode]);
@@ -443,7 +452,7 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev The amount of interest fees accrued by beneficiaries.
+     * @dev Returns the fee rate on interest.
      */
     function getInterestFeeRate() public view returns (uint256) {
         return _interestFeeRate;
@@ -460,7 +469,7 @@ contract RariFundManager is Ownable {
     mapping(string => uint256) private _interestFeesGeneratedAtLastFeeRateChange;
 
     /**
-     * @dev The amount of interest fees accrued by beneficiaries.
+     * @dev Returns the amount of interest fees accrued by beneficiaries.
      * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getInterestFeesGenerated(string memory currencyCode) public returns (uint256) {
@@ -546,6 +555,7 @@ contract RariFundManager is Ownable {
     /**
      * @dev Returns the unclaimed amount of shared interest fees belonging to a given beneficiary.
      * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
+     * @param currencyCode The currency code of the unclaimed interest fees to be calculated.
      * @param beneficiary The recipient of the fees.
      */
     function getBeneficiarySharedInterestFeesUnclaimed(string memory currencyCode, address beneficiary) internal returns (uint256) {
@@ -571,6 +581,7 @@ contract RariFundManager is Ownable {
     /**
      * @dev Returns the unclaimed amount of unshared interest fees (i.e., those belonging to the master beneficiary).
      * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
+     * @param currencyCode The currency code of the unclaimed interest fees to be calculated.
      */
     function getUnsharedInterestFeesUnclaimed(string memory currencyCode) internal returns (uint256) {
         return getInterestFeesUnclaimed(currencyCode).sub(getSharedInterestFeesUnclaimed(currencyCode));
@@ -583,7 +594,9 @@ contract RariFundManager is Ownable {
 
     /**
      * @dev Withdraws all accrued fees on interest to a valid beneficiary.
+     * @param currencyCode The currency code of the interest fees to be claimed.
      * @param beneficiary The recipient of the fees.
+     * @return Boolean indicating success.
      */
     function claimFees(string calldata currencyCode, address beneficiary) external returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];

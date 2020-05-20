@@ -36,7 +36,7 @@ library CompoundPoolController {
     }
 
     /**
-     * @dev Retrieves the calling address's balance of the specified currency in the Compound pool.
+     * @dev Returns the calling address's balance of the specified currency in the Compound pool.
      * @param erc20Contract The ERC20 contract address of the token.
      */
     function getBalance(address erc20Contract) internal returns (uint256) {
@@ -48,6 +48,7 @@ library CompoundPoolController {
      * @dev Deposits funds to the Compound pool.
      * @param erc20Contract The ERC20 contract address of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
+     * @return Boolean indicating success.
      */
     function deposit(address erc20Contract, uint256 amount) internal returns (bool) {
         address cErc20Contract = getCErc20Address(erc20Contract);
@@ -62,6 +63,7 @@ library CompoundPoolController {
      * @dev Withdraws funds from the Compound pool.
      * @param erc20Contract The ERC20 contract address of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
+     * @return Boolean indicating success.
      */
     function withdraw(address erc20Contract, uint256 amount) internal returns (bool) {
         address cErc20Contract = getCErc20Address(erc20Contract);
@@ -73,6 +75,7 @@ library CompoundPoolController {
     /**
      * @dev Withdraws all funds from the Compound pool.
      * @param erc20Contract The ERC20 contract address of the token to be withdrawn.
+     * @return Boolean indicating success.
      */
     function withdrawAll(address erc20Contract) internal returns (bool) {
         address cErc20Contract = getCErc20Address(erc20Contract);

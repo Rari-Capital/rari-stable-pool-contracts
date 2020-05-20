@@ -28,7 +28,7 @@ library RariFundController {
     using SafeMath for uint256;
 
     /**
-     * @dev Retrieves the calling address's balance of the specified currency in the specified pool.
+     * @dev Returns the calling address's balance of the specified currency in the specified pool.
      * @param pool The name of the pool.
      * @param erc20Contract The ERC20 contract of the token.
      */
@@ -43,6 +43,7 @@ library RariFundController {
      * @param pool The name of the pool.
      * @param erc20Contract The ERC20 contract of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
+     * @return Boolean indicating success.
      */
     function depositToPool(uint8 pool, address erc20Contract, uint256 amount) internal returns (bool) {
         if (pool == 0) require(DydxPoolController.deposit(erc20Contract, amount), "Deposit to dYdX failed.");
@@ -56,6 +57,7 @@ library RariFundController {
      * @param pool The name of the pool.
      * @param erc20Contract The ERC20 contract of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
+     * @return Boolean indicating success.
      */
     function withdrawFromPool(uint8 pool, address erc20Contract, uint256 amount) internal returns (bool) {
         if (pool == 0) require(DydxPoolController.withdraw(erc20Contract, amount), "Withdrawal from dYdX failed.");
@@ -68,6 +70,7 @@ library RariFundController {
      * @dev Withdraws all funds from the specified pool.
      * @param pool The name of the pool.
      * @param erc20Contract The ERC20 contract of the token to be withdrawn.
+     * @return Boolean indicating success.
      */
     function withdrawAllFromPool(uint8 pool, address erc20Contract) internal returns (bool) {
         if (pool == 0) require(DydxPoolController.withdrawAll(erc20Contract), "Withdrawal from dYdX failed.");

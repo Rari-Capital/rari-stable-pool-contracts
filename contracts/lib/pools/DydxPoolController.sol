@@ -43,7 +43,7 @@ library DydxPoolController {
     }
 
     /**
-     * @dev Retrieves the calling address's balance of the specified currency in the dYdX pool.
+     * @dev Returns the calling address's balance of the specified currency in the dYdX pool.
      * @param erc20Contract The ERC20 contract address of the token.
      */
     function getBalance(address erc20Contract) internal view returns (uint256) {
@@ -64,6 +64,7 @@ library DydxPoolController {
      * @dev Deposits funds to the dYdX pool.
      * @param erc20Contract The ERC20 contract address of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
+     * @return Boolean indicating success.
      */
     function deposit(address erc20Contract, uint256 amount) internal returns (bool) {
         uint256 marketId = getMarketId(erc20Contract); // TODO: Make sure this reverts if an invalid address is supplied
@@ -101,6 +102,7 @@ library DydxPoolController {
      * @dev Withdraws funds from the dYdX pool.
      * @param erc20Contract The ERC20 contract address of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
+     * @return Boolean indicating success.
      */
     function withdraw(address erc20Contract, uint256 amount) internal returns (bool) {
         uint256 marketId = getMarketId(erc20Contract); // TODO: Make sure this reverts if an invalid address is supplied
@@ -134,6 +136,7 @@ library DydxPoolController {
     /**
      * @dev Withdraws all funds from the dYdX pool.
      * @param erc20Contract The ERC20 contract address of the token to be withdrawn.
+     * @return Boolean indicating success.
      */
     function withdrawAll(address erc20Contract) internal returns (bool) {
         uint256 marketId = getMarketId(erc20Contract); // TODO: Make sure this reverts if an invalid address is supplied
