@@ -8,7 +8,7 @@ Returns the amount of RFT owned by `account`.
 
 Parameters:
 
- - **account** (address) - The account whose balance we are calculating.
+ - **account** (address) - The account whose balance we are retrieving.
 
 ## uint256 RariFundManager.usdBalanceOf(address account)
 
@@ -24,7 +24,7 @@ Development notes:
 
 ## uint256 RariFundManager.getCombinedUsdBalance()
 
-Returns the fund's raw total balance (investor funds + unclaimed fees) of the specified currency.
+Returns the fund's total balance of all currencies in USD (scaled by 1e18).
 
 Development notes:
 
