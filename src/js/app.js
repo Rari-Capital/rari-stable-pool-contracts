@@ -3,6 +3,9 @@ const Web3Modal = window.Web3Modal.default;
 const WalletConnectProvider = window.WalletConnectProvider.default;
 const EvmChains = window.EvmChains;
 const Fortmatic = window.Fortmatic;
+const Torus = window.Torus;
+const Portis = window.Portis;
+const Authereum = window.Authereum;
 
 App = {
   web3: null,
@@ -231,8 +234,25 @@ App = {
       fortmatic: {
         package: Fortmatic,
         options: {
-          key: "pk_test_391E26A3B43A3350" // TODO: Replace Mikko's TESTNET api key
+          key: "pk_live_F95FEECB1BE324B5" // TODO: Replace API key
         }
+      },
+
+      torus: {
+        package: Torus,
+        options: {}
+      },
+
+      portis: {
+        package: Portis,
+        options: {
+          id: "7e4ce7f9-7cd0-42da-a634-44e682aacd73" // TODO: Replace API key
+        }
+      },
+
+      authereum: {
+        package: Authereum,
+        options: {}
       }
     };
   
