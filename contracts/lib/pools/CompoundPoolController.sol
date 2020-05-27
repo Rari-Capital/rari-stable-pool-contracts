@@ -45,15 +45,25 @@ library CompoundPoolController {
     }
 
     /**
-     * @dev Deposits funds to the Compound pool.
+     * @dev Approves tokens to Compound without spending gas on every deposit.
+     * @param erc20Contract The ERC20 contract address of the token.
+     * @param amount Amount of the specified token to approve to dYdX.
+     * @return Boolean indicating success.
+     */
+    function approve(address erc20Contract, uint256 amount) internal returns (bool) {
+        ERC20 underlying = ERC20(erc20Contract);
+        require(underlying.approve(cErc20Contract, amount), "Approval of tokens to Compound failed.");
+        return true;
+    }
+
+    /**
+     * @dev Deposits funds to the Compound pool. Assumes that you have already approved >= the amount to Compound.
      * @param erc20Contract The ERC20 contract address of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
      * @return Boolean indicating success.
      */
     function deposit(address erc20Contract, uint256 amount) internal returns (bool) {
         address cErc20Contract = getCErc20Address(erc20Contract);
-        ERC20 underlying = ERC20(erc20Contract);
-        require(underlying.approve(cErc20Contract, amount)); // TODO: Execute infinite approval once instead of approving every time we deposit so we don't waste gas?
         uint256 mintResult = CErc20(cErc20Contract).mint(amount);
         require(mintResult == 0, "Error calling mint on Compound cToken: error code not equal to 0");
         return true;

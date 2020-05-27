@@ -39,6 +39,20 @@ library RariFundController {
     }
 
     /**
+     * @dev Approves tokens to the pool without spending gas on every deposit.
+     * @param pool The name of the pool.
+     * @param erc20Contract The ERC20 contract of the token to be approved.
+     * @param amount The amount of tokens to be approved.
+     * @return Boolean indicating success.
+     */
+    function approveToPool(uint8 pool, address erc20Contract, uint256 amount) internal returns (bool) {
+        if (pool == 0) require(DydxPoolController.approve(erc20Contract, amount), "Approval of tokens to dYdX failed.");
+        else if (pool == 1) require(CompoundPoolController.approve(erc20Contract, amount), "Approval of tokens to Compound failed.");
+        else revert("Invalid pool index.");
+        return true;
+    }
+
+    /**
      * @dev Deposits funds to the specified pool.
      * @param pool The name of the pool.
      * @param erc20Contract The ERC20 contract of the token to be deposited.

@@ -359,6 +359,20 @@ contract RariFundManager is Ownable {
     }
 
     /**
+     * @dev Approves tokens to the pool without spending gas on every deposit.
+     * @param pool The name of the pool.
+     * @param currencyCode The currency code of the token to be approved.
+     * @param amount The amount of tokens to be approved.
+     * @return Boolean indicating success.
+     */
+    function approveToPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyRebalancer returns (bool) {
+        address erc20Contract = _erc20Contracts[currencyCode];
+        require(erc20Contract != address(0), "Invalid currency code.");
+        require(RariFundController.approveToPool(pool, erc20Contract, amount), "Pool approval failed.");
+        return true;
+    }
+
+    /**
      * @dev Deposits funds from any supported pool.
      * @param pool The name of the pool.
      * @param currencyCode The currency code of the token to be deposited.

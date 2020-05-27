@@ -61,16 +61,25 @@ library DydxPoolController {
     }
 
     /**
-     * @dev Deposits funds to the dYdX pool.
+     * @dev Approves tokens to dYdX without spending gas on every deposit.
+     * @param erc20Contract The ERC20 contract address of the token.
+     * @param amount Amount of the specified token to approve to dYdX.
+     * @return Boolean indicating success.
+     */
+    function approve(address erc20Contract, uint256 amount) internal returns (bool) {
+        ERC20 underlying = ERC20(erc20Contract);
+        require(underlying.approve(SOLO_MARGIN_CONTRACT, amount), "Approval of tokens to dYdX failed.");
+        return true;
+    }
+
+    /**
+     * @dev Deposits funds to the dYdX pool. Assumes that you have already approved >= the amount to dYdX.
      * @param erc20Contract The ERC20 contract address of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
      * @return Boolean indicating success.
      */
     function deposit(address erc20Contract, uint256 amount) internal returns (bool) {
         uint256 marketId = getMarketId(erc20Contract); // TODO: Make sure this reverts if an invalid address is supplied
-
-        ERC20 underlying = ERC20(erc20Contract);
-        require(underlying.approve(SOLO_MARGIN_CONTRACT, amount), "Approval of tokens failed."); // TODO: Execute infinite approval once instead of approving every time we deposit so we don't waste gas?
 
         Account.Info memory account = Account.Info(address(this), 0);
         Account.Info[] memory accounts = new Account.Info[](1);
