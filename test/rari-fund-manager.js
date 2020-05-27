@@ -7,34 +7,57 @@ contract("RariFundManager v0.3.0", async accounts => {
 
     // Check balances in original FundManager
     var oldTokenBalances = {};
-    for (const currencyCode of ["DAI", "USDC", "USDT"]) oldTokenBalances[currencyCode] = await fundManagerInstance.getRawTotalBalance.call(RariFundManager.address);
+    for (const currencyCode of ["DAI", "USDC", "USDT"]) oldTokenBalances[currencyCode] = await fundManagerInstance.getRawTotalBalance.call(currencyCode);
     let ethBalanceOld = await web3.eth.getBalance(RariFundManager.address);
 
-    // TODO: Create new FundManager and set its address below
+    // Create new FundManager
+    // TODO: Test that we can make changes to the code of the new fund manager before deploying it and upgrading to it
+    var newFundManagerInstance = await RariFundManager.new([], { from: accounts[0] });
 
     // Upgrade!
-    await fundManagerInstance.upgradeFundManager("0x0000000000000000000000000000000000000000");
+    await fundManagerInstance.upgradeFundManager(newFundManagerInstance.address);
 
     // Check balances in new FundManager
     for (const currencyCode of ["DAI", "USDC", "USDT"]) {
-      let newTokenBalance = await fundManagerInstance.getRawTotalBalance.call(RariFundManager.address);
-      assert.atLeast(oldTokenBalances[currencyCode].valueOf(), newTokenBalance.valueOf());
+      let newTokenBalance = await newFundManagerInstance.getRawTotalBalance().call(currencyCode);
+      assert.atLeast(newTokenBalance.valueOf(), oldTokenBalances[currencyCode].valueOf());
     }
 
     let ethBalanceNew = await web3.eth.getBalance(RariFundManager.address);
-    if (ethBalanceOld.valueOf() > 0) assert.greater(ethBalanceNew.valueOf(), 0);
+    if (ethBalanceOld.toNumber() > 0) assert.greater(ethBalanceNew.valueOf(), 0); // TODO: Implement better assertion technique considering fees
   });
 
   it("should put upgrade the FundToken", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
+    let fundTokenInstance = await RariFundToken.deployed();
 
-    // TODO: Create new FundToken (with changes), copy balances, and set its address below (how do we unit test this? I don't have the resources to get an ERC20 token balance list from anywhere other than Etherscan)
+    // Create new FundToken
+    // TODO: Test that we can make changes to the code of the new fund token before deploying it and upgrading to it
+    var newFundTokenInstance = await RariFundToken.new([], { from: accounts[0] });
+
+    // Copy balances from the old to the new FundToken
+    // TODO: Actually pull the token holders from somewhere (how do we do this? I don't have the resources to get an ERC20 token balance list from anywhere other than Etherscan)
+    var tokenHolders = [accounts[0]];
+    var tokenBalances = [];
+
+    for (var i = 0; i < tokenHolders.length; i++) {
+      var balance = await fundTokenInstance.balanceOf(tokenHolders[i]);
+      tokenBalances.push(balance.valueOf());
+    }
+    
+    // TODO: Implement RariFundToken.upgrade(uint256[] memory accounts, uint256[] memory balances)
+    fundTokenInstance.upgrade(tokenHolders, tokenBalances);
 
     // RariFundManager.setFundToken(address newContract)
-    await fundManagerInstance.setFundToken("0x0000000000000000000000000000000000000000", { from: accounts[0] });
+    await fundManagerInstance.setFundToken(newFundTokenInstance.address, { from: accounts[0] });
 
     // TODO: Check RariFundManager._rariFundTokenContract (no way to do this as of now)
-    // TODO: Check balances to make sure they're the same (how do we unit test this? I don't have the resources to get an ERC20 token balance list from anywhere other than Etherscan)
+
+    // Check balances to make sure they're the same
+    for (var i = 0; i < tokenHolders.length; i++) {
+      var balance = await newFundTokenInstance.balanceOf(tokenHolders[i]);
+      assert.equal([tokenBalances[i], balance.valueOf()]);
+    }
   });
 
   it("should put upgrade the FundRebalancer", async () => {
@@ -55,9 +78,12 @@ contract("RariFundManager v0.3.0", async accounts => {
 
     // TODO: Check _fundDisabled (no way to do this as of now)
     
-    // Make sure we can't deposit or withdraw (using DAI as an example)
-    let myOldBalance = fundManagerInstance.usdBalanceOf.call(accounts[0]);
+    // Make sure we can't deposit or withdraw now (using DAI as an example)
+    let myInitialBalance = fundManagerInstance.usdBalanceOf.call(accounts[0]);
     await fundManagerInstance.deposit("DAI", 1, { from: accounts[0] });
+    let myNewBalance = fundManagerInstance.usdBalanceOf.call(accounts[0]);
+    assert.equal(myNewBalance.toNumber(), myOldBalance.toNumber());
+    await fundManagerInstance.withdraw("DAI", 1, { from: accounts[0] });
     let myNewBalance = fundManagerInstance.usdBalanceOf.call(accounts[0]);
     assert.equal(myNewBalance.toNumber(), myOldBalance.toNumber());
 
@@ -66,14 +92,13 @@ contract("RariFundManager v0.3.0", async accounts => {
 
     // TODO: Check _fundDisabled (no way to do this as of now)
 
-    // Make sure we can deposit and withdraw (using DAI as an example)
-    let myOldBalance = fundManagerInstance.usdBalanceOf.call(accounts[0]);
+    // Make sure we can deposit and withdraw now (using DAI as an example)
     await fundManagerInstance.deposit("DAI", 1, { from: accounts[0] });
     let myNewBalance = fundManagerInstance.usdBalanceOf.call(accounts[0]);
     assert.greater(myNewBalance.toNumber(), myOldBalance.toNumber());
   });
 
-  it("should make a deposit, accrue interest, make a withdrawal, withdraw from pools, exchange tokens, and process pending withdrawals", async () => {
+  it("should make a deposit, deposit to pools, accrue interest, make a withdrawal, withdraw from pools, and process pending withdrawals", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     let fundTokenInstance = await RariFundToken.deployed();
 
@@ -82,8 +107,8 @@ contract("RariFundManager v0.3.0", async accounts => {
       var erc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCode]);
       await erc20Contract.approve(RariFundManager.address, 1).send({ from: accounts[0] });
       
-      // Check RariFundManager.balanceOf(string currencyCode, address account)
-      let initialAccountBalance = await fundManagerInstance.balanceOf.call(currencyCode, accounts[0]);
+      // Check RariFundManager.usdBalanceOf(string currencyCode, address account)
+      let initialAccountBalance = await fundManagerInstance.usdBalanceOf.call(currencyCode, accounts[0]);
 
       // Check RariFundManager.getTotalBalance(string currencyCode)
       let initialCurrencyBalance = await fundManagerInstance.getTotalBalance.call(currencyCode);
@@ -97,8 +122,8 @@ contract("RariFundManager v0.3.0", async accounts => {
       // RariFundManager.deposit
       await fundManagerInstance.deposit(currencyCode, 1, { from: accounts[0] });
 
-      // Check RariFundManager.balanceOf(string currencyCode, address account)
-      let postDepositAccountBalance = await fundManagerInstance.balanceOf.call(currencyCode, accounts[0]);
+      // Check RariFundManager.usdBalanceOf(string currencyCode, address account)
+      let postDepositAccountBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
       Assert.isAbove(postDepositAccountBalance.toNumber(), initialAccountBalance.toNumber());
 
       // Check RariFundManager.getTotalBalance(string currencyCode)
@@ -113,40 +138,48 @@ contract("RariFundManager v0.3.0", async accounts => {
       let postDepositRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
       Assert.isAbove(postDepositRftBalance.toNumber(), initialRftBalance.toNumber());
 
+      // Deposit to pool (using dYdX and DAI as an example)
+      // TODO: Ideally, deposit to pool via rari-fund-rebalancer
+      await fundManagerInstance.depositToPool(0, "DAI", 1e18);
+
+      // Wait for interest
       // TODO: Actually wait for interest and time out after 5 minutes
       setTimeout(function() {
-        // Check RariFundManager.balanceOf(string currencyCode, address account)
-        let preWithdrawalAccountBalance = await fundManagerInstance.balanceOf.call(currencyCode, accounts[0]);
-        Assert.isAbove(preWithdrawalAccountBalance.toNumber(), postDepositAccountBalance.toNumber());
+        // Check RariFundManager.usdBalanceOf(string currencyCode, address account)
+        let preWithdrawalAccountBalance = await fundManagerInstance.usdBalanceOf.call(currencyCode, accounts[0]);
+        Assert.isAbove(preWithdrawalAccountBalance.toNumber(), postDepositAccountBalance.toNumber() + 1e18);
 
         // Check RariFundManager.getTotalBalance(string currencyCode)
         let preWithdrawalCurrencyBalance = await fundManagerInstance.getTotalBalance.call(currencyCode);
-        Assert.isAbove(preWithdrawalCurrencyBalance.toNumber(), postDepositCurrencyBalance.toNumber());
+        Assert.isAbove(preWithdrawalCurrencyBalance.toNumber(), postDepositCurrencyBalance.toNumber() + 1e18);
 
         // Check RariFundManager.getCombinedUsdBalance()
         let preWithdrawalUsdBalance = await fundManagerInstance.getCombinedUsdBalance.call();
-        Assert.isAbove(preWithdrawalUsdBalance.toNumber(), postDepositUsdBalance.toNumber());
+        Assert.isAbove(preWithdrawalUsdBalance.toNumber(), postDepositUsdBalance.toNumber() + 1e18);
 
         // Check RariFundToken.balanceOf(address account)
         let preWithdrawalRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
         Assert.equal(preWithdrawalRftBalance.valueOf(), postDepositRftBalance.valueOf());
 
-        // TODO: RariFundManager.withdraw
-        await fundManagerInstance.withdraw(currencyCode, 1, { from: accounts[0] });
+        // RariFundManager.withdraw
+        await fundManagerInstance.withdraw("DAI", 1, { from: accounts[0] });
 
-        // TODO: Process pending withdrawals via RariFundManager.withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) and RariFundManager.processPendingWithdrawals(string currencyCode)
+        // Process pending withdrawals via RariFundManager.withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount), RariFundManager.exchangeTokens and RariFundManager.processPendingWithdrawals(string currencyCode)
+        // TODO: Ideally, withdraw from pool and process pending withdrawals via rari-fund-rebalancer
+        await fundManagerInstance.withdrawFromPool(0, "DAI", 1e18);
+        await fundManagerInstance.processPendingWithdrawals("DAI");
 
-        // Check RariFundManager.balanceOf(string currencyCode, address account)
-        let finalAccountBalance = await fundManagerInstance.balanceOf.call(currencyCode, accounts[0]);
-        Assert.isBelow(finalAccountBalance.toNumber(), preWithdrawalAccountBalance.toNumber());
+        // Check RariFundManager.usdBalanceOf(string currencyCode, address account)
+        let finalAccountBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
+        Assert.isBelow(finalAccountBalance.toNumber(), preWithdrawalAccountBalance.toNumber() - 1e18);
 
         // Check RariFundManager.getTotalBalance(string currencyCode)
         let finalCurrencyBalance = await fundManagerInstance.getTotalBalance.call(currencyCode);
-        Assert.isBelow(finalCurrencyBalance.toNumber(), preWithdrawalCurrencyBalance.toNumber());
+        Assert.isBelow(finalCurrencyBalance.toNumber(), preWithdrawalCurrencyBalance.toNumber() - 1e18);
 
         // Check RariFundManager.getCombinedUsdBalance()
         let finalUsdBalance = await fundManagerInstance.getCombinedUsdBalance.call();
-        Assert.isBelow(finalUsdBalance.toNumber(), preWithdrawalUsdBalance.toNumber());
+        Assert.isBelow(finalUsdBalance.toNumber(), preWithdrawalUsdBalance.toNumber() - 1e18);
 
         // Check RariFundToken.balanceOf(address account)
         let finalRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
@@ -237,14 +270,15 @@ contract("RariFundManager v0.3.0", async accounts => {
       // Check source and destination wallet balances
       var inputErc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCombinations[0]]);
       var outputErc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCombinations[1]]);
-      let oldInputBalance = inputErc20Contract.balanceOf(RariFundManager.address).call();
-      let oldOutputBalance = outputErc20Contract.balanceOf(RariFundManager.address).call();
+      let oldInputBalance = await inputErc20Contract.balanceOf(RariFundManager.address).call();
+      let oldOutputBalance = await outputErc20Contract.balanceOf(RariFundManager.address).call();
 
-      // TODO: RariFundManager.fill0xOrdersUpTo (either we call it directly, or, ideally, we add actually call rari-fund-rebalancer)
+      // TODO: RariFundManager.fill0xOrdersUpTo
+      // TODO: Ideally, we add actually call rari-fund-rebalancer
 
       // Check source and destination wallet balances
-      let newInputBalance = inputErc20Contract.balanceOf(RariFundManager.address).call();
-      let newOutputBalance = outputErc20Contract.balanceOf(RariFundManager.address).call();
+      let newInputBalance = await inputErc20Contract.balanceOf(RariFundManager.address).call();
+      let newOutputBalance = await outputErc20Contract.balanceOf(RariFundManager.address).call();
       assert.equal(newInputBalance, 0);
       assert.atLeast(newOutputBalance, oldOutputBalance + (oldInputBalance * minMarginalOutputAmount));
     }
@@ -260,6 +294,9 @@ contract("RariFundManager v0.3.0", async accounts => {
     let interestFeeRate = await fundManagerInstance.getInterestFeeRate().call();
     assert.equal(interestFeeRate.toNumber(), 1e18);
 
+    // Check raw interest accrued
+    let initialRawInterestAccrued = await fundManagerInstance.getRawInterestAccrued.call(currencyCode);
+
     // Check interest fees generated
     let initialInterestFeesGenerated = await fundManagerInstance.getInterestFeesGenerated.call(currencyCode);
 
@@ -272,19 +309,24 @@ contract("RariFundManager v0.3.0", async accounts => {
       for (var i = 0; i < Object.keys(erc20Contracts).length; i++) {
         var currencyCode = Object.keys(erc20Contracts)[i];
 
+        // Check raw interest accrued
+        let nowRawInterestAccrued = await fundManagerInstance.getRawInterestAccrued.call(currencyCode);
+        assert.greater(nowRawInterestAccrued.valueOf(), initialRawInterestAccrued.valueOf());
+
         // Check interest fees generated
+        // TODO: Exactly calculate expected fees generated (and remove multiplication of expected fees generated by 0.99)
         let nowInterestFeesGenerated = await fundManagerInstance.getInterestFeesGenerated.call(currencyCode);
-        assert.greater(nowInterestFeesGenerated, initialInterestFeesGenerated);
+        assert.atLeast(nowInterestFeesGenerated.valueOf(), initialInterestFeesGenerated.toNumber() + ((nowRawInterestAccrued.toNumber() - initialRawInterestAccrued.toNumber()) * 0.99));
 
         // Check initial balance
         var erc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCode]);
-        let myOldBalance = erc20Contract.balanceOf(accounts[0]).call();
+        let myOldBalance = await erc20Contract.balanceOf(accounts[0]).call();
 
         // claimFees(string currencyCode, address beneficiary)
-        fundManagerInstance.claimFees(currencyCode, accounts[0]);
+        await fundManagerInstance.claimFees(currencyCode, accounts[0]);
 
         // Check that we claimed fees
-        let myNewBalance = erc20Contract.balanceOf(accounts[0]).call();
+        let myNewBalance = await erc20Contract.balanceOf(accounts[0]).call();
         assert.greater(myNewBalance, myOldBalance);
       }
     }, 5 * 60 * 1000);
@@ -294,7 +336,7 @@ contract("RariFundManager v0.3.0", async accounts => {
     let fundManagerInstance = await RariFundManager.deployed();
 
     // RariFundManager.setInterestFeeShare(address beneficiary, uint256 shareProportion)
-    fundManagerInstance.setInterestFeeShare(accounts[0], 1e17);
+    await fundManagerInstance.setInterestFeeShare(accounts[1], 1e17);
 
     // TODO: Check _interestFeeShares[address].shareProportion (no way to do this as of now)
 
@@ -316,15 +358,19 @@ contract("RariFundManager v0.3.0", async accounts => {
 
         // Check initial balance
         var erc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCode]);
-        let myOldBalance = erc20Contract.balanceOf(accounts[0]).call();
+        let myOldBalance = erc20Contract.balanceOf(accounts[1]).call();
 
         // claimFees(string currencyCode, address beneficiary)
-        fundManagerInstance.claimFees(currencyCode, accounts[0]);
+        await fundManagerInstance.claimFees(currencyCode, accounts[1]);
 
         // Check that we claimed fees
-        let myNewBalance = erc20Contract.balanceOf(accounts[0]).call();
-        assert.greater(myNewBalance, myOldBalance);
+        // TODO: Exactly calculate expected fees generated (and remove multiplication of expected fees generated by 0.99)
+        let myNewBalance = await erc20Contract.balanceOf(accounts[1]).call();
+        assert.atLeast(myNewBalance.valueOf(), myOldBalance.toNumber() + ((nowInterestFeesGenerated.toNumber() - initialInterestFeesGenerated.toNumber()) * 0.1 * 0.99));
       }
+
+      // Reset share proportion of interest fees to 0
+      await fundManagerInstance.setInterestFeeShare(accounts[1], 0);
     }, 5 * 60 * 1000);
   });
 
@@ -332,7 +378,7 @@ contract("RariFundManager v0.3.0", async accounts => {
     let fundManagerInstance = await RariFundManager.deployed();
 
     // RariFundManager.setInterestFeeMasterBeneficiary(address beneficiary)
-    fundManagerInstance.setInterestFeeMasterBeneficiary(accounts[0]);
+    await fundManagerInstance.setInterestFeeMasterBeneficiary(accounts[1]);
 
     // TODO: Check _interestFeeMasterBeneficiary (no way to do this as of now)
 
@@ -354,15 +400,19 @@ contract("RariFundManager v0.3.0", async accounts => {
 
         // Check initial balance
         var erc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCode]);
-        let myOldBalance = erc20Contract.balanceOf(accounts[0]).call();
+        let myOldBalance = erc20Contract.balanceOf(accounts[1]).call();
 
         // claimFees(string currencyCode, address beneficiary)
-        fundManagerInstance.claimFees(currencyCode, accounts[0]);
+        await fundManagerInstance.claimFees(currencyCode, accounts[1]);
 
         // Check that we claimed fees
-        let myNewBalance = erc20Contract.balanceOf(accounts[0]).call();
-        assert.greater(myNewBalance.toNumber(), myOldBalance.toNumber());
+        // TODO: Exactly calculate expected fees generated (and remove multiplication of expected fees generated by 0.99)
+        let myNewBalance = await erc20Contract.balanceOf(accounts[1]).call();
+        assert.atLeast(myNewBalance.valueOf(), myOldBalance.toNumber() + ((nowInterestFeesGenerated.toNumber() - initialInterestFeesGenerated.toNumber()) * 0.1 * 0.99));
       }
+
+      // Reset master beneficiary of interest fees
+      await fundManagerInstance.setInterestFeeMasterBeneficiary(accounts[0]);
     }, 5 * 60 * 1000);
   });
 });
