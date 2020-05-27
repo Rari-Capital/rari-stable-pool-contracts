@@ -268,6 +268,28 @@ contract RariFundManager is Ownable {
     }
 
     /**
+     * @dev Fund balance limit in USD per Ethereum address.
+     */
+    mapping(string => bool) private _acceptedCurrencies;
+
+    /**
+     * @notice Returns a boolean indicating if `currencyCode` is currently accepted.
+     * @param currencyCode The currency code to mark as accepted or not accepted.
+     */
+    function isCurrencyAccepted(string memory currencyCode) public view returns (bool) {
+        return _acceptedCurrencies[currencyCode];
+    }
+
+    /**
+     * @dev Marks `currencyCode` as accepted or not accepted.
+     * @param currencyCode The currency code to mark as accepted or not accepted.
+     * @param accepted A boolean indicating if the `currencyCode` is to be accepted.
+     */
+    function setAcceptedCurrency(string memory currencyCode, bool accepted) external onlyOwner {
+        _acceptedCurrencies[currencyCode] = accepted;
+    }
+
+    /**
      * @dev Emitted when funds have been deposited to RariFund.
      */
     event Deposit(string indexed currencyCode, address indexed sender, uint256 amount);
@@ -294,6 +316,7 @@ contract RariFundManager is Ownable {
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
+        require(isCurrencyAccepted(currencyCode), "This currency is not currently accepted; please convert your funds to an accepted currency before depositing.");
 
         ERC20Detailed token = ERC20Detailed(erc20Contract);
         uint256 tokenDecimals = token.decimals();

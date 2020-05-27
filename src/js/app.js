@@ -438,22 +438,49 @@ App = {
     if (["DAI", "USDC", "USDT"].indexOf(token) < 0) return toastr["danger"]("Deposit failed", "Invalid token!");
     var amount = parseFloat($('#DepositAmount').val());
 
-    console.log('Deposit ' + amount + ' ' + token);
+    App.contracts.RariFundManager.methods.isAcceptedCurrency(token).call().then(function(accepted) {
+      function deposit() {
+        console.log('Deposit ' + amount + ' ' + token);
 
-    var dai = new web3.eth.Contract(erc20Abi, "0x6B175474E89094C44Da98b954EedeAC495271d0F");;
+        var dai = new web3.eth.Contract(erc20Abi, "0x6B175474E89094C44Da98b954EedeAC495271d0F");;
+  
+        dai.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call().then(function(result) {
+          if (result >= amount) return;
+          return dai.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
+        }).then(function(result) {
+          return App.contracts.RariFundManager.methods.deposit(token, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
+        }).then(function(result) {
+          toastr["success"]("Deposit successful", "Deposit of " + amount + " " + token + " confirmed!");
+          App.getFundBalances();
+          App.getMyFundBalances();
+          App.getTokenBalances();
+        }).catch(function(err) {
+          console.error(err);
+        });
+      }
 
-    dai.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call().then(function(result) {
-      if (result >= amount) return;
-      return dai.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
-    }).then(function(result) {
-      return App.contracts.RariFundManager.methods.deposit(token, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
-    }).then(function(result) {
-      toastr["success"]("Deposit successful", "Deposit of " + amount + " " + token + " confirmed!");
-      App.getFundBalances();
-      App.getMyFundBalances();
-      App.getTokenBalances();
-    }).catch(function(err) {
-      console.error(err);
+      if (!accepted) {
+        var availableAssetDatas = [];
+        App.contracts.RariFundManager.methods.isAcceptedCurrency("DAI").call().then(function(accepted) {
+          if (accepted) availableAssetDatas.push('0xf47261b00000000000000000000000006b175474e89094c44da98b954eedeac495271d0f');
+          return App.contracts.RariFundManager.methods.isAcceptedCurrency("USDC").call();
+        }).then(function(accepted) {
+          if (accepted) availableAssetDatas.push('0xf47261b0000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48');
+          return App.contracts.RariFundManager.methods.isAcceptedCurrency("USDT").call();
+        }).then(function(accepted) {
+          if (accepted) availableAssetDatas.push('0xf47261b0000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec7');
+        });
+
+        return zeroExInstant.render({
+          orderSource: 'https://api.0x.org/sra/',
+          availableAssetDatas,
+          provider: App.web3Provider, // TODO: Set walletDisplayName
+          defaultAssetBuyAmount: amount,
+          onSuccess: deposit
+        }, 'body');
+      }
+
+      return deposit();
     });
   },
   
