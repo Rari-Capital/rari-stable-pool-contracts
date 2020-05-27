@@ -255,6 +255,19 @@ contract RariFundManager is Ownable {
     }
 
     /**
+     * @dev Fund balance limit in USD per Ethereum address.
+     */
+    uint256 private _accountBalanceLimitUsd;
+
+    /**
+     * @dev Sets or upgrades the account balance limit in USD.
+     * @param accountBalanceLimitUsd The fund balance limit in USD per Ethereum address.
+     */
+    function setAccountBalanceLimitUsd(uint256 accountBalanceLimitUsd) external onlyOwner {
+        _accountBalanceLimitUsd = accountBalanceLimitUsd;
+    }
+
+    /**
      * @dev Emitted when funds have been deposited to RariFund.
      */
     event Deposit(string indexed currencyCode, address indexed sender, uint256 amount);
@@ -294,6 +307,8 @@ contract RariFundManager is Ownable {
             uint256 rftDecimals = rariFundToken.decimals();
             rftAmount = rftDecimals >= tokenDecimals ? amount.mul(10 ** (rftDecimals.sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(rftDecimals)));
         }
+
+        require(this.usdBalanceOf(msg.sender).add(amountUsd) <= _accountBalanceLimitUsd, "Making this deposit would cause this account's balance to exceed the maximum."); // TODO: Improve performance by not calling getCombinedUsdBalance() twice
 
         // TODO: Make sure the user must approve the transfer of tokens before calling the deposit function
         require(token.transferFrom(msg.sender, address(this), amount), "Failed to transfer input tokens.");

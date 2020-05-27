@@ -3,6 +3,7 @@ var RariFundToken = artifacts.require("./RariFundToken.sol");
 
 module.exports = function(deployer) {
   var rariFundToken = null;
+  var rariFundManager = null;
 
   deployer.deploy(RariFundManager).then(function() {
     return deployer.deploy(RariFundToken);
@@ -15,7 +16,10 @@ module.exports = function(deployer) {
     return rariFundToken.renounceMinter();
   }).then(function() {
     return RariFundManager.deployed();
-  }).then(function(rariFundManager) {
+  }).then(function(_rariFundManager) {
+    rariFundManager = _rariFundManager;
     return rariFundManager.setFundToken(RariFundToken.address);
+  }).then(function() {
+    return rariFundManager.setAccountBalanceLimitUsd(250 * 1e18);
   });
 };
