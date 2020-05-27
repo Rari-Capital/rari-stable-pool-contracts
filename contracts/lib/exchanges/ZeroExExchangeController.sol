@@ -27,7 +27,7 @@ import "@0x/contracts-exchange/contracts/src/interfaces/IExchange.sol";
 library ZeroExExchangeController {
     using SafeMath for uint256;
 
-    address constant private EXCHANGE_CONTRACT = 0x61935cbdd02287b511119ddb11aeb42f1593b7ef;
+    address constant private EXCHANGE_CONTRACT = 0x61935CbDd02287B511119DDb11Aeb42F1593b7Ef;
     IExchange constant private _exchange = IExchange(EXCHANGE_CONTRACT);
 
     /**
@@ -36,9 +36,9 @@ library ZeroExExchangeController {
      * @param signatures The signatures for the orders.
      * @param maxInputAmount The maximum amount that we can input (balance of the asset).
      * @param minMarginalOutputAmount The minumum amount of output for each unit of input (scaled to 1e18) necessary to continue filling orders (i.e., a price ceiling).
-     * @return Input amount sold and output amount bought.
+     * @return Array containing the input amount sold and output amount bought.
      */
-    function fillOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 memory maxInputAmount, uint256 memory minMarginalOutputAmount) internal returns (bool) {
+    function fillOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 maxInputAmount, uint256 minMarginalOutputAmount) internal returns (uint256[2] memory) {
         require(orders.length > 0, "At least one order and matching signature is required.");
         require(orders.length == signatures.length, "Mismatch between number of orders and signatures.");
 
@@ -52,7 +52,7 @@ library ZeroExExchangeController {
             filledOutputAmount = filledOutputAmount.add(fillResults.makerAssetFilledAmount);
             if (filledInputAmount == maxInputAmount) break;
         }
-        
+
         return [filledInputAmount, filledOutputAmount];
     }
 }

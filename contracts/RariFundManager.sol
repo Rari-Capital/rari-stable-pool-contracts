@@ -80,21 +80,33 @@ contract RariFundManager is Ownable {
      */
     constructor () public {
         // Add currencies
-        addCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F, [0, 1]); // dYdX and Compound
-        addCurrency("USDC", 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48, [0, 1]); // dYdX and Compound
-        addCurrency("USDT", 0xdac17f958d2ee523a2206206994597c13d831ec7, [1]); // Compound
+        addCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F);
+        addPoolToCurrency("DAI", 0); // dYdX
+        addPoolToCurrency("DAI", 1); // Compound
+        addCurrency("USDC", 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+        addPoolToCurrency("USDC", 0); // dYdX
+        addPoolToCurrency("USDC", 1); // Compound
+        addCurrency("USDT", 0xdAC17F958D2ee523a2206206994597C13D831ec7);
+        addPoolToCurrency("USDT", 1); // Compound
     }
 
     /**
-     * @dev Sets supported ERC20 token contract addresses and supported pools for each supported token.
+     * @dev Sets supported ERC20 token contract addresses for each supported token.
      * @param currencyCode The currency code of the token.
      * @param erc20Contract The ERC20 contract of the token.
-     * @param pools Array of supported pool IDs.
      */
-    function addCurrency(string memory currencyCode, address erc20Contract, uint8[] pools) internal {
+    function addCurrency(string memory currencyCode, address erc20Contract) internal {
         _supportedCurrencies.push(currencyCode);
         _erc20Contracts[currencyCode] = erc20Contract;
-        _poolsByCurrency["DAI"] = pools;
+    }
+
+    /**
+     * @dev Adds a supported pool for a token.
+     * @param currencyCode The currency code of the token.
+     * @param pool Pool ID to be supported.
+     */
+    function addPoolToCurrency(string memory currencyCode, uint8 pool) internal {
+        _poolsByCurrency[currencyCode].push(pool);
     }
 
     /**
@@ -213,7 +225,7 @@ contract RariFundManager is Ownable {
         uint256 rftTotalSupply = rariFundToken.totalSupply();
         if (rftTotalSupply == 0) return 0;
         uint256 rftBalance = rariFundToken.balanceOf(account);
-        uint256 totalUsdBalance = this.getCombinedUsdBalance(currencyCode);
+        uint256 totalUsdBalance = this.getCombinedUsdBalance();
         uint256 accountUsdBalance = rftBalance.mul(totalUsdBalance).div(rftTotalSupply);
         return accountUsdBalance;
     }
@@ -243,11 +255,11 @@ contract RariFundManager is Ownable {
         uint256 totalBalance = 0;
 
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
-            string currencyCode = _supportedCurrencies[i];
+            string memory currencyCode = _supportedCurrencies[i];
             ERC20Detailed token = ERC20Detailed(_erc20Contracts[currencyCode]);
             uint256 tokenDecimals = token.decimals();
             uint256 balance = getTotalBalance(_supportedCurrencies[i]);
-            uint256 balanceUsd = 18 >= tokenDecimals ? balance.mul(10 ** (18.sub(tokenDecimals))) : balance.div(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+            uint256 balanceUsd = 18 >= tokenDecimals ? balance.mul(10 ** (uint256(18).sub(tokenDecimals))) : balance.div(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
             totalBalance = totalBalance.add(balanceUsd);
         }
 
@@ -285,7 +297,7 @@ contract RariFundManager is Ownable {
      * @param currencyCode The currency code to mark as accepted or not accepted.
      * @param accepted A boolean indicating if the `currencyCode` is to be accepted.
      */
-    function setAcceptedCurrency(string memory currencyCode, bool accepted) external onlyOwner {
+    function setAcceptedCurrency(string calldata currencyCode, bool accepted) external onlyOwner {
         _acceptedCurrencies[currencyCode] = accepted;
     }
 
@@ -323,14 +335,10 @@ contract RariFundManager is Ownable {
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
         uint256 rftAmount = 0;
+        uint256 amountUsd = 18 >= tokenDecimals ? amount.mul(10 ** (uint256(18).sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(18)));
 
-        if (rftTotalSupply > 0) {
-            uint256 amountUsd = 18 >= tokenDecimals ? amount.mul(10 ** (18.sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(18)));
-            rftAmount = amountUsd.mul(rftTotalSupply).div(this.getCombinedUsdBalance());
-        } else {
-            uint256 rftDecimals = rariFundToken.decimals();
-            rftAmount = rftDecimals >= tokenDecimals ? amount.mul(10 ** (rftDecimals.sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(rftDecimals)));
-        }
+        if (rftTotalSupply > 0) rftAmount = amountUsd.mul(rftTotalSupply).div(this.getCombinedUsdBalance());
+        else rftAmount = amountUsd;
 
         require(this.usdBalanceOf(msg.sender).add(amountUsd) <= _accountBalanceLimitUsd, "Making this deposit would cause this account's balance to exceed the maximum."); // TODO: Improve performance by not calling getCombinedUsdBalance() twice
 
@@ -361,9 +369,9 @@ contract RariFundManager is Ownable {
 
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
-        uint256 totalUsdBalance = this.getCombinedUsdBalance(currencyCode);
-        uint256 amountUsd = 18 >= tokenDecimals ? amount.mul(10 ** (18.sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(18)));
-        uint256 rftAmount = amount.mul(rftTotalSupply).div(totalUsdBalance);
+        uint256 totalUsdBalance = this.getCombinedUsdBalance();
+        uint256 amountUsd = 18 >= tokenDecimals ? amount.mul(10 ** (uint256(18).sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(18)));
+        uint256 rftAmount = amountUsd.mul(rftTotalSupply).div(totalUsdBalance);
         require(rftAmount <= rariFundToken.balanceOf(msg.sender), "Your RFT balance is too low for a withdrawal of this amount.");
         require(amountUsd <= totalUsdBalance, "Fund balance is too low for a withdrawal of this amount.");
 
@@ -488,17 +496,18 @@ contract RariFundManager is Ownable {
 
     /**
      * @dev Fills 0x exchange orders up to a certain amount of input and up to a certain price.
+     * We should be able to make this function external and use calldata for all parameters, but Solidity does not support calldata structs (https://github.com/ethereum/solidity/issues/5479).
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
      * @param maxInputAmount The maximum amount that we can input (balance of the asset).
      * @param minMarginalOutputAmount The minumum amount of output for each unit of input (scaled to 1e18) necessary to continue filling orders (i.e., a price ceiling).
      * @return Boolean indicating success.
      */
-    function fill0xOrdersUpTo(string calldata inputCurrencyCode, string calldata outputCurrencyCode, LibOrder.Order[] calldata orders, bytes[] calldata signatures, uint256 maxInputAmount, uint256 minMarginalOutputAmount) external onlyRebalancer returns (bool) {
+    function fill0xOrdersUpTo(string memory inputCurrencyCode, string memory outputCurrencyCode, LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 maxInputAmount, uint256 minMarginalOutputAmount) public onlyRebalancer returns (bool) {
         require(orders.length > 0, "No orders supplied.");
         require(maxInputAmount > 0, "Maximum input amount must be greater than 0.");
-        uint256[] filledAmounts = RariFundController.fill0xOrdersUpTo(orders, signatures, maxInputAmount, minMarginalOutputAmount);
-        require(filledInputAmount > 0, "Filling orders via 0x failed.");
+        uint256[2] memory filledAmounts = RariFundController.fill0xOrdersUpTo(orders, signatures, maxInputAmount, minMarginalOutputAmount);
+        require(filledAmounts[0] > 0, "Filling orders via 0x failed.");
         _netExchanges[inputCurrencyCode].add(filledAmounts[0]);
         _netExchanges[outputCurrencyCode].sub(filledAmounts[1]);
         return true;
@@ -551,11 +560,11 @@ contract RariFundManager is Ownable {
         uint256 totalInterest = 0;
 
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
-            string currencyCode = _supportedCurrencies[i];
+            string memory currencyCode = _supportedCurrencies[i];
             ERC20Detailed token = ERC20Detailed(_erc20Contracts[currencyCode]);
             uint256 tokenDecimals = token.decimals();
             uint256 interest = getInterestAccrued(_supportedCurrencies[i]);
-            uint256 interestUsd = 18 >= tokenDecimals ? interest.mul(10 ** (18.sub(tokenDecimals))) : interest.div(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+            uint256 interestUsd = 18 >= tokenDecimals ? interest.mul(10 ** (uint256(18).sub(tokenDecimals))) : interest.div(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
             totalInterest = totalInterest.add(interestUsd);
         }
 

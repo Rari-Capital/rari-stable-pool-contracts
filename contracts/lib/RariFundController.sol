@@ -100,10 +100,9 @@ library RariFundController {
      * @param signatures The signatures for the orders.
      * @param maxInputAmount The maximum amount that we can input (balance of the asset).
      * @param minMarginalOutputAmount The minumum amount of output for each unit of input (scaled to 1e18) necessary to continue filling orders (i.e., a price ceiling).
-     * @return Boolean indicating success.
+     * @return Array containing the input amount sold and output amount bought.
      */
-    function fill0xOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 memory maxInputAmount, uint256 memory minMarginalOutputAmount) internal returns (bool) {
-        require(ZeroExExchangeController.fillOrdersUpTo(orders, signatures, maxInputAmount, minMarginalOutputAmount), "Filling orders via 0x failed.");
-        return true;
+    function fill0xOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 maxInputAmount, uint256 minMarginalOutputAmount) internal returns (uint256[2] memory) {
+        return ZeroExExchangeController.fillOrdersUpTo(orders, signatures, maxInputAmount, minMarginalOutputAmount);
     }
 }

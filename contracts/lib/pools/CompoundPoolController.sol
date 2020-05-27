@@ -32,8 +32,8 @@ library CompoundPoolController {
      */
     function getCErc20Address(address erc20Contract) private pure returns (address) {
         if (erc20Contract == 0x6B175474E89094C44Da98b954EedeAC495271d0F) return 0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643; // DAI => cDAI
-        if (erc20Contract == 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48) return 0x39aa39c021dfbae8fac545936693ac917d5e7563; // USDC => cUSDC
-        if (erc20Contract == 0xdac17f958d2ee523a2206206994597c13d831ec7) return 0xf650c3d88d12db855b8bf7d11be6c55a4e07dcc9; // USDT => cUSDT
+        if (erc20Contract == 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48) return 0x39AA39c021dfbaE8faC545936693aC917d5E7563; // USDC => cUSDC
+        if (erc20Contract == 0xdAC17F958D2ee523a2206206994597C13D831ec7) return 0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9; // USDT => cUSDT
         else revert("Supported Compound cToken address not found for this token address.");
     }
 
@@ -54,6 +54,7 @@ library CompoundPoolController {
      */
     function approve(address erc20Contract, uint256 amount) internal returns (bool) {
         ERC20 underlying = ERC20(erc20Contract);
+        address cErc20Contract = getCErc20Address(erc20Contract);
         require(underlying.approve(cErc20Contract, amount), "Approval of tokens to Compound failed.");
         return true;
     }
