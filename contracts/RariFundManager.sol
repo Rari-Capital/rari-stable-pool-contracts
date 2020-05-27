@@ -721,7 +721,7 @@ contract RariFundManager is Ownable {
      * @dev Sets the master beneficiary of interest fees.
      * @param beneficiary The master beneficiary of fees on interest; i.e., the recipient of all unshared fees on interest.
      */
-    function setInterestFeeMasterBeneficiary(address beneficiary) external onlyOwner {
+    function setInterestFeeMasterBeneficiary(address beneficiary) public onlyOwner {
         require(beneficiary != address(0), "Interest fee master beneficiary cannot be the zero address.");
         _interestFeeMasterBeneficiary = beneficiary;
     }
