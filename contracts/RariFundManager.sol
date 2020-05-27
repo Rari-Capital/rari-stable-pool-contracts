@@ -79,6 +79,9 @@ contract RariFundManager is Ownable {
      * @dev Constructor that sets supported ERC20 token contract addresses and supported pools for each supported token.
      */
     constructor () public {
+        // Set master beneficiary of interest fees
+        setInterestFeeMasterBeneficiary(msg.sender);
+
         // Add currencies
         addCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F);
         addPoolToCurrency("DAI", 0); // dYdX
