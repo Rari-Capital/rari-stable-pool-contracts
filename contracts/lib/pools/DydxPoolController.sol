@@ -38,6 +38,7 @@ library DydxPoolController {
      * @param erc20Contract The ERC20 contract address of the token.
      */
     function getMarketId(address erc20Contract) private pure returns (uint256) {
+        if (erc20Contract == 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48) return 2; // USDC
         if (erc20Contract == 0x6B175474E89094C44Da98b954EedeAC495271d0F) return 3; // DAI
         else revert("Supported dYdX market not found for this token address.");
     }

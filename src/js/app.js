@@ -284,7 +284,7 @@ App = {
     // If any current data is displayed when
     // the user is switching acounts in the wallet
     // immediate hide this data
-    $("#MyDAIBalance, #RFTBalance").text("?");
+    $("#MyDAIBalance, #MyUSDCBalance, #MyUSDTBalance, #RFTBalance").text("?");
   
     // Disable button while UI is loading.
     // fetchAccountData() will take a while as it communicates
@@ -415,7 +415,7 @@ App = {
     event.preventDefault();
 
     var token = $('#DepositToken').val();
-    if (["DAI"].indexOf(token) < 0) return toastr["danger"]("Deposit failed", "Invalid token!");
+    if (["DAI", "USDC", "USDT"].indexOf(token) < 0) return toastr["danger"]("Deposit failed", "Invalid token!");
     var amount = parseFloat($('#DepositAmount').val());
 
     console.log('Deposit ' + amount + ' ' + token);
@@ -426,7 +426,7 @@ App = {
       if (result >= amount) return;
       return dai.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
     }).then(function(result) {
-      return App.contracts.RariFundManager.methods.deposit("DAI", web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
+      return App.contracts.RariFundManager.methods.deposit(token, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
     }).then(function(result) {
       toastr["success"]("Deposit successful", "Deposit of " + amount + " " + token + " confirmed!");
       App.getFundBalances();
@@ -444,7 +444,7 @@ App = {
     event.preventDefault();
 
     var token = $('#WithdrawToken').val();
-    if (["DAI"].indexOf(token) < 0) return toastr["danger"]("Withdrawal failed", "Invalid token!");
+    if (["DAI", "USDC", "USDT"].indexOf(token) < 0) return toastr["danger"]("Withdrawal failed", "Invalid token!");
     var amount = parseFloat($('WithdrawAmount').val());
 
     console.log('Withdraw ' + amount + ' ' + token);
@@ -453,7 +453,7 @@ App = {
       if (result >= amount) return;
       return App.contracts.RariFundToken.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1)).send({ from: App.account });
     }).then(function(result) {
-      return App.contracts.RariFundManager.methods.withdraw("DAI", web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
+      return App.contracts.RariFundManager.methods.withdraw(token, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
     }).then(function(result) {
       toastr["success"]("Withdrawal successful", "Withdrawal of " + amount + " " + token + " confirmed!");
       App.getFundBalances();
@@ -470,9 +470,9 @@ App = {
   getFundBalances: function() {
     console.log('Getting fund balances...');
 
-    App.contracts.RariFundManager.methods.getTotalBalance("DAI").call().then(function(result) {
+    App.contracts.RariFundManager.methods.getCombinedUsdBalance().call().then(function(result) {
       balance = result / 1e18;
-      $('#DAIBalance').text(balance);
+      $('#USDBalance').text(balance);
     }).catch(function(err) {
       console.error(err);
     });
@@ -484,9 +484,9 @@ App = {
   getMyFundBalances: function() {
     console.log('Getting my fund balances...');
 
-    App.contracts.RariFundManager.methods.balanceOf("DAI", App.selectedAccount).call().then(function(result) {
+    App.contracts.RariFundManager.methods.usdBalanceOf(App.selectedAccount).call().then(function(result) {
       balance = result / 1e18;
-      $('#MyDAIBalance').text(balance);
+      $('#MyUSDBalance').text(balance);
     }).catch(function(err) {
       console.error(err);
     });

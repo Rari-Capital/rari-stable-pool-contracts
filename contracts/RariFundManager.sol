@@ -79,13 +79,22 @@ contract RariFundManager is Ownable {
      * @dev Constructor that sets supported ERC20 token contract addresses and supported pools for each supported token.
      */
     constructor () public {
-        // Add supported currency codes to array
-        _supportedCurrencies.push("DAI");
+        // Add currencies
+        addCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F, [0, 1]); // dYdX and Compound
+        addCurrency("USDC", 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48, [0, 1]); // dYdX and Compound
+        addCurrency("USDT", 0xdac17f958d2ee523a2206206994597c13d831ec7, [1]); // Compound
+    }
 
-        // Map ERC20 token contract addresses and supported pools to DAI
-        _erc20Contracts["DAI"] = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
-        _poolsByCurrency["DAI"].push(0); // dYdX
-        _poolsByCurrency["DAI"].push(1); // Compound
+    /**
+     * @dev Sets supported ERC20 token contract addresses and supported pools for each supported token.
+     * @param currencyCode The currency code of the token.
+     * @param erc20Contract The ERC20 contract of the token.
+     * @param pools Array of supported pool IDs.
+     */
+    function addCurrency(string memory currencyCode, address erc20Contract, uint8[] pools) internal {
+        _supportedCurrencies.push(currencyCode);
+        _erc20Contracts[currencyCode] = erc20Contract;
+        _poolsByCurrency["DAI"] = pools;
     }
 
     /**
@@ -194,24 +203,19 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @notice Returns an account's total balance of the specified currency.
+     * @notice Returns an account's total balance in USD (scaled by 1e18).
      * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
-     * @param currencyCode The currency code of the balance to be calculated.
      * @param account The account whose balance we are calculating.
      */
-    function balanceOf(string calldata currencyCode, address account) external returns (uint256) {
+    function usdBalanceOf(address account) external returns (uint256) {
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
-        address erc20Contract = _erc20Contracts[currencyCode];
-        require(erc20Contract != address(0), "Invalid currency code.");
-
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
         if (rftTotalSupply == 0) return 0;
         uint256 rftBalance = rariFundToken.balanceOf(account);
-        uint256 totalBalance = this.getTotalBalance(currencyCode);
-        uint256 tokenBalance = rftBalance.mul(totalBalance).div(rftTotalSupply);
-
-        return tokenBalance;
+        uint256 totalUsdBalance = this.getCombinedUsdBalance(currencyCode);
+        uint256 accountUsdBalance = rftBalance.mul(totalUsdBalance).div(rftTotalSupply);
+        return accountUsdBalance;
     }
 
     /**
@@ -227,6 +231,25 @@ contract RariFundManager is Ownable {
         uint256 totalBalance = token.balanceOf(address(this));
         for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++) totalBalance = totalBalance.add(RariFundController.getPoolBalance(_poolsByCurrency[currencyCode][i], erc20Contract));
         for (uint256 i = 0; i < _withdrawalQueues[currencyCode].length; i++) totalBalance = totalBalance.sub(_withdrawalQueues[currencyCode][i].amount);
+
+        return totalBalance;
+    }
+
+    /**
+     * @notice Returns the fund's total balance of all currencies in USD (scaled by 1e18).
+     * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
+     */
+    function getCombinedUsdBalance() public returns (uint256) {
+        uint256 totalBalance = 0;
+
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
+            string currencyCode = _supportedCurrencies[i];
+            ERC20Detailed token = ERC20Detailed(_erc20Contracts[currencyCode]);
+            uint256 tokenDecimals = token.decimals();
+            uint256 balance = getTotalBalance(_supportedCurrencies[i]);
+            uint256 balanceUsd = 18 >= tokenDecimals ? balance.mul(10 ** (18.sub(tokenDecimals))) : balance.div(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+            totalBalance = totalBalance.add(balanceUsd);
+        }
 
         return totalBalance;
     }
@@ -258,15 +281,16 @@ contract RariFundManager is Ownable {
         require(erc20Contract != address(0), "Invalid currency code.");
 
         ERC20Detailed token = ERC20Detailed(erc20Contract);
+        uint256 tokenDecimals = token.decimals();
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
         uint256 rftAmount = 0;
 
         if (rftTotalSupply > 0) {
-            rftAmount = amount.mul(rftTotalSupply).div(this.getTotalBalance(currencyCode));
+            uint256 amountUsd = 18 >= tokenDecimals ? amount.mul(10 ** (18.sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(18)));
+            rftAmount = amountUsd.mul(rftTotalSupply).div(this.getCombinedUsdBalance());
         } else {
             uint256 rftDecimals = rariFundToken.decimals();
-            uint256 tokenDecimals = token.decimals();
             rftAmount = rftDecimals >= tokenDecimals ? amount.mul(10 ** (rftDecimals.sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(rftDecimals)));
         }
 
@@ -289,15 +313,17 @@ contract RariFundManager is Ownable {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
 
-        ERC20 token = ERC20(erc20Contract);
+        ERC20Detailed token = ERC20Detailed(erc20Contract);
+        uint256 tokenDecimals = token.decimals();
         uint256 contractBalance = token.balanceOf(address(this));
 
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
-        uint256 totalBalance = this.getTotalBalance(currencyCode);
-        uint256 rftAmount = amount.mul(rftTotalSupply).div(totalBalance);
+        uint256 totalUsdBalance = this.getCombinedUsdBalance(currencyCode);
+        uint256 amountUsd = 18 >= tokenDecimals ? amount.mul(10 ** (18.sub(tokenDecimals))) : amount.div(10 ** (tokenDecimals.sub(18)));
+        uint256 rftAmount = amount.mul(rftTotalSupply).div(totalUsdBalance);
         require(rftAmount <= rariFundToken.balanceOf(msg.sender), "Your RFT balance is too low for a withdrawal of this amount.");
-        require(amount <= totalBalance, "Fund DAI balance is too low for a withdrawal of this amount.");
+        require(amountUsd <= totalUsdBalance, "Fund balance is too low for a withdrawal of this amount.");
 
         // TODO: Make sure the user must approve the burning of tokens before calling the withdraw function
         rariFundToken.burnFrom(msg.sender, rftAmount);
@@ -412,6 +438,24 @@ contract RariFundManager is Ownable {
         require(RariFundController.withdrawAllFromPool(pool, erc20Contract), "Pool withdrawal failed.");
         return true;
     }
+
+    /**
+     * @dev Fills 0x exchange orders up to a certain amount of input and up to a certain price.
+     * @param orders The limit orders to be filled in ascending order of price.
+     * @param signatures The signatures for the orders.
+     * @param maxInputAmount The maximum amount that we can input (balance of the asset).
+     * @param minMarginalOutputAmount The minumum amount of output for each unit of input (scaled to 1e18) necessary to continue filling orders (i.e., a price ceiling).
+     * @return Boolean indicating success.
+     */
+    function fill0xOrdersUpTo(string calldata inputCurrencyCode, string calldata outputCurrencyCode, LibOrder.Order[] calldata orders, bytes[] calldata signatures, uint256 maxInputAmount, uint256 minMarginalOutputAmount) external onlyRebalancer returns (bool) {
+        require(orders.length > 0, "No orders supplied.");
+        require(maxInputAmount > 0, "Maximum input amount must be greater than 0.");
+        uint256[] filledAmounts = RariFundController.fill0xOrdersUpTo(orders, signatures, maxInputAmount, minMarginalOutputAmount);
+        require(filledInputAmount > 0, "Filling orders via 0x failed.");
+        _netExchanges[inputCurrencyCode].add(filledAmounts[0]);
+        _netExchanges[outputCurrencyCode].sub(filledAmounts[1]);
+        return true;
+    }
     
     /**
      * @notice Returns the fund's total investor balance (combined balance of all users of the fund; unlike getRawTotalBalance, excludes unclaimed interest fees) of the specified currency.
@@ -426,6 +470,12 @@ contract RariFundManager is Ownable {
      * On deposit, amount deposited is added to _netDeposits[currencyCode]; on withdrawal, amount withdrawn is subtracted from _netDeposits[currencyCode].
      */
     mapping(string => uint256) private _netDeposits;
+
+    /**
+     * @dev Maps the net quantity of exchanges (i.e., sold - bought) to each currency code.
+     * On exchange to another currency, amount exchanged is added to _netExchanges[currencyCode]; on exchange from another currency, amount exchanged is subtracted from _netExchanges[currencyCode].
+     */
+    mapping(string => uint256) private _netExchanges;
     
     /**
      * @notice Returns the raw total amount of interest accrued (including the fees paid on interest).
@@ -440,7 +490,7 @@ contract RariFundManager is Ownable {
      * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getInterestAccrued(string memory currencyCode) public returns (uint256) {
-        return getTotalBalance(currencyCode).sub(_netDeposits[currencyCode]);
+        return getTotalBalance(currencyCode).sub(_netDeposits[currencyCode]).add(_netExchanges[currencyCode]);
     }
 
     /**

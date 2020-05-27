@@ -9,7 +9,7 @@
  *
  * @section DESCRIPTION
  *
- * This file includes the Ethereum contract code for RariFundController, our library handling deposits to and withdrawals from the liquidity pools that power RariFund.
+ * This file includes the Ethereum contract code for RariFundController, our library handling deposits to and withdrawals from the liquidity pools that power RariFund as well as currency exchanges via 0x.
  */
 
 pragma solidity ^0.5.7;
@@ -19,10 +19,11 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 
 import "./pools/DydxPoolController.sol";
 import "./pools/CompoundPoolController.sol";
+import "./exchanges/ZeroExExchangeController.sol";
 
 /**
  * @title RariFundController
- * @dev This library handles deposits to and withdrawals from the liquidity pools that power RariFund.
+ * @dev This library handles deposits to and withdrawals from the liquidity pools that power RariFund as well as currency exchanges via 0x.
  */
 library RariFundController {
     using SafeMath for uint256;
@@ -90,6 +91,19 @@ library RariFundController {
         if (pool == 0) require(DydxPoolController.withdrawAll(erc20Contract), "Withdrawal from dYdX failed.");
         else if (pool == 1) require(CompoundPoolController.withdrawAll(erc20Contract), "Withdrawal from Compound failed.");
         else revert("Invalid pool index.");
+        return true;
+    }
+
+    /**
+     * @dev Fills 0x exchange orders up to a certain amount of input and up to a certain price.
+     * @param orders The limit orders to be filled in ascending order of price.
+     * @param signatures The signatures for the orders.
+     * @param maxInputAmount The maximum amount that we can input (balance of the asset).
+     * @param minMarginalOutputAmount The minumum amount of output for each unit of input (scaled to 1e18) necessary to continue filling orders (i.e., a price ceiling).
+     * @return Boolean indicating success.
+     */
+    function fill0xOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 memory maxInputAmount, uint256 memory minMarginalOutputAmount) internal returns (bool) {
+        require(ZeroExExchangeController.fillOrdersUpTo(orders, signatures, maxInputAmount, minMarginalOutputAmount), "Filling orders via 0x failed.");
         return true;
     }
 }
