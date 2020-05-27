@@ -521,6 +521,25 @@ contract RariFundManager is Ownable {
     }
 
     /**
+     * @notice Returns the amount of interest accrued by investors across all currencies in USD (scaled by 1e18).
+     * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
+     */
+    function getCombinedUsdInterestAccrued() public returns (uint256) {
+        uint256 totalInterest = 0;
+
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
+            string currencyCode = _supportedCurrencies[i];
+            ERC20Detailed token = ERC20Detailed(_erc20Contracts[currencyCode]);
+            uint256 tokenDecimals = token.decimals();
+            uint256 interest = getInterestAccrued(_supportedCurrencies[i]);
+            uint256 interestUsd = 18 >= tokenDecimals ? interest.mul(10 ** (18.sub(tokenDecimals))) : interest.div(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+            totalInterest = totalInterest.add(interestUsd);
+        }
+
+        return totalInterest;
+    }
+
+    /**
      * @dev The proportion of interest accrued that is taken as a service fee (scaled by 1e18).
      */
     uint256 private _interestFeeRate;
