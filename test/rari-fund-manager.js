@@ -118,7 +118,7 @@ contract("RariFundManager v0.3.0", async accounts => {
         await fundManagerInstance.depositToPool(i, pools[i][j], 1, { from: accounts[0] });
 
         // Check new pool balance
-        var newBalanceOfUnderlying = await cErc20Contract.methods.balanceOfUnderlying.call(RariFundManager.address);
+        var newBalanceOfUnderlying = await cErc20Contract.methods.balanceOfUnderlying(RariFundManager.address).call();
         assert.equal(oldBalanceOfUnderlying.valueOf() + 1, newBalanceOfUnderlying.valueOf())
       }
   });
@@ -134,14 +134,14 @@ contract("RariFundManager v0.3.0", async accounts => {
       for (var j = 0; i < pools[i].length; j++) {
         // Check initial pool balance
         var cErc20Contract = new this.web3.eth.Contract(cErc20DelegatorAbi, cErc20Contracts[pools[i][j]]);
-        var oldBalanceOfUnderlying = await cErc20Contract.methods.balanceOfUnderlying.call(RariFundManager.address);
+        var oldBalanceOfUnderlying = await cErc20Contract.methods.balanceOfUnderlying(RariFundManager.address).call();
 
         // RariFundManager.withdrawFromPool
         // TODO: Ideally, we add actually call rari-fund-rebalancer
         await fundManagerInstance.withdrawFromPool(i, pools[i][j], oldBalanceOfUnderlying, { from: accounts[0] });
 
         // Check new pool balance
-        var newBalanceOfUnderlying = await cErc20Contract.methods.balanceOfUnderlying.call(RariFundManager.address);
+        var newBalanceOfUnderlying = await cErc20Contract.methods.balanceOfUnderlying(RariFundManager.address).call();
         assert.equal(newBalanceOfUnderlying.valueOf(), 0);
       }
   });
@@ -162,7 +162,7 @@ contract("RariFundManager v0.3.0", async accounts => {
         await fundManagerInstance.withdrawAllFromPool(i, pools[i][j], { from: accounts[0] });
 
         // Check new pool balance
-        var newBalanceOfUnderlying = await cErc20Contract.methods.balanceOfUnderlying.call(RariFundManager.address);
+        var newBalanceOfUnderlying = await cErc20Contract.methods.balanceOfUnderlying(RariFundManager.address).call();
         assert.equal(newBalanceOfUnderlying.valueOf(), 0);
       }
   });
@@ -178,16 +178,16 @@ contract("RariFundManager v0.3.0", async accounts => {
       // Check source and destination wallet balances
       var inputErc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCombinations[0]]);
       var outputErc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCombinations[1]]);
-      let oldInputBalance = inputErc20Contract.balanceOf.call(RariFundManager.address);
-      let oldOutputBalance = outputErc20Contract.balanceOf.call(RariFundManager.address);
+      let oldInputBalance = inputErc20Contract.balanceOf(RariFundManager.address).call();
+      let oldOutputBalance = outputErc20Contract.balanceOf(RariFundManager.address).call();
 
       // TODO: RariFundManager.fill0xOrdersUpTo (either we call it directly, or, ideally, we add actually call rari-fund-rebalancer)
 
       // Check source and destination wallet balances
-      let newInputBalance = inputErc20Contract.balanceOf.call(RariFundManager.address);
-      let newOutputBalance = outputErc20Contract.balanceOf.call(RariFundManager.address);
-      assert.equal(newInputBalance.toNumber(), 0);
-      assert.atLeast(newOutputBalance.toNumber(), oldOutputBalance.toNumber() + (oldInputBalance.toNumber() * minMarginalOutputAmount));
+      let newInputBalance = inputErc20Contract.balanceOf(RariFundManager.address).call();
+      let newOutputBalance = outputErc20Contract.balanceOf(RariFundManager.address).call();
+      assert.equal(newInputBalance, 0);
+      assert.atLeast(newOutputBalance, oldOutputBalance + (oldInputBalance * minMarginalOutputAmount));
     }
   });
 
@@ -219,14 +219,14 @@ contract("RariFundManager v0.3.0", async accounts => {
 
         // Check initial balance
         var erc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCode]);
-        let myOldBalance = erc20Contract.balanceOf.call(accounts[0]);
+        let myOldBalance = erc20Contract.balanceOf(accounts[0]).call();
 
         // claimFees(string currencyCode, address beneficiary)
         fundManagerInstance.claimFees(currencyCode, accounts[0]);
 
         // Check that we claimed fees
-        let myNewBalance = erc20Contract.balanceOf.call(accounts[0]);
-        assert.greater(myNewBalance.toNumber(), myOldBalance.toNumber());
+        let myNewBalance = erc20Contract.balanceOf(accounts[0]).call();
+        assert.greater(myNewBalance, myOldBalance);
       }
     }, 5 * 60 * 1000);
   });
@@ -257,14 +257,14 @@ contract("RariFundManager v0.3.0", async accounts => {
 
         // Check initial balance
         var erc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCode]);
-        let myOldBalance = erc20Contract.balanceOf.call(accounts[0]);
+        let myOldBalance = erc20Contract.balanceOf(accounts[0]).call();
 
         // claimFees(string currencyCode, address beneficiary)
         fundManagerInstance.claimFees(currencyCode, accounts[0]);
 
         // Check that we claimed fees
-        let myNewBalance = erc20Contract.balanceOf.call(accounts[0]);
-        assert.greater(myNewBalance.toNumber(), myOldBalance.toNumber());
+        let myNewBalance = erc20Contract.balanceOf(accounts[0]).call();
+        assert.greater(myNewBalance, myOldBalance);
       }
     }, 5 * 60 * 1000);
   });
@@ -295,13 +295,13 @@ contract("RariFundManager v0.3.0", async accounts => {
 
         // Check initial balance
         var erc20Contract = new this.web3.eth.Contract(erc20Abi, erc20Contracts[currencyCode]);
-        let myOldBalance = erc20Contract.balanceOf.call(accounts[0]);
+        let myOldBalance = erc20Contract.balanceOf(accounts[0]).call();
 
         // claimFees(string currencyCode, address beneficiary)
         fundManagerInstance.claimFees(currencyCode, accounts[0]);
 
         // Check that we claimed fees
-        let myNewBalance = erc20Contract.balanceOf.call(accounts[0]);
+        let myNewBalance = erc20Contract.balanceOf(accounts[0]).call();
         assert.greater(myNewBalance.toNumber(), myOldBalance.toNumber());
       }
     }, 5 * 60 * 1000);
