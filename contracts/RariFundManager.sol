@@ -276,6 +276,7 @@ contract RariFundManager is Ownable {
      * @return Boolean indicating success.
      */
     function deposit(string calldata currencyCode, uint256 amount) external returns (bool) {
+        require(!_fundDisabled, "Deposits to and withdrawals from the fund are currently disabled.");
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
@@ -309,6 +310,7 @@ contract RariFundManager is Ownable {
      * @return Boolean indicating success.
      */
     function withdraw(string calldata currencyCode, uint256 amount) external returns (bool) {
+        require(!_fundDisabled, "Deposits to and withdrawals from the fund are currently disabled.");
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
@@ -582,7 +584,7 @@ contract RariFundManager is Ownable {
      * @param beneficiary The recipient of the fees.
      * @param shareProportion The proportion of interest fees that will be shared/awarded to the beneficiary (scaled by 1e18).
      */
-    function updateInterestFeeShare(address beneficiary, uint256 shareProportion) external onlyOwner {
+    function setInterestFeeShare(address beneficiary, uint256 shareProportion) external onlyOwner {
         require(shareProportion >= 0, "Share proportion cannot be negative.");
         require(shareProportion != _interestFeeShares[beneficiary].shareProportion, "This share proportion is already set for this beneficary.");
 
@@ -672,7 +674,7 @@ contract RariFundManager is Ownable {
         require(feesToClaim > 0, "No new fees are available for this beneficiary to claim.");
         _interestFeesClaimed[currencyCode] = _interestFeesClaimed[currencyCode].add(feesToClaim);
         if (_interestFeeShares[beneficiary].shareProportion > 0) _interestFeeShares[beneficiary].feesClaimedSinceShareLastChanged[currencyCode] = _interestFeeShares[beneficiary].feesClaimedSinceShareLastChanged[currencyCode].add(sharedFeesToClaim);        
-        require(ERC20(erc20Contract).transfer(beneficiary, feesToClaim));
+        require(ERC20(erc20Contract).transfer(beneficiary, feesToClaim), "Failed to transfer fees to beneficiary.");
         emit InterestFeesClaimed(currencyCode, beneficiary, feesToClaim);
         return true;
     }
