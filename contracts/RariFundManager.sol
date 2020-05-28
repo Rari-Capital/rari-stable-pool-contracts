@@ -588,6 +588,7 @@ contract RariFundManager is Ownable {
 
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
+            this.claimFees(_interestFeeMasterBeneficiary);
             for (uint256 j = 0; j < _interestFeeShareBeneficiaries.length; j++) this.claimFees(currencyCode, _interestFeeShareBeneficiaries[j]);
             _interestFeesGeneratedAtLastFeeRateChange[currencyCode] = getInterestFeesGenerated(currencyCode); // MUST update this first before updating _rawInterestAccruedAtLastFeeRateChange since it depends on it 
             _rawInterestAccruedAtLastFeeRateChange[currencyCode] = getRawInterestAccrued(currencyCode);
