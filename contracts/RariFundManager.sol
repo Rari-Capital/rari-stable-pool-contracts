@@ -588,8 +588,7 @@ contract RariFundManager is Ownable {
 
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
-            this.claimFees(_interestFeeMasterBeneficiary);
-            for (uint256 j = 0; j < _interestFeeShareBeneficiaries.length; j++) this.claimFees(currencyCode, _interestFeeShareBeneficiaries[j]);
+            this.claimFees(currencyCode);
             _interestFeesGeneratedAtLastFeeRateChange[currencyCode] = getInterestFeesGenerated(currencyCode); // MUST update this first before updating _rawInterestAccruedAtLastFeeRateChange since it depends on it 
             _rawInterestAccruedAtLastFeeRateChange[currencyCode] = getRawInterestAccrued(currencyCode);
         }
@@ -638,82 +637,6 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Struct for an active share of interest fees.
-     */
-    struct InterestFeeShare { 
-        uint256 shareProportion; // Proportion of interest fees shared/awarded to a beneficiary (scaled by 1e18); value of interest fees awarded = shareProportion * (getInterestFeesGenerated() - feesGeneratedWhenShareLastChanged)
-        mapping(string => uint256) feesClaimedSinceShareLastChanged; // Claimed amount of fees on interest since share was created
-        mapping(string => uint256) feesGeneratedWhenShareLastChanged; // getInterestFeesGenerated() at the time of creation of each share
-    }
-
-    /**
-     * @dev Array of beneficiaries with active shares of interest fees.
-     */
-    address[] private _interestFeeShareBeneficiaries;
-
-    /**
-     * @dev Mapping of active shares of interest fees to beneficiaries.
-     */
-    mapping(address => InterestFeeShare) private _interestFeeShares;
-
-    /**
-     * @dev Emitted when an interest fee share is updated.
-     */
-    event InterestFeeShareUpdated(address beneficiary, uint256 shareProportion);
-
-    /**
-     * @dev Updates _interestFeeShareBeneficiaries and _interestFeeShares, running claimFees and resetting feesClaimedSinceShareLastChanged and feesGeneratedWhenShareLastChanged when changing a share proportion.
-     * @param beneficiary The recipient of the fees.
-     * @param shareProportion The proportion of interest fees that will be shared/awarded to the beneficiary (scaled by 1e18).
-     */
-    function setInterestFeeShare(address beneficiary, uint256 shareProportion) external onlyOwner {
-        require(shareProportion >= 0, "Share proportion cannot be negative.");
-        require(shareProportion != _interestFeeShares[beneficiary].shareProportion, "This share proportion is already set for this beneficary.");
-
-        // If beneficiary has existing share proportion, claim their unclaimed fees and, if we are removing them, update the array; otherwise, add them to the array
-        if (_interestFeeShares[beneficiary].shareProportion > 0) {
-            for (uint256 i = 0; i < _supportedCurrencies.length; i++) this.claimFees(_supportedCurrencies[i], beneficiary);
-
-            if (shareProportion == 0) {
-                // Get index of beneficiary
-                for (uint256 i = 0; i < _interestFeeShareBeneficiaries.length; i++) if (_interestFeeShareBeneficiaries[i] == beneficiary) {
-                    // Remove beneficiary
-                    for (uint256 j = i; j < _interestFeeShareBeneficiaries.length - 1; j++) _interestFeeShareBeneficiaries[j] = _interestFeeShareBeneficiaries[j + 1];
-                    _interestFeeShareBeneficiaries.length--;
-                }
-            }
-        } else _interestFeeShareBeneficiaries.push(beneficiary);
-
-        // Set data in storage and emit event
-        _interestFeeShares[beneficiary] = InterestFeeShare(shareProportion);
-        for (uint256 i = 0; i < _supportedCurrencies.length; i++) _interestFeeShares[beneficiary].feesGeneratedWhenShareLastChanged[_supportedCurrencies[i]] = getInterestFeesGenerated(_supportedCurrencies[i]);
-        emit InterestFeeShareUpdated(beneficiary, shareProportion);
-    }
-
-    /**
-     * @dev Returns the total unclaimed amount of shared interest fees.
-     * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
-     * @param currencyCode The currency code of the unclaimed interest fees to be calculated.
-     */
-    function getSharedInterestFeesUnclaimed(string memory currencyCode) internal returns (uint256) {
-        uint256 sharedInterestFeesUnclaimed = 0;
-        for (uint256 i = 0; i < _interestFeeShareBeneficiaries.length; i++) sharedInterestFeesUnclaimed = sharedInterestFeesUnclaimed.add(getBeneficiarySharedInterestFeesUnclaimed(currencyCode, _interestFeeShareBeneficiaries[i]));
-        return sharedInterestFeesUnclaimed;
-    }
-
-    /**
-     * @dev Returns the unclaimed amount of shared interest fees belonging to a given beneficiary.
-     * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
-     * @param currencyCode The currency code of the unclaimed interest fees to be calculated.
-     * @param beneficiary The recipient of the fees.
-     */
-    function getBeneficiarySharedInterestFeesUnclaimed(string memory currencyCode, address beneficiary) internal returns (uint256) {
-        if (_interestFeeShares[beneficiary].shareProportion == 0) return 0;
-        uint256 feesAwarded = getInterestFeesGenerated(currencyCode).sub(_interestFeeShares[beneficiary].feesGeneratedWhenShareLastChanged[currencyCode]).mul(_interestFeeShares[beneficiary].shareProportion).div(1e18);
-        return feesAwarded.sub(_interestFeeShares[beneficiary].feesClaimedSinceShareLastChanged[currencyCode]);
-    }
-
-    /**
      * @dev The master beneficiary of fees on interest; i.e., the recipient of all unshared fees on interest.
      */
     address private _interestFeeMasterBeneficiary;
@@ -728,37 +651,24 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Returns the unclaimed amount of unshared interest fees (i.e., those belonging to the master beneficiary).
-     * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
-     * @param currencyCode The currency code of the unclaimed interest fees to be calculated.
-     */
-    function getUnsharedInterestFeesUnclaimed(string memory currencyCode) internal returns (uint256) {
-        return getInterestFeesUnclaimed(currencyCode).sub(getSharedInterestFeesUnclaimed(currencyCode));
-    }
-
-    /**
      * @dev Emitted when fees on interest are withdrawn.
      */
     event InterestFeesClaimed(string currencyCode, address beneficiary, uint256 amount);
 
     /**
-     * @dev Withdraws all accrued fees on interest to a valid beneficiary.
+     * @dev Withdraws all accrued fees on interest to the master beneficiary.
      * @param currencyCode The currency code of the interest fees to be claimed.
-     * @param beneficiary The recipient of the fees.
      * @return Boolean indicating success.
      */
-    function claimFees(string calldata currencyCode, address beneficiary) external returns (bool) {
+    function claimFees(string calldata currencyCode) external returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        require(beneficiary != address(0), "Beneficiary cannot be the zero address.");
-        uint256 sharedFeesToClaim = getBeneficiarySharedInterestFeesUnclaimed(currencyCode, beneficiary);
-        uint256 masterBeneficiaryInterestFeesUnclaimed = beneficiary == _interestFeeMasterBeneficiary ? getUnsharedInterestFeesUnclaimed(currencyCode) : 0;
-        uint256 feesToClaim = sharedFeesToClaim.add(masterBeneficiaryInterestFeesUnclaimed);
-        require(feesToClaim > 0, "No new fees are available for this beneficiary to claim.");
+        require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
+        uint256 feesToClaim = getInterestFeesUnclaimed(currencyCode);
+        require(feesToClaim > 0, "No new fees are available to claim.");
         _interestFeesClaimed[currencyCode] = _interestFeesClaimed[currencyCode].add(feesToClaim);
-        if (_interestFeeShares[beneficiary].shareProportion > 0) _interestFeeShares[beneficiary].feesClaimedSinceShareLastChanged[currencyCode] = _interestFeeShares[beneficiary].feesClaimedSinceShareLastChanged[currencyCode].add(sharedFeesToClaim);        
-        require(ERC20(erc20Contract).transfer(beneficiary, feesToClaim), "Failed to transfer fees to beneficiary.");
-        emit InterestFeesClaimed(currencyCode, beneficiary, feesToClaim);
+        require(ERC20(erc20Contract).transfer(_interestFeeMasterBeneficiary, feesToClaim), "Failed to transfer fees to beneficiary.");
+        emit InterestFeesClaimed(currencyCode, _interestFeeMasterBeneficiary, feesToClaim);
         return true;
     }
 }
