@@ -4,6 +4,19 @@ const RariFundToken = artifacts.require("RariFundToken");
 const erc20Abi = require('./abi/ERC20.json');
 
 contract("RariFundManager v0.3.0", async accounts => {
+  it("should upgrade the fund owner", async () => {
+    let fundManagerInstance = await RariFundManager.deployed();
+
+    // RariFundManager.transferOwnership()
+    await fundManagerInstance.transferOwnership(accounts[1], { from: accounts[0] });
+
+    // RariFundManager.disableFund()
+    await fundManagerInstance.disableFund({ from: accounts[1] });
+
+    // RariFundManager.enableFund()
+    await fundManagerInstance.enableFund({ from: accounts[1] });
+  });
+
   it("should disable and re-enable the fund", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
 
