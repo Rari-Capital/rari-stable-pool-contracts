@@ -96,6 +96,7 @@ library RariFundController {
 
     /**
      * @dev Fills 0x exchange orders up to a certain amount of input and up to a certain price.
+     * We should be able to make this function external and use calldata for all parameters, but Solidity does not support calldata structs (https://github.com/ethereum/solidity/issues/5479).
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
      * @param maxInputAmount The maximum amount that we can input (balance of the asset).
