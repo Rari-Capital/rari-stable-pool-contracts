@@ -408,7 +408,7 @@ contract RariFundManager is Ownable {
         if (total > balanceHere) revert("Not enough balance to process pending withdrawals.");
 
         for (uint256 i = 0; i < _withdrawalQueues[currencyCode].length; i++) {
-            require(token.transfer(_withdrawalQueues[currencyCode][i].payee, _withdrawalQueues[currencyCode][i].amount));
+            require(token.transfer(_withdrawalQueues[currencyCode][i].payee, _withdrawalQueues[currencyCode][i].amount), "Failed to transfer tokens.");
             emit Withdrawal(currencyCode, _withdrawalQueues[currencyCode][i].payee, _withdrawalQueues[currencyCode][i].amount);
         }
 
