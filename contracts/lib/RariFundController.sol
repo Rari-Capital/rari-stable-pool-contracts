@@ -33,7 +33,7 @@ library RariFundController {
      * @param pool The name of the pool.
      * @param erc20Contract The ERC20 contract of the token.
      */
-    function getPoolBalance(uint8 pool, address erc20Contract) internal returns (uint256) {
+    function getPoolBalance(uint8 pool, address erc20Contract) external returns (uint256) {
         if (pool == 0) return DydxPoolController.getBalance(erc20Contract);
         else if (pool == 1) return CompoundPoolController.getBalance(erc20Contract);
         else revert("Invalid pool index.");
@@ -46,7 +46,7 @@ library RariFundController {
      * @param amount The amount of tokens to be approved.
      * @return Boolean indicating success.
      */
-    function approveToPool(uint8 pool, address erc20Contract, uint256 amount) internal returns (bool) {
+    function approveToPool(uint8 pool, address erc20Contract, uint256 amount) external returns (bool) {
         if (pool == 0) require(DydxPoolController.approve(erc20Contract, amount), "Approval of tokens to dYdX failed.");
         else if (pool == 1) require(CompoundPoolController.approve(erc20Contract, amount), "Approval of tokens to Compound failed.");
         else revert("Invalid pool index.");
@@ -60,7 +60,7 @@ library RariFundController {
      * @param amount The amount of tokens to be deposited.
      * @return Boolean indicating success.
      */
-    function depositToPool(uint8 pool, address erc20Contract, uint256 amount) internal returns (bool) {
+    function depositToPool(uint8 pool, address erc20Contract, uint256 amount) external returns (bool) {
         if (pool == 0) require(DydxPoolController.deposit(erc20Contract, amount), "Deposit to dYdX failed.");
         else if (pool == 1) require(CompoundPoolController.deposit(erc20Contract, amount), "Deposit to Compound failed.");
         else revert("Invalid pool index.");
@@ -74,7 +74,7 @@ library RariFundController {
      * @param amount The amount of tokens to be withdrawn.
      * @return Boolean indicating success.
      */
-    function withdrawFromPool(uint8 pool, address erc20Contract, uint256 amount) internal returns (bool) {
+    function withdrawFromPool(uint8 pool, address erc20Contract, uint256 amount) external returns (bool) {
         if (pool == 0) require(DydxPoolController.withdraw(erc20Contract, amount), "Withdrawal from dYdX failed.");
         else if (pool == 1) require(CompoundPoolController.withdraw(erc20Contract, amount), "Withdrawal from Compound failed.");
         else revert("Invalid pool index.");
@@ -87,7 +87,7 @@ library RariFundController {
      * @param erc20Contract The ERC20 contract of the token to be withdrawn.
      * @return Boolean indicating success.
      */
-    function withdrawAllFromPool(uint8 pool, address erc20Contract) internal returns (bool) {
+    function withdrawAllFromPool(uint8 pool, address erc20Contract) external returns (bool) {
         if (pool == 0) require(DydxPoolController.withdrawAll(erc20Contract), "Withdrawal from dYdX failed.");
         else if (pool == 1) require(CompoundPoolController.withdrawAll(erc20Contract), "Withdrawal from Compound failed.");
         else revert("Invalid pool index.");
@@ -102,7 +102,7 @@ library RariFundController {
      * @param minMarginalOutputAmount The minumum amount of output for each unit of input (scaled to 1e18) necessary to continue filling orders (i.e., a price ceiling).
      * @return Array containing the input amount sold and output amount bought.
      */
-    function fill0xOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 maxInputAmount, uint256 minMarginalOutputAmount) internal returns (uint256[2] memory) {
+    function fill0xOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 maxInputAmount, uint256 minMarginalOutputAmount) public returns (uint256[2] memory) {
         return ZeroExExchangeController.fillOrdersUpTo(orders, signatures, maxInputAmount, minMarginalOutputAmount);
     }
 }
