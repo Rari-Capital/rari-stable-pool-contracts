@@ -4,12 +4,19 @@ module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
   // for more about customizing your Truffle configuration!
   networks: {
-    live: {
+    development: {
       provider: function() {
-        return new HDWalletProvider("C721ABE244F3C55B3CA8F7395F3D1EFE97ED8BED200C235DC2F3FCD9873ACCE3", "https://mainnet.infura.io/v3/c52a3970da0a47978bee0fe7988b67b6")
+        return new HDWalletProvider(["DFC9C0CFB07304FAF3F356DF668731F87E58C84A1A56A1D80D680EA29E711E2C", "9103CF74D1C8C6B467051AFA0BDEC59CBE69120ECBF6CEB51E6730820F69B9E3"], "http://localhost:8546");
       },
       network_id: 1,
-      gasPrice: 2 * (10 ** 9)
+      gasPrice: 1 * (10 ** 9)
+    },
+    live: {
+      provider: function() {
+        return new HDWalletProvider(["DFC9C0CFB07304FAF3F356DF668731F87E58C84A1A56A1D80D680EA29E711E2C", "9103CF74D1C8C6B467051AFA0BDEC59CBE69120ECBF6CEB51E6730820F69B9E3"], "https://mainnet.infura.io/v3/c52a3970da0a47978bee0fe7988b67b6");
+      },
+      network_id: 1,
+      gasPrice: 1 * (10 ** 9)
     }
   },
   compilers: {

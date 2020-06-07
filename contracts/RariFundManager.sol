@@ -16,6 +16,7 @@ pragma solidity ^0.5.7;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/drafts/SignedSafeMath.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
@@ -31,6 +32,7 @@ import "./RariFundToken.sol";
  */
 contract RariFundManager is Ownable {
     using SafeMath for uint256;
+    using SignedSafeMath for int256;
 
     /**
      * @dev Boolean that, if true, disables deposits to and withdrawals from this RariFundManager.
@@ -113,11 +115,6 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Fallback function to receive ETH to be used for gas fees.
-     */
-    function() external payable { }
-
-    /**
      * @dev Emitted when RariFundManager is upgraded.
      */
     event FundManagerUpgraded(address newContract);
@@ -134,9 +131,23 @@ contract RariFundManager is Ownable {
 
     /**
      * @dev Upgrades RariFundManager.
+     * Passes data to the new contract, sets the new RariFundToken minter, and forwards tokens from the old to the new.
      * @param newContract The address of the new RariFundManager contract.
      */
-    function upgradeFundManager(address payable newContract) external onlyOwner {
+    function upgradeFundManager(address newContract) external onlyOwner {
+        // Pass data to the new contract
+        FundManagerData[] memory data = new FundManagerData[](_supportedCurrencies.length);
+
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) data[i] = FundManagerData(
+            _netDeposits[_supportedCurrencies[i]],
+            _netExchanges[_supportedCurrencies[i]],
+            _rawInterestAccruedAtLastFeeRateChange[_supportedCurrencies[i]],
+            _interestFeesGeneratedAtLastFeeRateChange[_supportedCurrencies[i]],
+            _interestFeesClaimed[_supportedCurrencies[i]]
+        );
+
+        RariFundManager(newContract).setFundManagerData(_supportedCurrencies, data);
+
         // Update RariFundToken minter
         if (_rariFundTokenContract != address(0)) {
             RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
@@ -144,7 +155,7 @@ contract RariFundManager is Ownable {
             rariFundToken.renounceMinter();
         }
 
-        // Withdraw all tokens from all pools and transfers them to new FundManager
+        // Withdraw all tokens from all pools, process pending withdrawals, and transfer them to new FundManager
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
 
@@ -152,15 +163,59 @@ contract RariFundManager is Ownable {
                 if (RariFundController.getPoolBalance(_poolsByCurrency[currencyCode][j], _erc20Contracts[currencyCode]) > 0)
                     RariFundController.withdrawAllFromPool(_poolsByCurrency[currencyCode][j], _erc20Contracts[currencyCode]);
 
+            processPendingWithdrawals(_supportedCurrencies[i]);
+
             ERC20 token = ERC20(_erc20Contracts[currencyCode]);
             uint256 balance = token.balanceOf(address(this));
             if (balance > 0) require(token.transfer(newContract, balance), "Failed to transfer tokens to new FundManager.");
         }
 
-        // Forward ETH to new FundManager
-        newContract.transfer(address(this).balance);
-
         emit FundManagerUpgraded(newContract);
+    }
+
+    /**
+     * @dev Old fund manager contract authorized to migrate its data to the new one.
+     */
+    address private _authorizedFundManagerDataSource;
+
+    /**
+     * @dev Upgrades RariFundManager.
+     * Authorizes the source for fund manager data (i.e., the old fund manager).
+     * @param authorizedFundManagerDataSource Authorized source for data (i.e., the old fund manager).
+     */
+    function authorizeFundManagerDataSource(address authorizedFundManagerDataSource) external onlyOwner {
+        _authorizedFundManagerDataSource = authorizedFundManagerDataSource;
+    }
+
+    /**
+     * @dev Struct for a pending withdrawal.
+     */
+    struct FundManagerData {
+        int256 netExchanges;
+        int256 netDeposits;
+        uint256 rawInterestAccruedAtLastFeeRateChange;
+        uint256 interestFeesGeneratedAtLastFeeRateChange;
+        uint256 interestFeesClaimed;
+    }
+
+    /**
+     * @dev Upgrades RariFundManager.
+     * Receives data from the old contract.
+     * @param supportedCurrencies To initialize all variables below.
+     * @param data Array of data by currency.
+     */
+    function setFundManagerData(string[] calldata supportedCurrencies, FundManagerData[] calldata data) external {
+        require(_authorizedFundManagerDataSource != address(0) && msg.sender == _authorizedFundManagerDataSource, "Caller is not an authorized source.");
+        require(supportedCurrencies.length > 0, "Array of supported currencies not supplied.");
+        require(supportedCurrencies.length == data.length, "Mismatch between length of supported currencies and data array.");
+        
+        for (uint256 i = 0; i < supportedCurrencies.length; i++) {
+            _netDeposits[supportedCurrencies[i]] = data[i].netDeposits;
+            _netExchanges[supportedCurrencies[i]] = data[i].netExchanges;
+            _rawInterestAccruedAtLastFeeRateChange[supportedCurrencies[i]] = data[i].rawInterestAccruedAtLastFeeRateChange;
+            _interestFeesGeneratedAtLastFeeRateChange[supportedCurrencies[i]] = data[i].interestFeesGeneratedAtLastFeeRateChange;
+            _interestFeesClaimed[supportedCurrencies[i]] = data[i].interestFeesClaimed;
+        }
     }
 
     /**
@@ -300,7 +355,7 @@ contract RariFundManager is Ownable {
      * @param currencyCode The currency code to mark as accepted or not accepted.
      * @param accepted A boolean indicating if the `currencyCode` is to be accepted.
      */
-    function setAcceptedCurrency(string calldata currencyCode, bool accepted) external onlyOwner {
+    function setAcceptedCurrency(string calldata currencyCode, bool accepted) external onlyRebalancer {
         _acceptedCurrencies[currencyCode] = accepted;
     }
 
@@ -347,7 +402,7 @@ contract RariFundManager is Ownable {
 
         // Make sure the user must approve the transfer of tokens before calling the deposit function
         require(token.transferFrom(msg.sender, address(this), amount), "Failed to transfer input tokens.");
-        _netDeposits[currencyCode] = _netDeposits[currencyCode].add(amount);
+        _netDeposits[currencyCode] = _netDeposits[currencyCode].add(int256(amount));
         require(rariFundToken.mint(msg.sender, rftAmount), "Failed to mint output tokens.");
         emit Deposit(currencyCode, msg.sender, amount);
         return true;
@@ -380,7 +435,7 @@ contract RariFundManager is Ownable {
 
         // Make sure the user must approve the burning of tokens before calling the withdraw function
         rariFundToken.burnFrom(msg.sender, rftAmount);
-        _netDeposits[currencyCode] = _netDeposits[currencyCode].sub(amount);
+        _netDeposits[currencyCode] = _netDeposits[currencyCode].sub(int256(amount));
 
         if (amount <= contractBalance) {
             require(token.transfer(msg.sender, amount), "Failed to transfer output tokens.");
@@ -398,7 +453,7 @@ contract RariFundManager is Ownable {
      * @param currencyCode The currency code of the token for which to process pending withdrawals.
      * @return Boolean indicating success.
      */
-    function processPendingWithdrawals(string calldata currencyCode) external returns (bool) {
+    function processPendingWithdrawals(string memory currencyCode) public returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         ERC20 token = ERC20(erc20Contract);
@@ -498,21 +553,33 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Fills 0x exchange orders up to a certain amount of input and up to a certain price.
-     * We should be able to make this function external and use calldata for all parameters, but Solidity does not support calldata structs (https://github.com/ethereum/solidity/issues/5479).
-     * @param orders The limit orders to be filled in ascending order of price.
-     * @param signatures The signatures for the orders.
-     * @param maxInputAmount The maximum amount that we can input (balance of the asset).
-     * @param minMarginalOutputAmount The minumum amount of output for each unit of input (scaled to 1e18) necessary to continue filling orders (i.e., a price ceiling).
+     * @dev Approves tokens to 0x without spending gas on every deposit.
+     * @param currencyCode The currency code of the token to be approved.
+     * @param amount The amount of tokens to be approved.
      * @return Boolean indicating success.
      */
-    function fill0xOrdersUpTo(string memory inputCurrencyCode, string memory outputCurrencyCode, LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 maxInputAmount, uint256 minMarginalOutputAmount) public onlyRebalancer returns (bool) {
-        require(orders.length > 0, "No orders supplied.");
-        require(maxInputAmount > 0, "Maximum input amount must be greater than 0.");
-        uint256[2] memory filledAmounts = RariFundController.fill0xOrdersUpTo(orders, signatures, maxInputAmount, minMarginalOutputAmount);
+    function approveTo0x(string calldata currencyCode, uint256 amount) external onlyRebalancer returns (bool) {
+        address erc20Contract = _erc20Contracts[currencyCode];
+        require(erc20Contract != address(0), "Invalid currency code.");
+        require(RariFundController.approveTo0x(erc20Contract, amount), "0x approval failed.");
+        return true;
+    }
+
+    /**
+     * @dev Fills 0x exchange orders up to a certain amount of input and up to a certain price.
+     * We should be able to make this function external and use calldata for all parameters, but Solidity does not support calldata structs (https://github.com/ethereum/solidity/issues/5479).
+     * @param inputCurrencyCode The currency code to be sold.
+     * @param outputCurrencyCode The currency code to be bought.
+     * @param orders The limit orders to be filled in ascending order of price.
+     * @param signatures The signatures for the orders.
+     * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
+     * @return Boolean indicating success.
+     */
+    function fill0xOrdersUpTo(string memory inputCurrencyCode, string memory outputCurrencyCode, LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public payable onlyRebalancer returns (bool) {
+        uint256[2] memory filledAmounts = RariFundController.fill0xOrdersUpTo(orders, signatures, takerAssetFillAmount);
         require(filledAmounts[0] > 0, "Filling orders via 0x failed.");
-        _netExchanges[inputCurrencyCode].add(filledAmounts[0]);
-        _netExchanges[outputCurrencyCode].sub(filledAmounts[1]);
+        _netExchanges[inputCurrencyCode] = _netExchanges[inputCurrencyCode].add(int256(filledAmounts[0]));
+        _netExchanges[outputCurrencyCode] = _netExchanges[outputCurrencyCode].sub(int256(filledAmounts[1]));
         return true;
     }
     
@@ -529,13 +596,13 @@ contract RariFundManager is Ownable {
      * @dev Maps the net quantity of deposits (i.e., deposits - withdrawals) to each currency code.
      * On deposit, amount deposited is added to _netDeposits[currencyCode]; on withdrawal, amount withdrawn is subtracted from _netDeposits[currencyCode].
      */
-    mapping(string => uint256) private _netDeposits;
+    mapping(string => int256) private _netDeposits;
 
     /**
      * @dev Maps the net quantity of exchanges (i.e., sold - bought) to each currency code.
      * On exchange to another currency, amount exchanged is added to _netExchanges[currencyCode]; on exchange from another currency, amount exchanged is subtracted from _netExchanges[currencyCode].
      */
-    mapping(string => uint256) private _netExchanges;
+    mapping(string => int256) private _netExchanges;
     
     /**
      * @notice Returns the raw total amount of interest accrued by the fund as a whole (including the fees paid on interest).
@@ -543,7 +610,8 @@ contract RariFundManager is Ownable {
      * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getRawInterestAccrued(string memory currencyCode) public returns (uint256) {
-        return getRawTotalBalance(currencyCode).sub(_netDeposits[currencyCode]).add(_interestFeesClaimed[currencyCode]);
+        int256 rawInterestAccrued = int256(getRawTotalBalance(currencyCode)).sub(_netDeposits[currencyCode]).add(_netExchanges[currencyCode]).add(int256(_interestFeesClaimed[currencyCode]));
+        return rawInterestAccrued > 0 ? uint256(rawInterestAccrued) : 0;
     }
     
     /**
@@ -552,7 +620,8 @@ contract RariFundManager is Ownable {
      * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getInterestAccrued(string memory currencyCode) public returns (uint256) {
-        return getTotalBalance(currencyCode).sub(_netDeposits[currencyCode]).add(_netExchanges[currencyCode]);
+        int256 interestAccrued = int256(getTotalBalance(currencyCode)).sub(_netDeposits[currencyCode]).add(_netExchanges[currencyCode]);
+        return interestAccrued > 0 ? uint256(interestAccrued) : 0;
     }
 
     /**
@@ -588,7 +657,7 @@ contract RariFundManager is Ownable {
 
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
-            this.claimFees(currencyCode);
+            if (getInterestFeesUnclaimed(currencyCode) > 0) this.claimFees(currencyCode);
             _interestFeesGeneratedAtLastFeeRateChange[currencyCode] = getInterestFeesGenerated(currencyCode); // MUST update this first before updating _rawInterestAccruedAtLastFeeRateChange since it depends on it 
             _rawInterestAccruedAtLastFeeRateChange[currencyCode] = getRawInterestAccrued(currencyCode);
         }
@@ -619,7 +688,10 @@ contract RariFundManager is Ownable {
      * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getInterestFeesGenerated(string memory currencyCode) public returns (uint256) {
-        return _interestFeesGeneratedAtLastFeeRateChange[currencyCode].add(getRawInterestAccrued(currencyCode).sub(_rawInterestAccruedAtLastFeeRateChange[currencyCode]).mul(_interestFeeRate).div(1e18));
+        int256 rawInterestAccruedSinceLastFeeRateChange = int256(getRawInterestAccrued(currencyCode)).sub(int256(_rawInterestAccruedAtLastFeeRateChange[currencyCode]));
+        int256 interestFeesGeneratedSinceLastFeeRateChange = rawInterestAccruedSinceLastFeeRateChange.mul(int256(_interestFeeRate)).div(1e18);
+        int256 interestFeesGenerated = int256(_interestFeesGeneratedAtLastFeeRateChange[currencyCode]).add(interestFeesGeneratedSinceLastFeeRateChange);
+        return interestFeesGenerated > 0 ? uint256(interestFeesGenerated) : 0;
     }
 
     /**
@@ -633,7 +705,8 @@ contract RariFundManager is Ownable {
      * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.
      */
     function getInterestFeesUnclaimed(string memory currencyCode) internal returns (uint256) {
-        return getInterestFeesGenerated(currencyCode).sub(_interestFeesClaimed[currencyCode]);
+        int256 interestFeesUnclaimed = int256(getInterestFeesGenerated(currencyCode)).sub(int256(_interestFeesClaimed[currencyCode]));
+        return interestFeesUnclaimed > 0 ? uint256(interestFeesUnclaimed) : 0;
     }
 
     /**

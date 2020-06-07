@@ -16,6 +16,8 @@ pragma solidity ^0.5.7;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 import "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol";
 import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
 import "@0x/contracts-exchange/contracts/src/interfaces/IExchange.sol";
@@ -29,30 +31,31 @@ library ZeroExExchangeController {
 
     address constant private EXCHANGE_CONTRACT = 0x61935CbDd02287B511119DDb11Aeb42F1593b7Ef;
     IExchange constant private _exchange = IExchange(EXCHANGE_CONTRACT);
+    address constant private ERC20_PROXY_CONTRACT = 0x95E6F48254609A6ee006F7D493c8e5fB97094ceF;
+
+    /**
+     * @dev Approves tokens to 0x without spending gas on every deposit.
+     * @param erc20Contract The ERC20 contract address of the token.
+     * @param amount Amount of the specified token to approve to dYdX.
+     * @return Boolean indicating success.
+     */
+    function approve(address erc20Contract, uint256 amount) internal returns (bool) {
+        require(ERC20(erc20Contract).approve(ERC20_PROXY_CONTRACT, amount), "Approval of tokens to 0x failed.");
+        return true;
+    }
 
     /**
      * @dev Fills 0x exchange orders up to a certain amount of input and up to a certain price.
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
-     * @param maxInputAmount The maximum amount that we can input (balance of the asset).
-     * @param minMarginalOutputAmount The minumum amount of output for each unit of input (scaled to 1e18) necessary to continue filling orders (i.e., a price ceiling).
+     * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
      * @return Array containing the input amount sold and output amount bought.
      */
-    function fillOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 maxInputAmount, uint256 minMarginalOutputAmount) internal returns (uint256[2] memory) {
+    function fillOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) internal returns (uint256[2] memory) {
         require(orders.length > 0, "At least one order and matching signature is required.");
         require(orders.length == signatures.length, "Mismatch between number of orders and signatures.");
-
-        uint256 filledInputAmount = 0;
-        uint256 filledOutputAmount = 0;
-
-        for (uint256 i = 0; i < orders.length; i++) {
-            if (orders[i].makerAssetAmount < orders[i].takerAssetAmount.mul(minMarginalOutputAmount).div(1e18)) break;
-            LibFillResults.FillResults memory fillResults = _exchange.fillOrder(orders[i], maxInputAmount.sub(filledInputAmount), signatures[i]);
-            filledInputAmount = filledInputAmount.add(fillResults.takerAssetFilledAmount);
-            filledOutputAmount = filledOutputAmount.add(fillResults.makerAssetFilledAmount);
-            if (filledInputAmount == maxInputAmount) break;
-        }
-
-        return [filledInputAmount, filledOutputAmount];
+        require(takerAssetFillAmount > 0, "Taker asset fill amount must be greater than 0.");
+        LibFillResults.FillResults memory fillResults = _exchange.marketSellOrdersNoThrow.value(msg.value)(orders, takerAssetFillAmount, signatures);
+        return [fillResults.takerAssetFilledAmount, fillResults.makerAssetFilledAmount];
     }
 }

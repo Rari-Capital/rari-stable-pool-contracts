@@ -95,15 +95,25 @@ library RariFundController {
     }
 
     /**
+     * @dev Approves tokens to 0x without spending gas on every deposit.
+     * @param erc20Contract The ERC20 contract of the token to be approved.
+     * @param amount The amount of tokens to be approved.
+     * @return Boolean indicating success.
+     */
+    function approveTo0x(address erc20Contract, uint256 amount) external returns (bool) {
+        require(ZeroExExchangeController.approve(erc20Contract, amount), "Approval of tokens to 0x failed.");
+        return true;
+    }
+
+    /**
      * @dev Fills 0x exchange orders up to a certain amount of input and up to a certain price.
      * We should be able to make this function external and use calldata for all parameters, but Solidity does not support calldata structs (https://github.com/ethereum/solidity/issues/5479).
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
-     * @param maxInputAmount The maximum amount that we can input (balance of the asset).
-     * @param minMarginalOutputAmount The minumum amount of output for each unit of input (scaled to 1e18) necessary to continue filling orders (i.e., a price ceiling).
+     * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
      * @return Array containing the input amount sold and output amount bought.
      */
-    function fill0xOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 maxInputAmount, uint256 minMarginalOutputAmount) public returns (uint256[2] memory) {
-        return ZeroExExchangeController.fillOrdersUpTo(orders, signatures, maxInputAmount, minMarginalOutputAmount);
+    function fill0xOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public returns (uint256[2] memory) {
+        return ZeroExExchangeController.fillOrdersUpTo(orders, signatures, takerAssetFillAmount);
     }
 }

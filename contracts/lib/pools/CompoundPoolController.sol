@@ -38,12 +38,14 @@ library CompoundPoolController {
     }
 
     /**
-     * @dev Returns the calling address's balance of the specified currency in the Compound pool.
+     * @dev Returns the fund's balance of the specified currency in the Compound pool.
+     * We would simply be using balanceOfUnderlying, but exchangeRateCurrent is nonReentrant, which causes us issues
      * @param erc20Contract The ERC20 contract address of the token.
      */
     function getBalance(address erc20Contract) internal returns (uint256) {
-        address cErc20Contract = getCErc20Address(erc20Contract); // TODO: Make sure this reverts if an invalid address is supplied
-        return CErc20(cErc20Contract).balanceOfUnderlying(address(this));
+        CErc20 cErc20 = CErc20(getCErc20Address(erc20Contract));
+        cErc20.accrueInterest();
+        return cErc20.balanceOf(address(this)).mul(cErc20.exchangeRateStored()).div(1e18);
     }
 
     /**
@@ -54,8 +56,7 @@ library CompoundPoolController {
      */
     function approve(address erc20Contract, uint256 amount) internal returns (bool) {
         ERC20 underlying = ERC20(erc20Contract);
-        address cErc20Contract = getCErc20Address(erc20Contract);
-        require(underlying.approve(cErc20Contract, amount), "Approval of tokens to Compound failed.");
+        require(underlying.approve(getCErc20Address(erc20Contract), amount), "Approval of tokens to Compound failed.");
         return true;
     }
 
@@ -66,8 +67,8 @@ library CompoundPoolController {
      * @return Boolean indicating success.
      */
     function deposit(address erc20Contract, uint256 amount) internal returns (bool) {
-        address cErc20Contract = getCErc20Address(erc20Contract);
-        uint256 mintResult = CErc20(cErc20Contract).mint(amount);
+        CErc20 cErc20 = CErc20(getCErc20Address(erc20Contract));
+        uint256 mintResult = cErc20.mint(amount);
         require(mintResult == 0, "Error calling mint on Compound cToken: error code not equal to 0");
         return true;
     }
@@ -79,8 +80,8 @@ library CompoundPoolController {
      * @return Boolean indicating success.
      */
     function withdraw(address erc20Contract, uint256 amount) internal returns (bool) {
-        address cErc20Contract = getCErc20Address(erc20Contract);
-        uint256 redeemResult = CErc20(cErc20Contract).redeemUnderlying(amount);
+        CErc20 cErc20 = CErc20(getCErc20Address(erc20Contract));
+        uint256 redeemResult = cErc20.redeemUnderlying(amount);
         require(redeemResult == 0, "Error calling redeemUnderlying on Compound cToken: error code not equal to 0");
         return true;
     }
@@ -91,10 +92,10 @@ library CompoundPoolController {
      * @return Boolean indicating success.
      */
     function withdrawAll(address erc20Contract) internal returns (bool) {
-        address cErc20Contract = getCErc20Address(erc20Contract);
-        uint256 balance = ERC20(cErc20Contract).balanceOf(address(this));
+        CErc20 cErc20 = CErc20(getCErc20Address(erc20Contract));
+        uint256 balance = cErc20.balanceOf(address(this));
         if (balance == 0) return false; // TODO: Or revert("No funds available to redeem from Compound cToken.")
-        uint256 redeemResult = CErc20(cErc20Contract).redeem(balance);
+        uint256 redeemResult = cErc20.redeem(balance);
         require(redeemResult == 0, "Error calling redeem on Compound cToken: error code not equal to 0");
         return true;
     }
