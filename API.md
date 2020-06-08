@@ -1,6 +1,6 @@
-# RariFund Ethereum API Documentation
+# Rari Capital Ethereum API Documentation
 
-Welcome to the API docs for **RariFundManager** and **RariFundToken**, the smart contracts behind Rari Capital's quantitative fund. You can find out more about Rari at [http://rari.capital](http://rari.capital).
+Welcome to the API docs for `RariFundManager` and `RariFundToken`, the smart contracts behind Rari Capital's quantitative fund. You can find out more about Rari at [www.rari.capital](https://rari.capital).
 
 ## uint256 RariFundToken.balanceOf(address account)
 
@@ -8,27 +8,27 @@ Returns the amount of RFT owned by `account`.
 
 Parameters:
 
- - **account** (address) - The account whose balance we are retrieving.
+ - `account` (address) - The account whose balance we are retrieving.
 
-## uint256 RariFundManager.usdBalanceOf(address account)
+## uint256 RariFundManager.balanceOf(address account)
 
 Returns an account's total balance in USD (scaled by 1e18).
 
 Parameters:
 
- - **account** (address) - The account whose balance we are calculating.
+ - `account` (address) - The account whose balance we are calculating.
 
 Development notes:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.*
+ - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.*
 
-## uint256 RariFundManager.getCombinedUsdBalance()
+## bool RariFundManager.isCurrencyAccepted(string currencyCode)
 
-Returns the fund's total balance of all currencies in USD (scaled by 1e18).
+Returns a boolean indicating if deposits in `currencyCode` are currently accepted.
 
-Development notes:
+Parameters:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.*
+ - `currencyCode` (string): The currency code to check.
 
 ## bool RariFundManager.deposit(string currencyCode, uint256 amount)
 
@@ -37,8 +37,8 @@ Deposits funds to RariFund in exchange for RFT.
 Please note that you must approve RariFundManager to transfer of the necessary amount of tokens.
 
 Parameters:
- - **currencyCode** (string): The current code of the token to be deposited.
- - **amount** (uint256): The amount of tokens to be deposited.
+ - `currencyCode` (string): The currency code of the token to be deposited.
+ - `amount` (uint256): The amount of tokens to be deposited.
 
 Return value: Boolean indicating success.
 
@@ -49,8 +49,8 @@ Withdraws funds from RariFund in exchange for RFT.
 Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
 
 Parameters:
- - **currencyCode** (string): The current code of the token to be deposited.
- - **amount** (uint256): The amount of tokens to be deposited.
+ - `currencyCode` (string): The currency code of the token to be withdrawn.
+ - `amount` (uint256): The amount of tokens to be withdrawn.
 
 Return value: Boolean indicating success.
 
@@ -59,72 +59,64 @@ Return value: Boolean indicating success.
 Returns the number of pending withdrawals in the queue of the specified currency.
 
 Parameters:
- - **currencyCode** (string): The current code of the pending withdrawals.
+ - `currencyCode` (string): The currency code of the pending withdrawals.
 
 ## uint256 RariFundManager.getPendingWithdrawalPayee(string currencyCode, uint256 index)
 
 Returns the payee of a pending withdrawal of the specified currency.
 
 Parameters:
- - **currencyCode** (string): The current code of the pending withdrawals.
- - **index** (uint256): The index of the pending withdrawal.
+ - `currencyCode` (string): The currency code of the pending withdrawal.
+ - `index` (uint256): The index of the pending withdrawal.
 
 ## uint256 RariFundManager.getPendingWithdrawalAmount(string currencyCode, uint256 index)
 
 Returns the amount of a pending withdrawal of the specified currency.
 
 Parameters:
- - **currencyCode** (string): The current code of the pending withdrawals.
- - **index** (uint256): The index of the pending withdrawal.
+ - `currencyCode` (string): The currency code of the pending withdrawal.
+ - `index` (uint256): The index of the pending withdrawal.
 
-## uint256 RariFundManager.getTotalBalance(string currencyCode)
+## uint256 RariFundManager.getFundBalance()
 
-Returns the fund's total investor balance (combined balance of all users of the fund; unlike getRawTotalBalance, excludes unclaimed interest fees) of the specified currency.
-
-Development notes:
-
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.*
-
-## uint256 RariFundManager.getRawInterestAccrued(string currencyCode)
-
-Returns the raw total amount of interest accrued by the fund as a whole (including the fees paid on interest).
-
-Parameters:
-
- - **currencyCode** (string): The currency code of the interest to be calculated.
+Returns the fund's total investor balance (all RFT holders' funds but not unclaimed fees or pending withdrawals) of all currencies in USD (scaled by 1e18).
 
 Development notes:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.*
+ - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.*
 
-## uint256 RariFundManager.getInterestAccrued(string currencyCode)
+## int256 RariFundManager.getInterestAccrued()
 
-Returns the amount of interest accrued by investors (excluding the fees taken on interest).
-
-Parameters:
-
- - **currencyCode** (string): The currency code of the interest to be calculated.
+Returns the total amount of interest accrued by past and current RFT holders (excluding the fees paid on interest) in USD (scaled by 1e18).
 
 Development notes:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.*
+ - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.*
 
-## uint256 RariFundManager.getCombinedUsdInterestAccrued()
+## uint256 RariFundManager.getInterestFeeRate()
 
-Returns the amount of interest accrued by investors across all currencies in USD (scaled by 1e18).
+Returns the fee rate on interest.
 
-Development notes:
+## int256 RariFundManager.getInterestFeesGenerated()
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.*
-
-## uint256 RariFundManager.getInterestFeesGenerated(string currencyCode)
-
-Returns the amount of interest fees accrued by beneficiaries.
-
-Parameters:
-
- - **currencyCode** (string): The currency code of the interest fees to be calculated.
+Returns the amount of interest fees accrued by beneficiaries in USD (scaled by 1e18).
 
 Development notes:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawTotalBalance) potentially modifies the state.*
+ - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.*
+
+## int256 RariFundManager.getRawInterestAccrued()
+
+Returns the raw total amount of interest accrued by the fund as a whole (including the fees paid on interest) in USD (scaled by 1e18).
+
+Development notes:
+
+ - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.*
+
+## uint256 RariFundManager.getRawFundBalance()
+
+Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees but not pending withdrawals) of all currencies in USD (scaled by 1e18).
+
+Development notes:
+
+ - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state*

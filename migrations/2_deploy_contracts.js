@@ -36,5 +36,7 @@ module.exports = function(deployer, network, accounts) {
     return rariFundManager.setAcceptedCurrency("USDC", true);
   }).then(function() {
     return rariFundManager.setAcceptedCurrency("USDT", true);
+  }).then(function() {
+    return rariFundManager.setInterestFeeMasterBeneficiary(accounts[0]);
   });
 };

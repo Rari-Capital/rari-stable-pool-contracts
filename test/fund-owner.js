@@ -31,12 +31,17 @@ contract("RariFundManager v0.3.0", accounts => {
 
     // TODO: Check _fundDisabled (no way to do this as of now)
     
+    // Use DAI as an example and set amount to deposit/withdraw
+    var currencyCode = "DAI";
+    var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
+    var amountUsdBN = 18 >= currencies[currencyCode].decimals ? amountBN.mul(web3.utils.toBN(10 ** (18 - currencies[currencyCode].decimals))) : amountBN.div(web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 18)));
+    
     // Make sure we can't deposit or withdraw now (using DAI as an example)
-    var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
-    await erc20Contract.methods.approve(RariFundManager.address, web3.utils.toBN(1e17).toString()).send({ from: accounts[0] });
+    var erc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
+    await erc20Contract.methods.approve(RariFundManager.address, amountBN.toString()).send({ from: accounts[0] });
   
     try {
-      await fundManagerInstance.deposit("DAI", web3.utils.toBN(1e17), { from: accounts[0] });
+      await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0] });
       assert.fail();
     } catch (error) {
       assert.include(error.message, "Deposits to and withdrawals from the fund are currently disabled.");
@@ -45,7 +50,7 @@ contract("RariFundManager v0.3.0", accounts => {
     await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
     
     try {
-      await fundManagerInstance.withdraw("DAI", web3.utils.toBN(1e17), { from: accounts[0] });
+      await fundManagerInstance.withdraw(currencyCode, amountBN, { from: accounts[0] });
       assert.fail();
     } catch (error) {
       assert.include(error.message, "Deposits to and withdrawals from the fund are currently disabled.");
@@ -57,15 +62,15 @@ contract("RariFundManager v0.3.0", accounts => {
     // TODO: Check _fundDisabled (no way to do this as of now)
 
     // Make sure we can deposit and withdraw now (using DAI as an example)
-    let myOldBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
-    await fundManagerInstance.deposit("DAI", web3.utils.toBN(1e17), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-    let myPostDepositBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
-    assert(myPostDepositBalance.gte(myOldBalance.add(web3.utils.toBN(1e17))));
+    let myInitialBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+    await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    let myPostDepositBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+    assert(myPostDepositBalance.gte(myInitialBalance.add(amountUsdBN)));
     
     await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-    await fundManagerInstance.withdraw("DAI", web3.utils.toBN(1e17), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-    let myNewBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
-    assert(myNewBalance.lt(myPostDepositBalance));
+    await fundManagerInstance.withdraw(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    let myPostWithdrawalBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+    assert(myPostWithdrawalBalance.lt(myPostDepositBalance));
   });
 
   it("should put upgrade the FundRebalancer", async () => {
@@ -98,29 +103,33 @@ contract("RariFundManager v0.3.0", accounts => {
     await fundManagerInstance.approveToPool(1, "DAI", amountBN, { from: accounts[0] });
     await fundManagerInstance.depositToPool(1, "DAI", amountBN, { from: accounts[0] });
 
-    // Check balances in original FundManager
-    var oldTokenBalances = {};
-    for (const currencyCode of Object.keys(currencies)) oldTokenBalances[currencyCode] = await fundManagerInstance.getTotalBalance.call(currencyCode);
-
-    // Create new FundManager
-    // TODO: Test that we can make changes to the code of the new fund manager before deploying it and upgrading to it
-    var newFundManagerInstance = await RariFundManager.new({ from: accounts[0] });
+    // Check balance of original FundManager
+    var oldRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
+    var oldFundBalance = await fundManagerInstance.getFundBalance.call();
+    var oldAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
 
     // Disable original FundManager
     await fundManagerInstance.disableFund({ from: accounts[0] });
 
     // TODO: Check _fundDisabled (no way to do this as of now)
 
+    // Create new FundManager
+    // TODO: Test that we can make changes to the code of the new fund manager before deploying it and upgrading to it
+    var newFundManagerInstance = await RariFundManager.new({ from: accounts[0] });
+    await newFundManagerInstance.setFundToken(RariFundToken.address, { from: accounts[0] });
+
     // Upgrade!
     await newFundManagerInstance.authorizeFundManagerDataSource(fundManagerInstance.address);
     await fundManagerInstance.upgradeFundManager(newFundManagerInstance.address);
     await newFundManagerInstance.authorizeFundManagerDataSource("0x0000000000000000000000000000000000000000");
 
-    // Check balances in new FundManager
-    for (const currencyCode of Object.keys(currencies)) {
-      let newTokenBalance = await newFundManagerInstance.getTotalBalance.call(currencyCode);
-      assert(newTokenBalance.gte(oldTokenBalances[currencyCode]));
-    }
+    // Check balance of new FundManager
+    let newRawFundBalance = await newFundManagerInstance.getRawFundBalance.call();
+    assert(newRawFundBalance.gte(oldRawFundBalance));
+    let newFundBalance = await newFundManagerInstance.getFundBalance.call();
+    assert(newFundBalance.gte(oldFundBalance));
+    let newAccountBalance = await newFundManagerInstance.balanceOf.call(accounts[0]);
+    assert(newAccountBalance.gte(oldAccountBalance));
   });
 
   // Disabled for now as we do not yet have an upgrade function on the token because it will only be necessary on a future upgrade

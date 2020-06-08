@@ -1,10 +1,16 @@
 const erc20Abi = require('./abi/ERC20.json');
+const cErc20DelegatorAbi = require('./abi/CErc20Delegator.json');
 
 const currencies = require('./fixtures/currencies.json');
 const pools = require('./fixtures/pools.json');
 
 const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
+
+async function forceAccrueCompound(currencyCode, account) {
+  var cErc20Contract = new web3.eth.Contract(cErc20DelegatorAbi, pools["Compound"].currencies[currencyCode].cTokenAddress);
+  await cErc20Contract.methods.accrueInterest().send({ from: account });
+}
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
 contract("RariFundManager v0.3.0", accounts => {
@@ -15,12 +21,13 @@ contract("RariFundManager v0.3.0", accounts => {
     // Use Compound as an example
     for (const currencyCode of Object.keys(pools["Compound"].currencies)) {
       console.log(currencyCode);
+      
       var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
+      var amountUsdBN = 18 >= currencies[currencyCode].decimals ? amountBN.mul(web3.utils.toBN(10 ** (18 - currencies[currencyCode].decimals))) : amountBN.div(web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 18)));
       
       // Check balances
-      let initialAccountBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
-      let initialCurrencyBalance = await fundManagerInstance.getTotalBalance.call(currencyCode);
-      let initialUsdBalance = await fundManagerInstance.getCombinedUsdBalance.call();
+      let initialAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+      let initialFundBalance = await fundManagerInstance.getFundBalance.call();
       let initialRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
       
       // Approve tokens to RariFundManager
@@ -31,12 +38,10 @@ contract("RariFundManager v0.3.0", accounts => {
       await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0] });
 
       // Check balances
-      let postDepositAccountBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
-      assert(postDepositAccountBalance.gte(initialAccountBalance.add(amountBN)));
-      let postDepositCurrencyBalance = await fundManagerInstance.getTotalBalance.call(currencyCode);
-      assert(postDepositCurrencyBalance.gte(initialCurrencyBalance.add(amountBN)));
-      let postDepositUsdBalance = await fundManagerInstance.getCombinedUsdBalance.call();
-      assert(postDepositUsdBalance.gte(initialUsdBalance.add(amountBN)));
+      let postDepositAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+      assert(postDepositAccountBalance.eq(initialAccountBalance.add(amountUsdBN)));
+      let postDepositFundBalance = await fundManagerInstance.getFundBalance.call();
+      assert(postDepositFundBalance.eq(initialFundBalance.add(amountUsdBN)));
       let postDepositRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
       assert(postDepositRftBalance.gt(initialRftBalance));
 
@@ -45,19 +50,16 @@ contract("RariFundManager v0.3.0", accounts => {
       await fundManagerInstance.approveToPool(1, currencyCode, amountBN, { from: accounts[0] });
       await fundManagerInstance.depositToPool(1, currencyCode, amountBN, { from: accounts[0] });
 
-      // TODO: Wait for interest
-      // TODO: Actually wait for interest and time out after x minutes
-      // await new Promise(resolve => setTimeout(resolve, 60 * 1000));
-      
-      // TODO: Check balances after waiting for interest
-      let preWithdrawalAccountBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
-      // assert(preWithdrawalAccountBalance.gt(postDepositAccountBalance));
-      let preWithdrawalCurrencyBalance = await fundManagerInstance.getTotalBalance.call(currencyCode);
-      // assert(preWithdrawalCurrencyBalance.gt(postDepositCurrencyBalance));
-      let preWithdrawalUsdBalance = await fundManagerInstance.getCombinedUsdBalance.call();
-      // assert(preWithdrawalUsdBalance.gt(postDepositUsdBalance));
+      // Force accrue interest
+      await forceAccrueCompound(currencyCode, accounts[0]);
+
+      // Check balances after waiting for interest
+      let preWithdrawalAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+      assert(preWithdrawalAccountBalance.gt(postDepositAccountBalance));
+      let preWithdrawalFundBalance = await fundManagerInstance.getFundBalance.call();
+      assert(preWithdrawalFundBalance.gt(postDepositFundBalance));
       let preWithdrawalRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
-      // assert(preWithdrawalRftBalance.eq(postDepositRftBalance));
+      assert(preWithdrawalRftBalance.eq(postDepositRftBalance));
 
       // RariFundManager.withdraw
       await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[0] });
@@ -69,12 +71,10 @@ contract("RariFundManager v0.3.0", accounts => {
       await fundManagerInstance.processPendingWithdrawals(currencyCode, { from: accounts[0] });
 
       // TODO: Check balances and assert with post-interest balances
-      let finalAccountBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
+      let finalAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
       assert(finalAccountBalance.lt(preWithdrawalAccountBalance));
-      let finalCurrencyBalance = await fundManagerInstance.getTotalBalance.call(currencyCode);
-      assert(finalCurrencyBalance.lt(preWithdrawalCurrencyBalance));
-      let finalUsdBalance = await fundManagerInstance.getCombinedUsdBalance.call();
-      assert(finalUsdBalance.lt(preWithdrawalUsdBalance));
+      let finalFundBalance = await fundManagerInstance.getFundBalance.call();
+      assert(finalFundBalance.lt(preWithdrawalFundBalance));
       let finalRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
       assert(finalRftBalance.lt(preWithdrawalRftBalance));
     }

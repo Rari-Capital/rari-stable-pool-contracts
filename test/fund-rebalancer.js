@@ -32,42 +32,47 @@ contract("RariFundManager v0.3.0", accounts => {
   it("should set accepted currencies", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     let fundTokenInstance = await RariFundToken.deployed();
+    
+    // Use DAI as an example and set amount to deposit/withdraw
+    var currencyCode = "DAI";
+    var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
+    var amountUsdBN = 18 >= currencies[currencyCode].decimals ? amountBN.mul(web3.utils.toBN(10 ** (18 - currencies[currencyCode].decimals))) : amountBN.div(web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 18)));
 
-    // RariFundManager.setAcceptedCurrency(string calldata currencyCode, bool accepted)
-    await fundManagerInstance.setAcceptedCurrency("DAI", false, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    // Set DAI as unaccepted currency
+    await fundManagerInstance.setAcceptedCurrency(currencyCode, false, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
 
     // Check to make sure DAI is now not accepted
-    let daiAcceptedInitial = await fundManagerInstance.isCurrencyAccepted.call("DAI");
+    let daiAcceptedInitial = await fundManagerInstance.isCurrencyAccepted.call(currencyCode);
     assert.equal(daiAcceptedInitial, false);
 
-    // Make sure we can't deposit now (using DAI as an example)
-    var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
-    await erc20Contract.methods.approve(RariFundManager.address, web3.utils.toBN(1e17).toString()).send({ from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    // Make sure we can't deposit DAI now
+    var erc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
+    await erc20Contract.methods.approve(RariFundManager.address, amountBN.toString()).send({ from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
   
     try {
-      await fundManagerInstance.deposit("DAI", web3.utils.toBN(1e17), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+      await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
       assert.fail();
     } catch (error) {
       assert.include(error.message, "This currency is not currently accepted; please convert your funds to an accepted currency before depositing.");
     }
 
-    // RariFundManager.setAcceptedCurrency(string calldata currencyCode, bool accepted)
-    await fundManagerInstance.setAcceptedCurrency("DAI", true, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    // Set DAI as accepted currency
+    await fundManagerInstance.setAcceptedCurrency(currencyCode, true, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
 
     // Check to make sure DAI is now accepted
-    let daiAcceptedNow = await fundManagerInstance.isCurrencyAccepted.call("DAI");
+    let daiAcceptedNow = await fundManagerInstance.isCurrencyAccepted.call(currencyCode);
     assert.equal(daiAcceptedNow, true);
 
-    // Make sure we can deposit now (using DAI as an example)
-    let myOldBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
-    await fundManagerInstance.deposit("DAI", web3.utils.toBN(1e17), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-    let myPostDepositBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
-    assert(myPostDepositBalance.gte(myOldBalance.add(web3.utils.toBN(1e17))));
+    // Make sure we can deposit DAI now
+    let myOldBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+    await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    let myPostDepositBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+    assert(myPostDepositBalance.gte(myOldBalance.add(amountUsdBN)));
     
     // Withdraw what we deposited
     await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-    await fundManagerInstance.withdraw("DAI", web3.utils.toBN(1e17), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-    let myNewBalance = await fundManagerInstance.usdBalanceOf.call(accounts[0]);
+    await fundManagerInstance.withdraw(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    let myNewBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
     assert(myNewBalance.lt(myPostDepositBalance));
   });
 
@@ -217,7 +222,7 @@ contract("RariFundManager v0.3.0", accounts => {
       // Fill 0x orders
       // TODO: Ideally, we add actually call rari-fund-rebalancer
       await fundManagerInstance.approveTo0x(currencyCombinations[i][0], maxInputAmountBN);
-      await fundManagerWeb3Instance.methods.fill0xOrdersUpTo(currencyCombinations[i][0], currencyCombinations[i][1], orders, signatures, takerAssetFilledAmountBN.toString()).send({ from: accounts[0], value: web3.utils.toBN(protocolFee).toString() });
+      await fundManagerWeb3Instance.methods.fill0xOrdersUpTo(orders, signatures, takerAssetFilledAmountBN.toString()).send({ from: accounts[0], value: web3.utils.toBN(protocolFee).toString() });
 
       // Check source and destination wallet balances
       let newInputBalanceBN = web3.utils.toBN(await inputErc20Contract.methods.balanceOf(RariFundManager.address).call());
