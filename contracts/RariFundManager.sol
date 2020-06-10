@@ -51,12 +51,12 @@ contract RariFundManager is Ownable {
     address private _rariFundRebalancerAddress;
 
     /**
-     * @dev Maps ERC20 token contract addresses to their currency codes.
+     * @dev Array of currencies supported by the fund.
      */
     string[] private _supportedCurrencies;
 
     /**
-     * @dev Maps ERC20 token contract addresses to their currency codes.
+     * @dev Maps ERC20 token contract addresses to supported currency codes.
      */
     mapping(string => address) private _erc20Contracts;
 
@@ -66,39 +66,39 @@ contract RariFundManager is Ownable {
     mapping(string => uint8[]) private _poolsByCurrency;
 
     /**
-     * @dev Struct for a pending withdrawal.
+     * @dev Array of currencies withdrawable by the owner.
      */
-    struct PendingWithdrawal {
-        address payee;
-        uint256 amount;
-    }
+    string[] private _ownerCurrencies;
 
     /**
-     * @dev Mapping of withdrawal queues to currency codes.
+     * @dev Maps ERC20 token contract addresses to currency codes withdrawable by the owner.
      */
-    mapping(string => PendingWithdrawal[]) private _withdrawalQueues;
+    mapping(string => address) private _ownerErc20Contracts;
 
     /**
      * @dev Constructor that sets supported ERC20 token contract addresses and supported pools for each supported token.
      */
     constructor () public {
-        // Add currencies
-        addCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F);
+        // Add supported currencies
+        addSupportedCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F);
         addPoolToCurrency("DAI", 0); // dYdX
         addPoolToCurrency("DAI", 1); // Compound
-        addCurrency("USDC", 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+        addSupportedCurrency("USDC", 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
         addPoolToCurrency("USDC", 0); // dYdX
         addPoolToCurrency("USDC", 1); // Compound
-        addCurrency("USDT", 0xdAC17F958D2ee523a2206206994597C13D831ec7);
+        addSupportedCurrency("USDT", 0xdAC17F958D2ee523a2206206994597C13D831ec7);
         addPoolToCurrency("USDT", 1); // Compound
+        
+        // Add owner currency
+        addOwnerCurrency("COMP", 0xc00e94Cb662C3520282E6f5717214004A7f26888);
     }
 
     /**
-     * @dev Sets supported ERC20 token contract addresses for each supported token.
+     * @dev Marks a token as supported by the fund and stores its ERC20 contract address.
      * @param currencyCode The currency code of the token.
      * @param erc20Contract The ERC20 contract of the token.
      */
-    function addCurrency(string memory currencyCode, address erc20Contract) internal {
+    function addSupportedCurrency(string memory currencyCode, address erc20Contract) internal {
         _supportedCurrencies.push(currencyCode);
         _erc20Contracts[currencyCode] = erc20Contract;
     }
@@ -110,6 +110,31 @@ contract RariFundManager is Ownable {
      */
     function addPoolToCurrency(string memory currencyCode, uint8 pool) internal {
         _poolsByCurrency[currencyCode].push(pool);
+    }
+
+    /**
+     * @dev Marks a token as withdrawable by the owner and stores its ERC20 contract address.
+     * @param currencyCode The currency code of the token.
+     * @param erc20Contract The ERC20 contract of the token.
+     */
+    function addOwnerCurrency(string memory currencyCode, address erc20Contract) internal {
+        _ownerCurrencies.push(currencyCode);
+        _ownerErc20Contracts[currencyCode] = erc20Contract;
+    }
+
+    /**
+     * @dev Withdraws fund manager balance of `currencyCode` to the team if withdrawable.
+     * @param currencyCode The currency code of the token to withdraw.
+     * @return Boolean indicating success.
+     */
+    function ownerWithdraw(string calldata currencyCode) external returns (bool) {
+        address erc20Contract = _ownerErc20Contracts[currencyCode];
+        require(erc20Contract != address(0), "Invalid currency code.");
+        IERC20 token = IERC20(erc20Contract);
+        uint256 balance = token.balanceOf(address(this));
+        require(balance > 0, "No available balance to withdraw.");
+        token.safeTransfer(owner(), balance);
+        return true;
     }
 
     /**
@@ -455,6 +480,19 @@ contract RariFundManager is Ownable {
 
         return true;
     }
+
+    /**
+     * @dev Struct for a pending withdrawal.
+     */
+    struct PendingWithdrawal {
+        address payee;
+        uint256 amount;
+    }
+
+    /**
+     * @dev Mapping of withdrawal queues to currency codes.
+     */
+    mapping(string => PendingWithdrawal[]) private _withdrawalQueues;
 
     /**
      * @dev Processes pending withdrawals in the queue for the specified currency.
