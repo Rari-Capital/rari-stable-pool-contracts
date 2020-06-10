@@ -73,6 +73,51 @@ contract("RariFundManager v0.3.0", accounts => {
     assert(myPostWithdrawalBalance.lt(myPostDepositBalance));
   });
 
+  it("should transfer ETH to the fund manager and withdraw it to the owner", async () => {
+    let fundManagerInstance = await RariFundManager.deployed();
+    
+    // Check initial ETH balance of RariFundManager
+    let initialBalance = web3.utils.toBN(await web3.eth.getBalance(RariFundManager.address));
+    
+    // Transfer ETH to RariFundManager
+    var amountBN = web3.utils.toBN(1e15);
+    await fundManagerInstance.send(amountBN, { from: accounts[0] });
+    
+    // Check post-deposit ETH balance of RariFundManager
+    let postDepositBalance = web3.utils.toBN(await web3.eth.getBalance(RariFundManager.address));
+    assert(postDepositBalance.eq(initialBalance.add(amountBN));
+    
+    // Transfer ETH from RariFundManager
+    await fundManagerInstance.ownerWithdraw("ETH", amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    
+    // Check post-withdrawal ETH balance of RariFundManager
+    let postWithdrawalBalance = web3.utils.toBN(await web3.eth.getBalance(RariFundManager.address));
+    assert(postWithdrawalBalance.isZero());
+  });
+
+  it("should transfer COMP to the fund manager and withdraw it to the owner", async () => {
+    let fundManagerInstance = await RariFundManager.deployed();
+
+    // Check initial COMP balance of RariFundManager
+    var erc20Contract = new web3.eth.Contract(erc20Abi, "0xc00e94Cb662C3520282E6f5717214004A7f26888");
+    let initialBalance = web3.utils.toBN(await erc20Contract.methods.balanceOf(RariFundManager.address).call());
+    
+    // Transfer COMP to RariFundManager
+    var amountBN = web3.utils.toBN(1e18);
+    await erc20Contract.methods.transfer(RariFundManager.address, amountBN.toString()).send({ from: accounts[0] });
+    
+    // Check post-deposit COMP balance of RariFundManager
+    let postDepositBalance = web3.utils.toBN(await erc20Contract.methods.balanceOf(RariFundManager.address).call());
+    assert(postDepositBalance.eq(initialBalance.add(amountBN));
+    
+    // Transfer COMP from RariFundManager
+    await fundManagerInstance.ownerWithdraw("COMP", amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    
+    // Check post-withdrawal COMP balance of RariFundManager
+    let postWithdrawalBalance = web3.utils.toBN(await erc20Contract.methods.balanceOf(RariFundManager.address).call());
+    assert(postWithdrawalBalance.isZero());
+  });
+
   it("should put upgrade the FundRebalancer", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
 
