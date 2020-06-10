@@ -272,19 +272,19 @@ App = {
     // Get connected chain ID from Ethereum node
     const chainId = await App.web3.eth.getChainId();
 
-    if (chainId !== 1) {
+    /* if (chainId !== 1) {
       $('#depositButton, #withdrawButton, #transferButton').prop("disabled", true);
-      toastr["danger"]("Ethereum connection failed", "Invalid chain selected.");
-    }
+      toastr["error"]("Ethereum connection failed", "Invalid chain selected.");
+    } */
   
     // Get list of accounts of the connected wallet
     // MetaMask does not give you all accounts, only the selected account
     App.accounts = await App.web3.eth.getAccounts();
     App.selectedAccount = App.accounts[0];
 
-    // Get user's stablecoin balances and token balances
-    if (App.contracts.RariFundManager) App.getMyFundBalances();
-    if (App.contracts.RariFundToken) App.getTokenBalances();
+    // Get user's account balance in the quant fund and RFT balance
+    if (App.contracts.RariFundManager) App.getMyFundBalance();
+    if (App.contracts.RariFundToken) App.getTokenBalance();
   
     // Load acounts dropdown
     $('#selected-account').empty();
@@ -395,15 +395,21 @@ App = {
    * Initialize FundManager and FundToken contracts.
    */
   initContracts: function() {
-    $.getJSON('RariFundManager.json', function(data) {
-      App.contracts.RariFundManager = new web3.eth.Contract(data, "0xCa3187F301920877795EfD16B5f920aABC7a9cC2");
-      App.getFundBalances();
-      if (App.selectedAccount) App.getMyFundBalances();
+    $.getJSON('abi/RariFundManager.json', function(data) {
+      App.contracts.RariFundManager = new web3.eth.Contract(data, "0xa5E348898D6b55B9724Fba87eA709C7aDcF91cBc");
+      App.getFundBalance();
+      if (App.selectedAccount) App.getMyFundBalance();
     });
 
-    $.getJSON('RariFundToken.json', function(data) {
-      App.contracts.RariFundToken = new web3.eth.Contract(data, "0x946a1c5415a41abfbcbc8d60d302f6df4d8911c3");
-      if (App.selectedAccount) App.getTokenBalances();
+    $.getJSON('abi/RariFundToken.json', function(data) {
+      App.contracts.RariFundToken = new web3.eth.Contract(data, "0xF8bf0c88f3ebA7ab4aF9675231f4549082546791");
+      if (App.selectedAccount) App.getTokenBalance();
+    });
+
+    $.getJSON('abi/ERC20.json', function(data) {
+      App.contracts.DAI = new web3.eth.Contract(data, "0x6B175474E89094C44Da98b954EedeAC495271d0F");
+      App.contracts.USDC = new web3.eth.Contract(data, "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48");
+      App.contracts.USDT = new web3.eth.Contract(data, "0xdAC17F958D2ee523a2206206994597C13D831ec7");
     });
   },
   
@@ -418,9 +424,9 @@ App = {
       // Set selected account
       App.selectedAccount = $(this).val();
 
-      // Get user's stablecoin balances and token balances
-      if (App.contracts.RariFundManager) App.getMyFundBalances();
-      if (App.contracts.RariFundToken) App.getTokenBalances();
+      // Get user's account balance in the quant fund and RFT balance
+      if (App.contracts.RariFundManager) App.getMyFundBalance();
+      if (App.contracts.RariFundToken) App.getTokenBalance();
     });
 
     $(document).on('click', '#depositButton', App.handleDeposit);
@@ -435,25 +441,24 @@ App = {
     event.preventDefault();
 
     var token = $('#DepositToken').val();
-    if (["DAI", "USDC", "USDT"].indexOf(token) < 0) return toastr["danger"]("Deposit failed", "Invalid token!");
+    if (["DAI", "USDC", "USDT"].indexOf(token) < 0) return toastr["error"]("Deposit failed", "Invalid token!");
     var amount = parseFloat($('#DepositAmount').val());
+    var amountBN = web3.utils.toBN(amount * (token === "DAI" ? 1e18 : 1e6));
 
-    App.contracts.RariFundManager.methods.isAcceptedCurrency(token).call().then(function(accepted) {
+    App.contracts.RariFundManager.methods.isCurrencyAccepted(token).call().then(function(accepted) {
       function deposit() {
         console.log('Deposit ' + amount + ' ' + token);
-
-        var dai = new web3.eth.Contract(erc20Abi, "0x6B175474E89094C44Da98b954EedeAC495271d0F");;
   
-        dai.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call().then(function(result) {
+        App.contracts[token].methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call().then(function(result) {
           if (result >= amount) return;
-          return dai.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
+          return App.contracts[token].methods.approve(App.contracts.RariFundManager.options.address, amountBN).send({ from: App.selectedAccount });
         }).then(function(result) {
-          return App.contracts.RariFundManager.methods.deposit(token, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
+          return App.contracts.RariFundManager.methods.deposit(token, amountBN).send({ from: App.selectedAccount });
         }).then(function(result) {
           toastr["success"]("Deposit successful", "Deposit of " + amount + " " + token + " confirmed!");
-          App.getFundBalances();
-          App.getMyFundBalances();
-          App.getTokenBalances();
+          App.getFundBalance();
+          App.getMyFundBalance();
+          App.getTokenBalance();
         }).catch(function(err) {
           console.error(err);
         });
@@ -461,12 +466,12 @@ App = {
 
       if (!accepted) {
         var availableAssetDatas = [];
-        App.contracts.RariFundManager.methods.isAcceptedCurrency("DAI").call().then(function(accepted) {
+        App.contracts.RariFundManager.methods.isCurrencyAccepted("DAI").call().then(function(accepted) {
           if (accepted) availableAssetDatas.push('0xf47261b00000000000000000000000006b175474e89094c44da98b954eedeac495271d0f');
-          return App.contracts.RariFundManager.methods.isAcceptedCurrency("USDC").call();
+          return App.contracts.RariFundManager.methods.isCurrencyAccepted("USDC").call();
         }).then(function(accepted) {
           if (accepted) availableAssetDatas.push('0xf47261b0000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb48');
-          return App.contracts.RariFundManager.methods.isAcceptedCurrency("USDT").call();
+          return App.contracts.RariFundManager.methods.isCurrencyAccepted("USDT").call();
         }).then(function(accepted) {
           if (accepted) availableAssetDatas.push('0xf47261b0000000000000000000000000dac17f958d2ee523a2206206994597c13d831ec7');
         });
@@ -491,33 +496,34 @@ App = {
     event.preventDefault();
 
     var token = $('#WithdrawToken').val();
-    if (["DAI", "USDC", "USDT"].indexOf(token) < 0) return toastr["danger"]("Withdrawal failed", "Invalid token!");
-    var amount = parseFloat($('WithdrawAmount').val());
+    if (["DAI", "USDC", "USDT"].indexOf(token) < 0) return toastr["error"]("Withdrawal failed", "Invalid token!");
+    var amount = parseFloat($('#WithdrawAmount').val());
+    var amountBN = web3.utils.toBN(amount * (token === "DAI" ? 1e18 : 1e6));
 
     console.log('Withdraw ' + amount + ' ' + token);
 
     App.contracts.RariFundToken.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call().then(function(result) {
       if (result >= amount) return;
-      return App.contracts.RariFundToken.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1)).send({ from: App.account });
+      return App.contracts.RariFundToken.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1)).send({ from: App.selectedAccount });
     }).then(function(result) {
-      return App.contracts.RariFundManager.methods.withdraw(token, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
+      return App.contracts.RariFundManager.methods.withdraw(token, amountBN).send({ from: App.selectedAccount });
     }).then(function(result) {
       toastr["success"]("Withdrawal successful", "Withdrawal of " + amount + " " + token + " confirmed!");
-      App.getFundBalances();
-      App.getMyFundBalances();
-      App.getTokenBalances();
+      App.getFundBalance();
+      App.getMyFundBalance();
+      App.getTokenBalance();
     }).catch(function(err) {
       console.error(err);
     });
   },
 
   /**
-   * Get the total balance of each supported stablecoin in the quant fund.
+   * Get the total balance of the quant fund in USD.
    */
-  getFundBalances: function() {
-    console.log('Getting fund balances...');
+  getFundBalance: function() {
+    console.log('Getting fund balance...');
 
-    App.contracts.RariFundManager.methods.getCombinedUsdBalance().call().then(function(result) {
+    App.contracts.RariFundManager.methods.getFundBalance().call().then(function(result) {
       balance = result / 1e18;
       $('#USDBalance').text(balance);
     }).catch(function(err) {
@@ -526,12 +532,12 @@ App = {
   },
 
   /**
-   * Get the user's balance of each supported stablecoin in the quant fund.
+   * Get the user's account balance in the quant fund in USD.
    */
-  getMyFundBalances: function() {
-    console.log('Getting my fund balances...');
+  getMyFundBalance: function() {
+    console.log('Getting my fund balance...');
 
-    App.contracts.RariFundManager.methods.usdBalanceOf(App.selectedAccount).call().then(function(result) {
+    App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call().then(function(result) {
       balance = result / 1e18;
       $('#MyUSDBalance').text(balance);
     }).catch(function(err) {
@@ -550,9 +556,9 @@ App = {
 
     console.log('Transfer ' + amount + ' RFT to ' + toAddress);
 
-    App.contracts.RariFundToken.methods.transfer(toAddress, amount * 1e18).send({ from: App.selectedAccount }).then(function(result) {
+    App.contracts.RariFundToken.methods.transfer(toAddress, web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount }).then(function(result) {
       toastr["success"]("Transfer successful", "Transfer of " + amount + " RFT confirmed!");
-      return App.getTokenBalances();
+      return App.getTokenBalance();
     }).catch(function(err) {
       console.error(err);
     });
@@ -561,8 +567,8 @@ App = {
   /**
    * Get's the user's balance of RariFundToken.
    */
-  getTokenBalances: function() {
-    console.log('Getting token balances...');
+  getTokenBalance: function() {
+    console.log('Getting token balance...');
 
     App.contracts.RariFundToken.methods.balanceOf(App.selectedAccount).call().then(function(result) {
       balance = result / 1e18;

@@ -101,8 +101,8 @@
                 <input type="text" class="form-control" id="DepositAmount" placeholder="Amount" />
                 <select class="custom-select" id="DepositToken">
                   <option selected>DAI</option>
-                  <option disabled>USDC</option>
-                  <option disabled>USDT</option>
+                  <option>USDC</option>
+                  <option>USDT</option>
                 </select>
               </div>
               <button class="btn btn-success" id="depositButton" type="button" disabled>Deposit</button><br /><br />
@@ -111,8 +111,8 @@
                 <input type="text" class="form-control" id="WithdrawAmount" placeholder="Amount" />
                 <select class="custom-select" id="WithdrawToken">
                   <option selected>DAI</option>
-                  <option disabled>USDC</option>
-                  <option disabled>USDT</option>
+                  <option>USDC</option>
+                  <option>USDT</option>
                 </select>
               </div>
               <button class="btn btn-danger" id="withdrawButton" type="button" disabled>Withdraw</button>
@@ -163,13 +163,12 @@
     <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
     <script type="text/javascript" src="https://unpkg.com/@toruslabs/torus-embed"></script>
     <script type="text/javascript" src="https://unpkg.com/@portis/web3"></script>
-    <script type="text/javascript" src="https://unpkg.com/authereum"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/authereum@latest/authereum.js"></script>
 
     <!-- 0x Instant -->
     <script src="https://instant.0x.org/v3/instant.js"></script>
 
     <!-- Rari Fund Web App -->
-    <script src="js/erc20-abi.js"></script>
-    <script src="js/app.js?v=17"></script>
+    <script src="js/app.js?v=18"></script>
   </body>
 </html>
