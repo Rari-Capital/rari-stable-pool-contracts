@@ -138,6 +138,14 @@ contract RariFundManager is Ownable {
     }
 
     /**
+     * @dev Payable fallback function that forwards `msg.value` to the team.
+     * Called by 0x exchange to refund unspent protocol fee.
+     */
+    function () external payable {
+        if (msg.value > 0) address(uint160(owner())).transfer(msg.value);
+    }
+
+    /**
      * @dev Emitted when RariFundManager is upgraded.
      */
     event FundManagerUpgraded(address newContract);
@@ -157,7 +165,7 @@ contract RariFundManager is Ownable {
      * Sends data to the new contract, sets the new RariFundToken minter, and forwards tokens from the old to the new.
      * @param newContract The address of the new RariFundManager contract.
      */
-    function upgradeFundManager(address newContract) external onlyOwner {
+    function upgradeFundManager(address payable newContract) external onlyOwner {
         // Pass data to the new contract
         FundManagerData memory data;
 
@@ -288,7 +296,7 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees) of the specified currency.
+     * @dev Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees + all pending withdrawals) of the specified currency.
      * Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by RariFundController.getPoolBalance) potentially modifies the state.
      * @param currencyCode The currency code of the balance to be calculated.
      */
@@ -299,13 +307,12 @@ contract RariFundManager is Ownable {
         IERC20 token = IERC20(erc20Contract);
         uint256 totalBalance = token.balanceOf(address(this));
         for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++) totalBalance = totalBalance.add(RariFundController.getPoolBalance(_poolsByCurrency[currencyCode][i], erc20Contract));
-        for (uint256 i = 0; i < _withdrawalQueues[currencyCode].length; i++) totalBalance = totalBalance.sub(_withdrawalQueues[currencyCode][i].amount);
 
         return totalBalance;
     }
 
     /**
-     * @notice Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees but not pending withdrawals) of all currencies in USD (scaled by 1e18).
+     * @notice Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees + all pending withdrawals) of all currencies in USD (scaled by 1e18).
      * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.
      */
     function getRawFundBalance() public returns (uint256) {
@@ -313,9 +320,9 @@ contract RariFundManager is Ownable {
 
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
+            uint256 balance = getRawFundBalance(currencyCode);
             address erc20Contract = _erc20Contracts[currencyCode];
             uint256 tokenDecimals = erc20Contract == 0xdAC17F958D2ee523a2206206994597C13D831ec7 ? 6 : ERC20Detailed(erc20Contract).decimals();
-            uint256 balance = getRawFundBalance(currencyCode);
             uint256 balanceUsd = 18 >= tokenDecimals ? balance.mul(10 ** (uint256(18).sub(tokenDecimals))) : balance.div(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
             totalBalance = totalBalance.add(balanceUsd);
         }
@@ -328,7 +335,19 @@ contract RariFundManager is Ownable {
      * @dev Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.
      */
     function getFundBalance() public returns (uint256) {
-        return getRawFundBalance().sub(getInterestFeesUnclaimed());
+        uint256 totalBalance = 0;
+
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
+            string memory currencyCode = _supportedCurrencies[i];
+            uint256 balance = getRawFundBalance(currencyCode);
+            for (uint256 j = 0; j < _withdrawalQueues[currencyCode].length; j++) balance = balance.sub(_withdrawalQueues[currencyCode][j].amount);
+            address erc20Contract = _erc20Contracts[currencyCode];
+            uint256 tokenDecimals = erc20Contract == 0xdAC17F958D2ee523a2206206994597C13D831ec7 ? 6 : ERC20Detailed(erc20Contract).decimals();
+            uint256 balanceUsd = 18 >= tokenDecimals ? balance.mul(10 ** (uint256(18).sub(tokenDecimals))) : balance.div(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+            totalBalance = totalBalance.add(balanceUsd);
+        }
+        
+        return totalBalance.sub(getInterestFeesUnclaimed());
     }
 
     /**
@@ -468,9 +487,9 @@ contract RariFundManager is Ownable {
 
         // Make sure the user must approve the burning of tokens before calling the withdraw function
         rariFundToken.burnFrom(msg.sender, rftAmount);
-        _netDeposits = _netDeposits.sub(int256(amountUsd));
 
         if (amount <= contractBalance) {
+            _netDeposits = _netDeposits.sub(int256(amountUsd));
             token.safeTransfer(msg.sender, amount);
             emit Withdrawal(currencyCode, msg.sender, amount);
         } else  {
@@ -507,8 +526,11 @@ contract RariFundManager is Ownable {
         uint256 total = 0;
         for (uint256 i = 0; i < _withdrawalQueues[currencyCode].length; i++) total = total.add(_withdrawalQueues[currencyCode][i].amount);
         if (total > balanceHere) revert("Not enough balance to process pending withdrawals.");
+        uint256 tokenDecimals = erc20Contract == 0xdAC17F958D2ee523a2206206994597C13D831ec7 ? 6 : ERC20Detailed(erc20Contract).decimals();
 
         for (uint256 i = 0; i < _withdrawalQueues[currencyCode].length; i++) {
+            uint256 amountUsd = 18 >= tokenDecimals ? _withdrawalQueues[currencyCode][i].amount.mul(10 ** (uint256(18).sub(tokenDecimals))) : _withdrawalQueues[currencyCode][i].amount.div(10 ** (tokenDecimals.sub(18)));
+            _netDeposits = _netDeposits.sub(int256(amountUsd));
             token.safeTransfer(_withdrawalQueues[currencyCode][i].payee, _withdrawalQueues[currencyCode][i].amount);
             emit Withdrawal(currencyCode, _withdrawalQueues[currencyCode][i].payee, _withdrawalQueues[currencyCode][i].amount);
         }

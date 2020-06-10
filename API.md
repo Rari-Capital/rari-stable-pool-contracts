@@ -115,7 +115,7 @@ Development notes:
 
 ## uint256 RariFundManager.getRawFundBalance()
 
-Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees but not pending withdrawals) of all currencies in USD (scaled by 1e18).
+Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees + all pending withdrawals) of all currencies in USD (scaled by 1e18).
 
 Development notes:
 
