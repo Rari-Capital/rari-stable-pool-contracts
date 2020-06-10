@@ -336,7 +336,12 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Fund balance limit in USD per Ethereum address.
+     * @dev Maps booleans indicating if Ethereum addresses are immune to the account balance limit.
+     */
+    mapping(address => bool) private _accountBalanceLimitWhitelist;
+
+    /**
+     * @dev Maps booleans indicating if currency codes are accepted for deposits.
      */
     mapping(string => bool) private _acceptedCurrencies;
 
@@ -398,7 +403,7 @@ contract RariFundManager is Ownable {
         require(rftAmount > 0, "Deposit amount is so small that no RFT would be minted.");
         
         uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? rariFundToken.balanceOf(msg.sender).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
-        require(initialBalanceUsd.add(amountUsd) <= _accountBalanceLimitUsd || msg.sender == _interestFeeMasterBeneficiary, "Making this deposit would cause this account's balance to exceed the maximum.");
+        require(initialBalanceUsd.add(amountUsd) <= _accountBalanceLimitUsd || msg.sender == _interestFeeMasterBeneficiary || _accountBalanceLimitWhitelist[msg.sender], "Making this deposit would cause this account's balance to exceed the maximum.");
 
         // Make sure the user must approve the transfer of tokens before calling the deposit function
         IERC20(erc20Contract).safeTransferFrom(msg.sender, address(this), amount);
