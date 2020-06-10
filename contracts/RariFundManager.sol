@@ -66,11 +66,6 @@ contract RariFundManager is Ownable {
     mapping(string => uint8[]) private _poolsByCurrency;
 
     /**
-     * @dev Array of currencies withdrawable by the owner.
-     */
-    string[] private _ownerCurrencies;
-
-    /**
      * @dev Maps ERC20 token contract addresses to currency codes withdrawable by the owner.
      */
     mapping(string => address) private _ownerErc20Contracts;
@@ -118,7 +113,6 @@ contract RariFundManager is Ownable {
      * @param erc20Contract The ERC20 contract of the token.
      */
     function addOwnerCurrency(string memory currencyCode, address erc20Contract) internal {
-        _ownerCurrencies.push(currencyCode);
         _ownerErc20Contracts[currencyCode] = erc20Contract;
     }
 
@@ -128,12 +122,19 @@ contract RariFundManager is Ownable {
      * @return Boolean indicating success.
      */
     function ownerWithdraw(string calldata currencyCode) external returns (bool) {
-        address erc20Contract = _ownerErc20Contracts[currencyCode];
-        require(erc20Contract != address(0), "Invalid currency code.");
-        IERC20 token = IERC20(erc20Contract);
-        uint256 balance = token.balanceOf(address(this));
-        require(balance > 0, "No available balance to withdraw.");
-        token.safeTransfer(owner(), balance);
+        if (keccak256(abi.encodePacked(currencyCode)) == keccak256(abi.encodePacked("ETH"))) {
+            uint256 balance = address(this).balance;
+            require(balance > 0, "No available balance to withdraw.");
+            address(uint160(owner())).transfer(balance);
+        } else {
+            address erc20Contract = _ownerErc20Contracts[currencyCode];
+            require(erc20Contract != address(0), "Invalid currency code.");
+            IERC20 token = IERC20(erc20Contract);
+            uint256 balance = token.balanceOf(address(this));
+            require(balance > 0, "No available balance to withdraw.");
+            token.safeTransfer(owner(), balance);
+        }
+        
         return true;
     }
 
@@ -141,9 +142,7 @@ contract RariFundManager is Ownable {
      * @dev Payable fallback function that forwards `msg.value` to the team.
      * Called by 0x exchange to refund unspent protocol fee.
      */
-    function () external payable {
-        if (msg.value > 0) address(uint160(owner())).transfer(msg.value);
-    }
+    function () external payable { }
 
     /**
      * @dev Emitted when RariFundManager is upgraded.
