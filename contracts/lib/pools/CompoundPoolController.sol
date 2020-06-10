@@ -15,7 +15,7 @@
 pragma solidity ^0.5.7;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 import "../../external/compound/CErc20.sol";
 
@@ -25,6 +25,7 @@ import "../../external/compound/CErc20.sol";
  */
 library CompoundPoolController {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     /**
      * @dev Returns a token's cToken contract address given its ERC20 contract address.
@@ -51,12 +52,11 @@ library CompoundPoolController {
     /**
      * @dev Approves tokens to Compound without spending gas on every deposit.
      * @param erc20Contract The ERC20 contract address of the token.
-     * @param amount Amount of the specified token to approve to dYdX.
+     * @param amount Amount of the specified token to approve to Compound.
      * @return Boolean indicating success.
      */
     function approve(address erc20Contract, uint256 amount) internal returns (bool) {
-        ERC20 underlying = ERC20(erc20Contract);
-        require(underlying.approve(getCErc20Address(erc20Contract), amount), "Approval of tokens to Compound failed.");
+        IERC20(erc20Contract).safeApprove(getCErc20Address(erc20Contract), amount);
         return true;
     }
 

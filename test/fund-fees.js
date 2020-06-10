@@ -9,7 +9,8 @@ const RariFundToken = artifacts.require("RariFundToken");
 
 async function forceAccrueCompound(currencyCode, account) {
   var cErc20Contract = new web3.eth.Contract(cErc20DelegatorAbi, pools["Compound"].currencies[currencyCode].cTokenAddress);
-  await cErc20Contract.methods.accrueInterest().send({ from: account });
+  try { await cErc20Contract.methods.accrueInterest().send({ from: account, nonce: await web3.eth.getTransactionCount(account) }); } catch (error) { console.error(error); }
+  try { await cErc20Contract.methods.accrueInterest().send({ from: account, nonce: await web3.eth.getTransactionCount(account) }); } catch (error) { console.error(error); }
 }
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
@@ -74,16 +75,15 @@ contract("RariFundManager v0.3.0", accounts => {
     let postDepositRftBalance = await fundTokenInstance.balanceOf.call(accounts[1]);
     assert(postDepositRftBalance.gt(initialRftBalance));
 
-    // Check initial raw interest accrued and interest fees generated
+    // Check initial raw interest accrued, interest accrued, and interest fees generated
     initialRawInterestAccrued = await fundManagerInstance.getRawInterestAccrued.call();
     initialInterestAccrued = await fundManagerInstance.getInterestAccrued.call();
     initialInterestFeesGenerated = await fundManagerInstance.getInterestFeesGenerated.call();
 
     // Force accrue interest
     await forceAccrueCompound(currencyCode, accounts[0]);
-    assert(nowInterestAccrued.gt(initialRawInterestAccrued));
 
-    // Check interest fees generated
+    // Check raw interest accrued, interest accrued, and interest fees generated
     nowRawInterestAccrued = await fundManagerInstance.getRawInterestAccrued.call();
     assert(nowRawInterestAccrued.gt(initialRawInterestAccrued));
     nowInterestAccrued = await fundManagerInstance.getInterestAccrued.call();

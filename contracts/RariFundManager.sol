@@ -18,7 +18,7 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/drafts/SignedSafeMath.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 
 import "./lib/RariFundController.sol";
@@ -33,6 +33,7 @@ import "./RariFundToken.sol";
 contract RariFundManager is Ownable {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
+    using SafeERC20 for IERC20;
 
     /**
      * @dev Boolean that, if true, disables deposits to and withdrawals from this RariFundManager.
@@ -161,9 +162,9 @@ contract RariFundManager is Ownable {
 
             processPendingWithdrawals(_supportedCurrencies[i]);
 
-            ERC20 token = ERC20(_erc20Contracts[currencyCode]);
+            IERC20 token = IERC20(_erc20Contracts[currencyCode]);
             uint256 balance = token.balanceOf(address(this));
-            if (balance > 0) require(token.transfer(newContract, balance), "Failed to transfer tokens to new FundManager.");
+            if (balance > 0) token.safeTransfer(newContract, balance);
         }
 
         emit FundManagerUpgraded(newContract);
@@ -270,7 +271,7 @@ contract RariFundManager is Ownable {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
 
-        ERC20 token = ERC20(erc20Contract);
+        IERC20 token = IERC20(erc20Contract);
         uint256 totalBalance = token.balanceOf(address(this));
         for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++) totalBalance = totalBalance.add(RariFundController.getPoolBalance(_poolsByCurrency[currencyCode][i], erc20Contract));
         for (uint256 i = 0; i < _withdrawalQueues[currencyCode].length; i++) totalBalance = totalBalance.sub(_withdrawalQueues[currencyCode][i].amount);
@@ -287,9 +288,9 @@ contract RariFundManager is Ownable {
 
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
-            ERC20Detailed token = ERC20Detailed(_erc20Contracts[currencyCode]);
-            uint256 tokenDecimals = token.decimals();
-            uint256 balance = getRawFundBalance(_supportedCurrencies[i]);
+            address erc20Contract = _erc20Contracts[currencyCode];
+            uint256 tokenDecimals = erc20Contract == 0xdAC17F958D2ee523a2206206994597C13D831ec7 ? 6 : ERC20Detailed(erc20Contract).decimals();
+            uint256 balance = getRawFundBalance(currencyCode);
             uint256 balanceUsd = 18 >= tokenDecimals ? balance.mul(10 ** (uint256(18).sub(tokenDecimals))) : balance.div(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
             totalBalance = totalBalance.add(balanceUsd);
         }
@@ -386,8 +387,7 @@ contract RariFundManager is Ownable {
         require(isCurrencyAccepted(currencyCode), "This currency is not currently accepted; please convert your funds to an accepted currency before depositing.");
         require(amount > 0, "Deposit amount must be greater than 0.");
 
-        ERC20Detailed token = ERC20Detailed(erc20Contract);
-        uint256 tokenDecimals = token.decimals();
+        uint256 tokenDecimals = erc20Contract == 0xdAC17F958D2ee523a2206206994597C13D831ec7 ? 6 : ERC20Detailed(erc20Contract).decimals();
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
         uint256 rftAmount = 0;
@@ -401,7 +401,7 @@ contract RariFundManager is Ownable {
         require(initialBalanceUsd.add(amountUsd) <= _accountBalanceLimitUsd || msg.sender == _interestFeeMasterBeneficiary, "Making this deposit would cause this account's balance to exceed the maximum.");
 
         // Make sure the user must approve the transfer of tokens before calling the deposit function
-        require(token.transferFrom(msg.sender, address(this), amount), "Failed to transfer input tokens.");
+        IERC20(erc20Contract).safeTransferFrom(msg.sender, address(this), amount);
         _netDeposits = _netDeposits.add(int256(amountUsd));
         require(rariFundToken.mint(msg.sender, rftAmount), "Failed to mint output tokens.");
         emit Deposit(currencyCode, msg.sender, amount);
@@ -422,8 +422,8 @@ contract RariFundManager is Ownable {
         require(erc20Contract != address(0), "Invalid currency code.");
         require(amount > 0, "Withdrawal amount must be greater than 0.");
 
-        ERC20Detailed token = ERC20Detailed(erc20Contract);
-        uint256 tokenDecimals = token.decimals();
+        uint256 tokenDecimals = erc20Contract == 0xdAC17F958D2ee523a2206206994597C13D831ec7 ? 6 : ERC20Detailed(erc20Contract).decimals();
+        IERC20 token = IERC20(erc20Contract);
         uint256 contractBalance = token.balanceOf(address(this));
 
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
@@ -441,7 +441,7 @@ contract RariFundManager is Ownable {
         _netDeposits = _netDeposits.sub(int256(amountUsd));
 
         if (amount <= contractBalance) {
-            require(token.transfer(msg.sender, amount), "Failed to transfer output tokens.");
+            token.safeTransfer(msg.sender, amount);
             emit Withdrawal(currencyCode, msg.sender, amount);
         } else  {
             _withdrawalQueues[currencyCode].push(PendingWithdrawal(msg.sender, amount));
@@ -459,14 +459,14 @@ contract RariFundManager is Ownable {
     function processPendingWithdrawals(string memory currencyCode) public returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        ERC20 token = ERC20(erc20Contract);
+        IERC20 token = IERC20(erc20Contract);
         uint256 balanceHere = token.balanceOf(address(this));
         uint256 total = 0;
         for (uint256 i = 0; i < _withdrawalQueues[currencyCode].length; i++) total = total.add(_withdrawalQueues[currencyCode][i].amount);
         if (total > balanceHere) revert("Not enough balance to process pending withdrawals.");
 
         for (uint256 i = 0; i < _withdrawalQueues[currencyCode].length; i++) {
-            require(token.transfer(_withdrawalQueues[currencyCode][i].payee, _withdrawalQueues[currencyCode][i].amount), "Failed to transfer tokens.");
+            token.safeTransfer(_withdrawalQueues[currencyCode][i].payee, _withdrawalQueues[currencyCode][i].amount);
             emit Withdrawal(currencyCode, _withdrawalQueues[currencyCode][i].payee, _withdrawalQueues[currencyCode][i].amount);
         }
 
@@ -763,13 +763,12 @@ contract RariFundManager is Ownable {
         require(erc20Contract != address(0), "Invalid currency code.");
         
         uint256 amountUsd = getInterestFeesUnclaimed();
-        ERC20Detailed token = ERC20Detailed(erc20Contract);
-        uint256 tokenDecimals = token.decimals();
+        uint256 tokenDecimals = erc20Contract == 0xdAC17F958D2ee523a2206206994597C13D831ec7 ? 6 : ERC20Detailed(erc20Contract).decimals();
         uint256 amount = 18 >= tokenDecimals ? amountUsd.div(10 ** (uint256(18).sub(tokenDecimals))) : amountUsd.mul(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
         require(amount > 0, "No new fees are available to claim.");
         
         _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
-        require(ERC20(erc20Contract).transfer(_interestFeeMasterBeneficiary, amount), "Failed to transfer fees to beneficiary.");
+        IERC20(erc20Contract).safeTransfer(_interestFeeMasterBeneficiary, amount);
         
         emit InterestFeeWithdrawal(_interestFeeMasterBeneficiary, amountUsd, currencyCode, amount);
         return true;

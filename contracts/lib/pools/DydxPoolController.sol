@@ -16,7 +16,7 @@ pragma solidity ^0.5.7;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 import "../../external/dydx/SoloMargin.sol";
 import "../../external/dydx/lib/Account.sol";
@@ -29,6 +29,7 @@ import "../../external/dydx/lib/Types.sol";
  */
 library DydxPoolController {
     using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
     address constant private SOLO_MARGIN_CONTRACT = 0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e;
     SoloMargin constant private _soloMargin = SoloMargin(SOLO_MARGIN_CONTRACT);
@@ -68,8 +69,7 @@ library DydxPoolController {
      * @return Boolean indicating success.
      */
     function approve(address erc20Contract, uint256 amount) internal returns (bool) {
-        ERC20 underlying = ERC20(erc20Contract);
-        require(underlying.approve(SOLO_MARGIN_CONTRACT, amount), "Approval of tokens to dYdX failed.");
+        IERC20(erc20Contract).safeApprove(SOLO_MARGIN_CONTRACT, amount);
         return true;
     }
 
