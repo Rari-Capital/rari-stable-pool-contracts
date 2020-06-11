@@ -9,8 +9,16 @@ const RariFundToken = artifacts.require("RariFundToken");
 
 async function forceAccrueCompound(currencyCode, account) {
   var cErc20Contract = new web3.eth.Contract(cErc20DelegatorAbi, pools["Compound"].currencies[currencyCode].cTokenAddress);
-  try { await cErc20Contract.methods.accrueInterest().send({ from: account, nonce: await web3.eth.getTransactionCount(account) }); } catch (error) { console.error(error); }
-  try { await cErc20Contract.methods.accrueInterest().send({ from: account, nonce: await web3.eth.getTransactionCount(account) }); } catch (error) { console.error(error); }
+  
+  try {
+    await cErc20Contract.methods.accrueInterest().send({ from: account, nonce: await web3.eth.getTransactionCount(account) });
+  } catch (error) {
+    try {
+      await cErc20Contract.methods.accrueInterest().send({ from: account, nonce: await web3.eth.getTransactionCount(account) });
+    } catch (error) {
+      console.error("Both attempts to force accrue interest on Compound " + currencyCode + " failed. Not trying again!");
+    }
+  }
 }
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
@@ -28,8 +36,8 @@ contract("RariFundManager v0.3.0", accounts => {
     await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0] });
 
     // Approve and deposit to pool (using Compound as an example)
-    await fundManagerInstance.approveToPool(1, currencyCode, amountBN, { from: accounts[0] });
-    await fundManagerInstance.depositToPool(1, currencyCode, amountBN, { from: accounts[0] });
+    await fundManagerInstance.approveToPool(1, currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    await fundManagerInstance.depositToPool(1, currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
 
     // Set interest fee rate
     await fundManagerInstance.setInterestFeeRate(web3.utils.toBN(1e17), { from: accounts[0] });

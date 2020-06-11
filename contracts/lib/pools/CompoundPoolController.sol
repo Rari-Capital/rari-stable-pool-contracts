@@ -40,7 +40,7 @@ library CompoundPoolController {
 
     /**
      * @dev Returns the fund's balance of the specified currency in the Compound pool.
-     * We would simply be using balanceOfUnderlying, but exchangeRateCurrent is nonReentrant, which causes us issues
+     * We would simply be using balanceOfUnderlying, but exchangeRateCurrent is nonReentrant, which causes us issues.
      * @param erc20Contract The ERC20 contract address of the token.
      */
     function getBalance(address erc20Contract) internal returns (uint256) {
