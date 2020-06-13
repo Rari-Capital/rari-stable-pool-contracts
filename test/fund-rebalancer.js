@@ -222,7 +222,7 @@ contract("RariFundManager v0.3.0", accounts => {
       // Fill 0x orders
       // TODO: Ideally, we add actually call rari-fund-rebalancer
       await fundManagerInstance.approveTo0x(currencyCombinations[i][0], maxInputAmountBN);
-      await fundManagerWeb3Instance.methods.fill0xOrdersUpTo(orders, signatures, takerAssetFilledAmountBN.toString()).send({ from: accounts[0], value: web3.utils.toBN(protocolFee).toString() });
+      await fundManagerWeb3Instance.methods.marketSell0xOrdersFillOrKill(orders, signatures, takerAssetFilledAmountBN.toString()).send({ from: accounts[0], value: web3.utils.toBN(protocolFee).toString() });
 
       // Check source and destination wallet balances
       let newInputBalanceBN = web3.utils.toBN(await inputErc20Contract.methods.balanceOf(RariFundManager.address).call());

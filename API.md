@@ -8,7 +8,7 @@ Returns the amount of RFT owned by `account`.
 
 Parameters:
 
- - `account` (address) - The account whose balance we are retrieving.
+* `account` (address) - The account whose balance we are retrieving.
 
 ## uint256 RariFundManager.balanceOf(address account)
 
@@ -16,11 +16,11 @@ Returns an account's total balance in USD (scaled by 1e18).
 
 Parameters:
 
- - `account` (address) - The account whose balance we are calculating.
+* `account` (address) - The account whose balance we are calculating.
 
 Development notes:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.*
+* *Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
 ## bool RariFundManager.isCurrencyAccepted(string currencyCode)
 
@@ -28,17 +28,20 @@ Returns a boolean indicating if deposits in `currencyCode` are currently accepte
 
 Parameters:
 
- - `currencyCode` (string): The currency code to check.
+* `currencyCode` (string): The currency code to check.
 
 ## bool RariFundManager.deposit(string currencyCode, uint256 amount)
 
 Deposits funds to RariFund in exchange for RFT.
 
+You may only deposit currencies accepted by the fund (see `RariFundManager.isCurrencyAccepted(string currencyCode)`). However, exchanges are integrated into the web client via 0x Instant.
+
 Please note that you must approve RariFundManager to transfer of the necessary amount of tokens.
 
 Parameters:
- - `currencyCode` (string): The currency code of the token to be deposited.
- - `amount` (uint256): The amount of tokens to be deposited.
+
+* `currencyCode` (string): The currency code of the token to be deposited.
+* `amount` (uint256): The amount of tokens to be deposited.
 
 Return value: Boolean indicating success.
 
@@ -46,44 +49,24 @@ Return value: Boolean indicating success.
 
 Withdraws funds from RariFund in exchange for RFT.
 
+You may only withdraw currencies held by the fund (see `RariFundManager.getRawFundBalance(string currencyCode)`). However, exchanges are integrated into the web client via 0x Instant.
+
 Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
 
 Parameters:
- - `currencyCode` (string): The currency code of the token to be withdrawn.
- - `amount` (uint256): The amount of tokens to be withdrawn.
+
+* `currencyCode` (string): The currency code of the token to be withdrawn.
+* `amount` (uint256): The amount of tokens to be withdrawn.
 
 Return value: Boolean indicating success.
 
-## uint256 RariFundManager.countPendingWithdrawals(string currencyCode)
-
-Returns the number of pending withdrawals in the queue of the specified currency.
-
-Parameters:
- - `currencyCode` (string): The currency code of the pending withdrawals.
-
-## uint256 RariFundManager.getPendingWithdrawalPayee(string currencyCode, uint256 index)
-
-Returns the payee of a pending withdrawal of the specified currency.
-
-Parameters:
- - `currencyCode` (string): The currency code of the pending withdrawal.
- - `index` (uint256): The index of the pending withdrawal.
-
-## uint256 RariFundManager.getPendingWithdrawalAmount(string currencyCode, uint256 index)
-
-Returns the amount of a pending withdrawal of the specified currency.
-
-Parameters:
- - `currencyCode` (string): The currency code of the pending withdrawal.
- - `index` (uint256): The index of the pending withdrawal.
-
 ## uint256 RariFundManager.getFundBalance()
 
-Returns the fund's total investor balance (all RFT holders' funds but not unclaimed fees or pending withdrawals) of all currencies in USD (scaled by 1e18).
+Returns the fund's total investor balance (all RFT holders' funds but not unclaimed fees) of all currencies in USD (scaled by 1e18).
 
 Development notes:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.*
+* *Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
 ## int256 RariFundManager.getInterestAccrued()
 
@@ -91,7 +74,7 @@ Returns the total amount of interest accrued by past and current RFT holders (ex
 
 Development notes:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.*
+* *Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
 ## uint256 RariFundManager.getInterestFeeRate()
 
@@ -103,7 +86,7 @@ Returns the amount of interest fees accrued by beneficiaries in USD (scaled by 1
 
 Development notes:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.*
+* *Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
 ## int256 RariFundManager.getRawInterestAccrued()
 
@@ -111,12 +94,24 @@ Returns the raw total amount of interest accrued by the fund as a whole (includi
 
 Development notes:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state.*
+* *Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
 ## uint256 RariFundManager.getRawFundBalance()
 
-Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees + all pending withdrawals) of all currencies in USD (scaled by 1e18).
+Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees) of all currencies in USD (scaled by 1e18).
 
 Development notes:
 
- - *Ideally, we can add the view modifier, but Compound's getUnderlyingBalance function (called by getRawFundBalance) potentially modifies the state*
+* *Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
+
+## uint256 RariFundManager.getRawFundBalance(string currencyCode)
+
+Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees) of the specified currency.
+
+Parameters:
+
+* `currencyCode` (string): The currency code of the balance to be calculated.
+
+Development notes:
+
+* *Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `RariFundController.getPoolBalance`) potentially modifies the state.*

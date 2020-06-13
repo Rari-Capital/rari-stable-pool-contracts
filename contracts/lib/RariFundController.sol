@@ -113,7 +113,7 @@ library RariFundController {
      * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
      * @return Array containing the input amount sold and output amount bought.
      */
-    function fill0xOrdersUpTo(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public returns (uint256[2] memory) {
+    function marketSell0xOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public returns (uint256[2] memory) {
         return ZeroExExchangeController.fillOrdersUpTo(orders, signatures, takerAssetFillAmount);
     }
 }
