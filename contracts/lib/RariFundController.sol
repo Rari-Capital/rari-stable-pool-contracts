@@ -17,6 +17,8 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
+import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
+
 import "./pools/DydxPoolController.sol";
 import "./pools/CompoundPoolController.sol";
 import "./exchanges/ZeroExExchangeController.sol";
@@ -114,6 +116,6 @@ library RariFundController {
      * @return Array containing the input amount sold and output amount bought.
      */
     function marketSell0xOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public returns (uint256[2] memory) {
-        return ZeroExExchangeController.fillOrdersUpTo(orders, signatures, takerAssetFillAmount);
+        return ZeroExExchangeController.marketSellOrdersFillOrKill(orders, signatures, takerAssetFillAmount);
     }
 }

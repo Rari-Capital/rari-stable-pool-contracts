@@ -3,6 +3,7 @@ const Web3 = require('web3');
 var RariFundController = artifacts.require("./lib/RariFundController.sol");
 var RariFundManager = artifacts.require("./RariFundManager.sol");
 var RariFundToken = artifacts.require("./RariFundToken.sol");
+var RariFundProxy = artifacts.require("./RariFundProxy.sol");
 
 module.exports = function(deployer, network, accounts) {
   var rariFundToken = null;
@@ -26,6 +27,14 @@ module.exports = function(deployer, network, accounts) {
   }).then(function(_rariFundManager) {
     rariFundManager = _rariFundManager;
     return rariFundManager.setFundToken(RariFundToken.address);
+  }).then(function() {
+    return deployer.deploy(RariFundProxy);
+  }).then(function() {
+    return rariFundManager.setFundProxy(RariFundProxy.address);
+  }).then(function() {
+    return RariFundProxy.deployed();
+  }).then(function(rariFundProxy) {
+    return rariFundProxy.setFundManager(RariFundManager.address);
   }).then(function() {
     return rariFundManager.setAccountBalanceLimitUsd(Web3.utils.toBN(250 * 1e18));
   }).then(function() {

@@ -21,14 +21,17 @@ import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 
+import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
+
 import "./lib/RariFundController.sol";
 import "./RariFundToken.sol";
+import "./RariFundProxy.sol";
 
 /**
  * @title RariFundManager
  * @dev This contract is the primary contract powering RariFund.
- * Anyone can deposit to the fund with deposit(string currencyCode, uint256 amount)
- * Anyone can withdraw their funds (with interest) from the fund with withdraw(string currencyCode, uint256 amount)
+ * Anyone can deposit to the fund with deposit(string currencyCode, uint256 amount).
+ * Anyone can withdraw their funds (with interest) from the fund with withdraw(string currencyCode, uint256 amount).
  */
 contract RariFundManager is Ownable {
     using SafeMath for uint256;
@@ -44,6 +47,11 @@ contract RariFundManager is Ownable {
      * @dev Address of the RariFundToken.
      */
     address private _rariFundTokenContract;
+
+    /**
+     * @dev Address of the RariFundProxy.
+     */
+    address private _rariFundProxyContract;
 
     /**
      * @dev Address of the rebalancer.
@@ -139,8 +147,7 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Payable fallback function that forwards `msg.value` to the team.
-     * Called by 0x exchange to refund unspent protocol fee.
+     * @dev Payable fallback function called by 0x exchange to refund unspent protocol fee.
      */
     function () external payable { }
 
@@ -148,16 +155,6 @@ contract RariFundManager is Ownable {
      * @dev Emitted when RariFundManager is upgraded.
      */
     event FundManagerUpgraded(address newContract);
-
-    /**
-     * @dev Emitted when the RariFundToken of the RariFundManager is set.
-     */
-    event FundTokenSet(address newContract);
-
-    /**
-     * @dev Emitted when the rebalancer of the RariFundManager is set.
-     */
-    event FundRebalancerSet(address newAddress);
 
     /**
      * @dev Upgrades RariFundManager.
@@ -184,15 +181,13 @@ contract RariFundManager is Ownable {
             rariFundToken.renounceMinter();
         }
 
-        // Withdraw all tokens from all pools, process pending withdrawals, and transfer them to new FundManager
+        // Withdraw all tokens from all pools and transfer them to new FundManager
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
 
             for (uint256 j = 0; j < _poolsByCurrency[currencyCode].length; j++)
                 if (RariFundController.getPoolBalance(_poolsByCurrency[currencyCode][j], _erc20Contracts[currencyCode]) > 0)
                     RariFundController.withdrawAllFromPool(_poolsByCurrency[currencyCode][j], _erc20Contracts[currencyCode]);
-
-            processPendingWithdrawals(_supportedCurrencies[i]);
 
             IERC20 token = IERC20(_erc20Contracts[currencyCode]);
             uint256 balance = token.balanceOf(address(this));
@@ -241,6 +236,11 @@ contract RariFundManager is Ownable {
     }
 
     /**
+     * @dev Emitted when the RariFundToken of the RariFundManager is set.
+     */
+    event FundTokenSet(address newContract);
+
+    /**
      * @dev Sets or upgrades the RariFundToken of the RariFundManager.
      * @param newContract The address of the new RariFundToken contract.
      */
@@ -248,6 +248,33 @@ contract RariFundManager is Ownable {
         _rariFundTokenContract = newContract;
         emit FundTokenSet(newContract);
     }
+
+    /**
+     * @dev Emitted when the RariFundProxy of the RariFundManager is set.
+     */
+    event FundProxySet(address newContract);
+
+    /**
+     * @dev Sets or upgrades the RariFundProxy of the RariFundManager.
+     * @param newContract The address of the new RariFundProxy contract.
+     */
+    function setFundProxy(address newContract) external onlyOwner {
+        _rariFundProxyContract = newContract;
+        emit FundProxySet(newContract);
+    }
+
+    /**
+     * @dev Throws if called by any account other than the RariFundProxy.
+     */
+    modifier onlyProxy() {
+        require(_rariFundProxyContract == msg.sender, "Caller is not the RariFundProxy.");
+        _;
+    }
+
+    /**
+     * @dev Emitted when the rebalancer of the RariFundManager is set.
+     */
+    event FundRebalancerSet(address newAddress);
 
     /**
      * @dev Sets or upgrades the rebalancer of the RariFundManager.
@@ -396,22 +423,23 @@ contract RariFundManager is Ownable {
     /**
      * @dev Emitted when funds have been deposited to RariFund.
      */
-    event Deposit(string indexed currencyCode, address indexed sender, uint256 amount, uint256 amountUsd, uint256 rftMinted);
+    event Deposit(string indexed currencyCode, address indexed sender, address indexed payee, uint256 amount, uint256 amountUsd, uint256 rftMinted);
 
     /**
      * @dev Emitted when funds have been withdrawn from RariFund.
      */
-    event Withdrawal(string indexed currencyCode, address indexed payee, uint256 amount, uint256 amountUsd, uint256 rftBurned);
+    event Withdrawal(string indexed currencyCode, address indexed sender, address indexed payee, uint256 amount, uint256 amountUsd, uint256 rftBurned);
 
     /**
-     * @notice Deposits funds to RariFund in exchange for RFT.
+     * @notice Internal function to deposit funds from `msg.sender` to RariFund in exchange for RFT minted to `to`.
      * You may only deposit currencies accepted by the fund (see `isCurrencyAccepted(string currencyCode)`).
-     * Please note that you must approve RariFundManager to transfer of the necessary amount of tokens.
-     * @param currencyCode The current code of the token to be deposited.
+     * Please note that you must approve RariFundManager to transfer at least `amount`.
+     * @param to The address that will receieve the minted RFT.
+     * @param currencyCode The currency code of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
      * @return Boolean indicating success.
      */
-    function deposit(string calldata currencyCode, uint256 amount) external returns (bool) {
+    function _depositTo(address to, string memory currencyCode, uint256 amount) internal returns (bool) {
         // Input validation
         require(!_fundDisabled, "Deposits to and withdrawals from the fund are currently disabled.");
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
@@ -440,20 +468,48 @@ contract RariFundManager is Ownable {
         // Transfer funds from msg.sender and mint RFT
         IERC20(erc20Contract).safeTransferFrom(msg.sender, address(this), amount); // The user must approve the transfer of tokens beforehand
         _netDeposits = _netDeposits.add(int256(amountUsd));
-        require(rariFundToken.mint(msg.sender, rftAmount), "Failed to mint output tokens.");
-        emit Deposit(currencyCode, msg.sender, amount, amountUsd, rftAmount);
+        require(rariFundToken.mint(to, rftAmount), "Failed to mint output tokens.");
+        emit Deposit(currencyCode, msg.sender, to, amount, amountUsd, rftAmount);
         return true;
     }
 
     /**
-     * @notice Withdraws funds from RariFund in exchange for RFT.
+     * @notice Deposits funds to RariFund in exchange for RFT.
+     * You may only deposit currencies accepted by the fund (see `isCurrencyAccepted(string currencyCode)`).
+     * Please note that you must approve RariFundManager to transfer at least `amount`.
+     * @param currencyCode The currency code of the token to be deposited.
+     * @param amount The amount of tokens to be deposited.
+     * @return Boolean indicating success.
+     */
+    function deposit(string calldata currencyCode, uint256 amount) external returns (bool) {
+        require(_depositTo(msg.sender, currencyCode, amount), "Deposit failed.");
+        return true;
+    }
+
+    /**
+     * @dev Deposits funds from `msg.sender` (RariFundProxy) to RariFund in exchange for RFT minted to `to`.
+     * You may only deposit currencies accepted by the fund (see `isCurrencyAccepted(string currencyCode)`).
+     * Please note that you must approve RariFundManager to transfer at least `amount`.
+     * @param to The address that will receieve the minted RFT.
+     * @param currencyCode The currency code of the token to be deposited.
+     * @param amount The amount of tokens to be deposited.
+     * @return Boolean indicating success.
+     */
+    function depositTo(address to, string calldata currencyCode, uint256 amount) external onlyProxy returns (bool) {
+        require(_depositTo(to, currencyCode, amount), "Deposit failed.");
+        return true;
+    }
+
+    /**
+     * @dev Internal function to withdraw funds from RariFund to `msg.sender` in exchange for RFT burned from `from`.
      * You may only withdraw currencies held by the fund (see `getRawFundBalance(string currencyCode)`).
      * Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
-     * @param currencyCode The current code of the token to be withdrawn.
+     * @param from The address from which RFT will be burned.
+     * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
      * @return Boolean indicating success.
      */
-    function withdraw(string calldata currencyCode, uint256 amount) external returns (bool) {
+    function _withdrawFrom(address from, string memory currencyCode, uint256 amount) internal returns (bool) {
         // Input validation
         require(!_fundDisabled, "Deposits to and withdrawals from the fund are currently disabled.");
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
@@ -490,10 +546,37 @@ contract RariFundManager is Ownable {
         require(rftAmount > 0, "Withdrawal amount is so small that no RFT would be burned.");
 
         // Burn RFT and transfer funds to msg.sender
-        rariFundToken.burnFrom(msg.sender, rftAmount); // The user must approve the burning of tokens beforehand
+        rariFundToken.burnFrom(from, rftAmount); // The user must approve the burning of tokens beforehand
         _netDeposits = _netDeposits.sub(int256(amountUsd));
         token.safeTransfer(msg.sender, amount);
-        emit Withdrawal(currencyCode, msg.sender, amount, amountUsd, rftAmount);
+        emit Withdrawal(currencyCode, from, msg.sender, amount, amountUsd, rftAmount);
+        return true;
+    }
+
+    /**
+     * @notice Withdraws funds from RariFund in exchange for RFT.
+     * You may only withdraw currencies held by the fund (see `getRawFundBalance(string currencyCode)`).
+     * Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
+     * @param currencyCode The currency code of the token to be withdrawn.
+     * @param amount The amount of tokens to be withdrawn.
+     * @return Boolean indicating success.
+     */
+    function withdraw(string calldata currencyCode, uint256 amount) external returns (bool) {
+        require(_withdrawFrom(msg.sender, currencyCode, amount), "Withdrawal failed.");
+        return true;
+    }
+
+    /**
+     * @dev Withdraws funds from RariFund to `msg.sender` (RariFundProxy) in exchange for RFT burned from `from`.
+     * You may only withdraw currencies held by the fund (see `getRawFundBalance(string currencyCode)`).
+     * Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
+     * @param from The address from which RFT will be burned.
+     * @param currencyCode The currency code of the token to be withdrawn.
+     * @param amount The amount of tokens to be withdrawn.
+     * @return Boolean indicating success.
+     */
+    function withdrawFrom(address from, string calldata currencyCode, uint256 amount) external onlyProxy returns (bool) {
+        require(_withdrawFrom(from, currencyCode, amount), "Withdrawal failed.");
         return true;
     }
 
@@ -566,7 +649,7 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Fills 0x exchange orders up to a certain amount of input and up to a certain price.
+     * @dev Market sell to 0x exchange orders (reverting if `takerAssetFillAmount` is not filled).
      * We should be able to make this function external and use calldata for all parameters, but Solidity does not support calldata structs (https://github.com/ethereum/solidity/issues/5479).
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
@@ -709,7 +792,7 @@ contract RariFundManager is Ownable {
         _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
         _netDeposits = _netDeposits.add(int256(amountUsd));
         require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
-        emit Deposit("USD", _interestFeeMasterBeneficiary, amountUsd);
+        emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
         
         emit InterestFeeDeposit(_interestFeeMasterBeneficiary, amountUsd);
         return true;
@@ -741,7 +824,7 @@ contract RariFundManager is Ownable {
         _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
         _netDeposits = _netDeposits.add(int256(amountUsd));
         require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
-        emit Deposit("USD", _interestFeeMasterBeneficiary, amountUsd);
+        emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
         
         emit InterestFeeDeposit(_interestFeeMasterBeneficiary, amountUsd);
         return true;

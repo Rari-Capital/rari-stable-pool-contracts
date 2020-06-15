@@ -36,7 +36,7 @@ Deposits funds to RariFund in exchange for RFT.
 
 You may only deposit currencies accepted by the fund (see `RariFundManager.isCurrencyAccepted(string currencyCode)`). However, exchanges are integrated into the web client via 0x Instant.
 
-Please note that you must approve RariFundManager to transfer of the necessary amount of tokens.
+Please note that you must approve RariFundManager to transfer at least `amount`.
 
 Parameters:
 

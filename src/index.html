@@ -33,12 +33,25 @@
       </div>
       
       <div class="row">
+        <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+          <div class="panel panel-default panel-horizontal">
+            <div class="panel-heading">
+              <h3 class="panel-title" style="white-space: nowrap; font-size: 2.5rem;">APY Today</h3>
+            </div>
+            <div class="panel-body flex-grow-1 text-md-right">
+              <kbd class="d-inline-block display-4" id="APYToday">?%</kbd>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
         <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
           <div class="panel panel-default panel-horizontal">
             <div class="panel-heading">
               <h3 class="panel-title" style="white-space: nowrap;">Fund Stablecoin Balance</h3>
             </div>
-            <div class="panel-body flex-grow-1 text-right">
+            <div class="panel-body flex-grow-1 text-md-right">
               <kbd class="d-inline-block"><span id="USDBalance">?</span> USD (DAI + USDC + USDT)</kbd>
             </div>
           </div>
@@ -49,11 +62,26 @@
         <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
           <div class="panel panel-default">
             <div class="panel-heading">
-              <h3 class="panel-title">Fund APR Comparison Chart</h3>
+              <h3 class="panel-title">Fund APY Comparison Chart</h3>
             </div>
             <div class="panel-body">
               <canvas id="chart-aprs"></canvas>
-              <small class="d-block text-center mt-2">*Data before our inception in early 2020 based on theoretical returns.</small>
+              <small class="d-block text-center mt-2">*Data before our launch in June 2020 based on theoretical returns.</small>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="row">
+        <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Fund Return Comparison Chart</h3>
+            </div>
+            <div class="panel-body">
+              <small class="d-block text-center mb-2">The following chart tracks the theoretical growth of $10,000 USD over the past year in Rari compared to other protocols.</small>
+              <canvas id="chart-return"></canvas>
+              <small class="d-block text-center mt-2">*Data before our launch in June 2020 based on theoretical returns.</small>
             </div>
           </div>
         </div>
@@ -105,6 +133,7 @@
                   <option>USDT</option>
                 </select>
               </div>
+              <div class="form-group" id="DepositSlippage" style="display: none;">Slippage: <kbd class="text-red">0%</kbd></div>
               <button class="btn btn-success" id="depositButton" type="button" disabled>Deposit</button><br /><br />
               <h4>Withdraw</h4>
               <div class="form-group input-group">
@@ -115,6 +144,7 @@
                   <option>USDT</option>
                 </select>
               </div>
+              <div class="form-group" id="WithdrawSlippage" style="display: none;">Slippage: <kbd class="text-red">0%</kbd></div>
               <button class="btn btn-danger" id="withdrawButton" type="button" disabled>Withdraw</button>
             </div>
           </div>
@@ -165,10 +195,7 @@
     <script type="text/javascript" src="https://unpkg.com/@portis/web3"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/authereum@latest/authereum.js"></script>
 
-    <!-- 0x Instant -->
-    <script src="https://instant.0x.org/v3/instant.js"></script>
-
     <!-- Rari Fund Web App -->
-    <script src="js/app.js?v=18"></script>
+    <script src="js/app.js?v=21"></script>
   </body>
 </html>
