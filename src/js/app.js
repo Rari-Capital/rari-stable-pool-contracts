@@ -840,7 +840,7 @@ App = {
       // Get orders from 0x swap API for each input currency candidate
       for (var i = 0; i < inputCandidates.length; i++) {
         try {
-          var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN] = await App.get0xSwapOrders(App.contracts[inputCandidates[i].currencyCode].options.address, token === "ETH" ? "WETH" : App.contracts[token].options.address, inputCandidates[i].rawFundBalanceBN, amountBN);
+          var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN] = await App.get0xSwapOrders(App.contracts[inputCandidates[i].currencyCode].options.address, token === "ETH" ? "WETH" : App.contracts[token].options.address, inputCandidates[i].rawFundBalanceBN, amountBN);
         } catch (err) {
           return toastr["error"]("Failed to get swap orders from 0x API: " + err, "Withdrawal failed");
         }
@@ -874,26 +874,30 @@ App = {
         inputCandidates[i].inputFillAmountBN = inputFilledAmountBN;
         inputCandidates[i].protocolFee = protocolFee;
         inputCandidates[i].takerAssetFillAmountBN = takerAssetFilledAmountBN;
+        inputCandidates[i].makerAssetFillAmountBN = makerAssetFilledAmountBN;
       }
 
       // Sort candidates from lowest to highest takerAssetFillAmount
-      inputCandidates.sort((a, b) => a.takerAssetFilledAmountBN.gt(b.takerAssetFilledAmountBN) ? 1 : -1);
+      inputCandidates.sort((a, b) => a.takerAssetFillAmountBN.gt(b.takerAssetFillAmountBN) ? 1 : -1);
+
+      console.log(inputCandidates);
 
       // Loop through input currency candidates until we fill the withdrawal
       for (var i = 0; i < inputCandidates.length; i++) {
         // If there is enough input in the fund and enough 0x orders to fulfill the rest of the withdrawal amount, withdraw and exchange
-        if (inputCandidates[i].takerAssetFillAmountBN >= amountBN.sub(amountWithdrawnBN)) {
-          var thisOutputAmount = amountBN.sub(amountWithdrawnBN);
-          var thisInputAmount = inputCandidates[i].inputFillAmountBN.mul(thisOutputAmount).div(web3.utils.toBN(inputCandidates[i].takerAssetFillAmountBN));
+        if (inputCandidates[i].makerAssetFillAmountBN.gte(amountBN.sub(amountWithdrawnBN))) {
+          var thisOutputAmountBN = amountBN.sub(amountWithdrawnBN);
+          var thisInputAmountBN = inputCandidates[i].inputFillAmountBN.mul(thisOutputAmountBN).div(web3.utils.toBN(inputCandidates[i].makerAssetFillAmountBN));
+          var thisTakerAssetFillAmount = inputCandidates[i].takerAssetFillAmountBN.mul(thisOutputAmountBN).div(web3.utils.toBN(inputCandidates[i].makerAssetFillAmountBN));
 
           inputCurrencyCodes.push(inputCandidates[i].currencyCode);
-          inputAmountBNs.push(thisInputAmount);
+          inputAmountBNs.push(thisInputAmountBN);
           allOrders.push(inputCandidates[i].orders);
           allSignatures.push(inputCandidates[i].signatures);
-          takerAssetFillAmountBNs.push(thisOutputAmount);
+          takerAssetFillAmountBNs.push(thisTakerAssetFillAmount);
 
-          amountInputtedUsdBN.iadd(thisInputAmount.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
-          amountWithdrawnBN.iadd(thisOutputAmount);
+          amountInputtedUsdBN.iadd(thisInputAmountBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
+          amountWithdrawnBN.iadd(thisOutputAmountBN);
           totalProtocolFeeBN.iadd(web3.utils.toBN(inputCandidates[i].protocolFee));
 
           break;
@@ -908,7 +912,7 @@ App = {
           takerAssetFillAmountBNs.push(inputCandidates[i].takerAssetFillAmountBN);
 
           amountInputtedUsdBN.iadd(inputCandidates[i].inputFillAmountBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
-          amountWithdrawnBN.iadd(inputCandidates[i].takerAssetFillAmountBN);
+          amountWithdrawnBN.iadd(inputCandidates[i].makerAssetFillAmountBN);
           totalProtocolFeeBN.iadd(web3.utils.toBN(inputCandidates[i].protocolFee));
 
           i = -1;
@@ -918,6 +922,13 @@ App = {
         // Stop if we have filled the withdrawal
         if (amountWithdrawnBN.gte(amountBN)) break;
       }
+
+      // TODO: Remove log code below
+      var inputAmountStrings = [];
+      for (var i = 0; i < inputAmountBNs.length; i++) inputAmountStrings[i] = inputAmountBNs[i].toString();
+      var takerAssetFillAmountStrings = [];
+      for (var i = 0; i < takerAssetFillAmountBNs.length; i++) takerAssetFillAmountStrings[i] = takerAssetFillAmountBNs[i].toString();
+      console.log(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, takerAssetFillAmountStrings, amountWithdrawnBN.toString());
       
       // Make sure input amount is completely filled
       if (amountWithdrawnBN.lt(amountBN)) {
@@ -948,7 +959,7 @@ App = {
         for (var i = 0; i < inputAmountBNs.length; i++) inputAmountStrings[i] = inputAmountBNs[i].toString();
         var takerAssetFillAmountStrings = [];
         for (var i = 0; i < takerAssetFillAmountBNs.length; i++) takerAssetFillAmountStrings[i] = takerAssetFillAmountBNs[i].toString();
-        await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, takerAssetFillAmountStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN });
+        await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, takerAssetFillAmountStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
       } catch (err) {
         return toastr["error"]("RariFundProxy.withdrawAndExchange failed: " + err, "Withdrawal failed");
       }

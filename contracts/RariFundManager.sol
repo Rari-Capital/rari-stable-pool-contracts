@@ -461,9 +461,11 @@ contract RariFundManager is Ownable {
         else rftAmount = amountUsd;
         require(rftAmount > 0, "Deposit amount is so small that no RFT would be minted.");
         
-        // Check balance limit
-        uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? rariFundToken.balanceOf(msg.sender).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
-        require(initialBalanceUsd.add(amountUsd) <= _accountBalanceLimitUsd || msg.sender == _interestFeeMasterBeneficiary || _accountBalanceLimitWhitelist[msg.sender], "Making this deposit would cause this account's balance to exceed the maximum.");
+        // Check balance limit if `to` is not whitelisted
+        if (to != _interestFeeMasterBeneficiary && !_accountBalanceLimitWhitelist[to]) {
+            uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? rariFundToken.balanceOf(to).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
+            require(initialBalanceUsd.add(amountUsd) <= _accountBalanceLimitUsd, "Making this deposit would cause this account's balance to exceed the maximum.");
+        }
 
         // Transfer funds from msg.sender and mint RFT
         IERC20(erc20Contract).safeTransferFrom(msg.sender, address(this), amount); // The user must approve the transfer of tokens beforehand
@@ -542,7 +544,7 @@ contract RariFundManager is Ownable {
         uint256 fundBalanceUsd = getFundBalance();
         require(fundBalanceUsd > 0, "Fund balance is zero.");
         uint256 rftAmount = amountUsd.mul(rftTotalSupply).div(fundBalanceUsd);
-        require(rftAmount <= rariFundToken.balanceOf(msg.sender), "Your RFT balance is too low for a withdrawal of this amount.");
+        require(rftAmount <= rariFundToken.balanceOf(from), "Your RFT balance is too low for a withdrawal of this amount.");
         require(rftAmount > 0, "Withdrawal amount is so small that no RFT would be burned.");
 
         // Burn RFT and transfer funds to msg.sender
