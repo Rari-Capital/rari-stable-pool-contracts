@@ -483,7 +483,7 @@ contract RariFundManager is Ownable {
      * @return Boolean indicating success.
      */
     function checkAccountBalanceLimit(address to, uint256 amountUsd, RariFundToken rariFundToken, uint256 rftTotalSupply, uint256 fundBalanceUsd) internal view returns (bool) {
-        if (to != owner && to != _interestFeeMasterBeneficiary && !_accountBalanceLimitWhitelist[to]) {
+        if (to != owner() && to != _interestFeeMasterBeneficiary && !_accountBalanceLimitWhitelist[to]) {
             uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? rariFundToken.balanceOf(to).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
             if (initialBalanceUsd.add(amountUsd) > _accountBalanceLimitUsd) return false;
         }

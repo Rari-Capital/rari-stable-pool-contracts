@@ -624,23 +624,37 @@ App = {
           var makerAssetAmountBN = web3.utils.toBN(decoded.orders[i].makerAssetAmount);
 
           if (maxMakerAssetFillAmountBN !== undefined) {
-            // Calculate orderTakerAssetFillAmountBN and orderInputFillAmountBN from maxMakerAssetFillAmountBN
-            var orderMakerAssetFillAmountBN = maxMakerAssetFillAmountBN.sub(makerAssetFilledAmountBN).lte(makerAssetAmountBN) ? maxMakerAssetFillAmountBN.sub(makerAssetFilledAmountBN) : makerAssetAmountBN;
-            var orderTakerAssetFillAmountBN = orderMakerAssetFillAmountBN.mul(orderInputAmountBN).div(makerAssetAmountBN);
-            var orderInputFillAmountBN = orderMakerAssetFillAmountBN.mul(orderInputAmountBN).div(makerAssetAmountBN);
+            // maxMakerAssetFillAmountBN is specified, so use it
+            if (maxMakerAssetFillAmountBN.sub(makerAssetFilledAmountBN).lte(makerAssetAmountBN)) {
+              // Calculate orderTakerAssetFillAmountBN and orderInputFillAmountBN from maxMakerAssetFillAmountBN
+              var orderMakerAssetFillAmountBN = maxMakerAssetFillAmountBN.sub(makerAssetFilledAmountBN);
+              var orderTakerAssetFillAmountBN = orderMakerAssetFillAmountBN.mul(takerAssetAmountBN).div(makerAssetAmountBN);
+              var orderInputFillAmountBN = orderMakerAssetFillAmountBN.mul(orderInputAmountBN).div(makerAssetAmountBN);
+              console.log(orderMakerAssetFillAmountBN.toString(), orderInputFillAmountBN.toString(), makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN).toString());
+              while (makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN) < orderMakerAssetFillAmountBN) orderInputFillAmountBN.iadd(web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
+              console.log(orderMakerAssetFillAmountBN.toString(), orderInputFillAmountBN.toString(), makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN).toString());
+            } else {
+              // Fill whole order
+              var orderMakerAssetFillAmountBN = makerAssetAmountBN;
+              var orderTakerAssetFillAmountBN = takerAssetAmountBN;
+              var orderInputFillAmountBN = orderInputAmountBN;
+            }
 
+            // If this order input amount is higher than the remaining input, calculate orderTakerAssetFillAmountBN and orderMakerAssetFillAmountBN from the remaining maxInputAmountBN as usual
             if (orderInputFillAmountBN.gt(maxInputAmountBN.sub(inputFilledAmountBN))) {
               orderInputFillAmountBN = maxInputAmountBN.sub(inputFilledAmountBN);
               orderTakerAssetFillAmountBN = orderInputFillAmountBN.mul(takerAssetAmountBN).div(orderInputAmountBN);
               orderMakerAssetFillAmountBN = orderInputFillAmountBN.mul(makerAssetAmountBN).div(orderInputAmountBN);
             }
           } else {
-            // Calculate orderInputFillAmountBN and orderTakerAssetFillAmountBN from maxInputAmount
+            // maxMakerAssetFillAmountBN is not specified, so use maxInputAmountBN
             if (maxInputAmountBN.sub(inputFilledAmountBN).lte(orderInputAmountBN)) {
+              // Calculate orderInputFillAmountBN and orderTakerAssetFillAmountBN from the remaining maxInputAmountBN as usual
               var orderInputFillAmountBN = maxInputAmountBN.sub(inputFilledAmountBN);
               var orderTakerAssetFillAmountBN = orderInputFillAmountBN.mul(takerAssetAmountBN).div(orderInputAmountBN);
               var orderMakerAssetFillAmountBN = orderInputFillAmountBN.mul(makerAssetAmountBN).div(orderInputAmountBN);
             } else {
+              // Fill whole order
               var orderInputFillAmountBN = orderInputAmountBN;
               var orderTakerAssetFillAmountBN = takerAssetAmountBN;
               var orderMakerAssetFillAmountBN = makerAssetAmountBN;
@@ -710,7 +724,7 @@ App = {
       }
       
       // Make sure input amount is completely filled
-      if (!inputFilledAmountBN.lt(amountBN)) {
+      if (inputFilledAmountBN.lt(amountBN)) {
         $('#DepositAmount').val(inputFilledAmountBN.toString() / (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6));
         return toastr["warning"]("Unable to find enough liquidity to exchange " + token + " before depositing.", "Deposit canceled");
       }
@@ -730,7 +744,7 @@ App = {
         return toastr["warning"]("Exchange slippage changed.", "Deposit canceled");
       }
 
-      console.log('Exchange ' + amount + ' ' + token + ' to deposit ' + takerAssetFillAmount + ' ' + acceptedCurrency);
+      console.log('Exchange ' + amount + ' ' + token + ' to deposit ' + amount + ' ' + acceptedCurrency);
 
       // Approve tokens to RariFundProxy if token is not ETH
       if (token !== "ETH") {
@@ -768,6 +782,9 @@ App = {
       } catch (err) {
         return toastr["error"]("RariFundProxy.exchangeAndDeposit failed: " + err, "Deposit failed");
       }
+
+      // Hide old slippage after exchange success
+      $('#DepositSlippageWrapper').hide();
     }
 
     // Alert success and refresh balances
@@ -814,7 +831,7 @@ App = {
       var inputAmountBNs = [];
       var allOrders = [];
       var allSignatures = [];
-      var takerAssetFillAmountBNs = [];
+      var makerAssetFillAmountBNs = [];
       var amountInputtedUsdBN = web3.utils.toBN(0);
       var amountWithdrawnBN = web3.utils.toBN(0);
       var totalProtocolFeeBN = web3.utils.toBN(0);
@@ -828,7 +845,7 @@ App = {
           inputAmountBNs.push(tokenRawFundBalanceBN);
           allOrders.push([]);
           allSignatures.push([]);
-          takerAssetFillAmountBNs.push(0);
+          makerAssetFillAmountBNs.push(0);
           amountWithdrawnBN.iadd(tokenRawFundBalanceBN);
         } else {
           // Push other candidates to array
@@ -878,7 +895,7 @@ App = {
       }
 
       // Sort candidates from lowest to highest takerAssetFillAmount
-      inputCandidates.sort((a, b) => a.takerAssetFillAmountBN.gt(b.takerAssetFillAmountBN) ? 1 : -1);
+      inputCandidates.sort((a, b) => a.makerAssetFillAmountBN.gt(b.makerAssetFillAmountBN) ? 1 : -1);
 
       console.log(inputCandidates);
 
@@ -887,14 +904,16 @@ App = {
         // If there is enough input in the fund and enough 0x orders to fulfill the rest of the withdrawal amount, withdraw and exchange
         if (inputCandidates[i].makerAssetFillAmountBN.gte(amountBN.sub(amountWithdrawnBN))) {
           var thisOutputAmountBN = amountBN.sub(amountWithdrawnBN);
-          var thisInputAmountBN = inputCandidates[i].inputFillAmountBN.mul(thisOutputAmountBN).div(web3.utils.toBN(inputCandidates[i].makerAssetFillAmountBN));
-          var thisTakerAssetFillAmount = inputCandidates[i].takerAssetFillAmountBN.mul(thisOutputAmountBN).div(web3.utils.toBN(inputCandidates[i].makerAssetFillAmountBN));
+          var thisInputAmountBN = inputCandidates[i].inputFillAmountBN.mul(thisOutputAmountBN).div(inputCandidates[i].makerAssetFillAmountBN);
+          console.log(thisOutputAmountBN.toString(), thisInputAmountBN.toString(), inputCandidates[i].makerAssetFillAmountBN.mul(thisInputAmountBN).div(inputCandidates[i].inputFillAmountBN).toString());
+          while (inputCandidates[i].makerAssetFillAmountBN.mul(thisInputAmountBN).div(inputCandidates[i].inputFillAmountBN) < thisOutputAmountBN) thisInputAmountBN.iadd(web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
+          console.log(thisOutputAmountBN.toString(), thisInputAmountBN.toString(), inputCandidates[i].makerAssetFillAmountBN.mul(thisInputAmountBN).div(inputCandidates[i].inputFillAmountBN).toString());
 
           inputCurrencyCodes.push(inputCandidates[i].currencyCode);
           inputAmountBNs.push(thisInputAmountBN);
           allOrders.push(inputCandidates[i].orders);
           allSignatures.push(inputCandidates[i].signatures);
-          takerAssetFillAmountBNs.push(thisTakerAssetFillAmount);
+          makerAssetFillAmountBNs.push(thisOutputAmountBN);
 
           amountInputtedUsdBN.iadd(thisInputAmountBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
           amountWithdrawnBN.iadd(thisOutputAmountBN);
@@ -909,7 +928,7 @@ App = {
           inputAmountBNs.push(inputCandidates[i].inputFillAmountBN);
           allOrders.push(inputCandidates[i].orders);
           allSignatures.push(inputCandidates[i].signatures);
-          takerAssetFillAmountBNs.push(inputCandidates[i].takerAssetFillAmountBN);
+          makerAssetFillAmountBNs.push(inputCandidates[i].makerAssetFillAmountBN);
 
           amountInputtedUsdBN.iadd(inputCandidates[i].inputFillAmountBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
           amountWithdrawnBN.iadd(inputCandidates[i].makerAssetFillAmountBN);
@@ -926,9 +945,9 @@ App = {
       // TODO: Remove log code below
       var inputAmountStrings = [];
       for (var i = 0; i < inputAmountBNs.length; i++) inputAmountStrings[i] = inputAmountBNs[i].toString();
-      var takerAssetFillAmountStrings = [];
-      for (var i = 0; i < takerAssetFillAmountBNs.length; i++) takerAssetFillAmountStrings[i] = takerAssetFillAmountBNs[i].toString();
-      console.log(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, takerAssetFillAmountStrings, amountWithdrawnBN.toString());
+      var makerAssetFillAmountStrings = [];
+      for (var i = 0; i < makerAssetFillAmountBNs.length; i++) makerAssetFillAmountStrings[i] = makerAssetFillAmountBNs[i].toString();
+      console.log(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings, amountWithdrawnBN.toString());
       
       // Make sure input amount is completely filled
       if (amountWithdrawnBN.lt(amountBN)) {
@@ -951,18 +970,22 @@ App = {
         return toastr["warning"]("Exchange slippage changed.", "Withdrawal canceled");
       }
 
-      console.log('Withdraw and exchange to ' + amountWithdrawnBN + ' ' + token);
+      console.log('Withdraw and exchange to ' + (amountWithdrawnBN.toString() / (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6)) + ' ' + token);
 
       // Withdraw and exchange tokens via RariFundProxy
       try {
         var inputAmountStrings = [];
         for (var i = 0; i < inputAmountBNs.length; i++) inputAmountStrings[i] = inputAmountBNs[i].toString();
-        var takerAssetFillAmountStrings = [];
-        for (var i = 0; i < takerAssetFillAmountBNs.length; i++) takerAssetFillAmountStrings[i] = takerAssetFillAmountBNs[i].toString();
-        await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, takerAssetFillAmountStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
+        var makerAssetFillAmountStrings = [];
+        for (var i = 0; i < makerAssetFillAmountBNs.length; i++) makerAssetFillAmountStrings[i] = makerAssetFillAmountBNs[i].toString();
+        console.log(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings);
+        await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
       } catch (err) {
         return toastr["error"]("RariFundProxy.withdrawAndExchange failed: " + err, "Withdrawal failed");
       }
+
+      // Hide old slippage after exchange success
+      $('#WithdrawSlippageWrapper').hide();
     }
     
     // Alert success and refresh balances

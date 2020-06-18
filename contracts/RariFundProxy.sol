@@ -178,13 +178,13 @@ contract RariFundProxy is Ownable {
      * @param outputErc20Contract The ERC20 contract address of the token to be outputted by the exchange. Set to address(0) to output ETH.
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
-     * @param takerAssetFillAmounts The amounts of the taker assets to sell (excluding taker fees).
+     * @param makerAssetFillAmounts The amounts of the maker assets to buy.
      * @return Boolean indicating success.
      */
-    function withdrawAndExchange(string[] memory inputCurrencyCodes, uint256[] memory inputAmounts, address outputErc20Contract, LibOrder.Order[][] memory orders, bytes[][] memory signatures, uint256[] memory takerAssetFillAmounts) public payable returns (bool) {
+    function withdrawAndExchange(string[] memory inputCurrencyCodes, uint256[] memory inputAmounts, address outputErc20Contract, LibOrder.Order[][] memory orders, bytes[][] memory signatures, uint256[] memory makerAssetFillAmounts) public payable returns (bool) {
         // Input validation
         require(_rariFundManagerContract != address(0), "RariFundManager contract not set.");
-        require(inputCurrencyCodes.length == inputAmounts.length && inputCurrencyCodes.length == orders.length && inputCurrencyCodes.length == signatures.length && inputCurrencyCodes.length == takerAssetFillAmounts.length, "Array parameters are not all the same length.");
+        require(inputCurrencyCodes.length == inputAmounts.length && inputCurrencyCodes.length == orders.length && inputCurrencyCodes.length == signatures.length && inputCurrencyCodes.length == makerAssetFillAmounts.length, "Array parameters are not all the same length.");
 
         // For each input currency
         for (uint256 i = 0; i < inputCurrencyCodes.length; i++) {
@@ -193,12 +193,12 @@ contract RariFundProxy is Ownable {
             // Withdraw input tokens
             require(RariFundManager(_rariFundManagerContract).withdrawFrom(msg.sender, inputCurrencyCodes[i], inputAmounts[i]));
 
-            if (orders[i].length > 0 && signatures[i].length > 0 && takerAssetFillAmounts[i] > 0) {
+            if (orders[i].length > 0 && signatures[i].length > 0 && makerAssetFillAmounts[i] > 0) {
                 // Input validation
                 require(orders.length == signatures.length, "Length of all orders and signatures arrays must be equal.");
         
                 // Exchange tokens and emit event
-                uint256[2] memory filledAmounts = ZeroExExchangeController.marketSellOrdersFillOrKill(orders[i], signatures[i], takerAssetFillAmounts[i]);
+                uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i]);
                 emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], filledAmounts[1]);
             }
         }

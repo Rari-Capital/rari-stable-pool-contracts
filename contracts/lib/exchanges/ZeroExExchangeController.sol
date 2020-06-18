@@ -49,17 +49,32 @@ library ZeroExExchangeController {
     }
 
     /**
-     * @dev Fills 0x exchange orders up to a certain amount of input and up to a certain price.
+     * @dev Market sells to 0x exchange orders up to a certain amount of input.
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
      * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
-     * @return Array containing the input amount sold and output amount bought.
+     * @return Array containing the taker asset filled amount (sold) and maker asset filled amount (bought).
      */
     function marketSellOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) internal returns (uint256[2] memory) {
         require(orders.length > 0, "At least one order and matching signature is required.");
         require(orders.length == signatures.length, "Mismatch between number of orders and signatures.");
         require(takerAssetFillAmount > 0, "Taker asset fill amount must be greater than 0.");
         LibFillResults.FillResults memory fillResults = _exchange.marketSellOrdersFillOrKill.value(msg.value)(orders, takerAssetFillAmount, signatures);
+        return [fillResults.takerAssetFilledAmount, fillResults.makerAssetFilledAmount];
+    }
+
+    /**
+     * @dev Market buys from 0x exchange orders up to a certain amount of output.
+     * @param orders The limit orders to be filled in ascending order of price.
+     * @param signatures The signatures for the orders.
+     * @param makerAssetFillAmount The amount of the maker asset to buy.
+     * @return Array containing the taker asset filled amount (sold) and maker asset filled amount (bought).
+     */
+    function marketBuyOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 makerAssetFillAmount) internal returns (uint256[2] memory) {
+        require(orders.length > 0, "At least one order and matching signature is required.");
+        require(orders.length == signatures.length, "Mismatch between number of orders and signatures.");
+        require(makerAssetFillAmount > 0, "Maker asset fill amount must be greater than 0.");
+        LibFillResults.FillResults memory fillResults = _exchange.marketBuyOrdersFillOrKill.value(msg.value)(orders, makerAssetFillAmount, signatures);
         return [fillResults.takerAssetFilledAmount, fillResults.makerAssetFilledAmount];
     }
 }
