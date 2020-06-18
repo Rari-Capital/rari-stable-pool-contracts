@@ -460,18 +460,34 @@ contract RariFundManager is Ownable {
         if (rftTotalSupply > 0 && fundBalanceUsd > 0) rftAmount = amountUsd.mul(rftTotalSupply).div(fundBalanceUsd);
         else rftAmount = amountUsd;
         require(rftAmount > 0, "Deposit amount is so small that no RFT would be minted.");
-        
-        // Check balance limit if `to` is not whitelisted
-        if (to != _interestFeeMasterBeneficiary && !_accountBalanceLimitWhitelist[to]) {
-            uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? rariFundToken.balanceOf(to).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
-            require(initialBalanceUsd.add(amountUsd) <= _accountBalanceLimitUsd, "Making this deposit would cause this account's balance to exceed the maximum.");
-        }
+
+        // Check account balance limit if `to` is not whitelisted
+        require(checkAccountBalanceLimit(to, amountUsd, rariFundToken, rftTotalSupply, fundBalanceUsd), "Making this deposit would cause this account's balance to exceed the maximum.");
 
         // Transfer funds from msg.sender and mint RFT
         IERC20(erc20Contract).safeTransferFrom(msg.sender, address(this), amount); // The user must approve the transfer of tokens beforehand
         _netDeposits = _netDeposits.add(int256(amountUsd));
         require(rariFundToken.mint(to, rftAmount), "Failed to mint output tokens.");
         emit Deposit(currencyCode, msg.sender, to, amount, amountUsd, rftAmount);
+        return true;
+    }
+
+    /**
+     * @dev Checks to make sure that, if `to` is not whitelisted, its balance will not exceed the maximum after depositing `amountUsd`.
+     * This function was separated from the `_depositTo` function to avoid the stack getting too deep.
+     * @param to The address that will receieve the minted RFT.
+     * @param amountUsd The amount of tokens to be deposited in USD.
+     * @param rariFundToken The RariFundToken contract object.
+     * @param rftTotalSupply The total supply of RFT representing the fund's total investor balance.
+     * @param fundBalanceUsd The fund's total investor balance in USD.
+     * @return Boolean indicating success.
+     */
+    function checkAccountBalanceLimit(address to, uint256 amountUsd, RariFundToken rariFundToken, uint256 rftTotalSupply, uint256 fundBalanceUsd) internal view returns (bool) {
+        if (to != owner && to != _interestFeeMasterBeneficiary && !_accountBalanceLimitWhitelist[to]) {
+            uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? rariFundToken.balanceOf(to).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
+            if (initialBalanceUsd.add(amountUsd) > _accountBalanceLimitUsd) return false;
+        }
+
         return true;
     }
 
