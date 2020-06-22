@@ -589,8 +589,7 @@ App = {
 
   get0xPrice: function(inputTokenSymbol, outputTokenSymbol) {
     return new Promise((resolve, reject) => {
-      $.getJSON('https://api.0x.org/swap/v0/prices?sellToken=' + inputTokenSymbol, function(data) {
-        var decoded = JSON.parse(data);
+      $.getJSON('https://api.0x.org/swap/v0/prices?sellToken=' + inputTokenSymbol, function(decoded) {
         if (!decoded) reject("Failed to decode prices from 0x swap API");
         if (!decoded.records) reject("No prices found on 0x swap API");
         for (var i = 0; i < decoded.records.length; i++)
@@ -730,7 +729,7 @@ App = {
       }
 
       // Warn user of slippage
-      var amountUsd = token === "ETH" ? amount * (await get0xPrice("ETH", acceptedCurrency)) : amount;
+      var amountUsd = token === "ETH" ? amount / (await App.get0xPrice("ETH", acceptedCurrency)) : amount;
       var slippage = 1 - ((makerAssetFilledAmountBN.toString() / (acceptedCurrency === "DAI" ? 1e18 : 1e6)) / amountUsd);
       var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
@@ -744,7 +743,7 @@ App = {
         return toastr["warning"]("Exchange slippage changed.", "Deposit canceled");
       }
 
-      console.log('Exchange ' + amount + ' ' + token + ' to deposit ' + amount + ' ' + acceptedCurrency);
+      console.log('Exchange ' + amount + ' ' + token + ' to ' + acceptedCurrency + ' to deposit ' + amountUsd + ' USD');
 
       // Approve tokens to RariFundProxy if token is not ETH
       if (token !== "ETH") {
@@ -778,7 +777,7 @@ App = {
 
       // Exchange and deposit tokens via RariFundProxy
       try {
-        await App.contracts.RariFundProxy.methods.exchangeAndDeposit(App.contracts[token].options.address, amountBN, acceptedCurrency, orders, signatures, takerAssetFilledAmountBN).send({ from: App.selectedAccount, value: token === "ETH" ? web3.utils.toBN(protocolFee).add(amountBN).toString() : protocolFee });
+        await App.contracts.RariFundProxy.methods.exchangeAndDeposit(token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.contracts[token].options.address, amountBN, acceptedCurrency, orders, signatures, takerAssetFilledAmountBN).send({ from: App.selectedAccount, value: token === "ETH" ? web3.utils.toBN(protocolFee).add(amountBN).toString() : protocolFee });
       } catch (err) {
         return toastr["error"]("RariFundProxy.exchangeAndDeposit failed: " + err, "Deposit failed");
       }
@@ -956,7 +955,7 @@ App = {
       }
 
       // Warn user of slippage
-      var amountUsd = token === "ETH" ? amount * (await get0xPrice("ETH", acceptedCurrency)) : amount;
+      var amountUsd = token === "ETH" ? amount * (await App.get0xPrice("ETH", acceptedCurrency)) : amount;
       var slippage = 1 - (amountUsd / (amountInputtedUsdBN.toString() / 1e18));
       var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
