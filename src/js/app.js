@@ -577,11 +577,11 @@ App = {
     });
 
     $(document).on('change', '#DepositAmount', function() {
-      $('#DepositSlippageWrapper').hide();
+      $('#DepositSlippage').hide();
     });
     $(document).on('click', '#depositButton', App.handleDeposit);
     $(document).on('change', '#WithdrawAmount', function() {
-      $('#WithdrawSlippageWrapper').hide();
+      $('#WithdrawSlippage').hide();
     });
     $(document).on('click', '#withdrawButton', App.handleWithdraw);
     $(document).on('click', '#transferButton', App.handleTransfer);
@@ -694,7 +694,7 @@ App = {
     var accepted = ["DAI", "USDC", "USDT"].indexOf(token) >= 0 ? await App.contracts.RariFundManager.methods.isCurrencyAccepted(token).call() : false;
 
     if (accepted) {
-      $('#DepositSlippageWrapper').hide();
+      $('#DepositSlippage').hide();
 
       console.log('Deposit ' + amount + ' ' + token + ' directly');
 
@@ -784,7 +784,7 @@ App = {
       }
 
       // Hide old slippage after exchange success
-      $('#DepositSlippageWrapper').hide();
+      $('#DepositSlippage').hide();
     }
 
     // Alert success and refresh balances
@@ -822,7 +822,7 @@ App = {
 
     if (tokenRawFundBalanceBN.gte(amountBN)) {
       // If we can withdraw everything directly, do so
-      $('#WithdrawSlippageWrapper').hide();
+      $('#WithdrawSlippage').hide();
       console.log('Withdraw ' + amountBN + ' of ' + amount + ' ' + token + ' directly');
       await App.contracts.RariFundManager.methods.withdraw(token, amountBN).send({ from: App.selectedAccount });
     } else {
@@ -985,7 +985,7 @@ App = {
       }
 
       // Hide old slippage after exchange success
-      $('#WithdrawSlippageWrapper').hide();
+      $('#WithdrawSlippage').hide();
     }
     
     // Alert success and refresh balances
