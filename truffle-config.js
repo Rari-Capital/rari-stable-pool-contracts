@@ -6,14 +6,14 @@ module.exports = {
   networks: {
     development: {
       provider: function() {
-        return new HDWalletProvider(["DFC9C0CFB07304FAF3F356DF668731F87E58C84A1A56A1D80D680EA29E711E2C", "9103CF74D1C8C6B467051AFA0BDEC59CBE69120ECBF6CEB51E6730820F69B9E3"], "http://localhost:8546");
+        return new HDWalletProvider([process.env.DEVELOPMENT_PRIVATE_KEY, process.env.DEVELOPMENT_PRIVATE_KEY_SECONDARY], "http://localhost:8546"); // Fork mainnet geth instance with compound-finance/ganache-core (Compound's fork fixes a false reentrancy error)
       },
       network_id: 1,
       gasPrice: 1 * (10 ** 9)
     },
     live: {
       provider: function() {
-        return new HDWalletProvider(["DFC9C0CFB07304FAF3F356DF668731F87E58C84A1A56A1D80D680EA29E711E2C", "9103CF74D1C8C6B467051AFA0BDEC59CBE69120ECBF6CEB51E6730820F69B9E3"], "https://mainnet.infura.io/v3/c52a3970da0a47978bee0fe7988b67b6");
+        return new HDWalletProvider([process.env.LIVE_DEPLOYER_PRIVATE_KEY], "https://mainnet.infura.io/v3/" + process.env.LIVE_INFURA_PROJECT_ID);
       },
       network_id: 1,
       gasPrice: 1 * (10 ** 9)

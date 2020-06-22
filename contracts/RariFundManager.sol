@@ -129,7 +129,7 @@ contract RariFundManager is Ownable {
      * @param currencyCode The currency code of the token to withdraw.
      * @return Boolean indicating success.
      */
-    function ownerWithdraw(string calldata currencyCode) external returns (bool) {
+    function ownerWithdraw(string calldata currencyCode) external onlyOwnerOrRebalancer returns (bool) {
         if (keccak256(abi.encodePacked(currencyCode)) == keccak256(abi.encodePacked("ETH"))) {
             uint256 balance = address(this).balance;
             require(balance > 0, "No available balance to withdraw.");
@@ -142,7 +142,7 @@ contract RariFundManager is Ownable {
             require(balance > 0, "No available balance to withdraw.");
             token.safeTransfer(owner(), balance);
         }
-        
+
         return true;
     }
 
@@ -290,6 +290,14 @@ contract RariFundManager is Ownable {
      */
     modifier onlyRebalancer() {
         require(_rariFundRebalancerAddress == msg.sender, "Caller is not the rebalancer.");
+        _;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner or the rebalancer.
+     */
+    modifier onlyOwnerOrRebalancer() {
+        require(owner() == msg.sender || _rariFundRebalancerAddress == msg.sender, "Caller is not the owner or the rebalancer.");
         _;
     }
 
@@ -794,7 +802,7 @@ contract RariFundManager is Ownable {
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
         
         uint256 amountUsd = getInterestFeesUnclaimed();
-        if (amountUsd == 0) return false;
+        if (amountUsd <= 0) return false;
 
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
@@ -806,7 +814,7 @@ contract RariFundManager is Ownable {
             else rftAmount = amountUsd;
         } else rftAmount = amountUsd;
 
-        if (rftAmount == 0) return false;
+        if (rftAmount <= 0) return false;
         _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
         _netDeposits = _netDeposits.add(int256(amountUsd));
         require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
