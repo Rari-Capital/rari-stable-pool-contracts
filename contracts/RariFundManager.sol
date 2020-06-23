@@ -683,7 +683,7 @@ contract RariFundManager is Ownable {
      * @return Boolean indicating success.
      */
     function marketSell0xOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public payable onlyRebalancer returns (bool) {
-        RariFundController.marketSell0xOrdersFillOrKill(orders, signatures, takerAssetFillAmount);
+        RariFundController.marketSell0xOrdersFillOrKill(orders, signatures, takerAssetFillAmount, msg.value);
         return true;
     }
 

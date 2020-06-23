@@ -53,13 +53,14 @@ library ZeroExExchangeController {
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
      * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
+     * @param protocolFee The protocol fee in ETH to pay to 0x.
      * @return Array containing the taker asset filled amount (sold) and maker asset filled amount (bought).
      */
-    function marketSellOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) internal returns (uint256[2] memory) {
+    function marketSellOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount, uint256 protocolFee) internal returns (uint256[2] memory) {
         require(orders.length > 0, "At least one order and matching signature is required.");
         require(orders.length == signatures.length, "Mismatch between number of orders and signatures.");
         require(takerAssetFillAmount > 0, "Taker asset fill amount must be greater than 0.");
-        LibFillResults.FillResults memory fillResults = _exchange.marketSellOrdersFillOrKill.value(msg.value)(orders, takerAssetFillAmount, signatures);
+        LibFillResults.FillResults memory fillResults = _exchange.marketSellOrdersFillOrKill.value(protocolFee)(orders, takerAssetFillAmount, signatures);
         return [fillResults.takerAssetFilledAmount, fillResults.makerAssetFilledAmount];
     }
 
@@ -68,13 +69,14 @@ library ZeroExExchangeController {
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
      * @param makerAssetFillAmount The amount of the maker asset to buy.
+     * @param protocolFee The protocol fee in ETH to pay to 0x.
      * @return Array containing the taker asset filled amount (sold) and maker asset filled amount (bought).
      */
-    function marketBuyOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 makerAssetFillAmount) internal returns (uint256[2] memory) {
+    function marketBuyOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 makerAssetFillAmount, uint256 protocolFee) internal returns (uint256[2] memory) {
         require(orders.length > 0, "At least one order and matching signature is required.");
         require(orders.length == signatures.length, "Mismatch between number of orders and signatures.");
         require(makerAssetFillAmount > 0, "Maker asset fill amount must be greater than 0.");
-        LibFillResults.FillResults memory fillResults = _exchange.marketBuyOrdersFillOrKill.value(msg.value)(orders, makerAssetFillAmount, signatures);
+        LibFillResults.FillResults memory fillResults = _exchange.marketBuyOrdersFillOrKill.value(protocolFee)(orders, makerAssetFillAmount, signatures);
         return [fillResults.takerAssetFilledAmount, fillResults.makerAssetFilledAmount];
     }
 }

@@ -146,7 +146,7 @@ contract RariFundProxy is Ownable {
 
         // Approve and exchange tokens
         ZeroExExchangeController.approve(inputErc20Contract == address(0) ? WETH_CONTRACT : inputErc20Contract, inputAmount);
-        uint256[2] memory filledAmounts = ZeroExExchangeController.marketSellOrdersFillOrKill(orders, signatures, takerAssetFillAmount);
+        uint256[2] memory filledAmounts = ZeroExExchangeController.marketSellOrdersFillOrKill(orders, signatures, takerAssetFillAmount, inputErc20Contract == address(0) ? msg.value.sub(inputAmount) : msg.value);
 
         // Refund unused input tokens and update input amount
         IERC20 inputToken = IERC20(inputErc20Contract == address(0) ? WETH_CONTRACT : inputErc20Contract);
@@ -197,7 +197,7 @@ contract RariFundProxy is Ownable {
                 require(orders.length == signatures.length, "Length of all orders and signatures arrays must be equal.");
         
                 // Exchange tokens and emit event
-                uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i]);
+                uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], msg.value);
                 emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], filledAmounts[1]);
             }
         }

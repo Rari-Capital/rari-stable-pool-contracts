@@ -113,9 +113,10 @@ library RariFundController {
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
      * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
+     * @param protocolFee The protocol fee in ETH to pay to 0x.
      * @return Array containing the input amount sold and output amount bought.
      */
-    function marketSell0xOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public returns (uint256[2] memory) {
-        return ZeroExExchangeController.marketSellOrdersFillOrKill(orders, signatures, takerAssetFillAmount);
+    function marketSell0xOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount, uint256 protocolFee) public returns (uint256[2] memory) {
+        return ZeroExExchangeController.marketSellOrdersFillOrKill(orders, signatures, takerAssetFillAmount, protocolFee);
     }
 }
