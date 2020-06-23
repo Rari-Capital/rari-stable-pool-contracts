@@ -659,8 +659,14 @@ App = {
               var orderMakerAssetFillAmountBN = maxMakerAssetFillAmountBN.sub(makerAssetFilledAmountBN);
               var orderTakerAssetFillAmountBN = orderMakerAssetFillAmountBN.mul(takerAssetAmountBN).div(makerAssetAmountBN);
               var orderInputFillAmountBN = orderMakerAssetFillAmountBN.mul(orderInputAmountBN).div(makerAssetAmountBN);
+              
               console.log(orderMakerAssetFillAmountBN.toString(), orderInputFillAmountBN.toString(), makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN).toString());
-              while (makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN) < orderMakerAssetFillAmountBN) orderInputFillAmountBN.iadd(web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
+              var tries = 0;
+              while (makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN).lt(orderMakerAssetFillAmountBN)) {
+                if (tries >= 1000) return toastr["error"]("Failed to get increment order input amount to achieve desired output amount: " + err, "Withdrawal failed");
+                orderInputFillAmountBN.iadd(web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
+                tries++;
+              }
               console.log(orderMakerAssetFillAmountBN.toString(), orderInputFillAmountBN.toString(), makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN).toString());
             } else {
               // Fill whole order
@@ -939,8 +945,14 @@ App = {
         if (inputCandidates[i].makerAssetFillAmountBN.gte(amountBN.sub(amountWithdrawnBN))) {
           var thisOutputAmountBN = amountBN.sub(amountWithdrawnBN);
           var thisInputAmountBN = inputCandidates[i].inputFillAmountBN.mul(thisOutputAmountBN).div(inputCandidates[i].makerAssetFillAmountBN);
+          
           console.log(thisOutputAmountBN.toString(), thisInputAmountBN.toString(), inputCandidates[i].makerAssetFillAmountBN.mul(thisInputAmountBN).div(inputCandidates[i].inputFillAmountBN).toString());
-          while (inputCandidates[i].makerAssetFillAmountBN.mul(thisInputAmountBN).div(inputCandidates[i].inputFillAmountBN) < thisOutputAmountBN) thisInputAmountBN.iadd(web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
+          var tries = 0;
+          while (inputCandidates[i].makerAssetFillAmountBN.mul(thisInputAmountBN).div(inputCandidates[i].inputFillAmountBN).lt(thisOutputAmountBN)) {
+            if (tries >= 1000) return toastr["error"]("Failed to get increment order input amount to achieve desired output amount: " + err, "Withdrawal failed");
+            thisInputAmountBN.iadd(web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
+            tries++;
+          }
           console.log(thisOutputAmountBN.toString(), thisInputAmountBN.toString(), inputCandidates[i].makerAssetFillAmountBN.mul(thisInputAmountBN).div(inputCandidates[i].inputFillAmountBN).toString());
 
           inputCurrencyCodes.push(inputCandidates[i].currencyCode);
