@@ -541,6 +541,12 @@ App = {
       App.contracts.RariFundManager = new web3.eth.Contract(data, "0xa5E348898D6b55B9724Fba87eA709C7aDcF91cBc");
       App.getFundBalance();
       if (App.selectedAccount) App.getMyFundBalance();
+      App.getDirectlyDepositableCurrencies();
+      App.getDirectlyWithdrawableCurrencies();
+      setInterval(function() {
+        App.getDirectlyDepositableCurrencies();
+        App.getDirectlyWithdrawableCurrencies();
+      }, 5 * 60 * 1000);
     });
 
     $.getJSON('abi/RariFundToken.json', function(data) {
@@ -557,6 +563,18 @@ App = {
       App.contracts.DAI = new web3.eth.Contract(data, "0x6B175474E89094C44Da98b954EedeAC495271d0F");
       App.contracts.USDC = new web3.eth.Contract(data, "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48");
       App.contracts.USDT = new web3.eth.Contract(data, "0xdAC17F958D2ee523a2206206994597C13D831ec7");
+    });
+  },
+
+  getDirectlyDepositableCurrencies: function() {
+    for (const currencyCode of ["DAI", "USDC", "USDT"]) App.contracts.RariFundManager.methods.isCurrencyAccepted(currencyCode).call().then(function(accepted) {
+      $('#DepositToken > option[value="' + currencyCode + '"]').text(currencyCode + (accepted ? " (no slippage)" : ""));
+    });
+  },
+
+  getDirectlyWithdrawableCurrencies: function() {
+    for (const currencyCode of ["DAI", "USDC", "USDT"]) App.contracts.RariFundManager.methods["getRawFundBalance(string)"](currencyCode).call().then(function (rawFundBalance) {
+      $('#WithdrawToken > option[value="' + currencyCode + '"]').text(currencyCode + (parseFloat(rawFundBalance) > 0 ? " (no slippage up to " + (parseFloat(rawFundBalance) / (currencyCode === "DAI" ? 1e18 : 1e6)).toPrecision(4) + ")" : ""));
     });
   },
   
@@ -686,6 +704,8 @@ App = {
   handleDeposit: async function(event) {
     event.preventDefault();
 
+    App.getDirectlyDepositableCurrencies();
+
     var token = $('#DepositToken').val();
     if (["DAI", "USDC", "USDT", "ETH"].indexOf(token) < 0) return toastr["error"]("Invalid token!", "Deposit failed");
     var amount = parseFloat($('#DepositAmount').val());
@@ -798,6 +818,8 @@ App = {
    */
   handleWithdraw: async function(event) {
     event.preventDefault();
+
+    App.getDirectlyWithdrawableCurrencies();
 
     var token = $('#WithdrawToken').val();
     if (["DAI", "USDC", "USDT", "ETH"].indexOf(token) < 0) return toastr["error"]("Invalid token!", "Withdrawal failed");
