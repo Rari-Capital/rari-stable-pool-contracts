@@ -137,20 +137,19 @@ contract RariFundProxy is Ownable {
         require(takerAssetFillAmount > 0, "Taker asset fill amount must be greater than 0.");
 
         if (inputErc20Contract == address(0)) {
-            // Wrap ETH and set input ERC20 contract to WETH if input currency is ETH
+            // Wrap ETH
             _weth.deposit.value(inputAmount)();
-            inputErc20Contract = WETH_CONTRACT;
         } else {
             // Transfer input tokens from msg.sender if not inputting ETH
             IERC20(inputErc20Contract).safeTransferFrom(msg.sender, address(this), inputAmount); // The user must approve the transfer of tokens beforehand
         }
 
         // Approve and exchange tokens
-        ZeroExExchangeController.approve(inputErc20Contract, inputAmount);
+        ZeroExExchangeController.approve(inputErc20Contract == address(0) ? WETH_CONTRACT : inputErc20Contract, inputAmount);
         uint256[2] memory filledAmounts = ZeroExExchangeController.marketSellOrdersFillOrKill(orders, signatures, takerAssetFillAmount);
 
         // Refund unused input tokens and update input amount
-        IERC20 inputToken = IERC20(inputErc20Contract);
+        IERC20 inputToken = IERC20(inputErc20Contract == address(0) ? WETH_CONTRACT : inputErc20Contract);
         uint256 inputTokenBalance = inputToken.balanceOf(address(this));
         if (inputTokenBalance > 0) inputToken.safeTransfer(msg.sender, inputTokenBalance);
 

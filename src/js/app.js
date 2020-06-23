@@ -743,7 +743,7 @@ App = {
         return toastr["warning"]("Exchange slippage changed.", "Deposit canceled");
       }
 
-      console.log('Exchange ' + amount + ' ' + token + ' to ' + acceptedCurrency + ' to deposit ' + amountUsd + ' USD');
+      console.log('Exchange ' + amount + ' ' + token + ' to deposit ' + acceptedCurrency);
 
       // Approve tokens to RariFundProxy if token is not ETH
       if (token !== "ETH") {
@@ -815,7 +815,7 @@ App = {
       try {
         tokenRawFundBalanceBN = web3.utils.toBN(await App.contracts.RariFundManager.methods["getRawFundBalance(string)"](token).call());
       } catch (error) {
-        toastr["error"]("Failed to get raw fund balance of output currency.", "Withdrawal failed");
+        return toastr["error"]("Failed to get raw fund balance of output currency.", "Withdrawal failed");
       }
     }
 
@@ -946,7 +946,7 @@ App = {
       for (var i = 0; i < inputAmountBNs.length; i++) inputAmountStrings[i] = inputAmountBNs[i].toString();
       var makerAssetFillAmountStrings = [];
       for (var i = 0; i < makerAssetFillAmountBNs.length; i++) makerAssetFillAmountStrings[i] = makerAssetFillAmountBNs[i].toString();
-      console.log(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings, amountWithdrawnBN.toString());
+      console.log(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "ETH" : App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings, amountWithdrawnBN.toString());
       
       // Make sure input amount is completely filled
       if (amountWithdrawnBN.lt(amountBN)) {
@@ -955,7 +955,7 @@ App = {
       }
 
       // Warn user of slippage
-      var amountUsd = token === "ETH" ? amount * (await App.get0xPrice("ETH", acceptedCurrency)) : amount;
+      var amountUsd = token === "ETH" ? amount * (await App.get0xPrice("DAI", "WETH")) : amount; // TODO: Use actual input currencies instead of using DAI for USD price
       var slippage = 1 - (amountUsd / (amountInputtedUsdBN.toString() / 1e18));
       var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
@@ -977,8 +977,8 @@ App = {
         for (var i = 0; i < inputAmountBNs.length; i++) inputAmountStrings[i] = inputAmountBNs[i].toString();
         var makerAssetFillAmountStrings = [];
         for (var i = 0; i < makerAssetFillAmountBNs.length; i++) makerAssetFillAmountStrings[i] = makerAssetFillAmountBNs[i].toString();
-        console.log(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings);
-        await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
+        console.log(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "ETH" : App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings);
+        await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
       } catch (err) {
         return toastr["error"]("RariFundProxy.withdrawAndExchange failed: " + err, "Withdrawal failed");
       }
