@@ -540,7 +540,11 @@ App = {
     $.getJSON('abi/RariFundManager.json', function(data) {
       App.contracts.RariFundManager = new web3.eth.Contract(data, "0xa5E348898D6b55B9724Fba87eA709C7aDcF91cBc");
       App.getFundBalance();
-      if (App.selectedAccount) App.getMyFundBalance();
+      setInterval(App.getFundBalance, 5 * 60 * 1000);
+      if (App.selectedAccount) {
+        App.getMyFundBalance();
+        setInterval(App.getMyFundBalance, 5 * 60 * 1000);
+      }
       App.getDirectlyDepositableCurrencies();
       App.getDirectlyWithdrawableCurrencies();
       setInterval(function() {
@@ -551,12 +555,14 @@ App = {
 
     $.getJSON('abi/RariFundToken.json', function(data) {
       App.contracts.RariFundToken = new web3.eth.Contract(data, "0xF8bf0c88f3ebA7ab4aF9675231f4549082546791");
-      if (App.selectedAccount) App.getTokenBalance();
+      if (App.selectedAccount) {
+        App.getTokenBalance();
+        setInterval(App.getTokenBalance, 5 * 60 * 1000);
+      }
     });
 
     $.getJSON('abi/RariFundProxy.json', function(data) {
       App.contracts.RariFundProxy = new web3.eth.Contract(data, "0x812D7380490bd22A957d9a81a49c1E3Ea296Ec48");
-      if (App.selectedAccount) App.getTokenBalance();
     });
 
     $.getJSON('abi/ERC20.json', function(data) {
@@ -590,8 +596,14 @@ App = {
       App.selectedAccount = $(this).val();
 
       // Get user's account balance in the quant fund and RFT balance
-      if (App.contracts.RariFundManager) App.getMyFundBalance();
-      if (App.contracts.RariFundToken) App.getTokenBalance();
+      if (App.contracts.RariFundManager) {
+        App.getMyFundBalance();
+        setInterval(App.getMyFundBalance, 5 * 60 * 1000);
+      }
+      if (App.contracts.RariFundToken) {
+        App.getTokenBalance();
+        setInterval(App.getTokenBalance, 5 * 60 * 1000);
+      }
     });
 
     $(document).on('change', '#DepositAmount', function() {
@@ -833,7 +845,7 @@ App = {
     // See how much we can withdraw directly if token is not ETH
     var tokenRawFundBalanceBN = web3.utils.toBN(0);
 
-    if (token !== "ETH") {
+    if (["DAI", "USDC", "USDT"].indexOf(token) >= 0) {
       try {
         tokenRawFundBalanceBN = web3.utils.toBN(await App.contracts.RariFundManager.methods["getRawFundBalance(string)"](token).call());
       } catch (error) {
