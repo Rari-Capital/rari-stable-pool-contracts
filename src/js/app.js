@@ -766,12 +766,12 @@ App = {
       var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
       if (!$('#DepositSlippage').is(':visible')) {
-        $('#DepositSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-danger">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
+        $('#DepositSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "danger") + '">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
         return toastr["warning"]("Please note the exchange slippage required to make a deposit of this currency.", "Deposit canceled");
       }
 
-      if (!$('#DepositSlippage kbd').hasClass(slippage >= 0 ? "text-danger" : "text-success") || $('#DepositSlippage kbd').text() !== slippageAbsPercentageString + "%") {
-        $('#DepositSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-danger">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
+      if ($('#DepositSlippage kbd').text() !== slippageAbsPercentageString + "%") {
+        $('#DepositSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "danger") + '">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
         return toastr["warning"]("Exchange slippage changed.", "Deposit canceled");
       }
 
@@ -823,6 +823,7 @@ App = {
     App.getFundBalance();
     App.getMyFundBalance();
     App.getTokenBalance();
+    App.getDirectlyWithdrawableCurrencies();
   },
   
   /**
@@ -994,12 +995,12 @@ App = {
       var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
       if (!$('#WithdrawSlippage').is(':visible')) {
-        $('#WithdrawSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-danger">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
+        $('#WithdrawSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "danger") + '">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
         return toastr["warning"]("Please note the exchange slippage required to make a withdrawal of this currency.", "Withdrawal canceled");
       }
 
-      if (!$('#WithdrawSlippage kbd').hasClass(slippage >= 0 ? "text-danger" : "text-success") || $('#WithdrawSlippage kbd').text() !== slippageAbsPercentageString + "%") {
-        $('#WithdrawSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-danger">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
+      if ($('#WithdrawSlippage kbd').text() !== slippageAbsPercentageString + "%") {
+        $('#WithdrawSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "danger") + '">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
         return toastr["warning"]("Exchange slippage changed.", "Withdrawal canceled");
       }
 
@@ -1026,6 +1027,7 @@ App = {
     App.getFundBalance();
     App.getMyFundBalance();
     App.getTokenBalance();
+    App.getDirectlyWithdrawableCurrencies();
   },
 
   /**

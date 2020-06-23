@@ -195,7 +195,7 @@ contract RariFundProxy is Ownable {
             if (orders[i].length > 0 && signatures[i].length > 0 && makerAssetFillAmounts[i] > 0) {
                 // Input validation
                 require(orders.length == signatures.length, "Length of all orders and signatures arrays must be equal.");
-        
+
                 // Exchange tokens and emit event
                 uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], msg.value);
                 emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], filledAmounts[1]);
