@@ -872,6 +872,8 @@ App = {
       var allOrders = [];
       var allSignatures = [];
       var makerAssetFillAmountBNs = [];
+      var protocolFeeBNs = [];
+
       var amountInputtedUsdBN = web3.utils.toBN(0);
       var amountWithdrawnBN = web3.utils.toBN(0);
       var totalProtocolFeeBN = web3.utils.toBN(0);
@@ -886,6 +888,9 @@ App = {
           allOrders.push([]);
           allSignatures.push([]);
           makerAssetFillAmountBNs.push(0);
+          protocolFeeBNs.push(0);
+
+          amountInputtedUsdBN.iadd(tokenRawFundBalanceBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(token === "DAI" ? 1e18 : 1e6)));
           amountWithdrawnBN.iadd(tokenRawFundBalanceBN);
         } else {
           // Push other candidates to array
@@ -960,6 +965,7 @@ App = {
           allOrders.push(inputCandidates[i].orders);
           allSignatures.push(inputCandidates[i].signatures);
           makerAssetFillAmountBNs.push(thisOutputAmountBN);
+          protocolFeeBNs.push(web3.utils.toBN(inputCandidates[i].protocolFee));
 
           amountInputtedUsdBN.iadd(thisInputAmountBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
           amountWithdrawnBN.iadd(thisOutputAmountBN);
@@ -975,6 +981,7 @@ App = {
           allOrders.push(inputCandidates[i].orders);
           allSignatures.push(inputCandidates[i].signatures);
           makerAssetFillAmountBNs.push(inputCandidates[i].makerAssetFillAmountBN);
+          protocolFeeBNs.push(web3.utils.toBN(inputCandidates[i].protocolFee));
 
           amountInputtedUsdBN.iadd(inputCandidates[i].inputFillAmountBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
           amountWithdrawnBN.iadd(inputCandidates[i].makerAssetFillAmountBN);
@@ -987,13 +994,6 @@ App = {
         // Stop if we have filled the withdrawal
         if (amountWithdrawnBN.gte(amountBN)) break;
       }
-
-      // TODO: Remove log code below
-      var inputAmountStrings = [];
-      for (var i = 0; i < inputAmountBNs.length; i++) inputAmountStrings[i] = inputAmountBNs[i].toString();
-      var makerAssetFillAmountStrings = [];
-      for (var i = 0; i < makerAssetFillAmountBNs.length; i++) makerAssetFillAmountStrings[i] = makerAssetFillAmountBNs[i].toString();
-      console.log(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "ETH" : App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings, amountWithdrawnBN.toString());
       
       // Make sure input amount is completely filled
       if (amountWithdrawnBN.lt(amountBN)) {
@@ -1024,8 +1024,10 @@ App = {
         for (var i = 0; i < inputAmountBNs.length; i++) inputAmountStrings[i] = inputAmountBNs[i].toString();
         var makerAssetFillAmountStrings = [];
         for (var i = 0; i < makerAssetFillAmountBNs.length; i++) makerAssetFillAmountStrings[i] = makerAssetFillAmountBNs[i].toString();
-        console.log(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "ETH" : App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings);
-        await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
+        var protocolFeeStrings = [];
+        for (var i = 0; i < protocolFeeBNs.length; i++) protocolFeeStrings[i] = protocolFeeBNs[i].toString();
+        console.log(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "ETH" : App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings);
+        await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
       } catch (err) {
         return toastr["error"]("RariFundProxy.withdrawAndExchange failed: " + err, "Withdrawal failed");
       }

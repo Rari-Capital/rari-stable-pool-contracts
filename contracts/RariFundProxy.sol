@@ -178,12 +178,13 @@ contract RariFundProxy is Ownable {
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
      * @param makerAssetFillAmounts The amounts of the maker assets to buy.
+     * @param protocolFees The protocol fees to pay to 0x in ETH for each order.
      * @return Boolean indicating success.
      */
-    function withdrawAndExchange(string[] memory inputCurrencyCodes, uint256[] memory inputAmounts, address outputErc20Contract, LibOrder.Order[][] memory orders, bytes[][] memory signatures, uint256[] memory makerAssetFillAmounts) public payable returns (bool) {
+    function withdrawAndExchange(string[] memory inputCurrencyCodes, uint256[] memory inputAmounts, address outputErc20Contract, LibOrder.Order[][] memory orders, bytes[][] memory signatures, uint256[] memory makerAssetFillAmounts, uint256[] memory protocolFees) public payable returns (bool) {
         // Input validation
         require(_rariFundManagerContract != address(0), "RariFundManager contract not set.");
-        require(inputCurrencyCodes.length == inputAmounts.length && inputCurrencyCodes.length == orders.length && inputCurrencyCodes.length == signatures.length && inputCurrencyCodes.length == makerAssetFillAmounts.length, "Array parameters are not all the same length.");
+        require(inputCurrencyCodes.length == inputAmounts.length && inputCurrencyCodes.length == orders.length && inputCurrencyCodes.length == signatures.length && inputCurrencyCodes.length == makerAssetFillAmounts.length && inputCurrencyCodes.length == protocolFees.length, "Array parameters are not all the same length.");
 
         // For each input currency
         for (uint256 i = 0; i < inputCurrencyCodes.length; i++) {
@@ -197,7 +198,7 @@ contract RariFundProxy is Ownable {
                 require(orders.length == signatures.length, "Length of all orders and signatures arrays must be equal.");
 
                 // Exchange tokens and emit event
-                uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], msg.value);
+                uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], protocolFees[i]);
                 emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], filledAmounts[1]);
             }
         }
