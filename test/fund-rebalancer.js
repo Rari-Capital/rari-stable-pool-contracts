@@ -188,7 +188,7 @@ contract("RariFundManager v0.3.0", accounts => {
       // TODO: Ideally, we add actually call rari-fund-rebalancer
       var price = await zeroExExchange.getPrice(currencyCombinations[i][0], currencyCombinations[i][1]);
       var minMarginalOutputAmount = 1 / parseFloat(price) * 0.9;
-      var minMarginalOutputAmountBN = web3.utils.toBN(parseInt(minMarginalOutputAmount * (10 ** currencies[currencyCombinations[i][1]].decimals)));
+      var minMarginalOutputAmountBN = web3.utils.toBN(Math.trunc(minMarginalOutputAmount * (10 ** currencies[currencyCombinations[i][1]].decimals)));
 
       // Get estimated filled input amount from 0x swap API
       // TODO: Ideally, we add actually call rari-fund-rebalancer
@@ -228,7 +228,7 @@ contract("RariFundManager v0.3.0", accounts => {
       let newInputBalanceBN = web3.utils.toBN(await inputErc20Contract.methods.balanceOf(RariFundManager.address).call());
       let newOutputBalanceBN = web3.utils.toBN(await outputErc20Contract.methods.balanceOf(RariFundManager.address).call());
       assert(newInputBalanceBN.lt(oldInputBalanceBN));
-      assert(newOutputBalanceBN.gte(oldOutputBalanceBN.add(web3.utils.toBN(parseInt(oldInputBalanceBN.sub(newInputBalanceBN).toString() / (10 ** currencies[currencyCombinations[i][0]].decimals) * minMarginalOutputAmountBN.toString())))));
+      assert(newOutputBalanceBN.gte(oldOutputBalanceBN.add(web3.utils.toBN(Math.trunc(oldInputBalanceBN.sub(newInputBalanceBN).toString() / (10 ** currencies[currencyCombinations[i][0]].decimals) * minMarginalOutputAmountBN.toString())))));
     }
   });
 });
