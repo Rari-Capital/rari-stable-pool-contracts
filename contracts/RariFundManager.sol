@@ -407,6 +407,15 @@ contract RariFundManager is Ownable {
     mapping(address => bool) private _accountBalanceLimitWhitelist;
 
     /**
+     * @dev Adds or removes an account from the balance limit whitelist.
+     * @param account The Ethereum address to add or remove.
+     * @param whitelisted A boolean indicating if the account is to be added or removed.
+     */
+    function setAccountBalanceLimitWhitelist(address account, bool whitelisted) external onlyOwner {
+        _accountBalanceLimitWhitelist[account] = whitelisted;
+    }
+
+    /**
      * @dev Maps booleans indicating if currency codes are accepted for deposits.
      */
     mapping(string => bool) private _acceptedCurrencies;
