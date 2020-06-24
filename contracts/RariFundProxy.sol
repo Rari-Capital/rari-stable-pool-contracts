@@ -148,10 +148,16 @@ contract RariFundProxy is Ownable {
         ZeroExExchangeController.approve(inputErc20Contract == address(0) ? WETH_CONTRACT : inputErc20Contract, inputAmount);
         uint256[2] memory filledAmounts = ZeroExExchangeController.marketSellOrdersFillOrKill(orders, signatures, takerAssetFillAmount, inputErc20Contract == address(0) ? msg.value.sub(inputAmount) : msg.value);
 
-        // Refund unused input tokens and update input amount
-        IERC20 inputToken = IERC20(inputErc20Contract == address(0) ? WETH_CONTRACT : inputErc20Contract);
-        uint256 inputTokenBalance = inputToken.balanceOf(address(this));
-        if (inputTokenBalance > 0) inputToken.safeTransfer(msg.sender, inputTokenBalance);
+        if (inputErc20Contract == address(0)) {
+            // Unwrap unused ETH
+            uint256 wethBalance = _weth.balanceOf(address(this));
+            if (wethBalance > 0) _weth.withdraw(wethBalance);
+        } else {
+            // Refund unused input tokens
+            IERC20 inputToken = IERC20(inputErc20Contract);
+            uint256 inputTokenBalance = inputToken.balanceOf(address(this));
+            if (inputTokenBalance > 0) inputToken.safeTransfer(msg.sender, inputTokenBalance);
+        }
 
         // Emit event
         emit PreDepositExchange(inputErc20Contract, outputCurrencyCode, msg.sender, filledAmounts[0], filledAmounts[1]);
