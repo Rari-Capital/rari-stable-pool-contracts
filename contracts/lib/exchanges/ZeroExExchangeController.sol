@@ -43,8 +43,8 @@ library ZeroExExchangeController {
     function approve(address erc20Contract, uint256 amount) internal returns (bool) {
         IERC20 token = IERC20(erc20Contract);
         uint256 allowance = token.allowance(address(this), ERC20_PROXY_CONTRACT);
-        if (amount < allowance) token.safeDecreaseAllowance(ERC20_PROXY_CONTRACT, allowance - amount);
-        else if (amount > allowance) token.safeIncreaseAllowance(ERC20_PROXY_CONTRACT, amount - allowance);
+        if (amount < allowance) token.safeDecreaseAllowance(ERC20_PROXY_CONTRACT, allowance.sub(amount));
+        else if (amount > allowance) token.safeIncreaseAllowance(ERC20_PROXY_CONTRACT, amount.sub(allowance));
         return true;
     }
 

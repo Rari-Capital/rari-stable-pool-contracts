@@ -71,8 +71,8 @@ library DydxPoolController {
     function approve(address erc20Contract, uint256 amount) internal returns (bool) {
         IERC20 token = IERC20(erc20Contract);
         uint256 allowance = token.allowance(address(this), SOLO_MARGIN_CONTRACT);
-        if (amount < allowance) token.safeDecreaseAllowance(SOLO_MARGIN_CONTRACT, allowance - amount);
-        else if (amount > allowance) token.safeIncreaseAllowance(SOLO_MARGIN_CONTRACT, amount - allowance);
+        if (amount < allowance) token.safeDecreaseAllowance(SOLO_MARGIN_CONTRACT, allowance.sub(amount));
+        else if (amount > allowance) token.safeIncreaseAllowance(SOLO_MARGIN_CONTRACT, amount.sub(allowance));
         return true;
     }
 

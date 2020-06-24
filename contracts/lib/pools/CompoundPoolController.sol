@@ -59,8 +59,8 @@ library CompoundPoolController {
         address cErc20Contract = getCErc20Contract(erc20Contract);
         IERC20 token = IERC20(erc20Contract);
         uint256 allowance = token.allowance(address(this), cErc20Contract);
-        if (amount < allowance) token.safeDecreaseAllowance(cErc20Contract, allowance - amount);
-        else if (amount > allowance) token.safeIncreaseAllowance(cErc20Contract, amount - allowance);
+        if (amount < allowance) token.safeDecreaseAllowance(cErc20Contract, allowance.sub(amount));
+        else if (amount > allowance) token.safeIncreaseAllowance(cErc20Contract, amount.sub(allowance));
         return true;
     }
 
