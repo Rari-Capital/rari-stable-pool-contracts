@@ -8,11 +8,15 @@
   },
   "scripts": {
     "dev": "lite-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src/js/app.js --out-file src/js/app-compiled.js"
   },
   "author": "",
   "license": "",
   "devDependencies": {
+    "@babel/cli": "^7.10.3",
+    "@babel/core": "^7.10.3",
+    "@babel/preset-env": "^7.10.3",
     "lite-server": "^2.3.0"
   },
   "dependencies": {
