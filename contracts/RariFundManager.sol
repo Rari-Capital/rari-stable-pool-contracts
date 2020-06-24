@@ -394,25 +394,25 @@ contract RariFundManager is Ownable {
     uint256 private _accountBalanceLimitUsd;
 
     /**
-     * @dev Sets or upgrades the account balance limit in USD.
-     * @param accountBalanceLimitUsd The fund balance limit in USD per Ethereum address.
+     * @dev Sets or upgrades the default account balance limit in USD.
+     * @param limitUsd The default fund balance limit per Ethereum address in USD.
      */
-    function setAccountBalanceLimitUsd(uint256 accountBalanceLimitUsd) external onlyOwner {
-        _accountBalanceLimitUsd = accountBalanceLimitUsd;
+    function setDefaultAccountBalanceLimitUsd(uint256 limitUsd) external onlyOwner {
+        _accountBalanceLimitUsd = limitUsd;
     }
 
     /**
      * @dev Maps booleans indicating if Ethereum addresses are immune to the account balance limit.
      */
-    mapping(address => bool) private _accountBalanceLimitWhitelist;
+    mapping(address => int256) private _accountBalanceLimitWhitelist;
 
     /**
      * @dev Adds or removes an account from the balance limit whitelist.
      * @param account The Ethereum address to add or remove.
-     * @param whitelisted A boolean indicating if the account is to be added or removed.
+     * @param limitUsd The fund balance limit of `account` in USD. Use 0 to unset individual limit (and restore account to global limit). Use -1 to disable deposits from `account`.
      */
-    function setAccountBalanceLimitWhitelist(address account, bool whitelisted) external onlyOwner {
-        _accountBalanceLimitWhitelist[account] = whitelisted;
+    function setIndividualAccountBalanceLimit(address account, int256 limitUsd) external onlyOwner {
+        _accountBalanceLimitWhitelist[account] = limitUsd;
     }
 
     /**
@@ -500,9 +500,10 @@ contract RariFundManager is Ownable {
      * @return Boolean indicating success.
      */
     function checkAccountBalanceLimit(address to, uint256 amountUsd, RariFundToken rariFundToken, uint256 rftTotalSupply, uint256 fundBalanceUsd) internal view returns (bool) {
-        if (to != owner() && to != _interestFeeMasterBeneficiary && !_accountBalanceLimitWhitelist[to]) {
+        if (to != owner() && to != _interestFeeMasterBeneficiary && _accountBalanceLimitWhitelist[to] >= 0) {
             uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? rariFundToken.balanceOf(to).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
-            if (initialBalanceUsd.add(amountUsd) > _accountBalanceLimitUsd) return false;
+            uint256 accountBalanceLimitUsd = _accountBalanceLimitWhitelist[to] > 0 ? uint256(_accountBalanceLimitWhitelist[to]) : _accountBalanceLimitUsd;
+            if (initialBalanceUsd.add(amountUsd) > accountBalanceLimitUsd) return false;
         }
 
         return true;
