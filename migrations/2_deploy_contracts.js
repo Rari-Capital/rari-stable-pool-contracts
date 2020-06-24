@@ -36,7 +36,7 @@ module.exports = function(deployer, network, accounts) {
   }).then(function(rariFundProxy) {
     return rariFundProxy.setFundManager(RariFundManager.address);
   }).then(function() {
-    return rariFundManager.setAccountBalanceLimitUsd(Web3.utils.toBN(250 * 1e18));
+    return rariFundManager.setDefaultAccountBalanceLimitUsd(Web3.utils.toBN(250 * 1e18));
   }).then(function() {
     return rariFundManager.setFundRebalancer(accounts[0]);
   }).then(function() {
