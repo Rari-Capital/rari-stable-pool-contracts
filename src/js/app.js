@@ -728,16 +728,18 @@ App = {
   handleDeposit: async function(event) {
     event.preventDefault();
 
+    var token = $('#DepositToken').val();
+    // if (["DAI", "USDC", "USDT", "ETH"].indexOf(token) < 0) return toastr["error"]("Invalid token!", "Deposit failed");
+    var amount = parseFloat($('#DepositAmount').val());
+    if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Deposit failed");
+    var amountBN = web3.utils.toBN(amount * (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6));
+
     $('#depositButton').prop("disabled", true);
     $('#depositButton').text("...");
 
     await (async function() {
       App.getDirectlyDepositableCurrencies();
 
-      var token = $('#DepositToken').val();
-      // if (["DAI", "USDC", "USDT", "ETH"].indexOf(token) < 0) return toastr["error"]("Invalid token!", "Deposit failed");
-      var amount = parseFloat($('#DepositAmount').val());
-      var amountBN = web3.utils.toBN(amount * (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6));
       var accepted = ["DAI", "USDC", "USDT"].indexOf(token) >= 0 ? await App.contracts.RariFundManager.methods.isCurrencyAccepted(token).call() : false;
 
       if (accepted) {
@@ -856,16 +858,17 @@ App = {
   handleWithdraw: async function(event) {
     event.preventDefault();
 
+    var token = $('#WithdrawToken').val();
+    // if (["DAI", "USDC", "USDT", "ETH"].indexOf(token) < 0) return toastr["error"]("Invalid token!", "Withdrawal failed");
+    var amount = parseFloat($('#WithdrawAmount').val());
+    if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Withdrawal failed");
+    var amountBN = web3.utils.toBN(amount * (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6));
+
     $('#withdrawButton').prop("disabled", true);
     $('#withdrawButton').text("...");
 
     await (async function() {
       App.getDirectlyWithdrawableCurrencies();
-
-      var token = $('#WithdrawToken').val();
-      // if (["DAI", "USDC", "USDT", "ETH"].indexOf(token) < 0) return toastr["error"]("Invalid token!", "Withdrawal failed");
-      var amount = parseFloat($('#WithdrawAmount').val());
-      var amountBN = web3.utils.toBN(amount * (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6));
 
       // Approve RFT to RariFundManager
       try {
@@ -1108,13 +1111,14 @@ App = {
   handleTransfer: async function(event) {
     event.preventDefault();
 
+    var amount = parseFloat($('#RFTTransferAmount').val());
+    if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Transfer failed");
+    var toAddress = $('#RFTTransferAddress').val();
+
     $('#transferButton').prop("disabled", true);
     $('#transferButton').text("...");
 
     await (async function() {
-      var amount = parseFloat($('#RFTTransferAmount').val());
-      var toAddress = $('#RFTTransferAddress').val();
-
       console.log('Transfer ' + amount + ' RFT to ' + toAddress);
 
       try {
