@@ -425,8 +425,14 @@ App = {
     App.selectedAccount = App.accounts[0];
 
     // Get user's account balance in the quant fund and RFT balance
-    if (App.contracts.RariFundManager) App.getMyFundBalance();
-    if (App.contracts.RariFundToken) App.getTokenBalance();
+    if (App.contracts.RariFundManager) {
+      App.getMyFundBalance();
+      if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
+    }
+    if (App.contracts.RariFundToken) {
+      App.getTokenBalance();
+      if (!App.intervalGetTokenBalance) App.intervalGetTokenBalance = setInterval(App.getTokenBalance, 5 * 60 * 1000);
+    }
   
     // Load acounts dropdown
     $('#selected-account').empty();
@@ -543,7 +549,7 @@ App = {
       setInterval(App.getFundBalance, 5 * 60 * 1000);
       if (App.selectedAccount) {
         App.getMyFundBalance();
-        setInterval(App.getMyFundBalance, 5 * 60 * 1000);
+        if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
       }
       App.getDirectlyDepositableCurrencies();
       App.getDirectlyWithdrawableCurrencies();
@@ -557,7 +563,7 @@ App = {
       App.contracts.RariFundToken = new web3.eth.Contract(data, "0xF8bf0c88f3ebA7ab4aF9675231f4549082546791");
       if (App.selectedAccount) {
         App.getTokenBalance();
-        setInterval(App.getTokenBalance, 5 * 60 * 1000);
+        if (!App.intervalGetTokenBalance) App.intervalGetTokenBalance = setInterval(App.getTokenBalance, 5 * 60 * 1000);
       }
     });
 
@@ -598,11 +604,11 @@ App = {
       // Get user's account balance in the quant fund and RFT balance
       if (App.contracts.RariFundManager) {
         App.getMyFundBalance();
-        setInterval(App.getMyFundBalance, 5 * 60 * 1000);
+        if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
       }
       if (App.contracts.RariFundToken) {
         App.getTokenBalance();
-        setInterval(App.getTokenBalance, 5 * 60 * 1000);
+        if (!App.intervalGetTokenBalance) App.intervalGetTokenBalance = setInterval(App.getTokenBalance, 5 * 60 * 1000);
       }
     });
 
@@ -736,8 +742,12 @@ App = {
       console.log('Deposit ' + amount + ' ' + token + ' directly');
 
       // Approve tokens to RariFundManager
-      var allowanceBN = web3.utils.toBN(await App.contracts[token].methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call());
-      if (allowanceBN.lt(amountBN)) await App.contracts[token].methods.approve(App.contracts.RariFundManager.options.address, amountBN).send({ from: App.selectedAccount });
+      try {
+        var allowanceBN = web3.utils.toBN(await App.contracts[token].methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call());
+        if (allowanceBN.lt(amountBN)) await App.contracts[token].methods.approve(App.contracts.RariFundManager.options.address, amountBN).send({ from: App.selectedAccount });
+      } catch (err) {
+        return toastr["error"]("Failed to approve tokens to RariFundManager: " + err, "Deposit failed");
+      }
       
       // Deposit tokens to RariFundManager
       try {
@@ -846,8 +856,12 @@ App = {
     var amountBN = web3.utils.toBN(amount * (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6));
 
     // Approve RFT to RariFundManager
-    var allowanceBN = web3.utils.toBN(await App.contracts.RariFundToken.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call());
-    if (allowanceBN.lt(web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1))) await App.contracts.RariFundToken.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1)).send({ from: App.selectedAccount });
+    try {
+      var allowanceBN = web3.utils.toBN(await App.contracts.RariFundToken.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call());
+      if (allowanceBN.lt(web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1))) await App.contracts.RariFundToken.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1)).send({ from: App.selectedAccount });
+    } catch (error) {
+      return toastr["error"]("Failed to approve RFT to RariFundManager: " + error, "Withdrawal failed");
+    }
 
     // See how much we can withdraw directly if token is not ETH
     var tokenRawFundBalanceBN = web3.utils.toBN(0);
@@ -856,7 +870,7 @@ App = {
       try {
         tokenRawFundBalanceBN = web3.utils.toBN(await App.contracts.RariFundManager.methods["getRawFundBalance(string)"](token).call());
       } catch (error) {
-        return toastr["error"]("Failed to get raw fund balance of output currency.", "Withdrawal failed");
+        return toastr["error"]("Failed to get raw fund balance of output currency: " + error, "Withdrawal failed");
       }
     }
 
