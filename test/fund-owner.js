@@ -1,7 +1,13 @@
+const fs = require('fs');
+
 const erc20Abi = require('./abi/ERC20.json');
 
 const currencies = require('./fixtures/currencies.json');
-const pools = require('./fixtures/pools.json');
+
+// To compile DummyRariFundManager, run the following command using solc-js v0.5.17
+// solcjs DummyRariFundManager.sol --abi --bin
+const dummyRariFundManagerAbi = JSON.parse(fs.readFileSync(__dirname + '/fixtures/DummyRariFundManager_sol_DummyRariFundManager.abi'));
+const dummyRariFundManagerBin = fs.readFileSync(__dirname + '/fixtures/DummyRariFundManager_sol_DummyRariFundManager.bin');
 
 const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
@@ -135,7 +141,7 @@ contract("RariFundManager v0.3.0", accounts => {
     await fundManagerInstance.setFundRebalancer(accounts[0], { from: accounts[0] });
   });
   
-  it("should put upgrade the FundManager by disabling the old contract, withdrawing all tokens from all pools, transferring them to the new FundManager, and passing data to the new FundManager", async () => {
+  it("should put upgrade the FundManager to the same contract code by disabling the old contract, withdrawing all tokens from all pools, transferring them to the new FundManager, and passing data to the new FundManager", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     
     // Approve and deposit tokens to the fund (using DAI as an example)
@@ -159,7 +165,6 @@ contract("RariFundManager v0.3.0", accounts => {
     // TODO: Check _fundDisabled (no way to do this as of now)
 
     // Create new FundManager
-    // TODO: Test that we can make changes to the code of the new fund manager before deploying it and upgrading to it
     var newFundManagerInstance = await RariFundManager.new({ from: accounts[0] });
     await newFundManagerInstance.setFundToken(RariFundToken.address, { from: accounts[0] });
 
@@ -175,6 +180,34 @@ contract("RariFundManager v0.3.0", accounts => {
     assert(newFundBalance.gte(oldFundBalance));
     let newAccountBalance = await newFundManagerInstance.balanceOf.call(accounts[0]);
     assert(newAccountBalance.gte(oldAccountBalance));
+  });
+  
+  it("should put upgrade the FundManager to new contract code by disabling the old contract, withdrawing all tokens from all pools, transferring them to the new FundManager, and passing data to the new FundManager", async () => {
+    let fundManagerInstance = await RariFundManager.deployed();
+    
+    // Approve and deposit tokens to the fund (using DAI as an example)
+    var amountBN = web3.utils.toBN(10 ** (currencies["DAI"].decimals - 1));
+    var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
+    await erc20Contract.methods.approve(RariFundManager.address, amountBN.toString()).send({ from: accounts[0] });
+    await fundManagerInstance.deposit("DAI", amountBN, { from: accounts[0] });
+
+    // Approve and deposit to pool (using Compound as an example)
+    await fundManagerInstance.approveToPool(1, "DAI", amountBN, { from: accounts[0] });
+    await fundManagerInstance.depositToPool(1, "DAI", amountBN, { from: accounts[0] });
+
+    // Disable original FundManager
+    await fundManagerInstance.disableFund({ from: accounts[0] });
+
+    // TODO: Check _fundDisabled (no way to do this as of now)
+
+    // Create new FundManager
+    let newFundManagerWeb3Instance = new web3.eth.Contract(dummyRariFundManagerAbi);
+    newFundManagerWeb3Instance = await newFundManagerWeb3Instance.deploy({ data: "0x" + dummyRariFundManagerBin }).send({ from: accounts[0] });
+
+    // Upgrade!
+    await newFundManagerWeb3Instance.methods.authorizeFundManagerDataSource(fundManagerInstance.address).send({ from: accounts[0] });
+    await fundManagerInstance.upgradeFundManager(newFundManagerWeb3Instance.options.address);
+    await newFundManagerWeb3Instance.methods.authorizeFundManagerDataSource("0x0000000000000000000000000000000000000000").send({ from: accounts[0] });
   });
 
   // Disabled for now as we do not yet have an upgrade function on the token because it will only be necessary on a future upgrade
