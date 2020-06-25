@@ -1084,8 +1084,7 @@ App = {
     console.log('Getting fund balance...');
 
     App.contracts.RariFundManager.methods.getFundBalance().call().then(function(result) {
-      balance = result / 1e18;
-      $('#USDBalance').text(balance);
+      $('#USDBalance').text(result / 1e18);
     }).catch(function(err) {
       console.error(err);
     });
@@ -1098,8 +1097,7 @@ App = {
     console.log('Getting my fund balance...');
 
     App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call().then(function(result) {
-      balance = result / 1e18;
-      $('#MyUSDBalance').text(balance);
+      $('#MyUSDBalance').text(result / 1e18);
     }).catch(function(err) {
       console.error(err);
     });
@@ -1142,8 +1140,7 @@ App = {
     console.log('Getting token balance...');
 
     App.contracts.RariFundToken.methods.balanceOf(App.selectedAccount).call().then(function(result) {
-      balance = result / 1e18;
-      $('#RFTBalance').text(balance);
+      $('#RFTBalance').text(result / 1e18);
     }).catch(function(err) {
       console.error(err);
     });

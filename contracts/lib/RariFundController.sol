@@ -32,7 +32,7 @@ library RariFundController {
 
     /**
      * @dev Returns the calling address's balance of the specified currency in the specified pool.
-     * @param pool The name of the pool.
+     * @param pool The index of the pool.
      * @param erc20Contract The ERC20 contract of the token.
      */
     function getPoolBalance(uint8 pool, address erc20Contract) external returns (uint256) {
@@ -43,7 +43,7 @@ library RariFundController {
 
     /**
      * @dev Approves tokens to the pool without spending gas on every deposit.
-     * @param pool The name of the pool.
+     * @param pool The index of the pool.
      * @param erc20Contract The ERC20 contract of the token to be approved.
      * @param amount The amount of tokens to be approved.
      * @return Boolean indicating success.
@@ -57,7 +57,7 @@ library RariFundController {
 
     /**
      * @dev Deposits funds to the specified pool.
-     * @param pool The name of the pool.
+     * @param pool The index of the pool.
      * @param erc20Contract The ERC20 contract of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
      * @return Boolean indicating success.
@@ -71,7 +71,7 @@ library RariFundController {
 
     /**
      * @dev Withdraws funds from the specified pool.
-     * @param pool The name of the pool.
+     * @param pool The index of the pool.
      * @param erc20Contract The ERC20 contract of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
      * @return Boolean indicating success.
@@ -85,7 +85,7 @@ library RariFundController {
 
     /**
      * @dev Withdraws all funds from the specified pool.
-     * @param pool The name of the pool.
+     * @param pool The index of the pool.
      * @param erc20Contract The ERC20 contract of the token to be withdrawn.
      * @return Boolean indicating success.
      */

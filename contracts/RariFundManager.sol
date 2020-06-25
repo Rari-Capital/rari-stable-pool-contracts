@@ -699,7 +699,7 @@ contract RariFundManager is Ownable {
 
     /**
      * @dev Net quantity of deposits to the fund (i.e., deposits - withdrawals).
-     * On deposit, amount deposited is added to _netDeposits; on withdrawal, amount withdrawn is subtracted from _netDeposits.
+     * On deposit, amount deposited is added to `_netDeposits`; on withdrawal, amount withdrawn is subtracted from `_netDeposits`.
      */
     int256 private _netDeposits;
     
@@ -810,14 +810,14 @@ contract RariFundManager is Ownable {
         require(!_fundDisabled, "This RariFundManager contract is currently disabled.");
         require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
-        
+
         uint256 amountUsd = getInterestFeesUnclaimed();
         if (amountUsd <= 0) return false;
 
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
         uint256 rftAmount = 0;
-        
+
         if (rftTotalSupply > 0) {
             uint256 fundBalanceUsd = getFundBalance();
             if (fundBalanceUsd > 0) rftAmount = amountUsd.mul(rftTotalSupply).div(fundBalanceUsd);
@@ -829,7 +829,7 @@ contract RariFundManager is Ownable {
         _netDeposits = _netDeposits.add(int256(amountUsd));
         require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
         emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
-        
+
         emit InterestFeeDeposit(_interestFeeMasterBeneficiary, amountUsd);
         return true;
     }
@@ -842,7 +842,7 @@ contract RariFundManager is Ownable {
         require(!_fundDisabled, "This RariFundManager contract is currently disabled.");
         require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
         require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
-        
+
         uint256 amountUsd = getInterestFeesUnclaimed();
         require(amountUsd > 0, "No new fees are available to claim.");
 
@@ -861,7 +861,7 @@ contract RariFundManager is Ownable {
         _netDeposits = _netDeposits.add(int256(amountUsd));
         require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
         emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
-        
+
         emit InterestFeeDeposit(_interestFeeMasterBeneficiary, amountUsd);
         return true;
     }
@@ -876,15 +876,15 @@ contract RariFundManager is Ownable {
         require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        
+
         uint256 amountUsd = getInterestFeesUnclaimed();
         uint256 tokenDecimals = erc20Contract == 0xdAC17F958D2ee523a2206206994597C13D831ec7 ? 6 : ERC20Detailed(erc20Contract).decimals();
         uint256 amount = 18 >= tokenDecimals ? amountUsd.div(10 ** (uint256(18).sub(tokenDecimals))) : amountUsd.mul(10 ** (tokenDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
         require(amount > 0, "No new fees are available to claim.");
-        
+
         _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
         IERC20(erc20Contract).safeTransfer(_interestFeeMasterBeneficiary, amount);
-        
+
         emit InterestFeeWithdrawal(_interestFeeMasterBeneficiary, amountUsd, currencyCode, amount);
         return true;
     }
