@@ -250,6 +250,43 @@ contract RariFundManager is Ownable {
     }
 
     /**
+     * @dev Throws if called by any account other than the RariFundToken.
+     */
+    modifier onlyToken() {
+        require(_rariFundTokenContract == msg.sender, "Caller is not the RariFundToken.");
+        _;
+    }
+
+    /**
+     * @dev Maps net quantity of deposits to the fund (i.e., deposits - withdrawals) to each user.
+     * On deposit, amount deposited is added to `_netDepositsByAccount`; on withdrawal, amount withdrawn is subtracted from `_netDepositsByAccount`.
+     */
+    mapping(address => int256) private _netDepositsByAccount;
+
+    /**
+     * @dev Recieves data about an RFT transfer from RariFundToken so we can record it in `_netDepositsByAccount`.
+     * @param sender The sender of the RFT.
+     * @param recipient The recipient of the RFT.
+     * @param rftAmount The amount of RFT.
+     * @param rftTotalSupply The total supply of RFT.
+     */
+    function onFundTokenTransfer(address sender, address recipient, uint256 rftAmount, uint256 rftTotalSupply) external onlyToken {
+        if (rftAmount <= 0) return;
+        uint256 amountUsd = rftAmount.mul(getFundBalance()).div(rftTotalSupply);
+        _netDepositsByAccount[sender] = _netDepositsByAccount[sender].sub(int256(amountUsd));
+        _netDepositsByAccount[recipient] = _netDepositsByAccount[recipient].add(int256(amountUsd));
+    }
+
+    /**
+     * @notice Returns the total amount of interest accrued by `account` (excluding the fees paid on interest) in USD (scaled by 1e18).
+     * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.
+     * @param account The account whose interest we are calculating.
+     */
+    function interestAccruedBy(address account) public returns (int256) {
+        return int256(this.balanceOf(account)).sub(_netDepositsByAccount[account]);
+    }
+
+    /**
      * @dev Emitted when the RariFundProxy of the RariFundManager is set.
      */
     event FundProxySet(address newContract);
@@ -505,6 +542,7 @@ contract RariFundManager is Ownable {
         // Transfer funds from msg.sender and mint RFT
         IERC20(erc20Contract).safeTransferFrom(msg.sender, address(this), amount); // The user must approve the transfer of tokens beforehand
         _netDeposits = _netDeposits.add(int256(amountUsd));
+        _netDepositsByAccount[to] = _netDepositsByAccount[to].add(int256(amountUsd));
         require(rariFundToken.mint(to, rftAmount), "Failed to mint output tokens.");
         emit Deposit(currencyCode, msg.sender, to, amount, amountUsd, rftAmount);
         return true;
@@ -557,6 +595,23 @@ contract RariFundManager is Ownable {
         return true;
     }
 
+
+    /**
+     * @dev Returns the amount of RFT to burn for a withdrawal (used by `_withdrawFrom`).
+     * @param rariFundToken The RariFundToken contract object.
+     * @param from The address from which RFT will be burned.
+     * @param amountUsd The amount of the withdrawal in USD
+     */
+    function getRftBurnAmount(RariFundToken rariFundToken, address from, uint256 amountUsd) internal returns (uint256) {
+        uint256 rftTotalSupply = rariFundToken.totalSupply();
+        uint256 fundBalanceUsd = getFundBalance();
+        require(fundBalanceUsd > 0, "Fund balance is zero.");
+        uint256 rftAmount = amountUsd.mul(rftTotalSupply).div(fundBalanceUsd);
+        require(rftAmount <= rariFundToken.balanceOf(from), "Your RFT balance is too low for a withdrawal of this amount.");
+        require(rftAmount > 0, "Withdrawal amount is so small that no RFT would be burned.");
+        return rftAmount;
+    }
+
     /**
      * @dev Internal function to withdraw funds from RariFund to `msg.sender` in exchange for RFT burned from `from`.
      * You may only withdraw currencies held by the fund (see `getRawFundBalance(string currencyCode)`).
@@ -595,16 +650,12 @@ contract RariFundManager is Ownable {
 
         // Calculate RFT to burn
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
-        uint256 rftTotalSupply = rariFundToken.totalSupply();
-        uint256 fundBalanceUsd = getFundBalance();
-        require(fundBalanceUsd > 0, "Fund balance is zero.");
-        uint256 rftAmount = amountUsd.mul(rftTotalSupply).div(fundBalanceUsd);
-        require(rftAmount <= rariFundToken.balanceOf(from), "Your RFT balance is too low for a withdrawal of this amount.");
-        require(rftAmount > 0, "Withdrawal amount is so small that no RFT would be burned.");
+        uint256 rftAmount = getRftBurnAmount(rariFundToken, from, amountUsd);
 
         // Burn RFT and transfer funds to msg.sender
         rariFundToken.burnFrom(from, rftAmount); // The user must approve the burning of tokens beforehand
         _netDeposits = _netDeposits.sub(int256(amountUsd));
+        _netDepositsByAccount[from] = _netDepositsByAccount[from].sub(int256(amountUsd));
         token.safeTransfer(msg.sender, amount);
         emit Withdrawal(currencyCode, from, msg.sender, amount, amountUsd, rftAmount);
         return true;
@@ -848,6 +899,7 @@ contract RariFundManager is Ownable {
         if (rftAmount <= 0) return false;
         _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
         _netDeposits = _netDeposits.add(int256(amountUsd));
+        _netDepositsByAccount[_interestFeeMasterBeneficiary] = _netDepositsByAccount[_interestFeeMasterBeneficiary].add(int256(amountUsd));
         require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
         emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
 
@@ -870,7 +922,7 @@ contract RariFundManager is Ownable {
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
         uint256 rftAmount = 0;
-        
+
         if (rftTotalSupply > 0) {
             uint256 fundBalanceUsd = getFundBalance();
             if (fundBalanceUsd > 0) rftAmount = amountUsd.mul(rftTotalSupply).div(fundBalanceUsd);
@@ -880,6 +932,7 @@ contract RariFundManager is Ownable {
         require(rftAmount > 0, "Deposit amount is so small that no RFT would be minted.");
         _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
         _netDeposits = _netDeposits.add(int256(amountUsd));
+        _netDepositsByAccount[_interestFeeMasterBeneficiary] = _netDepositsByAccount[_interestFeeMasterBeneficiary].add(int256(amountUsd));
         require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
         emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
 

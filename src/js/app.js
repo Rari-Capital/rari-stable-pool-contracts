@@ -62,7 +62,7 @@ App = {
       for (var i = 0; i < factors.length; i++) if (factors[i][1].gt(maxApyBN)) maxApyBN = factors[i][1];
       return $('#APYNow').text((parseFloat(maxApyBN.toString()) / 1e16).toFixed(2) + "%");
     }
-    
+
     var apyBN = web3.utils.toBN(0);
     for (var i = 0; i < factors.length; i++) apyBN.add(factors[i][0].mul(factors[i][1]).div(totalBalanceUsdBN));
     $('#APYNow').text((parseFloat(apyBN.toString()) / 1e16).toFixed(2) + "%");
@@ -484,6 +484,8 @@ App = {
     if (App.contracts.RariFundManager) {
       App.getMyFundBalance();
       if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
+      App.getMyInterestAccrued();
+      if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000);
     }
     if (App.contracts.RariFundToken) {
       App.getTokenBalance();
@@ -608,6 +610,8 @@ App = {
       if (App.selectedAccount) {
         App.getMyFundBalance();
         if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
+        App.getMyInterestAccrued();
+        if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000);
       }
       App.getDirectlyDepositableCurrencies();
       App.getDirectlyWithdrawableCurrencies();
@@ -663,6 +667,8 @@ App = {
       if (App.contracts.RariFundManager) {
         App.getMyFundBalance();
         if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
+        App.getMyInterestAccrued();
+        if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000);
       }
       if (App.contracts.RariFundToken) {
         App.getTokenBalance();
@@ -1156,6 +1162,19 @@ App = {
 
     App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call().then(function(result) {
       $('#MyUSDBalance').text(result / 1e18);
+    }).catch(function(err) {
+      console.error(err);
+    });
+  },
+
+  /**
+   * Get the user's interest accrued in the quant fund in USD.
+   */
+  getMyInterestAccrued: function() {
+    console.log('Getting my interest accrued...');
+
+    App.contracts.RariFundManager.methods.interestAccruedBy(App.selectedAccount).call().then(function(result) {
+      $('#MyInterestAccrued').text(result / 1e18);
     }).catch(function(err) {
       console.error(err);
     });

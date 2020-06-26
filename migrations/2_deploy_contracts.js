@@ -28,6 +28,8 @@ module.exports = function(deployer, network, accounts) {
     rariFundManager = _rariFundManager;
     return rariFundManager.setFundToken(RariFundToken.address);
   }).then(function() {
+    return rariFundToken.setFundManager(RariFundManager.address);
+  }).then(function() {
     return deployer.deploy(RariFundProxy);
   }).then(function() {
     return rariFundManager.setFundProxy(RariFundProxy.address);
