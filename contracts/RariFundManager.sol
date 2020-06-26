@@ -330,6 +330,27 @@ contract RariFundManager is Ownable {
     }
 
     /**
+     * @notice Returns the fund's raw balance (all RFT holders' funds + all unclaimed fees) in each pool of the specified currency.
+     * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `RariFundController.getPoolBalance`) potentially modifies the state.
+     * @param currencyCode The currency code of the balance to be calculated.
+     * @return An array of arrays of pool indexes and balances.
+     */
+    function getRawPoolBalances(string calldata currencyCode) external returns (uint8[] memory, uint256[] memory) {
+        address erc20Contract = _erc20Contracts[currencyCode];
+        require(erc20Contract != address(0), "Invalid currency code.");
+
+        uint8[] memory pools = new uint8[](_poolsByCurrency[currencyCode].length);
+        uint256[] memory balances = new uint256[](_poolsByCurrency[currencyCode].length);
+
+        for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++) {
+            pools[i] = _poolsByCurrency[currencyCode][i];
+            balances[i] = RariFundController.getPoolBalance(_poolsByCurrency[currencyCode][i], erc20Contract);
+        }
+
+        return (pools, balances);
+    }
+
+    /**
      * @notice Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees) of the specified currency.
      * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `RariFundController.getPoolBalance`) potentially modifies the state.
      * @param currencyCode The currency code of the balance to be calculated.
