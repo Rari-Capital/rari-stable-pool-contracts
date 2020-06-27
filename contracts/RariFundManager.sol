@@ -449,28 +449,28 @@ contract RariFundManager is Ownable {
     /**
      * @dev Fund balance limit in USD per Ethereum address.
      */
-    uint256 private _accountBalanceLimitUsd;
+    uint256 private _accountBalanceLimitDefault;
 
     /**
      * @dev Sets or upgrades the default account balance limit in USD.
      * @param limitUsd The default fund balance limit per Ethereum address in USD.
      */
-    function setDefaultAccountBalanceLimitUsd(uint256 limitUsd) external onlyOwner {
-        _accountBalanceLimitUsd = limitUsd;
+    function setDefaultAccountBalanceLimit(uint256 limitUsd) external onlyOwner {
+        _accountBalanceLimitDefault = limitUsd;
     }
 
     /**
      * @dev Maps booleans indicating if Ethereum addresses are immune to the account balance limit.
      */
-    mapping(address => int256) private _accountBalanceLimitWhitelist;
+    mapping(address => int256) private _accountBalanceLimits;
 
     /**
-     * @dev Adds or removes an account from the balance limit whitelist.
+     * @dev Sets the balance limit in USD of `account`.
      * @param account The Ethereum address to add or remove.
      * @param limitUsd The fund balance limit of `account` in USD. Use 0 to unset individual limit (and restore account to global limit). Use -1 to disable deposits from `account`.
      */
     function setIndividualAccountBalanceLimit(address account, int256 limitUsd) external onlyOwner {
-        _accountBalanceLimitWhitelist[account] = limitUsd;
+        _accountBalanceLimits[account] = limitUsd;
     }
 
     /**
@@ -537,7 +537,7 @@ contract RariFundManager is Ownable {
         require(rftAmount > 0, "Deposit amount is so small that no RFT would be minted.");
 
         // Check account balance limit if `to` is not whitelisted
-        require(checkAccountBalanceLimit(to, amountUsd, rariFundToken, rftTotalSupply, fundBalanceUsd), "Making this deposit would cause this account's balance to exceed the maximum.");
+        require(checkAccountBalanceLimit(to, amountUsd, rariFundToken, rftTotalSupply, fundBalanceUsd), "Making this deposit would cause the balance of this account to exceed the maximum.");
 
         // Transfer funds from msg.sender and mint RFT
         IERC20(erc20Contract).safeTransferFrom(msg.sender, address(this), amount); // The user must approve the transfer of tokens beforehand
@@ -559,9 +559,10 @@ contract RariFundManager is Ownable {
      * @return Boolean indicating success.
      */
     function checkAccountBalanceLimit(address to, uint256 amountUsd, RariFundToken rariFundToken, uint256 rftTotalSupply, uint256 fundBalanceUsd) internal view returns (bool) {
-        if (to != owner() && to != _interestFeeMasterBeneficiary && _accountBalanceLimitWhitelist[to] >= 0) {
+        if (to != owner() && to != _interestFeeMasterBeneficiary) {
+            if (_accountBalanceLimits[to] < 0) return false;
             uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? rariFundToken.balanceOf(to).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
-            uint256 accountBalanceLimitUsd = _accountBalanceLimitWhitelist[to] > 0 ? uint256(_accountBalanceLimitWhitelist[to]) : _accountBalanceLimitUsd;
+            uint256 accountBalanceLimitUsd = _accountBalanceLimits[to] > 0 ? uint256(_accountBalanceLimits[to]) : _accountBalanceLimitDefault;
             if (initialBalanceUsd.add(amountUsd) > accountBalanceLimitUsd) return false;
         }
 
