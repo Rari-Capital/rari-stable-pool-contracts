@@ -14,6 +14,12 @@ App = {
   accounts: [],
   selectedAccount: null,
   contracts: {},
+  tokens: {
+    "DAI": { decimals: 18, address: "0x6B175474E89094C44Da98b954EedeAC495271d0F" },
+    "USDC": { decimals: 6, address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
+    "USDT": { decimals: 6, address: "0xdAC17F958D2ee523a2206206994597C13D831ec7" }
+  },
+  erc20Abi: null,
 
   init: function() {
     App.initChartColors();
@@ -41,7 +47,7 @@ App = {
     var compoundApyBNs = await App.getCompoundApyBNs();
 
     for (const currencyCode of ["DAI", "USDC", "USDT"]) {
-        var contractBalanceBN = web3.utils.toBN(await App.contracts[currencyCode].methods.balanceOf(App.contracts.RariFundManager.options.address).call());
+        var contractBalanceBN = web3.utils.toBN(await App.tokens[currencyCode].contract.methods.balanceOf(App.contracts.RariFundManager.options.address).call());
         var contractBalanceUsdBN = contractBalanceBN.mul(web3.utils.toBN(currencyCode === "DAI" ? 1e18 : 1e6)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
         factors.push([contractBalanceUsdBN, web3.utils.toBN(0)]);
         totalBalanceUsdBN = totalBalanceUsdBN.add(contractBalanceUsdBN);
@@ -602,7 +608,7 @@ App = {
    */
   initContracts: function() {
     $.getJSON('abi/RariFundManager.json', function(data) {
-      App.contracts.RariFundManager = new web3.eth.Contract(data, "0xF8bf0c88f3ebA7ab4aF9675231f4549082546791");
+      App.contracts.RariFundManager = new web3.eth.Contract(data, "0x5833E2F28075Dfbc63A9Dae238D6080da8adcbFA");
       App.getCurrentApy();
       setInterval(App.getCurrentApy, 5 * 60 * 1000);
       App.getFundBalance();
@@ -622,7 +628,7 @@ App = {
     });
 
     $.getJSON('abi/RariFundToken.json', function(data) {
-      App.contracts.RariFundToken = new web3.eth.Contract(data, "0x15050d464f7d9bD8c5314fa8d6De4d0bE7Ddf019");
+      App.contracts.RariFundToken = new web3.eth.Contract(data, "0x70d0082E5D7aD89F02c451c85a2C2E4d87FC72e4");
       if (App.selectedAccount) {
         App.getTokenBalance();
         if (!App.intervalGetTokenBalance) App.intervalGetTokenBalance = setInterval(App.getTokenBalance, 5 * 60 * 1000);
@@ -630,13 +636,22 @@ App = {
     });
 
     $.getJSON('abi/RariFundProxy.json', function(data) {
-      App.contracts.RariFundProxy = new web3.eth.Contract(data, "0x4d36516DaA48DbcdC90eEE3Ab1Cde81e7096Ba3F");
+      App.contracts.RariFundProxy = new web3.eth.Contract(data, "0x14852a7C0E244fCdDf81815b5cB694316a0eE276");
     });
 
     $.getJSON('abi/ERC20.json', function(data) {
-      App.contracts.DAI = new web3.eth.Contract(data, "0x6B175474E89094C44Da98b954EedeAC495271d0F");
-      App.contracts.USDC = new web3.eth.Contract(data, "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48");
-      App.contracts.USDT = new web3.eth.Contract(data, "0xdAC17F958D2ee523a2206206994597C13D831ec7");
+      App.erc20Abi = data;
+      for (const symbol of Object.keys(App.tokens)) App.tokens[symbol].contract = new web3.eth.Contract(data, App.tokens[symbol].address);
+    });
+
+    $.getJSON('https://api.0x.org/swap/v0/tokens', function(data) {
+      data.records.sort((a, b) => a.symbol > b.symbol ? 1 : -1);
+      for (const token of data.records) {
+        if (App.tokens[token.symbol]) continue;
+        App.tokens[token.symbol] = { address: token.address, decimals: token.decimals, contract: App.erc20Abi ? new web3.eth.Contract(App.erc20Abi, token.address) : null };
+        $('#DepositToken').append('<option>' + token.symbol + '</option>');
+        $('#WithdrawToken').append('<option>' + token.symbol + '</option>');
+      }
     });
   },
 
@@ -793,10 +808,10 @@ App = {
     event.preventDefault();
 
     var token = $('#DepositToken').val();
-    // if (["DAI", "USDC", "USDT", "ETH"].indexOf(token) < 0) return toastr["error"]("Invalid token!", "Deposit failed");
+    if (token !== "ETH" && !App.tokens[token]) return toastr["error"]("Invalid token!", "Deposit failed");
     var amount = parseFloat($('#DepositAmount').val());
     if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Deposit failed");
-    var amountBN = web3.utils.toBN(amount * (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6));
+    var amountBN = web3.utils.toBN(amount * (10 ** (token == "ETH" ? 18 : App.tokens[token].decimals)));
 
     $('#depositButton').prop("disabled", true);
     $('#depositButton').text("...");
@@ -813,8 +828,8 @@ App = {
 
         // Approve tokens to RariFundManager
         try {
-          var allowanceBN = web3.utils.toBN(await App.contracts[token].methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call());
-          if (allowanceBN.lt(amountBN)) await App.contracts[token].methods.approve(App.contracts.RariFundManager.options.address, amountBN).send({ from: App.selectedAccount });
+          var allowanceBN = web3.utils.toBN(await App.tokens[token].contract.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call());
+          if (allowanceBN.lt(amountBN)) await App.tokens[token].contract.methods.approve(App.contracts.RariFundManager.options.address, amountBN).send({ from: App.selectedAccount });
         } catch (err) {
           return toastr["error"]("Failed to approve tokens to RariFundManager: " + err, "Deposit failed");
         }
@@ -835,20 +850,21 @@ App = {
 
         // Get orders from 0x swap API
         try {
-          var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN] = await App.get0xSwapOrders(token === "ETH" ? "WETH" : App.contracts[token].options.address, App.contracts[acceptedCurrency].options.address, amountBN);
+          var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN] = await App.get0xSwapOrders(token === "ETH" ? "WETH" : App.tokens[token].address, App.tokens[acceptedCurrency].address, amountBN);
         } catch (err) {
           return toastr["error"]("Failed to get swap orders from 0x API: " + err, "Deposit failed");
         }
         
         // Make sure input amount is completely filled
         if (inputFilledAmountBN.lt(amountBN)) {
-          $('#DepositAmount').val(inputFilledAmountBN.toString() / (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6));
+          $('#DepositAmount').val(inputFilledAmountBN.toString() / (10 ** (token == "ETH" ? 18 : App.tokens[token].decimals)));
           return toastr["warning"]("Unable to find enough liquidity to exchange " + token + " before depositing.", "Deposit canceled");
         }
 
         // Warn user of slippage
-        var amountUsd = token === "ETH" ? amount / (await App.get0xPrice("ETH", acceptedCurrency)) : amount;
-        var slippage = 1 - ((makerAssetFilledAmountBN.toString() / (acceptedCurrency === "DAI" ? 1e18 : 1e6)) / amountUsd);
+        var amountInputtedUsd = ["DAI", "USDC", "USDT"].indexOf(token) >= 0 ? amount : amount / (await App.get0xPrice(token === "ETH" ? "WETH" : token, acceptedCurrency));
+        var amountOutputtedUsd = makerAssetFilledAmountBN.toString() / (10 ** App.tokens[token].decimals);
+        var slippage = 1 - (amountOutputtedUsd / amountInputtedUsd);
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
         if (!$('#DepositSlippage').is(':visible')) {
@@ -865,8 +881,8 @@ App = {
 
         // Approve tokens to RariFundProxy if token is not ETH
         if (token !== "ETH") {
-          var allowanceBN = web3.utils.toBN(await App.contracts[token].methods.allowance(App.selectedAccount, App.contracts.RariFundProxy.options.address).call());
-          if (allowanceBN.lt(amountBN)) await App.contracts[token].methods.approve(App.contracts.RariFundProxy.options.address, amountBN).send({ from: App.selectedAccount });
+          var allowanceBN = web3.utils.toBN(await App.tokens[token].contract.methods.allowance(App.selectedAccount, App.contracts.RariFundProxy.options.address).call());
+          if (allowanceBN.lt(amountBN)) await App.tokens[token].contract.methods.approve(App.contracts.RariFundProxy.options.address, amountBN).send({ from: App.selectedAccount });
         }
 
         // Build array of orders and signatures
@@ -895,7 +911,7 @@ App = {
 
         // Exchange and deposit tokens via RariFundProxy
         try {
-          await App.contracts.RariFundProxy.methods.exchangeAndDeposit(token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.contracts[token].options.address, amountBN, acceptedCurrency, orders, signatures, takerAssetFilledAmountBN).send({ from: App.selectedAccount, value: token === "ETH" ? web3.utils.toBN(protocolFee).add(amountBN).toString() : protocolFee });
+          await App.contracts.RariFundProxy.methods.exchangeAndDeposit(token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.tokens[token].address, amountBN, acceptedCurrency, orders, signatures, takerAssetFilledAmountBN).send({ from: App.selectedAccount, value: token === "ETH" ? web3.utils.toBN(protocolFee).add(amountBN).toString() : protocolFee });
         } catch (err) {
           return toastr["error"]("RariFundProxy.exchangeAndDeposit failed: " + err, "Deposit failed");
         }
@@ -923,10 +939,10 @@ App = {
     event.preventDefault();
 
     var token = $('#WithdrawToken').val();
-    // if (["DAI", "USDC", "USDT", "ETH"].indexOf(token) < 0) return toastr["error"]("Invalid token!", "Withdrawal failed");
+    if (token !== "ETH" && !App.tokens[token]) return toastr["error"]("Invalid token!", "Withdrawal failed");
     var amount = parseFloat($('#WithdrawAmount').val());
     if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Withdrawal failed");
-    var amountBN = web3.utils.toBN(amount * (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6));
+    var amountBN = web3.utils.toBN(amount * (10 ** (token == "ETH" ? 18 : App.tokens[token].decimals)));
 
     $('#withdrawButton').prop("disabled", true);
     $('#withdrawButton').text("...");
@@ -983,7 +999,7 @@ App = {
             makerAssetFillAmountBNs.push(0);
             protocolFeeBNs.push(0);
 
-            amountInputtedUsdBN.iadd(tokenRawFundBalanceBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(token === "DAI" ? 1e18 : 1e6)));
+            amountInputtedUsdBN.iadd(tokenRawFundBalanceBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(10 ** (token == "ETH" ? 18 : App.tokens[token].decimals))));
             amountWithdrawnBN.iadd(tokenRawFundBalanceBN);
           } else {
             // Push other candidates to array
@@ -995,7 +1011,7 @@ App = {
         // Get orders from 0x swap API for each input currency candidate
         for (var i = 0; i < inputCandidates.length; i++) {
           try {
-            var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN] = await App.get0xSwapOrders(App.contracts[inputCandidates[i].currencyCode].options.address, token === "ETH" ? "WETH" : App.contracts[token].options.address, inputCandidates[i].rawFundBalanceBN, amountBN);
+            var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN] = await App.get0xSwapOrders(App.tokens[inputCandidates[i].currencyCode].address, token === "ETH" ? "WETH" : App.tokens[token].address, inputCandidates[i].rawFundBalanceBN, amountBN);
           } catch (err) {
             return toastr["error"]("Failed to get swap orders from 0x API: " + err, "Withdrawal failed");
           }
@@ -1095,8 +1111,8 @@ App = {
         }
 
         // Warn user of slippage
-        var amountUsd = token === "ETH" ? amount * (await App.get0xPrice("DAI", "WETH")) : amount; // TODO: Use actual input currencies instead of using DAI for USD price
-        var slippage = 1 - (amountUsd / (amountInputtedUsdBN.toString() / 1e18));
+        var amountOutputtedUsd = ["DAI", "USDC", "USDT"].indexOf(token) >= 0 ? amount : amount * (await App.get0xPrice("DAI", token === "ETH" ? "WETH" : token)); // TODO: Use actual input currencies instead of using DAI for USD price
+        var slippage = 1 - (amountOutputtedUsd / (amountInputtedUsdBN.toString() / 1e18));
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
         if (!$('#WithdrawSlippage').is(':visible')) {
@@ -1119,8 +1135,8 @@ App = {
           for (var i = 0; i < makerAssetFillAmountBNs.length; i++) makerAssetFillAmountStrings[i] = makerAssetFillAmountBNs[i].toString();
           var protocolFeeStrings = [];
           for (var i = 0; i < protocolFeeBNs.length; i++) protocolFeeStrings[i] = protocolFeeBNs[i].toString();
-          console.log(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "ETH" : App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings);
-          await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.contracts[token].options.address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
+          console.log(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "ETH" : App.tokens[token].address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings);
+          await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.tokens[token].address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
         } catch (err) {
           return toastr["error"]("RariFundProxy.withdrawAndExchange failed: " + err, "Withdrawal failed");
         }
