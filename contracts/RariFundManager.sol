@@ -539,10 +539,10 @@ contract RariFundManager is Ownable {
         // Check account balance limit if `to` is not whitelisted
         require(checkAccountBalanceLimit(to, amountUsd, rariFundToken, rftTotalSupply, fundBalanceUsd), "Making this deposit would cause the balance of this account to exceed the maximum.");
 
-        // Transfer funds from msg.sender and mint RFT
-        IERC20(erc20Contract).safeTransferFrom(msg.sender, address(this), amount); // The user must approve the transfer of tokens beforehand
+        // Update net deposits, transfer funds from msg.sender, mint RFT, emit event, and return true
         _netDeposits = _netDeposits.add(int256(amountUsd));
         _netDepositsByAccount[to] = _netDepositsByAccount[to].add(int256(amountUsd));
+        IERC20(erc20Contract).safeTransferFrom(msg.sender, address(this), amount); // The user must approve the transfer of tokens beforehand
         require(rariFundToken.mint(to, rftAmount), "Failed to mint output tokens.");
         emit Deposit(currencyCode, msg.sender, to, amount, amountUsd, rftAmount);
         return true;
