@@ -1,4 +1,5 @@
 const Web3 = require('web3');
+require('dotenv').config();
 
 var RariFundController = artifacts.require("./lib/RariFundController.sol");
 var RariFundManager = artifacts.require("./RariFundManager.sol");
@@ -6,6 +7,12 @@ var RariFundToken = artifacts.require("./RariFundToken.sol");
 var RariFundProxy = artifacts.require("./RariFundProxy.sol");
 
 module.exports = function(deployer, network, accounts) {
+  if (network == "live") {
+    if (!process.env.LIVE_FUND_OWNER) return console.error("LIVE_FUND_OWNER is missing for live deployment");
+    if (!process.env.LIVE_FUND_REBALANCER) return console.error("LIVE_FUND_REBALANCER is missing for live deployment");
+    if (!process.env.LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY) return console.error("LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY is missing for live deployment");
+  }
+  
   var rariFundToken = null;
   var rariFundManager = null;
 
