@@ -407,10 +407,17 @@ contract RariFundManager is Ownable {
     }
 
     /**
+     * @dev Caches the fund's raw total balance (all RFT holders' funds + all unclaimed fees) of all currencies in USD (scaled by 1e18).
+     */
+    int256 private _rawFundBalanceCache = -1;
+
+    /**
      * @notice Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees) of all currencies in USD (scaled by 1e18).
      * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.
      */
     function getRawFundBalance() public returns (uint256) {
+        if (_rawFundBalanceCache >= 0) return uint256(_rawFundBalanceCache);
+
         uint256 totalBalance = 0;
 
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
@@ -426,10 +433,19 @@ contract RariFundManager is Ownable {
     }
 
     /**
+     * @dev Caches the value of getRawFundBalance() for the duration of the function.
+     */
+    modifier cacheRawFundBalance() {
+        _rawFundBalanceCache = int256(getRawFundBalance());
+        _;
+        _rawFundBalanceCache = -1;
+    }
+
+    /**
      * @notice Returns the fund's total investor balance (all RFT holders' funds but not unclaimed fees) of all currencies in USD (scaled by 1e18).
      * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.
      */
-    function getFundBalance() public returns (uint256) {
+    function getFundBalance() public cacheRawFundBalance returns (uint256) {
         return getRawFundBalance().sub(getInterestFeesUnclaimed());
     }
 
