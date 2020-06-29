@@ -32,6 +32,7 @@ library RariFundController {
 
     /**
      * @dev Returns the calling address's balance of the specified currency in the specified pool.
+     * Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
      * @param pool The index of the pool.
      * @param erc20Contract The ERC20 contract of the token.
      */

@@ -385,16 +385,9 @@ contract RariFundManager is Ownable {
     function getRawPoolBalances(string calldata currencyCode) external returns (uint8[] memory, uint256[] memory) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-
-        uint8[] memory pools = new uint8[](_poolsByCurrency[currencyCode].length);
         uint256[] memory balances = new uint256[](_poolsByCurrency[currencyCode].length);
-
-        for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++) {
-            pools[i] = _poolsByCurrency[currencyCode][i];
-            balances[i] = RariFundController.getPoolBalance(_poolsByCurrency[currencyCode][i], erc20Contract);
-        }
-
-        return (pools, balances);
+        for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++) balances[i] = RariFundController.getPoolBalance(_poolsByCurrency[currencyCode][i], erc20Contract);
+        return (_poolsByCurrency[currencyCode], balances);
     }
 
     /**
