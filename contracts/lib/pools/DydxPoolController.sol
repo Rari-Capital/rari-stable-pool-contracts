@@ -50,16 +50,9 @@ library DydxPoolController {
      */
     function getBalance(address erc20Contract) internal view returns (uint256) {
         uint256 marketId = getMarketId(erc20Contract); // TODO: Make sure this reverts if an invalid address is supplied
-
         Account.Info memory account = Account.Info(address(this), 0);
-
-        address[] memory tokens;
-        Types.Par[] memory pars;
-        Types.Wei[] memory weis;
-
-        (tokens, pars, weis) = _soloMargin.getAccountBalances(account);
-
-        return weis[marketId].value;
+        (, , Types.Wei[] memory weis) = _soloMargin.getAccountBalances(account);
+        return weis[marketId].sign ? weis[marketId].value : 0;
     }
 
     /**
@@ -83,7 +76,7 @@ library DydxPoolController {
      * @return Boolean indicating success.
      */
     function deposit(address erc20Contract, uint256 amount) internal returns (bool) {
-        uint256 marketId = getMarketId(erc20Contract); // TODO: Make sure this reverts if an invalid address is supplied
+        uint256 marketId = getMarketId(erc20Contract);
 
         Account.Info memory account = Account.Info(address(this), 0);
         Account.Info[] memory accounts = new Account.Info[](1);
@@ -118,7 +111,7 @@ library DydxPoolController {
      * @return Boolean indicating success.
      */
     function withdraw(address erc20Contract, uint256 amount) internal returns (bool) {
-        uint256 marketId = getMarketId(erc20Contract); // TODO: Make sure this reverts if an invalid address is supplied
+        uint256 marketId = getMarketId(erc20Contract);
 
         Account.Info memory account = Account.Info(address(this), 0);
         Account.Info[] memory accounts = new Account.Info[](1);
@@ -152,7 +145,7 @@ library DydxPoolController {
      * @return Boolean indicating success.
      */
     function withdrawAll(address erc20Contract) internal returns (bool) {
-        uint256 marketId = getMarketId(erc20Contract); // TODO: Make sure this reverts if an invalid address is supplied
+        uint256 marketId = getMarketId(erc20Contract);
 
         Account.Info memory account = Account.Info(address(this), 0);
         Account.Info[] memory accounts = new Account.Info[](1);
