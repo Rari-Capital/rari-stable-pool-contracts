@@ -270,8 +270,7 @@ contract RariFundManager is Ownable {
      * @param rftAmount The amount of RFT transferred or burnt.
      * @param newRftTotalSupply The total supply of RFT after the transfer or burn.
      */
-    function onFundTokenTransfer(address sender, address recipient, uint256 rftAmount, uint256 newRftTotalSupply) external onlyToken {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function onFundTokenTransfer(address sender, address recipient, uint256 rftAmount, uint256 newRftTotalSupply) external fundEnabled onlyToken {
         if (rftAmount <= 0) return;
         uint256 oldRftTotalSupply = recipient == address(0) ? newRftTotalSupply.add(rftAmount) : newRftTotalSupply;
         uint256 amountUsd = rftAmount.mul(getFundBalance()).div(oldRftTotalSupply);
@@ -342,17 +341,17 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Emitted when deposits to and withdrawals from this RariFundManager have been disabled.
+     * @dev Emitted when the primary functionality of this RariFundManager contract has been disabled.
      */
     event FundDisabled();
 
     /**
-     * @dev Emitted when deposits to and withdrawals from this RariFundManager have been enabled.
+     * @dev Emitted when the primary functionality of this RariFundManager contract has been enabled.
      */
     event FundEnabled();
 
     /**
-     * @dev Disables deposits to and withdrawals from this RariFundManager so contract(s) can be upgraded.
+     * @dev Disables primary functionality of this RariFundManager so contract(s) can be upgraded.
      */
     function disableFund() external onlyOwner {
         require(!_fundDisabled, "Fund already disabled.");
@@ -361,12 +360,20 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Enables deposits to and withdrawals from this RariFundManager once contract(s) are upgraded.
+     * @dev Enables primary functionality of this RariFundManager once contract(s) are upgraded.
      */
     function enableFund() external onlyOwner {
         require(_fundDisabled, "Fund already enabled.");
         _fundDisabled = false;
         emit FundEnabled();
+    }
+
+    /**
+     * @dev Throws if fund is disabled.
+     */
+    modifier fundEnabled() {
+        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+        _;
     }
 
     /**
@@ -517,9 +524,8 @@ contract RariFundManager is Ownable {
      * @param amount The amount of tokens to be deposited.
      * @return Boolean indicating success.
      */
-    function _depositTo(address to, string memory currencyCode, uint256 amount) internal returns (bool) {
+    function _depositTo(address to, string memory currencyCode, uint256 amount) internal fundEnabled returns (bool) {
         // Input validation
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
         require(_rariFundTokenContract != address(0), "RFT contract not set. This may be due to an upgrade.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
@@ -625,9 +631,8 @@ contract RariFundManager is Ownable {
      * @param amount The amount of tokens to be withdrawn.
      * @return Boolean indicating success.
      */
-    function _withdrawFrom(address from, string memory currencyCode, uint256 amount) internal returns (bool) {
+    function _withdrawFrom(address from, string memory currencyCode, uint256 amount) internal fundEnabled returns (bool) {
         // Input validation
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
         require(_rariFundTokenContract != address(0), "RFT contract not set. This may be due to an upgrade.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
@@ -699,8 +704,7 @@ contract RariFundManager is Ownable {
      * @param amount The amount of tokens to be approved.
      * @return Boolean indicating success.
      */
-    function approveToPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyRebalancer returns (bool) {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function approveToPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(RariFundController.approveToPool(pool, erc20Contract, amount), "Pool approval failed.");
@@ -714,8 +718,7 @@ contract RariFundManager is Ownable {
      * @param amount The amount of tokens to be deposited.
      * @return Boolean indicating success.
      */
-    function depositToPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyRebalancer returns (bool) {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function depositToPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(RariFundController.depositToPool(pool, erc20Contract, amount), "Pool deposit failed.");
@@ -729,8 +732,7 @@ contract RariFundManager is Ownable {
      * @param amount The amount of tokens to be withdrawn.
      * @return Boolean indicating success.
      */
-    function withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) external onlyRebalancer returns (bool) {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(RariFundController.withdrawFromPool(pool, erc20Contract, amount), "Pool withdrawal failed.");
@@ -743,8 +745,7 @@ contract RariFundManager is Ownable {
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
      * @return Boolean indicating success.
      */
-    function withdrawAllFromPool(uint8 pool, string calldata currencyCode) external onlyRebalancer returns (bool) {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function withdrawAllFromPool(uint8 pool, string calldata currencyCode) external fundEnabled onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(RariFundController.withdrawAllFromPool(pool, erc20Contract), "Pool withdrawal failed.");
@@ -757,8 +758,7 @@ contract RariFundManager is Ownable {
      * @param amount The amount of tokens to be approved.
      * @return Boolean indicating success.
      */
-    function approveTo0x(string calldata currencyCode, uint256 amount) external onlyRebalancer returns (bool) {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function approveTo0x(string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer returns (bool) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(RariFundController.approveTo0x(erc20Contract, amount), "0x approval failed.");
@@ -773,8 +773,7 @@ contract RariFundManager is Ownable {
      * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
      * @return Boolean indicating success.
      */
-    function marketSell0xOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public payable onlyRebalancer returns (bool) {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function marketSell0xOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public payable fundEnabled onlyRebalancer returns (bool) {
         RariFundController.marketSell0xOrdersFillOrKill(orders, signatures, takerAssetFillAmount, msg.value);
         return true;
     }
@@ -817,8 +816,7 @@ contract RariFundManager is Ownable {
      * @dev Sets the fee rate on interest.
      * @param rate The proportion of interest accrued to be taken as a service fee (scaled by 1e18).
      */
-    function setInterestFeeRate(uint256 rate) external onlyOwner {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function setInterestFeeRate(uint256 rate) external fundEnabled onlyOwner {
         require(rate != _interestFeeRate, "This is already the current interest fee rate.");
         _depositFees();
         _interestFeesGeneratedAtLastFeeRateChange = getInterestFeesGenerated(); // MUST update this first before updating _rawInterestAccruedAtLastFeeRateChange since it depends on it 
@@ -870,8 +868,7 @@ contract RariFundManager is Ownable {
      * @dev Sets the master beneficiary of interest fees.
      * @param beneficiary The master beneficiary of fees on interest; i.e., the recipient of all fees on interest.
      */
-    function setInterestFeeMasterBeneficiary(address beneficiary) external onlyOwner {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function setInterestFeeMasterBeneficiary(address beneficiary) external fundEnabled onlyOwner {
         require(beneficiary != address(0), "Interest fee master beneficiary cannot be the zero address.");
         _interestFeeMasterBeneficiary = beneficiary;
     }
@@ -890,8 +887,7 @@ contract RariFundManager is Ownable {
      * @dev Internal function to deposit all accrued fees on interest back into the fund on behalf of the master beneficiary.
      * @return Integer indicating success (0), no fees to claim (1), or no RFT to mint (2).
      */
-    function _depositFees() internal returns (uint8) {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function _depositFees() internal fundEnabled returns (uint8) {
         require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
         require(_rariFundTokenContract != address(0), "RFT contract not set. This may be due to an upgrade.");
 
@@ -933,8 +929,7 @@ contract RariFundManager is Ownable {
      * @param currencyCode The currency code of the interest fees to be claimed.
      * @return Boolean indicating success.
      */
-    function withdrawFees(string calldata currencyCode) external onlyRebalancer returns (bool) {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+    function withdrawFees(string calldata currencyCode) external fundEnabled onlyRebalancer returns (bool) {
         require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
