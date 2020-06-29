@@ -7,9 +7,10 @@
     "test": "test"
   },
   "scripts": {
-    "dev": "lite-server",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src/js/app.js --out-file src/js/app-compiled.js"
+    "compile": "truffle compile --all",
+    "test": "truffle test --network development",
+    "build": "babel src/js/app.js --out-file src/js/app-compiled.js",
+    "dev": "lite-server"
   },
   "author": "",
   "license": "",
