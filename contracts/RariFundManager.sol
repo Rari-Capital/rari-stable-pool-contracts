@@ -264,33 +264,20 @@ contract RariFundManager is Ownable {
     mapping(address => int256) private _netDepositsByAccount;
 
     /**
-     * @dev Recieves data about an RFT transfer from RariFundToken so we can record it in `_netDepositsByAccount`.
+     * @dev Recieves data about an RFT transfer or burn from RariFundToken so we can record it in `_netDepositsByAccount`.
      * @param sender The sender of the RFT.
-     * @param recipient The recipient of the RFT.
-     * @param rftAmount The amount of RFT transferred.
-     * @param rftTotalSupply The total supply of RFT.
+     * @param recipient The recipient of the RFT (the zero address if burning).
+     * @param rftAmount The amount of RFT transferred or burnt.
+     * @param newRftTotalSupply The total supply of RFT after the transfer or burn.
      */
-    function onFundTokenTransfer(address sender, address recipient, uint256 rftAmount, uint256 rftTotalSupply) external onlyToken {
+    function onFundTokenTransfer(address sender, address recipient, uint256 rftAmount, uint256 newRftTotalSupply) external onlyToken {
         require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
         if (rftAmount <= 0) return;
-        uint256 amountUsd = rftAmount.mul(getFundBalance()).div(rftTotalSupply);
-        _netDepositsByAccount[sender] = _netDepositsByAccount[sender].sub(int256(amountUsd));
-        _netDepositsByAccount[recipient] = _netDepositsByAccount[recipient].add(int256(amountUsd));
-    }
-
-    /**
-     * @dev Recieves data about an RFT burn from RariFundToken so we can record it in `_netDeposits` and `_netDepositsByAccount`.
-     * @param account The account whose RFT was burned.
-     * @param rftAmount The amount of RFT burned.
-     * @param newRftTotalSupply The total supply of RFT after the burn.
-     */
-    function onFundTokenBurn(address account, uint256 rftAmount, uint256 newRftTotalSupply) external onlyToken {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
-        if (rftAmount <= 0) return;
-        uint256 oldRftTotalSupply = newRftTotalSupply.add(rftAmount);
+        uint256 oldRftTotalSupply = recipient == address(0) ? newRftTotalSupply.add(rftAmount) : newRftTotalSupply;
         uint256 amountUsd = rftAmount.mul(getFundBalance()).div(oldRftTotalSupply);
-        _netDeposits = _netDeposits.sub(int256(amountUsd));
-        _netDepositsByAccount[account] = _netDepositsByAccount[account].sub(int256(amountUsd));
+        _netDepositsByAccount[sender] = _netDepositsByAccount[sender].sub(int256(amountUsd));
+        if (recipient == address(0)) _netDeposits = _netDeposits.sub(int256(amountUsd));
+        else _netDepositsByAccount[recipient] = _netDepositsByAccount[recipient].add(int256(amountUsd));
     }
 
     /**

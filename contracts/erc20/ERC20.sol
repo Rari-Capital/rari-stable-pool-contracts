@@ -221,7 +221,7 @@ contract ERC20 is Context, IERC20, Ownable {
         emit Transfer(account, address(0), amount);
 
         require(_rariFundManagerContract != address(0), "Fund manager contract not set. This may be due to an upgrade of this token contract.");
-        if (_msgSender() != _rariFundManagerContract) RariFundManager(_rariFundManagerContract).onFundTokenBurn(account, amount, _totalSupply);
+        if (_msgSender() != _rariFundManagerContract) RariFundManager(_rariFundManagerContract).onFundTokenTransfer(account, address(0), amount, _totalSupply);
     }
 
     /**
