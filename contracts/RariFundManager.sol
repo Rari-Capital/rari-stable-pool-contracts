@@ -452,7 +452,7 @@ contract RariFundManager is Ownable {
      * @param account The account whose balance we are calculating.
      */
     function balanceOf(address account) external returns (uint256) {
-        require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
+        require(_rariFundTokenContract != address(0), "RFT contract not set. This may be due to an upgrade.");
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
         if (rftTotalSupply == 0) return 0;
@@ -533,7 +533,7 @@ contract RariFundManager is Ownable {
     function _depositTo(address to, string memory currencyCode, uint256 amount) internal returns (bool) {
         // Input validation
         require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
-        require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
+        require(_rariFundTokenContract != address(0), "RFT contract not set. This may be due to an upgrade.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(isCurrencyAccepted(currencyCode), "This currency is not currently accepted; please convert your funds to an accepted currency before depositing.");
@@ -641,7 +641,7 @@ contract RariFundManager is Ownable {
     function _withdrawFrom(address from, string memory currencyCode, uint256 amount) internal returns (bool) {
         // Input validation
         require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
-        require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
+        require(_rariFundTokenContract != address(0), "RFT contract not set. This may be due to an upgrade.");
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         require(amount > 0, "Withdrawal amount must be greater than 0.");
@@ -906,7 +906,7 @@ contract RariFundManager is Ownable {
     function _depositFees() internal returns (bool) {
         require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
         require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
-        require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
+        require(_rariFundTokenContract != address(0), "RFT contract not set. This may be due to an upgrade.");
 
         uint256 amountUsd = getInterestFeesUnclaimed();
         if (amountUsd <= 0) return false;
@@ -939,7 +939,7 @@ contract RariFundManager is Ownable {
     function depositFees() external onlyRebalancer returns (bool) {
         require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
         require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
-        require(_rariFundTokenContract != address(0), "RariFundToken contract not set.");
+        require(_rariFundTokenContract != address(0), "RFT contract not set. This may be due to an upgrade.");
 
         uint256 amountUsd = getInterestFeesUnclaimed();
         require(amountUsd > 0, "No new fees are available to claim.");
