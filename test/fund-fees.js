@@ -22,7 +22,7 @@ async function forceAccrueCompound(currencyCode, account) {
 }
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
-contract("RariFundManager v0.3.0", accounts => {
+contract("RariFundManager", accounts => {
   it("should deposit to pools, set the interest fee rate, wait for interest, set the master beneficiary of interest fees, deposit fees, wait for interest again, and withdraw fees", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     let fundTokenInstance = await RariFundToken.deployed();

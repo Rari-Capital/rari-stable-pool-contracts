@@ -13,7 +13,7 @@ const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
-contract("RariFundManager v0.3.0", accounts => {
+contract("RariFundManager", accounts => {
   it("should upgrade the fund owner", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
 
@@ -140,8 +140,10 @@ contract("RariFundManager v0.3.0", accounts => {
     // Reset fund rebalancer address
     await fundManagerInstance.setFundRebalancer(accounts[0], { from: accounts[0] });
   });
-  
-  it("should put upgrade the FundManager to the same contract code by disabling the old contract, withdrawing all tokens from all pools, transferring them to the new FundManager, and passing data to the new FundManager", async () => {
+});
+
+contract("RariFundManager", accounts => {
+  it("should put upgrade the FundManager to a copy of its code by disabling the old contract, withdrawing all tokens from all pools, transferring them to the new FundManager, and passing data to the new FundManager", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     
     // Approve and deposit tokens to the fund (using DAI as an example)
@@ -181,8 +183,10 @@ contract("RariFundManager v0.3.0", accounts => {
     let newAccountBalance = await newFundManagerInstance.balanceOf.call(accounts[0]);
     assert(newAccountBalance.gte(oldAccountBalance));
   });
-  
-  it("should put upgrade the FundManager to new contract code by disabling the old contract, withdrawing all tokens from all pools, transferring them to the new FundManager, and passing data to the new FundManager", async () => {
+});
+
+contract("RariFundManager", accounts => {
+  it("should put upgrade the FundManager to new code by disabling the old contract, withdrawing all tokens from all pools, transferring them to the new FundManager, and passing data to the new FundManager", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     
     // Approve and deposit tokens to the fund (using DAI as an example)
@@ -209,7 +213,9 @@ contract("RariFundManager v0.3.0", accounts => {
     await fundManagerInstance.upgradeFundManager(newFundManagerWeb3Instance.options.address);
     await newFundManagerWeb3Instance.methods.authorizeFundManagerDataSource("0x0000000000000000000000000000000000000000").send({ from: accounts[0] });
   });
+});
 
+contract("RariFundToken", accounts => {
   // Disabled for now as we do not yet have an upgrade function on the token because it will only be necessary on a future upgrade
   /* it("should put upgrade the FundToken", async () => {
     let fundManagerInstance = await RariFundManager.deployed();

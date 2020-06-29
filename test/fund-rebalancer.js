@@ -28,7 +28,7 @@ async function getFundManagerUnderlyingCompoundBalance(currencyCode) {
 }
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
-contract("RariFundManager v0.3.0", accounts => {
+contract("RariFundManager", accounts => {
   it("should set accepted currencies", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     let fundTokenInstance = await RariFundToken.deployed();

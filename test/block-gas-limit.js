@@ -7,7 +7,7 @@ const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
-contract("RariFundManager v0.3.0", accounts => {
+contract("RariFundManager", accounts => {
   it("should put upgrade the FundManager with funds in all pools in all currencies without using too much gas", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
 

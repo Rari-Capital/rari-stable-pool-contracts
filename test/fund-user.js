@@ -22,7 +22,7 @@ async function forceAccrueCompound(currencyCode, account) {
 }
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
-contract("RariFundManager v0.3.0", accounts => {
+contract("RariFundManager", accounts => {
   it("should make a deposit, deposit to pools, accrue interest, make a withdrawal, withdraw from pools, and process pending withdrawals", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     let fundTokenInstance = await RariFundToken.deployed();
@@ -74,11 +74,6 @@ contract("RariFundManager v0.3.0", accounts => {
       // RariFundManager.withdraw
       await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
       await fundManagerInstance.withdraw(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-
-      // Withdraw from pools and process pending withdrawals
-      // TODO: Ideally, withdraw from pool and process pending withdrawals via rari-fund-rebalancer
-      await fundManagerInstance.withdrawAllFromPool(1, currencyCode, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-      await fundManagerInstance.processPendingWithdrawals(currencyCode, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
 
       // TODO: Check balances and assert with post-interest balances
       let finalAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);

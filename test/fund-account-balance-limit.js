@@ -5,7 +5,7 @@ const currencies = require('./fixtures/currencies.json');
 const RariFundManager = artifacts.require("RariFundManager");
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
-contract("RariFundManager v0.3.0", accounts => {
+contract("RariFundManager", accounts => {
   it("should make deposits until the default (global) account balance limit is hit", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     
