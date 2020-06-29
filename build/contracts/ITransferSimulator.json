@@ -1,0 +1,514 @@
+{
+  "contractName": "ITransferSimulator",
+  "abi": [
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "bytes[]",
+          "name": "assetData",
+          "type": "bytes[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "fromAddresses",
+          "type": "address[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "toAddresses",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "amounts",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "simulateDispatchTransferFromCalls",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.17+commit.d19bba13\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes[]\",\"name\":\"assetData\",\"type\":\"bytes[]\"},{\"internalType\":\"address[]\",\"name\":\"fromAddresses\",\"type\":\"address[]\"},{\"internalType\":\"address[]\",\"name\":\"toAddresses\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amounts\",\"type\":\"uint256[]\"}],\"name\":\"simulateDispatchTransferFromCalls\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"simulateDispatchTransferFromCalls(bytes[],address[],address[],uint256[])\":{\"details\":\"This function may be used to simulate any amount of transfers As they would occur through the Exchange contract. Note that this function will always revert, even if all transfers are successful. However, it may be used with eth_call or with a try/catch pattern in order to simulate the results of the transfers.\",\"params\":{\"amounts\":\"Array containing the amounts that correspond to each transfer.\",\"assetData\":\"Array of asset details, each encoded per the AssetProxy contract specification.\",\"fromAddresses\":\"Array containing the `from` addresses that correspond with each transfer.\",\"toAddresses\":\"Array containing the `to` addresses that correspond with each transfer.\"},\"return\":\"This function does not return a value. However, it will always revert with `Error(\\\"TRANSFERS_SUCCESSFUL\\\")` if all of the transfers were successful.\"}}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"@0x/contracts-exchange/contracts/src/interfaces/ITransferSimulator.sol\":\"ITransferSimulator\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@0x/contracts-exchange/contracts/src/interfaces/ITransferSimulator.sol\":{\"keccak256\":\"0x15a3952999620388de42961b069f2ebde0c5900d31a10a4b8d7dc6c315d1ef7e\",\"urls\":[\"bzz-raw://6324f0cfee0ea4a0cf68858fd634b7e9c085faa75d298fc582f3c76ce4400400\",\"dweb:/ipfs/QmVeyHXXGuUHKAu9c8MU8SwEcD3omsdogK86xcE7435gE6\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "/*\n\n  Copyright 2019 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.5.9;\npragma experimental ABIEncoderV2;\n\n\ncontract ITransferSimulator {\n\n    /// @dev This function may be used to simulate any amount of transfers\n    /// As they would occur through the Exchange contract. Note that this function\n    /// will always revert, even if all transfers are successful. However, it may\n    /// be used with eth_call or with a try/catch pattern in order to simulate\n    /// the results of the transfers.\n    /// @param assetData Array of asset details, each encoded per the AssetProxy contract specification.\n    /// @param fromAddresses Array containing the `from` addresses that correspond with each transfer.\n    /// @param toAddresses Array containing the `to` addresses that correspond with each transfer.\n    /// @param amounts Array containing the amounts that correspond to each transfer.\n    /// @return This function does not return a value. However, it will always revert with\n    /// `Error(\"TRANSFERS_SUCCESSFUL\")` if all of the transfers were successful.\n    function simulateDispatchTransferFromCalls(\n        bytes[] memory assetData,\n        address[] memory fromAddresses,\n        address[] memory toAddresses,\n        uint256[] memory amounts\n    )\n        public;\n}\n",
+  "sourcePath": "@0x/contracts-exchange/contracts/src/interfaces/ITransferSimulator.sol",
+  "ast": {
+    "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/ITransferSimulator.sol",
+    "exportedSymbols": {
+      "ITransferSimulator": [
+        6884
+      ]
+    },
+    "id": 6885,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6867,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".9"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "580:23:32"
+      },
+      {
+        "id": 6868,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "604:33:32"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 6884,
+        "linearizedBaseContracts": [
+          6884
+        ],
+        "name": "ITransferSimulator",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev This function may be used to simulate any amount of transfers\n As they would occur through the Exchange contract. Note that this function\n will always revert, even if all transfers are successful. However, it may\n be used with eth_call or with a try/catch pattern in order to simulate\n the results of the transfers.\n @param assetData Array of asset details, each encoded per the AssetProxy contract specification.\n @param fromAddresses Array containing the `from` addresses that correspond with each transfer.\n @param toAddresses Array containing the `to` addresses that correspond with each transfer.\n @param amounts Array containing the amounts that correspond to each transfer.\n @return This function does not return a value. However, it will always revert with\n `Error(\"TRANSFERS_SUCCESSFUL\")` if all of the transfers were successful.",
+            "id": 6883,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "simulateDispatchTransferFromCalls",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6881,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6871,
+                  "name": "assetData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6883,
+                  "src": "1649:24:32",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_bytes_memory_$dyn_memory_ptr",
+                    "typeString": "bytes[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6869,
+                      "name": "bytes",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1649:5:32",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes_storage_ptr",
+                        "typeString": "bytes"
+                      }
+                    },
+                    "id": 6870,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1649:7:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
+                      "typeString": "bytes[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6874,
+                  "name": "fromAddresses",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6883,
+                  "src": "1683:30:32",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6872,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1683:7:32",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6873,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1683:9:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6877,
+                  "name": "toAddresses",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6883,
+                  "src": "1723:28:32",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6875,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1723:7:32",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6876,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1723:9:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6880,
+                  "name": "amounts",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6883,
+                  "src": "1761:24:32",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6878,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1761:7:32",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 6879,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1761:9:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1639:152:32"
+            },
+            "returnParameters": {
+              "id": 6882,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1806:0:32"
+            },
+            "scope": 6884,
+            "src": "1597:210:32",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 6885,
+        "src": "640:1169:32"
+      }
+    ],
+    "src": "580:1230:32"
+  },
+  "legacyAST": {
+    "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/ITransferSimulator.sol",
+    "exportedSymbols": {
+      "ITransferSimulator": [
+        6884
+      ]
+    },
+    "id": 6885,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6867,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".9"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "580:23:32"
+      },
+      {
+        "id": 6868,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "604:33:32"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 6884,
+        "linearizedBaseContracts": [
+          6884
+        ],
+        "name": "ITransferSimulator",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev This function may be used to simulate any amount of transfers\n As they would occur through the Exchange contract. Note that this function\n will always revert, even if all transfers are successful. However, it may\n be used with eth_call or with a try/catch pattern in order to simulate\n the results of the transfers.\n @param assetData Array of asset details, each encoded per the AssetProxy contract specification.\n @param fromAddresses Array containing the `from` addresses that correspond with each transfer.\n @param toAddresses Array containing the `to` addresses that correspond with each transfer.\n @param amounts Array containing the amounts that correspond to each transfer.\n @return This function does not return a value. However, it will always revert with\n `Error(\"TRANSFERS_SUCCESSFUL\")` if all of the transfers were successful.",
+            "id": 6883,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "simulateDispatchTransferFromCalls",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6881,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6871,
+                  "name": "assetData",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6883,
+                  "src": "1649:24:32",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_bytes_memory_$dyn_memory_ptr",
+                    "typeString": "bytes[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6869,
+                      "name": "bytes",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1649:5:32",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_bytes_storage_ptr",
+                        "typeString": "bytes"
+                      }
+                    },
+                    "id": 6870,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1649:7:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
+                      "typeString": "bytes[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6874,
+                  "name": "fromAddresses",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6883,
+                  "src": "1683:30:32",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6872,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1683:7:32",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6873,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1683:9:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6877,
+                  "name": "toAddresses",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6883,
+                  "src": "1723:28:32",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
+                    "typeString": "address[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6875,
+                      "name": "address",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1723:7:32",
+                      "stateMutability": "nonpayable",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_address",
+                        "typeString": "address"
+                      }
+                    },
+                    "id": 6876,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1723:9:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                      "typeString": "address[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6880,
+                  "name": "amounts",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6883,
+                  "src": "1761:24:32",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_array$_t_uint256_$dyn_memory_ptr",
+                    "typeString": "uint256[]"
+                  },
+                  "typeName": {
+                    "baseType": {
+                      "id": 6878,
+                      "name": "uint256",
+                      "nodeType": "ElementaryTypeName",
+                      "src": "1761:7:32",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "id": 6879,
+                    "length": null,
+                    "nodeType": "ArrayTypeName",
+                    "src": "1761:9:32",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
+                      "typeString": "uint256[]"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1639:152:32"
+            },
+            "returnParameters": {
+              "id": 6882,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1806:0:32"
+            },
+            "scope": 6884,
+            "src": "1597:210:32",
+            "stateMutability": "nonpayable",
+            "superFunction": null,
+            "visibility": "public"
+          }
+        ],
+        "scope": 6885,
+        "src": "640:1169:32"
+      }
+    ],
+    "src": "580:1230:32"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.17+commit.d19bba13.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-06-29T13:53:09.416Z",
+  "devdoc": {
+    "methods": {
+      "simulateDispatchTransferFromCalls(bytes[],address[],address[],uint256[])": {
+        "details": "This function may be used to simulate any amount of transfers As they would occur through the Exchange contract. Note that this function will always revert, even if all transfers are successful. However, it may be used with eth_call or with a try/catch pattern in order to simulate the results of the transfers.",
+        "params": {
+          "amounts": "Array containing the amounts that correspond to each transfer.",
+          "assetData": "Array of asset details, each encoded per the AssetProxy contract specification.",
+          "fromAddresses": "Array containing the `from` addresses that correspond with each transfer.",
+          "toAddresses": "Array containing the `to` addresses that correspond with each transfer."
+        },
+        "return": "This function does not return a value. However, it will always revert with `Error(\"TRANSFERS_SUCCESSFUL\")` if all of the transfers were successful."
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

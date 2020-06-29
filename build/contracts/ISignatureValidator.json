@@ -1,0 +1,2285 @@
+{
+  "contractName": "ISignatureValidator",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "signerAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "validatorAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "isApproved",
+          "type": "bool"
+        }
+      ],
+      "name": "SignatureValidatorApproval",
+      "type": "event"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "preSign",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "validatorAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "approval",
+          "type": "bool"
+        }
+      ],
+      "name": "setSignatureValidatorApproval",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "hash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "signerAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "isValidHashSignature",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "isValid",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "makerAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "takerAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "feeRecipientAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "senderAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "makerAssetAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "takerAssetAmount",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "makerFee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "takerFee",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "expirationTimeSeconds",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "makerAssetData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "takerAssetData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "makerFeeAssetData",
+              "type": "bytes"
+            },
+            {
+              "internalType": "bytes",
+              "name": "takerFeeAssetData",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct LibOrder.Order",
+          "name": "order",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "isValidOrderSignature",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "isValid",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "salt",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "expirationTimeSeconds",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "gasPrice",
+              "type": "uint256"
+            },
+            {
+              "internalType": "address",
+              "name": "signerAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct LibZeroExTransaction.ZeroExTransaction",
+          "name": "transaction",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "isValidTransactionSignature",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "isValid",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.17+commit.d19bba13\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"signerAddress\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"isApproved\",\"type\":\"bool\"}],\"name\":\"SignatureValidatorApproval\",\"type\":\"event\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"signerAddress\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"isValidHashSignature\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"isValid\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"makerAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"takerAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"feeRecipientAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"senderAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"makerAssetAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"takerAssetAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"makerFee\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"takerFee\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expirationTimeSeconds\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"salt\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"makerAssetData\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"takerAssetData\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"makerFeeAssetData\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"takerFeeAssetData\",\"type\":\"bytes\"}],\"internalType\":\"struct LibOrder.Order\",\"name\":\"order\",\"type\":\"tuple\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"isValidOrderSignature\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"isValid\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"salt\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"expirationTimeSeconds\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"gasPrice\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"signerAddress\",\"type\":\"address\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct LibZeroExTransaction.ZeroExTransaction\",\"name\":\"transaction\",\"type\":\"tuple\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"isValidTransactionSignature\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"isValid\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"preSign\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"internalType\":\"address\",\"name\":\"validatorAddress\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"approval\",\"type\":\"bool\"}],\"name\":\"setSignatureValidatorApproval\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"isValidHashSignature(bytes32,address,bytes)\":{\"details\":\"Verifies that a hash has been signed by the given signer.\",\"params\":{\"hash\":\"Any 32-byte hash.\",\"signature\":\"Proof that the hash has been signed by signer.\"},\"return\":\"isValid `true` if the signature is valid for the given hash and signer.\"},\"isValidOrderSignature((address,address,address,address,uint256,uint256,uint256,uint256,uint256,uint256,bytes,bytes,bytes,bytes),bytes)\":{\"details\":\"Verifies that a signature for an order is valid.\",\"params\":{\"order\":\"The order.\",\"signature\":\"Proof that the order has been signed by signer.\"},\"return\":\"isValid true if the signature is valid for the given order and signer.\"},\"isValidTransactionSignature((uint256,uint256,uint256,address,bytes),bytes)\":{\"details\":\"Verifies that a signature for a transaction is valid.\",\"params\":{\"signature\":\"Proof that the order has been signed by signer.\",\"transaction\":\"The transaction.\"},\"return\":\"isValid true if the signature is valid for the given transaction and signer.\"},\"preSign(bytes32)\":{\"details\":\"Approves a hash on-chain.      After presigning a hash, the preSign signature type will become valid for that hash and signer.\",\"params\":{\"hash\":\"Any 32-byte hash.\"}},\"setSignatureValidatorApproval(address,bool)\":{\"details\":\"Approves/unnapproves a Validator contract to verify signatures on signer's behalf.\",\"params\":{\"approval\":\"Approval or disapproval of  Validator contract.\",\"validatorAddress\":\"Address of Validator contract.\"}}}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"@0x/contracts-exchange/contracts/src/interfaces/ISignatureValidator.sol\":\"ISignatureValidator\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@0x/contracts-exchange-libs/contracts/src/LibOrder.sol\":{\"keccak256\":\"0x1b7b1e1a2dff4249c6f6c500000342a805f372131797b6d7314435204a651ad4\",\"urls\":[\"bzz-raw://19c11b77022ccfa530af75f236ea00ecb92aa5476f96abbde268163660b3906b\",\"dweb:/ipfs/Qmf1MtwPLpocsBArn8Npyzu4AtMqSagYTuee8JdbMXXwHM\"]},\"@0x/contracts-exchange-libs/contracts/src/LibZeroExTransaction.sol\":{\"keccak256\":\"0x15e9dddfeb5b17b6d44a6be19b3f5f2cf2a2af24174cd623fcd731fb5204635a\",\"urls\":[\"bzz-raw://9014066b0fcf65ba9ecec88fc41e3413ef27c039159abd1203f0a48bb61e498d\",\"dweb:/ipfs/QmRAF6q5XrQV7pPZM1aaahRHAMba9hh6iUeRgW2fzFgn87\"]},\"@0x/contracts-exchange/contracts/src/interfaces/ISignatureValidator.sol\":{\"keccak256\":\"0xfaff6f59dc8d9ab1003f8408e104d10d261208187e349153c075da0b71f400cd\",\"urls\":[\"bzz-raw://10290e91a633564fc0b1e732aec3321a3bf60122b79069f90e8ce037dd8799b5\",\"dweb:/ipfs/QmaTZxNZkimMxsjTCS47sJgnfaZkG4gcTgawLAadxjkjFv\"]},\"@0x/contracts-utils/contracts/src/LibEIP712.sol\":{\"keccak256\":\"0xe19c3cbc71fbea0fdb45c1763306550015d940bea9dbec5f3fd2edfe2165d673\",\"urls\":[\"bzz-raw://267d263f0453352a1ac8d8085a13c4976fb8c964eff8d3aab0a84173d1438efb\",\"dweb:/ipfs/QmbaRw85MYYP3KTmQ68gYdEnFyMqD7frwjxxwsj4j4JCr1\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "/*\n\n  Copyright 2019 ZeroEx Intl.\n\n  Licensed under the Apache License, Version 2.0 (the \"License\");\n  you may not use this file except in compliance with the License.\n  You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n  Unless required by applicable law or agreed to in writing, software\n  distributed under the License is distributed on an \"AS IS\" BASIS,\n  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n  See the License for the specific language governing permissions and\n  limitations under the License.\n\n*/\n\npragma solidity ^0.5.9;\npragma experimental ABIEncoderV2;\n\nimport \"@0x/contracts-exchange-libs/contracts/src/LibOrder.sol\";\nimport \"@0x/contracts-exchange-libs/contracts/src/LibZeroExTransaction.sol\";\n\n\ncontract ISignatureValidator {\n\n   // Allowed signature types.\n    enum SignatureType {\n        Illegal,                     // 0x00, default value\n        Invalid,                     // 0x01\n        EIP712,                      // 0x02\n        EthSign,                     // 0x03\n        Wallet,                      // 0x04\n        Validator,                   // 0x05\n        PreSigned,                   // 0x06\n        EIP1271Wallet,               // 0x07\n        NSignatureTypes              // 0x08, number of signature types. Always leave at end.\n    }\n\n    event SignatureValidatorApproval(\n        address indexed signerAddress,     // Address that approves or disapproves a contract to verify signatures.\n        address indexed validatorAddress,  // Address of signature validator contract.\n        bool isApproved                    // Approval or disapproval of validator contract.\n    );\n\n    /// @dev Approves a hash on-chain.\n    ///      After presigning a hash, the preSign signature type will become valid for that hash and signer.\n    /// @param hash Any 32-byte hash.\n    function preSign(bytes32 hash)\n        external\n        payable;\n\n    /// @dev Approves/unnapproves a Validator contract to verify signatures on signer's behalf.\n    /// @param validatorAddress Address of Validator contract.\n    /// @param approval Approval or disapproval of  Validator contract.\n    function setSignatureValidatorApproval(\n        address validatorAddress,\n        bool approval\n    )\n        external\n        payable;\n\n    /// @dev Verifies that a hash has been signed by the given signer.\n    /// @param hash Any 32-byte hash.\n    /// @param signature Proof that the hash has been signed by signer.\n    /// @return isValid `true` if the signature is valid for the given hash and signer.\n    function isValidHashSignature(\n        bytes32 hash,\n        address signerAddress,\n        bytes memory signature\n    )\n        public\n        view\n        returns (bool isValid);\n\n    /// @dev Verifies that a signature for an order is valid.\n    /// @param order The order.\n    /// @param signature Proof that the order has been signed by signer.\n    /// @return isValid true if the signature is valid for the given order and signer.\n    function isValidOrderSignature(\n        LibOrder.Order memory order,\n        bytes memory signature\n    )\n        public\n        view\n        returns (bool isValid);\n\n    /// @dev Verifies that a signature for a transaction is valid.\n    /// @param transaction The transaction.\n    /// @param signature Proof that the order has been signed by signer.\n    /// @return isValid true if the signature is valid for the given transaction and signer.\n    function isValidTransactionSignature(\n        LibZeroExTransaction.ZeroExTransaction memory transaction,\n        bytes memory signature\n    )\n        public\n        view\n        returns (bool isValid);\n\n    /// @dev Verifies that an order, with provided order hash, has been signed\n    ///      by the given signer.\n    /// @param order The order.\n    /// @param orderHash The hash of the order.\n    /// @param signature Proof that the hash has been signed by signer.\n    /// @return isValid True if the signature is valid for the given order and signer.\n    function _isValidOrderWithHashSignature(\n        LibOrder.Order memory order,\n        bytes32 orderHash,\n        bytes memory signature\n    )\n        internal\n        view\n        returns (bool isValid);\n\n    /// @dev Verifies that a transaction, with provided order hash, has been signed\n    ///      by the given signer.\n    /// @param transaction The transaction.\n    /// @param transactionHash The hash of the transaction.\n    /// @param signature Proof that the hash has been signed by signer.\n    /// @return isValid True if the signature is valid for the given transaction and signer.\n    function _isValidTransactionWithHashSignature(\n        LibZeroExTransaction.ZeroExTransaction memory transaction,\n        bytes32 transactionHash,\n        bytes memory signature\n    )\n        internal\n        view\n        returns (bool isValid);\n}\n",
+  "sourcePath": "@0x/contracts-exchange/contracts/src/interfaces/ISignatureValidator.sol",
+  "ast": {
+    "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/ISignatureValidator.sol",
+    "exportedSymbols": {
+      "ISignatureValidator": [
+        6830
+      ]
+    },
+    "id": 6831,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6745,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".9"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "580:23:30"
+      },
+      {
+        "id": 6746,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "604:33:30"
+      },
+      {
+        "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
+        "file": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
+        "id": 6747,
+        "nodeType": "ImportDirective",
+        "scope": 6831,
+        "sourceUnit": 6424,
+        "src": "639:64:30",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibZeroExTransaction.sol",
+        "file": "@0x/contracts-exchange-libs/contracts/src/LibZeroExTransaction.sol",
+        "id": 6748,
+        "nodeType": "ImportDirective",
+        "scope": 6831,
+        "sourceUnit": 6508,
+        "src": "704:76:30",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 6830,
+        "linearizedBaseContracts": [
+          6830
+        ],
+        "name": "ISignatureValidator",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ISignatureValidator.SignatureType",
+            "id": 6758,
+            "members": [
+              {
+                "id": 6749,
+                "name": "Illegal",
+                "nodeType": "EnumValue",
+                "src": "879:7:30"
+              },
+              {
+                "id": 6750,
+                "name": "Invalid",
+                "nodeType": "EnumValue",
+                "src": "939:7:30"
+              },
+              {
+                "id": 6751,
+                "name": "EIP712",
+                "nodeType": "EnumValue",
+                "src": "984:6:30"
+              },
+              {
+                "id": 6752,
+                "name": "EthSign",
+                "nodeType": "EnumValue",
+                "src": "1029:7:30"
+              },
+              {
+                "id": 6753,
+                "name": "Wallet",
+                "nodeType": "EnumValue",
+                "src": "1074:6:30"
+              },
+              {
+                "id": 6754,
+                "name": "Validator",
+                "nodeType": "EnumValue",
+                "src": "1119:9:30"
+              },
+              {
+                "id": 6755,
+                "name": "PreSigned",
+                "nodeType": "EnumValue",
+                "src": "1164:9:30"
+              },
+              {
+                "id": 6756,
+                "name": "EIP1271Wallet",
+                "nodeType": "EnumValue",
+                "src": "1209:13:30"
+              },
+              {
+                "id": 6757,
+                "name": "NSignatureTypes",
+                "nodeType": "EnumValue",
+                "src": "1254:15:30"
+              }
+            ],
+            "name": "SignatureType",
+            "nodeType": "EnumDefinition",
+            "src": "850:495:30"
+          },
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 6766,
+            "name": "SignatureValidatorApproval",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 6765,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6760,
+                  "indexed": true,
+                  "name": "signerAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6766,
+                  "src": "1393:29:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6759,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1393:7:30",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6762,
+                  "indexed": true,
+                  "name": "validatorAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6766,
+                  "src": "1509:32:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6761,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1509:7:30",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6764,
+                  "indexed": false,
+                  "name": "isApproved",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6766,
+                  "src": "1596:15:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6763,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1596:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1383:303:30"
+            },
+            "src": "1351:336:30"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Approves a hash on-chain.\n      After presigning a hash, the preSign signature type will become valid for that hash and signer.\n @param hash Any 32-byte hash.",
+            "id": 6771,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "preSign",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6769,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6768,
+                  "name": "hash",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6771,
+                  "src": "1896:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 6767,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1896:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1895:14:30"
+            },
+            "returnParameters": {
+              "id": 6770,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1942:0:30"
+            },
+            "scope": 6830,
+            "src": "1879:64:30",
+            "stateMutability": "payable",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Approves/unnapproves a Validator contract to verify signatures on signer's behalf.\n @param validatorAddress Address of Validator contract.\n @param approval Approval or disapproval of  Validator contract.",
+            "id": 6778,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setSignatureValidatorApproval",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6776,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6773,
+                  "name": "validatorAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6778,
+                  "src": "2228:24:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6772,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2228:7:30",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6775,
+                  "name": "approval",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6778,
+                  "src": "2262:13:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6774,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2262:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2218:63:30"
+            },
+            "returnParameters": {
+              "id": 6777,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2314:0:30"
+            },
+            "scope": 6830,
+            "src": "2180:135:30",
+            "stateMutability": "payable",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Verifies that a hash has been signed by the given signer.\n @param hash Any 32-byte hash.\n @param signature Proof that the hash has been signed by signer.\n @return isValid `true` if the signature is valid for the given hash and signer.",
+            "id": 6789,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isValidHashSignature",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6785,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6780,
+                  "name": "hash",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6789,
+                  "src": "2629:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 6779,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2629:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6782,
+                  "name": "signerAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6789,
+                  "src": "2651:21:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6781,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2651:7:30",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6784,
+                  "name": "signature",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6789,
+                  "src": "2682:22:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6783,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2682:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2619:91:30"
+            },
+            "returnParameters": {
+              "id": 6788,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6787,
+                  "name": "isValid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6789,
+                  "src": "2756:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6786,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2756:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2755:14:30"
+            },
+            "scope": 6830,
+            "src": "2590:180:30",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Verifies that a signature for an order is valid.\n @param order The order.\n @param signature Proof that the order has been signed by signer.\n @return isValid true if the signature is valid for the given order and signer.",
+            "id": 6798,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isValidOrderSignature",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6794,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6791,
+                  "name": "order",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6798,
+                  "src": "3070:27:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Order_$6358_memory_ptr",
+                    "typeString": "struct LibOrder.Order"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6790,
+                    "name": "LibOrder.Order",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6358,
+                    "src": "3070:14:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Order_$6358_storage_ptr",
+                      "typeString": "struct LibOrder.Order"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6793,
+                  "name": "signature",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6798,
+                  "src": "3107:22:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6792,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3107:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3060:75:30"
+            },
+            "returnParameters": {
+              "id": 6797,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6796,
+                  "name": "isValid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6798,
+                  "src": "3181:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6795,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3181:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3180:14:30"
+            },
+            "scope": 6830,
+            "src": "3030:165:30",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Verifies that a signature for a transaction is valid.\n @param transaction The transaction.\n @param signature Proof that the order has been signed by signer.\n @return isValid true if the signature is valid for the given transaction and signer.",
+            "id": 6807,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isValidTransactionSignature",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6803,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6800,
+                  "name": "transaction",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6807,
+                  "src": "3524:57:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_ZeroExTransaction_$6444_memory_ptr",
+                    "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6799,
+                    "name": "LibZeroExTransaction.ZeroExTransaction",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6444,
+                    "src": "3524:38:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ZeroExTransaction_$6444_storage_ptr",
+                      "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6802,
+                  "name": "signature",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6807,
+                  "src": "3591:22:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6801,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3591:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3514:105:30"
+            },
+            "returnParameters": {
+              "id": 6806,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6805,
+                  "name": "isValid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6807,
+                  "src": "3665:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6804,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3665:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3664:14:30"
+            },
+            "scope": 6830,
+            "src": "3478:201:30",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Verifies that an order, with provided order hash, has been signed\n      by the given signer.\n @param order The order.\n @param orderHash The hash of the order.\n @param signature Proof that the hash has been signed by signer.\n @return isValid True if the signature is valid for the given order and signer.",
+            "id": 6818,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_isValidOrderWithHashSignature",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6814,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6809,
+                  "name": "order",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6818,
+                  "src": "4086:27:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Order_$6358_memory_ptr",
+                    "typeString": "struct LibOrder.Order"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6808,
+                    "name": "LibOrder.Order",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6358,
+                    "src": "4086:14:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Order_$6358_storage_ptr",
+                      "typeString": "struct LibOrder.Order"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6811,
+                  "name": "orderHash",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6818,
+                  "src": "4123:17:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 6810,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4123:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6813,
+                  "name": "signature",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6818,
+                  "src": "4150:22:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6812,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4150:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4076:102:30"
+            },
+            "returnParameters": {
+              "id": 6817,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6816,
+                  "name": "isValid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6818,
+                  "src": "4226:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6815,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4226:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4225:14:30"
+            },
+            "scope": 6830,
+            "src": "4037:203:30",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Verifies that a transaction, with provided order hash, has been signed\n      by the given signer.\n @param transaction The transaction.\n @param transactionHash The hash of the transaction.\n @param signature Proof that the hash has been signed by signer.\n @return isValid True if the signature is valid for the given transaction and signer.",
+            "id": 6829,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_isValidTransactionWithHashSignature",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6825,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6820,
+                  "name": "transaction",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6829,
+                  "src": "4688:57:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_ZeroExTransaction_$6444_memory_ptr",
+                    "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6819,
+                    "name": "LibZeroExTransaction.ZeroExTransaction",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6444,
+                    "src": "4688:38:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ZeroExTransaction_$6444_storage_ptr",
+                      "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6822,
+                  "name": "transactionHash",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6829,
+                  "src": "4755:23:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 6821,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4755:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6824,
+                  "name": "signature",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6829,
+                  "src": "4788:22:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6823,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4788:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4678:138:30"
+            },
+            "returnParameters": {
+              "id": 6828,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6827,
+                  "name": "isValid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6829,
+                  "src": "4864:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6826,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4864:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4863:14:30"
+            },
+            "scope": 6830,
+            "src": "4633:245:30",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6831,
+        "src": "783:4097:30"
+      }
+    ],
+    "src": "580:4301:30"
+  },
+  "legacyAST": {
+    "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/ISignatureValidator.sol",
+    "exportedSymbols": {
+      "ISignatureValidator": [
+        6830
+      ]
+    },
+    "id": 6831,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 6745,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".9"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "580:23:30"
+      },
+      {
+        "id": 6746,
+        "literals": [
+          "experimental",
+          "ABIEncoderV2"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "604:33:30"
+      },
+      {
+        "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
+        "file": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
+        "id": 6747,
+        "nodeType": "ImportDirective",
+        "scope": 6831,
+        "sourceUnit": 6424,
+        "src": "639:64:30",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibZeroExTransaction.sol",
+        "file": "@0x/contracts-exchange-libs/contracts/src/LibZeroExTransaction.sol",
+        "id": 6748,
+        "nodeType": "ImportDirective",
+        "scope": 6831,
+        "sourceUnit": 6508,
+        "src": "704:76:30",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": false,
+        "id": 6830,
+        "linearizedBaseContracts": [
+          6830
+        ],
+        "name": "ISignatureValidator",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "ISignatureValidator.SignatureType",
+            "id": 6758,
+            "members": [
+              {
+                "id": 6749,
+                "name": "Illegal",
+                "nodeType": "EnumValue",
+                "src": "879:7:30"
+              },
+              {
+                "id": 6750,
+                "name": "Invalid",
+                "nodeType": "EnumValue",
+                "src": "939:7:30"
+              },
+              {
+                "id": 6751,
+                "name": "EIP712",
+                "nodeType": "EnumValue",
+                "src": "984:6:30"
+              },
+              {
+                "id": 6752,
+                "name": "EthSign",
+                "nodeType": "EnumValue",
+                "src": "1029:7:30"
+              },
+              {
+                "id": 6753,
+                "name": "Wallet",
+                "nodeType": "EnumValue",
+                "src": "1074:6:30"
+              },
+              {
+                "id": 6754,
+                "name": "Validator",
+                "nodeType": "EnumValue",
+                "src": "1119:9:30"
+              },
+              {
+                "id": 6755,
+                "name": "PreSigned",
+                "nodeType": "EnumValue",
+                "src": "1164:9:30"
+              },
+              {
+                "id": 6756,
+                "name": "EIP1271Wallet",
+                "nodeType": "EnumValue",
+                "src": "1209:13:30"
+              },
+              {
+                "id": 6757,
+                "name": "NSignatureTypes",
+                "nodeType": "EnumValue",
+                "src": "1254:15:30"
+              }
+            ],
+            "name": "SignatureType",
+            "nodeType": "EnumDefinition",
+            "src": "850:495:30"
+          },
+          {
+            "anonymous": false,
+            "documentation": null,
+            "id": 6766,
+            "name": "SignatureValidatorApproval",
+            "nodeType": "EventDefinition",
+            "parameters": {
+              "id": 6765,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6760,
+                  "indexed": true,
+                  "name": "signerAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6766,
+                  "src": "1393:29:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6759,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1393:7:30",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6762,
+                  "indexed": true,
+                  "name": "validatorAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6766,
+                  "src": "1509:32:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6761,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1509:7:30",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6764,
+                  "indexed": false,
+                  "name": "isApproved",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6766,
+                  "src": "1596:15:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6763,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1596:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1383:303:30"
+            },
+            "src": "1351:336:30"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Approves a hash on-chain.\n      After presigning a hash, the preSign signature type will become valid for that hash and signer.\n @param hash Any 32-byte hash.",
+            "id": 6771,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "preSign",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6769,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6768,
+                  "name": "hash",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6771,
+                  "src": "1896:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 6767,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1896:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1895:14:30"
+            },
+            "returnParameters": {
+              "id": 6770,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "1942:0:30"
+            },
+            "scope": 6830,
+            "src": "1879:64:30",
+            "stateMutability": "payable",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Approves/unnapproves a Validator contract to verify signatures on signer's behalf.\n @param validatorAddress Address of Validator contract.\n @param approval Approval or disapproval of  Validator contract.",
+            "id": 6778,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setSignatureValidatorApproval",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6776,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6773,
+                  "name": "validatorAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6778,
+                  "src": "2228:24:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6772,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2228:7:30",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6775,
+                  "name": "approval",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6778,
+                  "src": "2262:13:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6774,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2262:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2218:63:30"
+            },
+            "returnParameters": {
+              "id": 6777,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "2314:0:30"
+            },
+            "scope": 6830,
+            "src": "2180:135:30",
+            "stateMutability": "payable",
+            "superFunction": null,
+            "visibility": "external"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Verifies that a hash has been signed by the given signer.\n @param hash Any 32-byte hash.\n @param signature Proof that the hash has been signed by signer.\n @return isValid `true` if the signature is valid for the given hash and signer.",
+            "id": 6789,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isValidHashSignature",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6785,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6780,
+                  "name": "hash",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6789,
+                  "src": "2629:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 6779,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2629:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6782,
+                  "name": "signerAddress",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6789,
+                  "src": "2651:21:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 6781,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2651:7:30",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6784,
+                  "name": "signature",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6789,
+                  "src": "2682:22:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6783,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2682:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2619:91:30"
+            },
+            "returnParameters": {
+              "id": 6788,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6787,
+                  "name": "isValid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6789,
+                  "src": "2756:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6786,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "2756:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "2755:14:30"
+            },
+            "scope": 6830,
+            "src": "2590:180:30",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Verifies that a signature for an order is valid.\n @param order The order.\n @param signature Proof that the order has been signed by signer.\n @return isValid true if the signature is valid for the given order and signer.",
+            "id": 6798,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isValidOrderSignature",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6794,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6791,
+                  "name": "order",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6798,
+                  "src": "3070:27:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Order_$6358_memory_ptr",
+                    "typeString": "struct LibOrder.Order"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6790,
+                    "name": "LibOrder.Order",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6358,
+                    "src": "3070:14:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Order_$6358_storage_ptr",
+                      "typeString": "struct LibOrder.Order"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6793,
+                  "name": "signature",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6798,
+                  "src": "3107:22:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6792,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3107:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3060:75:30"
+            },
+            "returnParameters": {
+              "id": 6797,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6796,
+                  "name": "isValid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6798,
+                  "src": "3181:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6795,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3181:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3180:14:30"
+            },
+            "scope": 6830,
+            "src": "3030:165:30",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Verifies that a signature for a transaction is valid.\n @param transaction The transaction.\n @param signature Proof that the order has been signed by signer.\n @return isValid true if the signature is valid for the given transaction and signer.",
+            "id": 6807,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isValidTransactionSignature",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6803,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6800,
+                  "name": "transaction",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6807,
+                  "src": "3524:57:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_ZeroExTransaction_$6444_memory_ptr",
+                    "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6799,
+                    "name": "LibZeroExTransaction.ZeroExTransaction",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6444,
+                    "src": "3524:38:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ZeroExTransaction_$6444_storage_ptr",
+                      "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6802,
+                  "name": "signature",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6807,
+                  "src": "3591:22:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6801,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3591:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3514:105:30"
+            },
+            "returnParameters": {
+              "id": 6806,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6805,
+                  "name": "isValid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6807,
+                  "src": "3665:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6804,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "3665:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "3664:14:30"
+            },
+            "scope": 6830,
+            "src": "3478:201:30",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "public"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Verifies that an order, with provided order hash, has been signed\n      by the given signer.\n @param order The order.\n @param orderHash The hash of the order.\n @param signature Proof that the hash has been signed by signer.\n @return isValid True if the signature is valid for the given order and signer.",
+            "id": 6818,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_isValidOrderWithHashSignature",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6814,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6809,
+                  "name": "order",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6818,
+                  "src": "4086:27:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Order_$6358_memory_ptr",
+                    "typeString": "struct LibOrder.Order"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6808,
+                    "name": "LibOrder.Order",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6358,
+                    "src": "4086:14:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Order_$6358_storage_ptr",
+                      "typeString": "struct LibOrder.Order"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6811,
+                  "name": "orderHash",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6818,
+                  "src": "4123:17:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 6810,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4123:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6813,
+                  "name": "signature",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6818,
+                  "src": "4150:22:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6812,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4150:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4076:102:30"
+            },
+            "returnParameters": {
+              "id": 6817,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6816,
+                  "name": "isValid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6818,
+                  "src": "4226:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6815,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4226:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4225:14:30"
+            },
+            "scope": 6830,
+            "src": "4037:203:30",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "internal"
+          },
+          {
+            "body": null,
+            "documentation": "@dev Verifies that a transaction, with provided order hash, has been signed\n      by the given signer.\n @param transaction The transaction.\n @param transactionHash The hash of the transaction.\n @param signature Proof that the hash has been signed by signer.\n @return isValid True if the signature is valid for the given transaction and signer.",
+            "id": 6829,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "_isValidTransactionWithHashSignature",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 6825,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6820,
+                  "name": "transaction",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6829,
+                  "src": "4688:57:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_ZeroExTransaction_$6444_memory_ptr",
+                    "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
+                  },
+                  "typeName": {
+                    "contractScope": null,
+                    "id": 6819,
+                    "name": "LibZeroExTransaction.ZeroExTransaction",
+                    "nodeType": "UserDefinedTypeName",
+                    "referencedDeclaration": 6444,
+                    "src": "4688:38:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_ZeroExTransaction_$6444_storage_ptr",
+                      "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6822,
+                  "name": "transactionHash",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6829,
+                  "src": "4755:23:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes32",
+                    "typeString": "bytes32"
+                  },
+                  "typeName": {
+                    "id": 6821,
+                    "name": "bytes32",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4755:7:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes32",
+                      "typeString": "bytes32"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 6824,
+                  "name": "signature",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6829,
+                  "src": "4788:22:30",
+                  "stateVariable": false,
+                  "storageLocation": "memory",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes_memory_ptr",
+                    "typeString": "bytes"
+                  },
+                  "typeName": {
+                    "id": 6823,
+                    "name": "bytes",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4788:5:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes_storage_ptr",
+                      "typeString": "bytes"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4678:138:30"
+            },
+            "returnParameters": {
+              "id": 6828,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6827,
+                  "name": "isValid",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 6829,
+                  "src": "4864:12:30",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 6826,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "4864:4:30",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "4863:14:30"
+            },
+            "scope": 6830,
+            "src": "4633:245:30",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 6831,
+        "src": "783:4097:30"
+      }
+    ],
+    "src": "580:4301:30"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.17+commit.d19bba13.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.2.0",
+  "updatedAt": "2020-06-29T13:53:09.415Z",
+  "devdoc": {
+    "methods": {
+      "isValidHashSignature(bytes32,address,bytes)": {
+        "details": "Verifies that a hash has been signed by the given signer.",
+        "params": {
+          "hash": "Any 32-byte hash.",
+          "signature": "Proof that the hash has been signed by signer."
+        },
+        "return": "isValid `true` if the signature is valid for the given hash and signer."
+      },
+      "isValidOrderSignature((address,address,address,address,uint256,uint256,uint256,uint256,uint256,uint256,bytes,bytes,bytes,bytes),bytes)": {
+        "details": "Verifies that a signature for an order is valid.",
+        "params": {
+          "order": "The order.",
+          "signature": "Proof that the order has been signed by signer."
+        },
+        "return": "isValid true if the signature is valid for the given order and signer."
+      },
+      "isValidTransactionSignature((uint256,uint256,uint256,address,bytes),bytes)": {
+        "details": "Verifies that a signature for a transaction is valid.",
+        "params": {
+          "signature": "Proof that the order has been signed by signer.",
+          "transaction": "The transaction."
+        },
+        "return": "isValid true if the signature is valid for the given transaction and signer."
+      },
+      "preSign(bytes32)": {
+        "details": "Approves a hash on-chain.      After presigning a hash, the preSign signature type will become valid for that hash and signer.",
+        "params": {
+          "hash": "Any 32-byte hash."
+        }
+      },
+      "setSignatureValidatorApproval(address,bool)": {
+        "details": "Approves/unnapproves a Validator contract to verify signatures on signer's behalf.",
+        "params": {
+          "approval": "Approval or disapproval of  Validator contract.",
+          "validatorAddress": "Address of Validator contract."
+        }
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}
