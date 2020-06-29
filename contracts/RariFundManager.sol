@@ -267,7 +267,7 @@ contract RariFundManager is Ownable {
      * @dev Recieves data about an RFT transfer from RariFundToken so we can record it in `_netDepositsByAccount`.
      * @param sender The sender of the RFT.
      * @param recipient The recipient of the RFT.
-     * @param rftAmount The amount of RFT.
+     * @param rftAmount The amount of RFT transferred.
      * @param rftTotalSupply The total supply of RFT.
      */
     function onFundTokenTransfer(address sender, address recipient, uint256 rftAmount, uint256 rftTotalSupply) external onlyToken {
@@ -275,6 +275,20 @@ contract RariFundManager is Ownable {
         uint256 amountUsd = rftAmount.mul(getFundBalance()).div(rftTotalSupply);
         _netDepositsByAccount[sender] = _netDepositsByAccount[sender].sub(int256(amountUsd));
         _netDepositsByAccount[recipient] = _netDepositsByAccount[recipient].add(int256(amountUsd));
+    }
+
+    /**
+     * @dev Recieves data about an RFT burn from RariFundToken so we can record it in `_netDeposits` and `_netDepositsByAccount`.
+     * @param sender The account whose RFT was burned.
+     * @param rftAmount The amount of RFT burned.
+     * @param newRftTotalSupply The total supply of RFT after the burn.
+     */
+    function onFundTokenBurn(address account, uint256 rftAmount, uint256 newRftTotalSupply) external onlyToken {
+        if (rftAmount <= 0) return;
+        uint256 oldRftTotalSupply = newRftTotalSupply.add(rftAmount);
+        uint256 amountUsd = rftAmount.mul(getFundBalance()).div(oldRftTotalSupply);
+        _netDeposits = _netDeposits.sub(int256(amountUsd));
+        _netDepositsByAccount[account] = _netDepositsByAccount[account].sub(int256(amountUsd));
     }
 
     /**

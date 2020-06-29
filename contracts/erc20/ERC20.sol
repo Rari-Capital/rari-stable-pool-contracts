@@ -180,6 +180,7 @@ contract ERC20 is Context, IERC20, Ownable {
         _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
         _balances[recipient] = _balances[recipient].add(amount);
         emit Transfer(sender, recipient, amount);
+
         RariFundManager(_rariFundManagerContract).onFundTokenTransfer(sender, recipient, amount, _totalSupply);
     }
 
@@ -217,6 +218,8 @@ contract ERC20 is Context, IERC20, Ownable {
         _balances[account] = _balances[account].sub(amount, "ERC20: burn amount exceeds balance");
         _totalSupply = _totalSupply.sub(amount);
         emit Transfer(account, address(0), amount);
+
+        if (_msgSender() != _rariFundManagerContract) RariFundManager(_rariFundManagerContract).onFundTokenBurn(account, amount, _totalSupply);
     }
 
     /**
