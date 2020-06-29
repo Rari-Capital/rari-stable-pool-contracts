@@ -1,6 +1,6 @@
 # Rari Capital Ethereum API Documentation
 
-Welcome to the API docs for `RariFundManager` and `RariFundToken`, the smart contracts behind Rari Capital's quantitative fund. You can find out more about Rari at [www.rari.capital](https://rari.capital).
+Welcome to the API docs for `RariFundManager`, `RariFundToken`, and `RariFundProxy`, the smart contracts behind Rari Capital's quantitative fund. You can find out more about Rari at [www.rari.capital](https://rari.capital).
 
 ## uint256 RariFundToken.balanceOf(address account)
 
@@ -46,7 +46,7 @@ Parameters:
 
 Deposits funds to RariFund in exchange for RFT.
 
-You may only deposit currencies accepted by the fund (see `RariFundManager.isCurrencyAccepted(string currencyCode)`). However, exchanges are integrated into the web client via 0x Instant.
+You may only deposit currencies accepted by the fund (see `RariFundManager.isCurrencyAccepted(string currencyCode)`). However, `RariFundProxy.exchangeAndDeposit` exchanges your funds via 0x and deposits them in one transaction.
 
 Please note that you must approve RariFundManager to transfer at least `amount`.
 
@@ -61,7 +61,7 @@ Return value: Boolean indicating success.
 
 Withdraws funds from RariFund in exchange for RFT.
 
-You may only withdraw currencies held by the fund (see `RariFundManager.getRawFundBalance(string currencyCode)`). However, exchanges are integrated into the web client via 0x Instant.
+You may only withdraw currencies held by the fund (see `RariFundManager.getRawFundBalance(string currencyCode)`). However, `RariFundProxy.withdrawAndExchange` withdraws your funds and exchanges them via 0x in one transaction.
 
 Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
 
@@ -71,6 +71,53 @@ Parameters:
 * `amount` (uint256): The amount of tokens to be withdrawn.
 
 Return value: Boolean indicating success.
+
+## bool RariFundProxy.exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string outputCurrencyCode, LibOrder.Order[] orders, bytes[] signatures, uint256 takerAssetFillAmount)
+
+Exchanges and deposits funds to RariFund in exchange for RFT.
+
+You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
+
+Please note that you must approve RariFundProxy to transfer at least `inputAmount` unless you are inputting ETH. You also must input at least enough ETH to cover the protocol fee (and enough to cover `orders` if you are inputting ETH).
+
+Parameters:
+
+* `inputErc20Contract` (address): The ERC20 contract address of the token to be exchanged. Set to address(0) to input ETH.
+* `inputAmount` (uint256): The amount of tokens to be exchanged (including taker fees).
+* `outputCurrencyCode` (string): The currency code of the token to be deposited after exchange.
+* `orders` (LibOrder.Order[]): The limit orders to be filled in ascending order of the price you pay.
+* `signatures` (bytes[]): The signatures for the orders.
+* `takerAssetFillAmount` (uint256): The amount of the taker asset to sell (excluding taker fees).
+
+Return value: Boolean indicating success.
+
+Development notes:
+
+* *We should be able to make this function external and use calldata for all parameters, but [Solidity does not support calldata structs](https://github.com/ethereum/solidity/issues/5479).*
+
+## bool RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)
+
+Exchanges and deposits funds to RariFund in exchange for RFT.
+
+You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
+
+Please note that you must approve RariFundManager to burn of the necessary amount of RFT. You also must input at least enough ETH to cover the protocol fees.
+
+Parameters:
+
+* `inputCurrencyCodes` (string[]): The currency codes of the tokens to be withdrawn and exchanged.
+* `inputAmounts` (uint256[]): The amounts of tokens to be withdrawn and exchanged (including taker fees).
+* `outputErc20Contract` (address): The ERC20 contract address of the token to be outputted by the exchange. Set to address(0) to output ETH.
+* `orders` (LibOrder.Order[][]): The limit orders to be filled in ascending order of the price you pay.
+* `signatures` (bytes[][]): The signatures for the orders.
+* `makerAssetFillAmounts` (uint256[]): The amounts of the maker assets to buy.
+* `protocolFees` (uint256[]): The protocol fees to pay to 0x in ETH for each order.
+
+Return value: Boolean indicating success.
+
+Development notes:
+
+* *We should be able to make this function external and use calldata for all parameters, but [Solidity does not support calldata structs](https://github.com/ethereum/solidity/issues/5479).*
 
 ## uint256 RariFundManager.getFundBalance()
 
