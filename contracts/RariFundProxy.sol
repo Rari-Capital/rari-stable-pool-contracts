@@ -121,7 +121,7 @@ contract RariFundProxy is Ownable {
      * @param inputErc20Contract The ERC20 contract address of the token to be exchanged. Set to address(0) to input ETH.
      * @param inputAmount The amount of tokens to be exchanged (including taker fees).
      * @param outputCurrencyCode The currency code of the token to be deposited after exchange.
-     * @param orders The limit orders to be filled in ascending order of price.
+     * @param orders The limit orders to be filled in ascending order of the price you pay.
      * @param signatures The signatures for the orders.
      * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
      * @return Boolean indicating success.
@@ -181,7 +181,7 @@ contract RariFundProxy is Ownable {
      * @param inputCurrencyCodes The currency codes of the tokens to be withdrawn and exchanged.
      * @param inputAmounts The amounts of tokens to be withdrawn and exchanged (including taker fees).
      * @param outputErc20Contract The ERC20 contract address of the token to be outputted by the exchange. Set to address(0) to output ETH.
-     * @param orders The limit orders to be filled in ascending order of price.
+     * @param orders The limit orders to be filled in ascending order of the price you pay.
      * @param signatures The signatures for the orders.
      * @param makerAssetFillAmounts The amounts of the maker assets to buy.
      * @param protocolFees The protocol fees to pay to 0x in ETH for each order.
