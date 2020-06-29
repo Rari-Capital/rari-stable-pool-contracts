@@ -667,11 +667,11 @@ contract RariFundManager is Ownable {
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftAmount = getRftBurnAmount(rariFundToken, from, amountUsd);
 
-        // Burn RFT and transfer funds to msg.sender
+        // Burn RFT, transfer funds to msg.sender, update net deposits, emit event, and return true
         rariFundToken.burnFrom(from, rftAmount); // The user must approve the burning of tokens beforehand
+        token.safeTransfer(msg.sender, amount);
         _netDeposits = _netDeposits.sub(int256(amountUsd));
         _netDepositsByAccount[from] = _netDepositsByAccount[from].sub(int256(amountUsd));
-        token.safeTransfer(msg.sender, amount);
         emit Withdrawal(currencyCode, from, msg.sender, amount, amountUsd, rftAmount);
         return true;
     }
