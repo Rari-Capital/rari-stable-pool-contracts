@@ -40,7 +40,7 @@ module.exports = function(deployer, network, accounts) {
   }).then(function() {
     return rariFundManager.setDefaultAccountBalanceLimit(Web3.utils.toBN(250 * 1e18));
   }).then(function() {
-    return rariFundManager.setFundRebalancer(accounts[0]);
+    return rariFundManager.setFundRebalancer(network == "live" ? process.env.LIVE_FUND_REBALANCER : accounts[0]);
   }).then(function() {
     return rariFundManager.setAcceptedCurrency("DAI", true);
   }).then(function() {
@@ -48,6 +48,12 @@ module.exports = function(deployer, network, accounts) {
   }).then(function() {
     return rariFundManager.setAcceptedCurrency("USDT", true);
   }).then(function() {
-    return rariFundManager.setInterestFeeMasterBeneficiary(accounts[0]);
+    return rariFundManager.setInterestFeeMasterBeneficiary(network == "live" ? process.env.LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY : accounts[0]);
+  }).then(function() {
+    if (network == "live") return rariFundManager.transferOwnership(process.env.LIVE_FUND_OWNER).then(function() {
+      return rariFundToken.transferOwnership(process.env.LIVE_FUND_OWNER);
+    }).then(function() {
+      return rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
+    });
   });
 };
