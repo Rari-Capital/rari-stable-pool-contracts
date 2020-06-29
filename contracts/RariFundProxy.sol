@@ -86,7 +86,7 @@ contract RariFundProxy is Ownable {
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             IERC20 token = IERC20(_erc20Contracts[_supportedCurrencies[i]]);
             if (_rariFundManagerContract != address(0)) token.safeDecreaseAllowance(_rariFundManagerContract, uint256(-1));
-            token.safeIncreaseAllowance(newContract, uint256(-1));
+            if (newContract != address(0)) token.safeIncreaseAllowance(newContract, uint256(-1));
         }
 
         _rariFundManagerContract = newContract;
@@ -128,7 +128,7 @@ contract RariFundProxy is Ownable {
      */
     function exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string memory outputCurrencyCode, LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public payable returns (bool) {
         // Input validation
-        require(_rariFundManagerContract != address(0), "RariFundManager contract not set.");
+        require(_rariFundManagerContract != address(0), "Fund manager contract not set. This may be due to an upgrade of this proxy contract.");
         require(inputAmount > 0, "Input amount must be greater than 0.");
         address outputErc20Contract = _erc20Contracts[outputCurrencyCode];
         require(outputErc20Contract != address(0), "Invalid output currency code.");
@@ -189,7 +189,7 @@ contract RariFundProxy is Ownable {
      */
     function withdrawAndExchange(string[] memory inputCurrencyCodes, uint256[] memory inputAmounts, address outputErc20Contract, LibOrder.Order[][] memory orders, bytes[][] memory signatures, uint256[] memory makerAssetFillAmounts, uint256[] memory protocolFees) public payable returns (bool) {
         // Input validation
-        require(_rariFundManagerContract != address(0), "RariFundManager contract not set.");
+        require(_rariFundManagerContract != address(0), "Fund manager contract not set. This may be due to an upgrade of this proxy contract.");
         require(inputCurrencyCodes.length == inputAmounts.length && inputCurrencyCodes.length == orders.length && inputCurrencyCodes.length == signatures.length && inputCurrencyCodes.length == makerAssetFillAmounts.length && inputCurrencyCodes.length == protocolFees.length, "Array parameters are not all the same length.");
 
         // For each input currency

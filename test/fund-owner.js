@@ -50,7 +50,7 @@ contract("RariFundManager v0.3.0", accounts => {
       await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0] });
       assert.fail();
     } catch (error) {
-      assert.include(error.message, "Deposits to and withdrawals from the fund are currently disabled.");
+      assert.include(error.message, "This fund manager contract is disabled. This may be due to an upgrade.");
     }
     
     await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
@@ -59,7 +59,7 @@ contract("RariFundManager v0.3.0", accounts => {
       await fundManagerInstance.withdraw(currencyCode, amountBN, { from: accounts[0] });
       assert.fail();
     } catch (error) {
-      assert.include(error.message, "Deposits to and withdrawals from the fund are currently disabled.");
+      assert.include(error.message, "This fund manager contract is disabled. This may be due to an upgrade.");
     }
 
     // RariFundManager.enableFund()
