@@ -1322,7 +1322,7 @@ App = {
 
                       case 91:
                         amountInputtedUsd = _context8.t9;
-                        amountOutputtedUsd = makerAssetFilledAmountBN.toString() / Math.pow(10, App.tokens[token].decimals);
+                        amountOutputtedUsd = makerAssetFilledAmountBN.toString() / Math.pow(10, App.tokens[acceptedCurrency].decimals);
                         slippage = 1 - amountOutputtedUsd / amountInputtedUsd;
                         slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 

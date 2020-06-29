@@ -863,7 +863,7 @@ App = {
 
         // Warn user of slippage
         var amountInputtedUsd = ["DAI", "USDC", "USDT"].indexOf(token) >= 0 ? amount : amount / (await App.get0xPrice(token === "ETH" ? "WETH" : token, acceptedCurrency));
-        var amountOutputtedUsd = makerAssetFilledAmountBN.toString() / (10 ** App.tokens[token].decimals);
+        var amountOutputtedUsd = makerAssetFilledAmountBN.toString() / (10 ** App.tokens[acceptedCurrency].decimals);
         var slippage = 1 - (amountOutputtedUsd / amountInputtedUsd);
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
