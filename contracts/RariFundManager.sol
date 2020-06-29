@@ -901,15 +901,15 @@ contract RariFundManager is Ownable {
 
     /**
      * @dev Internal function to deposit all accrued fees on interest back into the fund on behalf of the master beneficiary.
-     * @return Boolean indicating success.
+     * @return Integer indicating success (0), no fees to claim (1), or no RFT to mint (2).
      */
-    function _depositFees() internal returns (bool) {
+    function _depositFees() internal returns (uint8) {
         require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
         require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
         require(_rariFundTokenContract != address(0), "RFT contract not set. This may be due to an upgrade.");
 
         uint256 amountUsd = getInterestFeesUnclaimed();
-        if (amountUsd <= 0) return false;
+        if (amountUsd <= 0) return 1;
 
         RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
         uint256 rftTotalSupply = rariFundToken.totalSupply();
@@ -921,7 +921,7 @@ contract RariFundManager is Ownable {
             else rftAmount = amountUsd;
         } else rftAmount = amountUsd;
 
-        if (rftAmount <= 0) return false;
+        if (rftAmount <= 0) return 2;
         _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
         _netDeposits = _netDeposits.add(int256(amountUsd));
         _netDepositsByAccount[_interestFeeMasterBeneficiary] = _netDepositsByAccount[_interestFeeMasterBeneficiary].add(int256(amountUsd));
@@ -929,7 +929,7 @@ contract RariFundManager is Ownable {
         emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
 
         emit InterestFeeDeposit(_interestFeeMasterBeneficiary, amountUsd);
-        return true;
+        return 0;
     }
 
     /**
@@ -937,32 +937,8 @@ contract RariFundManager is Ownable {
      * @return Boolean indicating success.
      */
     function depositFees() external onlyRebalancer returns (bool) {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
-        require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
-        require(_rariFundTokenContract != address(0), "RFT contract not set. This may be due to an upgrade.");
-
-        uint256 amountUsd = getInterestFeesUnclaimed();
-        require(amountUsd > 0, "No new fees are available to claim.");
-
-        RariFundToken rariFundToken = RariFundToken(_rariFundTokenContract);
-        uint256 rftTotalSupply = rariFundToken.totalSupply();
-        uint256 rftAmount = 0;
-
-        if (rftTotalSupply > 0) {
-            uint256 fundBalanceUsd = getFundBalance();
-            if (fundBalanceUsd > 0) rftAmount = amountUsd.mul(rftTotalSupply).div(fundBalanceUsd);
-            else rftAmount = amountUsd;
-        } else rftAmount = amountUsd;
-
-        require(rftAmount > 0, "Deposit amount is so small that no RFT would be minted.");
-        _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
-        _netDeposits = _netDeposits.add(int256(amountUsd));
-        _netDepositsByAccount[_interestFeeMasterBeneficiary] = _netDepositsByAccount[_interestFeeMasterBeneficiary].add(int256(amountUsd));
-        require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
-        emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
-
-        emit InterestFeeDeposit(_interestFeeMasterBeneficiary, amountUsd);
-        return true;
+        uint8 result = _depositFees();
+        require(result == 0, result == 2 ? "Deposit amount is so small that no RFT would be minted." : "No new fees are available to claim.");
     }
 
     /**
