@@ -280,7 +280,7 @@ contract RariFundManager is Ownable {
 
     /**
      * @dev Recieves data about an RFT burn from RariFundToken so we can record it in `_netDeposits` and `_netDepositsByAccount`.
-     * @param sender The account whose RFT was burned.
+     * @param account The account whose RFT was burned.
      * @param rftAmount The amount of RFT burned.
      * @param newRftTotalSupply The total supply of RFT after the burn.
      */
