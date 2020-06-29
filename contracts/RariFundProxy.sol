@@ -115,6 +115,7 @@ contract RariFundProxy is Ownable {
 
     /**
      * @notice Exchanges and deposits funds to RariFund in exchange for RFT.
+     * You can retrieve orders from the 0x swap API (https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
      * Please note that you must approve RariFundProxy to transfer at least `inputAmount` unless you are inputting ETH.
      * You also must input at least enough ETH to cover the protocol fee (and enough to cover `orders` if you are inputting ETH).
      * @dev We should be able to make this function external and use calldata for all parameters, but Solidity does not support calldata structs (https://github.com/ethereum/solidity/issues/5479).
@@ -175,8 +176,9 @@ contract RariFundProxy is Ownable {
     
     /**
      * @notice Exchanges and deposits funds to RariFund in exchange for RFT.
+     * You can retrieve orders from the 0x swap API (https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
      * Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
-     * You also must input at least enough ETH to cover the protocol fee.
+     * You also must input at least enough ETH to cover the protocol fees.
      * @dev We should be able to make this function external and use calldata for all parameters, but Solidity does not support calldata structs (https://github.com/ethereum/solidity/issues/5479).
      * @param inputCurrencyCodes The currency codes of the tokens to be withdrawn and exchanged.
      * @param inputAmounts The amounts of tokens to be withdrawn and exchanged (including taker fees).
