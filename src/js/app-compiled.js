@@ -1997,8 +1997,9 @@ App = {
                       case 9:
                         toastr["success"]("Transfer of " + amount + " RFT confirmed!", "Transfer successful");
                         App.getTokenBalance();
+                        App.getMyFundBalance();
 
-                      case 11:
+                      case 12:
                       case "end":
                         return _context12.stop();
                     }

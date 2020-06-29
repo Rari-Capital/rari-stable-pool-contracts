@@ -1220,6 +1220,7 @@ App = {
 
       toastr["success"]("Transfer of " + amount + " RFT confirmed!", "Transfer successful");
       App.getTokenBalance();
+      App.getMyFundBalance();
     })();
 
     $('#transferButton').text("Transfer");
