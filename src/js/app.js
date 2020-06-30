@@ -794,7 +794,7 @@ App = {
         }
 
         if (takerAssetFilledAmountBN.isZero()) reject("No orders found on 0x swap API");
-        resolve([orders, inputFilledAmountBN, decoded.protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN]);
+        resolve([orders, inputFilledAmountBN, decoded.protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, decoded.gasPrice]);
       }).fail(function(err) {
           reject("Error requesting quote from 0x swap API: " + err.message);
       });
@@ -850,7 +850,7 @@ App = {
 
         // Get orders from 0x swap API
         try {
-          var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN] = await App.get0xSwapOrders(token === "ETH" ? "WETH" : App.tokens[token].address, App.tokens[acceptedCurrency].address, amountBN);
+          var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, gasPrice] = await App.get0xSwapOrders(token === "ETH" ? "WETH" : App.tokens[token].address, App.tokens[acceptedCurrency].address, amountBN);
         } catch (err) {
           return toastr["error"]("Failed to get swap orders from 0x API: " + err, "Deposit failed");
         }
@@ -911,7 +911,7 @@ App = {
 
         // Exchange and deposit tokens via RariFundProxy
         try {
-          await App.contracts.RariFundProxy.methods.exchangeAndDeposit(token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.tokens[token].address, amountBN, acceptedCurrency, orders, signatures, takerAssetFilledAmountBN).send({ from: App.selectedAccount, value: token === "ETH" ? web3.utils.toBN(protocolFee).add(amountBN).toString() : protocolFee });
+          await App.contracts.RariFundProxy.methods.exchangeAndDeposit(token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.tokens[token].address, amountBN, acceptedCurrency, orders, signatures, takerAssetFilledAmountBN).send({ from: App.selectedAccount, value: token === "ETH" ? web3.utils.toBN(protocolFee).add(amountBN).toString() : protocolFee, gasPrice: gasPrice });
         } catch (err) {
           return toastr["error"]("RariFundProxy.exchangeAndDeposit failed: " + err, "Deposit failed");
         }
@@ -1011,7 +1011,7 @@ App = {
         // Get orders from 0x swap API for each input currency candidate
         for (var i = 0; i < inputCandidates.length; i++) {
           try {
-            var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN] = await App.get0xSwapOrders(App.tokens[inputCandidates[i].currencyCode].address, token === "ETH" ? "WETH" : App.tokens[token].address, inputCandidates[i].rawFundBalanceBN, amountBN);
+            var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, gasPrice] = await App.get0xSwapOrders(App.tokens[inputCandidates[i].currencyCode].address, token === "ETH" ? "WETH" : App.tokens[token].address, inputCandidates[i].rawFundBalanceBN, amountBN);
           } catch (err) {
             return toastr["error"]("Failed to get swap orders from 0x API: " + err, "Withdrawal failed");
           }
@@ -1136,7 +1136,7 @@ App = {
           var protocolFeeStrings = [];
           for (var i = 0; i < protocolFeeBNs.length; i++) protocolFeeStrings[i] = protocolFeeBNs[i].toString();
           console.log(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "ETH" : App.tokens[token].address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings);
-          await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.tokens[token].address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
+          await App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.tokens[token].address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings).send({ from: App.selectedAccount, value: totalProtocolFeeBN, gasPrice: gasPrice, nonce: await web3.eth.getTransactionCount(App.selectedAccount) });
         } catch (err) {
           return toastr["error"]("RariFundProxy.withdrawAndExchange failed: " + err, "Withdrawal failed");
         }
