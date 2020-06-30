@@ -12,14 +12,14 @@
     "absolutePath": "@0x/contracts-utils/contracts/src/LibSafeMathRichErrors.sol",
     "exportedSymbols": {
       "LibSafeMathRichErrors": [
-        7316
+        7335
       ]
     },
-    "id": 7317,
+    "id": 7336,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7263,
+        "id": 7282,
         "literals": [
           "solidity",
           "^",
@@ -35,19 +35,19 @@
         "contractKind": "library",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 7316,
+        "id": 7335,
         "linearizedBaseContracts": [
-          7316
+          7335
         ],
         "name": "LibSafeMathRichErrors",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 7266,
+            "id": 7285,
             "name": "UINT256_BINOP_ERROR_SELECTOR",
             "nodeType": "VariableDeclaration",
-            "scope": 7316,
+            "scope": 7335,
             "src": "132:74:37",
             "stateVariable": true,
             "storageLocation": "default",
@@ -56,7 +56,7 @@
               "typeString": "bytes4"
             },
             "typeName": {
-              "id": 7264,
+              "id": 7283,
               "name": "bytes4",
               "nodeType": "ElementaryTypeName",
               "src": "132:6:37",
@@ -68,7 +68,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "30786539343663316262",
-              "id": 7265,
+              "id": 7284,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -87,10 +87,10 @@
           },
           {
             "constant": true,
-            "id": 7269,
+            "id": 7288,
             "name": "UINT256_DOWNCAST_ERROR_SELECTOR",
             "nodeType": "VariableDeclaration",
-            "scope": 7316,
+            "scope": 7335,
             "src": "277:77:37",
             "stateVariable": true,
             "storageLocation": "default",
@@ -99,7 +99,7 @@
               "typeString": "bytes4"
             },
             "typeName": {
-              "id": 7267,
+              "id": 7286,
               "name": "bytes4",
               "nodeType": "ElementaryTypeName",
               "src": "277:6:37",
@@ -111,7 +111,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "30786339393661663762",
-              "id": 7268,
+              "id": 7287,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -130,28 +130,28 @@
           },
           {
             "canonicalName": "LibSafeMathRichErrors.BinOpErrorCodes",
-            "id": 7274,
+            "id": 7293,
             "members": [
               {
-                "id": 7270,
+                "id": 7289,
                 "name": "ADDITION_OVERFLOW",
                 "nodeType": "EnumValue",
                 "src": "392:17:37"
               },
               {
-                "id": 7271,
+                "id": 7290,
                 "name": "MULTIPLICATION_OVERFLOW",
                 "nodeType": "EnumValue",
                 "src": "419:23:37"
               },
               {
-                "id": 7272,
+                "id": 7291,
                 "name": "SUBTRACTION_UNDERFLOW",
                 "nodeType": "EnumValue",
                 "src": "452:21:37"
               },
               {
-                "id": 7273,
+                "id": 7292,
                 "name": "DIVISION_BY_ZERO",
                 "nodeType": "EnumValue",
                 "src": "483:16:37"
@@ -163,22 +163,22 @@
           },
           {
             "canonicalName": "LibSafeMathRichErrors.DowncastErrorCodes",
-            "id": 7278,
+            "id": 7297,
             "members": [
               {
-                "id": 7275,
+                "id": 7294,
                 "name": "VALUE_TOO_LARGE_TO_DOWNCAST_TO_UINT32",
                 "nodeType": "EnumValue",
                 "src": "545:37:37"
               },
               {
-                "id": 7276,
+                "id": 7295,
                 "name": "VALUE_TOO_LARGE_TO_DOWNCAST_TO_UINT64",
                 "nodeType": "EnumValue",
                 "src": "592:37:37"
               },
               {
-                "id": 7277,
+                "id": 7296,
                 "name": "VALUE_TOO_LARGE_TO_DOWNCAST_TO_UINT96",
                 "nodeType": "EnumValue",
                 "src": "639:37:37"
@@ -190,7 +190,7 @@
           },
           {
             "body": {
-              "id": 7297,
+              "id": 7316,
               "nodeType": "Block",
               "src": "902:151:37",
               "statements": [
@@ -200,11 +200,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7291,
+                        "id": 7310,
                         "name": "UINT256_BINOP_ERROR_SELECTOR",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7266,
+                        "referencedDeclaration": 7285,
                         "src": "955:28:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes4",
@@ -213,24 +213,24 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7292,
+                        "id": 7311,
                         "name": "errorCode",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7280,
+                        "referencedDeclaration": 7299,
                         "src": "997:9:37",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_BinOpErrorCodes_$7274",
+                          "typeIdentifier": "t_enum$_BinOpErrorCodes_$7293",
                           "typeString": "enum LibSafeMathRichErrors.BinOpErrorCodes"
                         }
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7293,
+                        "id": 7312,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7282,
+                        "referencedDeclaration": 7301,
                         "src": "1020:1:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -239,11 +239,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7294,
+                        "id": 7313,
                         "name": "b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7284,
+                        "referencedDeclaration": 7303,
                         "src": "1035:1:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -258,7 +258,7 @@
                           "typeString": "bytes4"
                         },
                         {
-                          "typeIdentifier": "t_enum$_BinOpErrorCodes_$7274",
+                          "typeIdentifier": "t_enum$_BinOpErrorCodes_$7293",
                           "typeString": "enum LibSafeMathRichErrors.BinOpErrorCodes"
                         },
                         {
@@ -272,18 +272,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 7289,
+                        "id": 7308,
                         "name": "abi",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8434,
+                        "referencedDeclaration": 8453,
                         "src": "919:3:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_abi",
                           "typeString": "abi"
                         }
                       },
-                      "id": 7290,
+                      "id": 7309,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -297,7 +297,7 @@
                         "typeString": "function (bytes4) pure returns (bytes memory)"
                       }
                     },
-                    "id": 7295,
+                    "id": 7314,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -311,46 +311,46 @@
                       "typeString": "bytes memory"
                     }
                   },
-                  "functionReturnParameters": 7288,
-                  "id": 7296,
+                  "functionReturnParameters": 7307,
+                  "id": 7315,
                   "nodeType": "Return",
                   "src": "912:134:37"
                 }
               ]
             },
             "documentation": null,
-            "id": 7298,
+            "id": 7317,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "Uint256BinOpError",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7285,
+              "id": 7304,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7280,
+                  "id": 7299,
                   "name": "errorCode",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7298,
+                  "scope": 7317,
                   "src": "767:25:37",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_BinOpErrorCodes_$7274",
+                    "typeIdentifier": "t_enum$_BinOpErrorCodes_$7293",
                     "typeString": "enum LibSafeMathRichErrors.BinOpErrorCodes"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7279,
+                    "id": 7298,
                     "name": "BinOpErrorCodes",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7274,
+                    "referencedDeclaration": 7293,
                     "src": "767:15:37",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_BinOpErrorCodes_$7274",
+                      "typeIdentifier": "t_enum$_BinOpErrorCodes_$7293",
                       "typeString": "enum LibSafeMathRichErrors.BinOpErrorCodes"
                     }
                   },
@@ -359,10 +359,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7282,
+                  "id": 7301,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7298,
+                  "scope": 7317,
                   "src": "802:9:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -371,7 +371,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7281,
+                    "id": 7300,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "802:7:37",
@@ -385,10 +385,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7284,
+                  "id": 7303,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7298,
+                  "scope": 7317,
                   "src": "821:9:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -397,7 +397,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7283,
+                    "id": 7302,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "821:7:37",
@@ -413,15 +413,15 @@
               "src": "757:79:37"
             },
             "returnParameters": {
-              "id": 7288,
+              "id": 7307,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7287,
+                  "id": 7306,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7298,
+                  "scope": 7317,
                   "src": "884:12:37",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -430,7 +430,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7286,
+                    "id": 7305,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "884:5:37",
@@ -445,7 +445,7 @@
               ],
               "src": "883:14:37"
             },
-            "scope": 7316,
+            "scope": 7335,
             "src": "731:322:37",
             "stateMutability": "pure",
             "superFunction": null,
@@ -453,7 +453,7 @@
           },
           {
             "body": {
-              "id": 7314,
+              "id": 7333,
               "nodeType": "Block",
               "src": "1217:139:37",
               "statements": [
@@ -463,11 +463,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7309,
+                        "id": 7328,
                         "name": "UINT256_DOWNCAST_ERROR_SELECTOR",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7269,
+                        "referencedDeclaration": 7288,
                         "src": "1270:31:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes4",
@@ -476,24 +476,24 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7310,
+                        "id": 7329,
                         "name": "errorCode",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7300,
+                        "referencedDeclaration": 7319,
                         "src": "1315:9:37",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_DowncastErrorCodes_$7278",
+                          "typeIdentifier": "t_enum$_DowncastErrorCodes_$7297",
                           "typeString": "enum LibSafeMathRichErrors.DowncastErrorCodes"
                         }
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7311,
+                        "id": 7330,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7302,
+                        "referencedDeclaration": 7321,
                         "src": "1338:1:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -508,7 +508,7 @@
                           "typeString": "bytes4"
                         },
                         {
-                          "typeIdentifier": "t_enum$_DowncastErrorCodes_$7278",
+                          "typeIdentifier": "t_enum$_DowncastErrorCodes_$7297",
                           "typeString": "enum LibSafeMathRichErrors.DowncastErrorCodes"
                         },
                         {
@@ -518,18 +518,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 7307,
+                        "id": 7326,
                         "name": "abi",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8434,
+                        "referencedDeclaration": 8453,
                         "src": "1234:3:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_abi",
                           "typeString": "abi"
                         }
                       },
-                      "id": 7308,
+                      "id": 7327,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -543,7 +543,7 @@
                         "typeString": "function (bytes4) pure returns (bytes memory)"
                       }
                     },
-                    "id": 7312,
+                    "id": 7331,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -557,46 +557,46 @@
                       "typeString": "bytes memory"
                     }
                   },
-                  "functionReturnParameters": 7306,
-                  "id": 7313,
+                  "functionReturnParameters": 7325,
+                  "id": 7332,
                   "nodeType": "Return",
                   "src": "1227:122:37"
                 }
               ]
             },
             "documentation": null,
-            "id": 7315,
+            "id": 7334,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "Uint256DowncastError",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7303,
+              "id": 7322,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7300,
+                  "id": 7319,
                   "name": "errorCode",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7315,
+                  "scope": 7334,
                   "src": "1098:28:37",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_DowncastErrorCodes_$7278",
+                    "typeIdentifier": "t_enum$_DowncastErrorCodes_$7297",
                     "typeString": "enum LibSafeMathRichErrors.DowncastErrorCodes"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7299,
+                    "id": 7318,
                     "name": "DowncastErrorCodes",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7278,
+                    "referencedDeclaration": 7297,
                     "src": "1098:18:37",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_DowncastErrorCodes_$7278",
+                      "typeIdentifier": "t_enum$_DowncastErrorCodes_$7297",
                       "typeString": "enum LibSafeMathRichErrors.DowncastErrorCodes"
                     }
                   },
@@ -605,10 +605,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7302,
+                  "id": 7321,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7315,
+                  "scope": 7334,
                   "src": "1136:9:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -617,7 +617,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7301,
+                    "id": 7320,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1136:7:37",
@@ -633,15 +633,15 @@
               "src": "1088:63:37"
             },
             "returnParameters": {
-              "id": 7306,
+              "id": 7325,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7305,
+                  "id": 7324,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7315,
+                  "scope": 7334,
                   "src": "1199:12:37",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -650,7 +650,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7304,
+                    "id": 7323,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1199:5:37",
@@ -665,14 +665,14 @@
               ],
               "src": "1198:14:37"
             },
-            "scope": 7316,
+            "scope": 7335,
             "src": "1059:297:37",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 7317,
+        "scope": 7336,
         "src": "26:1332:37"
       }
     ],
@@ -682,14 +682,14 @@
     "absolutePath": "@0x/contracts-utils/contracts/src/LibSafeMathRichErrors.sol",
     "exportedSymbols": {
       "LibSafeMathRichErrors": [
-        7316
+        7335
       ]
     },
-    "id": 7317,
+    "id": 7336,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7263,
+        "id": 7282,
         "literals": [
           "solidity",
           "^",
@@ -705,19 +705,19 @@
         "contractKind": "library",
         "documentation": null,
         "fullyImplemented": true,
-        "id": 7316,
+        "id": 7335,
         "linearizedBaseContracts": [
-          7316
+          7335
         ],
         "name": "LibSafeMathRichErrors",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
             "constant": true,
-            "id": 7266,
+            "id": 7285,
             "name": "UINT256_BINOP_ERROR_SELECTOR",
             "nodeType": "VariableDeclaration",
-            "scope": 7316,
+            "scope": 7335,
             "src": "132:74:37",
             "stateVariable": true,
             "storageLocation": "default",
@@ -726,7 +726,7 @@
               "typeString": "bytes4"
             },
             "typeName": {
-              "id": 7264,
+              "id": 7283,
               "name": "bytes4",
               "nodeType": "ElementaryTypeName",
               "src": "132:6:37",
@@ -738,7 +738,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "30786539343663316262",
-              "id": 7265,
+              "id": 7284,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -757,10 +757,10 @@
           },
           {
             "constant": true,
-            "id": 7269,
+            "id": 7288,
             "name": "UINT256_DOWNCAST_ERROR_SELECTOR",
             "nodeType": "VariableDeclaration",
-            "scope": 7316,
+            "scope": 7335,
             "src": "277:77:37",
             "stateVariable": true,
             "storageLocation": "default",
@@ -769,7 +769,7 @@
               "typeString": "bytes4"
             },
             "typeName": {
-              "id": 7267,
+              "id": 7286,
               "name": "bytes4",
               "nodeType": "ElementaryTypeName",
               "src": "277:6:37",
@@ -781,7 +781,7 @@
             "value": {
               "argumentTypes": null,
               "hexValue": "30786339393661663762",
-              "id": 7268,
+              "id": 7287,
               "isConstant": false,
               "isLValue": false,
               "isPure": true,
@@ -800,28 +800,28 @@
           },
           {
             "canonicalName": "LibSafeMathRichErrors.BinOpErrorCodes",
-            "id": 7274,
+            "id": 7293,
             "members": [
               {
-                "id": 7270,
+                "id": 7289,
                 "name": "ADDITION_OVERFLOW",
                 "nodeType": "EnumValue",
                 "src": "392:17:37"
               },
               {
-                "id": 7271,
+                "id": 7290,
                 "name": "MULTIPLICATION_OVERFLOW",
                 "nodeType": "EnumValue",
                 "src": "419:23:37"
               },
               {
-                "id": 7272,
+                "id": 7291,
                 "name": "SUBTRACTION_UNDERFLOW",
                 "nodeType": "EnumValue",
                 "src": "452:21:37"
               },
               {
-                "id": 7273,
+                "id": 7292,
                 "name": "DIVISION_BY_ZERO",
                 "nodeType": "EnumValue",
                 "src": "483:16:37"
@@ -833,22 +833,22 @@
           },
           {
             "canonicalName": "LibSafeMathRichErrors.DowncastErrorCodes",
-            "id": 7278,
+            "id": 7297,
             "members": [
               {
-                "id": 7275,
+                "id": 7294,
                 "name": "VALUE_TOO_LARGE_TO_DOWNCAST_TO_UINT32",
                 "nodeType": "EnumValue",
                 "src": "545:37:37"
               },
               {
-                "id": 7276,
+                "id": 7295,
                 "name": "VALUE_TOO_LARGE_TO_DOWNCAST_TO_UINT64",
                 "nodeType": "EnumValue",
                 "src": "592:37:37"
               },
               {
-                "id": 7277,
+                "id": 7296,
                 "name": "VALUE_TOO_LARGE_TO_DOWNCAST_TO_UINT96",
                 "nodeType": "EnumValue",
                 "src": "639:37:37"
@@ -860,7 +860,7 @@
           },
           {
             "body": {
-              "id": 7297,
+              "id": 7316,
               "nodeType": "Block",
               "src": "902:151:37",
               "statements": [
@@ -870,11 +870,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7291,
+                        "id": 7310,
                         "name": "UINT256_BINOP_ERROR_SELECTOR",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7266,
+                        "referencedDeclaration": 7285,
                         "src": "955:28:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes4",
@@ -883,24 +883,24 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7292,
+                        "id": 7311,
                         "name": "errorCode",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7280,
+                        "referencedDeclaration": 7299,
                         "src": "997:9:37",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_BinOpErrorCodes_$7274",
+                          "typeIdentifier": "t_enum$_BinOpErrorCodes_$7293",
                           "typeString": "enum LibSafeMathRichErrors.BinOpErrorCodes"
                         }
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7293,
+                        "id": 7312,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7282,
+                        "referencedDeclaration": 7301,
                         "src": "1020:1:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -909,11 +909,11 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7294,
+                        "id": 7313,
                         "name": "b",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7284,
+                        "referencedDeclaration": 7303,
                         "src": "1035:1:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -928,7 +928,7 @@
                           "typeString": "bytes4"
                         },
                         {
-                          "typeIdentifier": "t_enum$_BinOpErrorCodes_$7274",
+                          "typeIdentifier": "t_enum$_BinOpErrorCodes_$7293",
                           "typeString": "enum LibSafeMathRichErrors.BinOpErrorCodes"
                         },
                         {
@@ -942,18 +942,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 7289,
+                        "id": 7308,
                         "name": "abi",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8434,
+                        "referencedDeclaration": 8453,
                         "src": "919:3:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_abi",
                           "typeString": "abi"
                         }
                       },
-                      "id": 7290,
+                      "id": 7309,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -967,7 +967,7 @@
                         "typeString": "function (bytes4) pure returns (bytes memory)"
                       }
                     },
-                    "id": 7295,
+                    "id": 7314,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -981,46 +981,46 @@
                       "typeString": "bytes memory"
                     }
                   },
-                  "functionReturnParameters": 7288,
-                  "id": 7296,
+                  "functionReturnParameters": 7307,
+                  "id": 7315,
                   "nodeType": "Return",
                   "src": "912:134:37"
                 }
               ]
             },
             "documentation": null,
-            "id": 7298,
+            "id": 7317,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "Uint256BinOpError",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7285,
+              "id": 7304,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7280,
+                  "id": 7299,
                   "name": "errorCode",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7298,
+                  "scope": 7317,
                   "src": "767:25:37",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_BinOpErrorCodes_$7274",
+                    "typeIdentifier": "t_enum$_BinOpErrorCodes_$7293",
                     "typeString": "enum LibSafeMathRichErrors.BinOpErrorCodes"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7279,
+                    "id": 7298,
                     "name": "BinOpErrorCodes",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7274,
+                    "referencedDeclaration": 7293,
                     "src": "767:15:37",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_BinOpErrorCodes_$7274",
+                      "typeIdentifier": "t_enum$_BinOpErrorCodes_$7293",
                       "typeString": "enum LibSafeMathRichErrors.BinOpErrorCodes"
                     }
                   },
@@ -1029,10 +1029,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7282,
+                  "id": 7301,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7298,
+                  "scope": 7317,
                   "src": "802:9:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1041,7 +1041,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7281,
+                    "id": 7300,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "802:7:37",
@@ -1055,10 +1055,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7284,
+                  "id": 7303,
                   "name": "b",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7298,
+                  "scope": 7317,
                   "src": "821:9:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1067,7 +1067,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7283,
+                    "id": 7302,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "821:7:37",
@@ -1083,15 +1083,15 @@
               "src": "757:79:37"
             },
             "returnParameters": {
-              "id": 7288,
+              "id": 7307,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7287,
+                  "id": 7306,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7298,
+                  "scope": 7317,
                   "src": "884:12:37",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1100,7 +1100,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7286,
+                    "id": 7305,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "884:5:37",
@@ -1115,7 +1115,7 @@
               ],
               "src": "883:14:37"
             },
-            "scope": 7316,
+            "scope": 7335,
             "src": "731:322:37",
             "stateMutability": "pure",
             "superFunction": null,
@@ -1123,7 +1123,7 @@
           },
           {
             "body": {
-              "id": 7314,
+              "id": 7333,
               "nodeType": "Block",
               "src": "1217:139:37",
               "statements": [
@@ -1133,11 +1133,11 @@
                     "arguments": [
                       {
                         "argumentTypes": null,
-                        "id": 7309,
+                        "id": 7328,
                         "name": "UINT256_DOWNCAST_ERROR_SELECTOR",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7269,
+                        "referencedDeclaration": 7288,
                         "src": "1270:31:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_bytes4",
@@ -1146,24 +1146,24 @@
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7310,
+                        "id": 7329,
                         "name": "errorCode",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7300,
+                        "referencedDeclaration": 7319,
                         "src": "1315:9:37",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_enum$_DowncastErrorCodes_$7278",
+                          "typeIdentifier": "t_enum$_DowncastErrorCodes_$7297",
                           "typeString": "enum LibSafeMathRichErrors.DowncastErrorCodes"
                         }
                       },
                       {
                         "argumentTypes": null,
-                        "id": 7311,
+                        "id": 7330,
                         "name": "a",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 7302,
+                        "referencedDeclaration": 7321,
                         "src": "1338:1:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -1178,7 +1178,7 @@
                           "typeString": "bytes4"
                         },
                         {
-                          "typeIdentifier": "t_enum$_DowncastErrorCodes_$7278",
+                          "typeIdentifier": "t_enum$_DowncastErrorCodes_$7297",
                           "typeString": "enum LibSafeMathRichErrors.DowncastErrorCodes"
                         },
                         {
@@ -1188,18 +1188,18 @@
                       ],
                       "expression": {
                         "argumentTypes": null,
-                        "id": 7307,
+                        "id": 7326,
                         "name": "abi",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 8434,
+                        "referencedDeclaration": 8453,
                         "src": "1234:3:37",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_abi",
                           "typeString": "abi"
                         }
                       },
-                      "id": 7308,
+                      "id": 7327,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -1213,7 +1213,7 @@
                         "typeString": "function (bytes4) pure returns (bytes memory)"
                       }
                     },
-                    "id": 7312,
+                    "id": 7331,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -1227,46 +1227,46 @@
                       "typeString": "bytes memory"
                     }
                   },
-                  "functionReturnParameters": 7306,
-                  "id": 7313,
+                  "functionReturnParameters": 7325,
+                  "id": 7332,
                   "nodeType": "Return",
                   "src": "1227:122:37"
                 }
               ]
             },
             "documentation": null,
-            "id": 7315,
+            "id": 7334,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "Uint256DowncastError",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7303,
+              "id": 7322,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7300,
+                  "id": 7319,
                   "name": "errorCode",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7315,
+                  "scope": 7334,
                   "src": "1098:28:37",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_enum$_DowncastErrorCodes_$7278",
+                    "typeIdentifier": "t_enum$_DowncastErrorCodes_$7297",
                     "typeString": "enum LibSafeMathRichErrors.DowncastErrorCodes"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7299,
+                    "id": 7318,
                     "name": "DowncastErrorCodes",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7278,
+                    "referencedDeclaration": 7297,
                     "src": "1098:18:37",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_enum$_DowncastErrorCodes_$7278",
+                      "typeIdentifier": "t_enum$_DowncastErrorCodes_$7297",
                       "typeString": "enum LibSafeMathRichErrors.DowncastErrorCodes"
                     }
                   },
@@ -1275,10 +1275,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7302,
+                  "id": 7321,
                   "name": "a",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7315,
+                  "scope": 7334,
                   "src": "1136:9:37",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1287,7 +1287,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7301,
+                    "id": 7320,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1136:7:37",
@@ -1303,15 +1303,15 @@
               "src": "1088:63:37"
             },
             "returnParameters": {
-              "id": 7306,
+              "id": 7325,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7305,
+                  "id": 7324,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7315,
+                  "scope": 7334,
                   "src": "1199:12:37",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1320,7 +1320,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7304,
+                    "id": 7323,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1199:5:37",
@@ -1335,14 +1335,14 @@
               ],
               "src": "1198:14:37"
             },
-            "scope": 7316,
+            "scope": 7335,
             "src": "1059:297:37",
             "stateMutability": "pure",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 7317,
+        "scope": 7336,
         "src": "26:1332:37"
       }
     ],
@@ -1354,7 +1354,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.0",
-  "updatedAt": "2020-06-29T13:53:09.423Z",
+  "updatedAt": "2020-06-29T20:03:34.254Z",
   "devdoc": {
     "methods": {}
   },
