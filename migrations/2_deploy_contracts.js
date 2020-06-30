@@ -7,7 +7,7 @@ var RariFundToken = artifacts.require("./RariFundToken.sol");
 var RariFundProxy = artifacts.require("./RariFundProxy.sol");
 
 module.exports = function(deployer, network, accounts) {
-  if (network == "live") {
+  if (["live", "live-fork"].indexOf(network) >= 0) {
     if (!process.env.LIVE_FUND_OWNER) return console.error("LIVE_FUND_OWNER is missing for live deployment");
     if (!process.env.LIVE_FUND_REBALANCER) return console.error("LIVE_FUND_REBALANCER is missing for live deployment");
     if (!process.env.LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY) return console.error("LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY is missing for live deployment");
@@ -15,6 +15,7 @@ module.exports = function(deployer, network, accounts) {
   
   var rariFundToken = null;
   var rariFundManager = null;
+  var rariFundProxy = null;
 
   deployer.deploy(RariFundController).then(function() {
     return deployer.link(RariFundController, RariFundManager);
@@ -42,25 +43,28 @@ module.exports = function(deployer, network, accounts) {
     return rariFundManager.setFundProxy(RariFundProxy.address);
   }).then(function() {
     return RariFundProxy.deployed();
-  }).then(function(rariFundProxy) {
+  }).then(function(_rariFundProxy) {
+    rariFundProxy = _rariFundProxy;
     return rariFundProxy.setFundManager(RariFundManager.address);
   }).then(function() {
     return rariFundManager.setDefaultAccountBalanceLimit(Web3.utils.toBN(250 * 1e18));
   }).then(function() {
-    return rariFundManager.setFundRebalancer(network == "live" ? process.env.LIVE_FUND_REBALANCER : accounts[0]);
+    return rariFundManager.setFundRebalancer(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_REBALANCER : accounts[0]);
   }).then(function() {
-    return rariFundManager.setAcceptedCurrency("DAI", true);
+    return rariFundManager.setInterestFeeMasterBeneficiary(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY : accounts[0]);
   }).then(function() {
-    return rariFundManager.setAcceptedCurrency("USDC", true);
-  }).then(function() {
-    return rariFundManager.setAcceptedCurrency("USDT", true);
-  }).then(function() {
-    return rariFundManager.setInterestFeeMasterBeneficiary(network == "live" ? process.env.LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY : accounts[0]);
-  }).then(function() {
-    if (network == "live") return rariFundManager.transferOwnership(process.env.LIVE_FUND_OWNER).then(function() {
-      return rariFundToken.transferOwnership(process.env.LIVE_FUND_OWNER);
-    }).then(function() {
-      return rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
-    });
+    if (["live", "live-fork"].indexOf(network) >= 0) {
+      return rariFundManager.transferOwnership(process.env.LIVE_FUND_OWNER).then(function() {
+        return rariFundToken.transferOwnership(process.env.LIVE_FUND_OWNER);
+      }).then(function() {
+        return rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
+      });
+    } else {
+      return rariFundManager.setAcceptedCurrency("DAI", true).then(function() {
+        return rariFundManager.setAcceptedCurrency("USDC", true);
+      }).then(function() {
+        return rariFundManager.setAcceptedCurrency("USDT", true);
+      });
+    }
   });
 };
