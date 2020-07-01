@@ -866,8 +866,11 @@ App = {
 
       // Alert success and refresh balances
       toastr["success"]("Deposit of " + amount + " " + token + " confirmed!", "Deposit successful");
+      $('#USDBalance').text("?");
       App.getFundBalance();
+      $('#MyUSDBalance').text("?");
       App.getMyFundBalance();
+      $('#RFTBalance').text("?");
       App.getTokenBalance();
       App.getDirectlyWithdrawableCurrencies();
     })();
@@ -1091,8 +1094,11 @@ App = {
       
       // Alert success and refresh balances
       toastr["success"]("Withdrawal of " + amount + " " + token + " confirmed!", "Withdrawal successful");
+      $('#USDBalance').text("?");
       App.getFundBalance();
+      $('#MyUSDBalance').text("?");
       App.getMyFundBalance();
+      $('#RFTBalance').text("?");
       App.getTokenBalance();
       App.getDirectlyWithdrawableCurrencies();
     })();
@@ -1163,7 +1169,9 @@ App = {
       }
 
       toastr["success"]("Transfer of " + amount + " RFT confirmed!", "Transfer successful");
+      $('#RFTBalance').text("?");
       App.getTokenBalance();
+      $('#MyUSDBalance').text("?");
       App.getMyFundBalance();
     })();
 

@@ -1367,12 +1367,15 @@ App = {
                       case 123:
                         // Alert success and refresh balances
                         toastr["success"]("Deposit of " + amount + " " + token + " confirmed!", "Deposit successful");
+                        $('#USDBalance').text("?");
                         App.getFundBalance();
+                        $('#MyUSDBalance').text("?");
                         App.getMyFundBalance();
+                        $('#RFTBalance').text("?");
                         App.getTokenBalance();
                         App.getDirectlyWithdrawableCurrencies();
 
-                      case 128:
+                      case 131:
                       case "end":
                         return _context8.stop();
                     }
@@ -1833,12 +1836,15 @@ App = {
                       case 176:
                         // Alert success and refresh balances
                         toastr["success"]("Withdrawal of " + amount + " " + token + " confirmed!", "Withdrawal successful");
+                        $('#USDBalance').text("?");
                         App.getFundBalance();
+                        $('#MyUSDBalance').text("?");
                         App.getMyFundBalance();
+                        $('#RFTBalance').text("?");
                         App.getTokenBalance();
                         App.getDirectlyWithdrawableCurrencies();
 
-                      case 181:
+                      case 184:
                       case "end":
                         return _context10.stop();
                     }
@@ -1949,10 +1955,12 @@ App = {
 
                       case 9:
                         toastr["success"]("Transfer of " + amount + " RFT confirmed!", "Transfer successful");
+                        $('#RFTBalance').text("?");
                         App.getTokenBalance();
+                        $('#MyUSDBalance').text("?");
                         App.getMyFundBalance();
 
-                      case 12:
+                      case 14:
                       case "end":
                         return _context12.stop();
                     }
