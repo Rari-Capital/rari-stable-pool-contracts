@@ -72,7 +72,7 @@ App = {
           switch (_context.prev = _context.next) {
             case 0:
               factors = [];
-              totalBalanceUsdBN = web3.utils.toBN(0);
+              totalBalanceUsdBN = Web3.utils.toBN(0);
               _context.next = 4;
               return App.getDydxApyBNs();
 
@@ -92,16 +92,16 @@ App = {
               }
 
               currencyCode = _arr[_i];
-              _context.t0 = web3.utils;
+              _context.t0 = Web3.utils;
               _context.next = 14;
               return App.tokens[currencyCode].contract.methods.balanceOf(App.contracts.RariFundManager.options.address).call();
 
             case 14:
               _context.t1 = _context.sent;
               contractBalanceBN = _context.t0.toBN.call(_context.t0, _context.t1);
-              contractBalanceUsdBN = contractBalanceBN.mul(web3.utils.toBN(currencyCode === "DAI" ? 1e18 : 1e6)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+              contractBalanceUsdBN = contractBalanceBN.mul(Web3.utils.toBN(currencyCode === "DAI" ? 1e18 : 1e6)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
 
-              factors.push([contractBalanceUsdBN, web3.utils.toBN(0)]);
+              factors.push([contractBalanceUsdBN, Web3.utils.toBN(0)]);
               totalBalanceUsdBN = totalBalanceUsdBN.add(contractBalanceUsdBN);
               _context.next = 21;
               return App.contracts.RariFundManager.methods.getRawPoolBalances(currencyCode).call();
@@ -110,8 +110,8 @@ App = {
               poolBalances = _context.sent;
 
               for (i = 0; i < poolBalances["0"].length; i++) {
-                poolBalanceBN = web3.utils.toBN(poolBalances["1"][i]);
-                poolBalanceUsdBN = poolBalanceBN.mul(web3.utils.toBN(currencyCode === "DAI" ? 1e18 : 1e6)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+                poolBalanceBN = Web3.utils.toBN(poolBalances["1"][i]);
+                poolBalanceUsdBN = poolBalanceBN.mul(Web3.utils.toBN(currencyCode === "DAI" ? 1e18 : 1e6)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
 
                 apyBN = poolBalances["0"][i] == 1 ? compoundApyBNs[currencyCode] : dydxApyBNs[currencyCode];
                 factors.push([poolBalanceUsdBN, apyBN]);
@@ -138,7 +138,7 @@ App = {
               return _context.abrupt("return", $('#APYNow').text((parseFloat(maxApyBN.toString()) / 1e16).toFixed(2) + "%"));
 
             case 30:
-              apyBN = web3.utils.toBN(0);
+              apyBN = Web3.utils.toBN(0);
 
               for (i = 0; i < factors.length; i++) {
                 apyBN.iadd(factors[i][0].mul(factors[i][1]).div(totalBalanceUsdBN));
@@ -175,7 +175,7 @@ App = {
               apyBNs = {};
 
               for (i = 0; i < data.markets.length; i++) {
-                if (["DAI", "USDC", "USDT"].indexOf(data.markets[i].symbol) >= 0) apyBNs[data.markets[i].symbol] = web3.utils.toBN(Math.trunc(parseFloat(data.markets[i].totalSupplyAPR) * 1e18));
+                if (["DAI", "USDC", "USDT"].indexOf(data.markets[i].symbol) >= 0) apyBNs[data.markets[i].symbol] = Web3.utils.toBN(Math.trunc(parseFloat(data.markets[i].totalSupplyAPR) * 1e18));
               }
 
               return _context2.abrupt("return", apyBNs);
@@ -209,7 +209,7 @@ App = {
               apyBNs = {};
 
               for (i = 0; i < data.cToken.length; i++) {
-                if (["DAI", "USDC", "USDT"].indexOf(data.cToken[i].underlying_symbol) >= 0) apyBNs[data.cToken[i].underlying_symbol] = web3.utils.toBN(Math.trunc(parseFloat(data.cToken[i].supply_rate.value) * 1e18));
+                if (["DAI", "USDC", "USDT"].indexOf(data.cToken[i].underlying_symbol) >= 0) apyBNs[data.cToken[i].underlying_symbol] = Web3.utils.toBN(Math.trunc(parseFloat(data.cToken[i].supply_rate.value) * 1e18));
               }
 
               return _context3.abrupt("return", apyBNs);
@@ -833,9 +833,9 @@ App = {
   initWeb3: function initWeb3() {
     $.getScript("js/web3.min.js", function () {
       if (typeof web3 !== 'undefined') {
-        web3 = new Web3(web3.currentProvider);
+        App.web3 = new Web3(web3.currentProvider);
       } else {
-        web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/c52a3970da0a47978bee0fe7988b67b6"));
+        App.web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/c52a3970da0a47978bee0fe7988b67b6"));
       }
 
       App.initContracts();
@@ -848,7 +848,7 @@ App = {
    */
   initContracts: function initContracts() {
     $.getJSON('abi/RariFundManager.json', function (data) {
-      App.contracts.RariFundManager = new web3.eth.Contract(data, "0x686Ac9D046418416d3ed9eA9206F3dacE4943027");
+      App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0x686Ac9D046418416d3ed9eA9206F3dacE4943027");
       App.getCurrentApy();
       setInterval(App.getCurrentApy, 5 * 60 * 1000);
       App.getFundBalance();
@@ -869,7 +869,7 @@ App = {
       }, 5 * 60 * 1000);
     });
     $.getJSON('abi/RariFundToken.json', function (data) {
-      App.contracts.RariFundToken = new web3.eth.Contract(data, "0x9366B7C00894c3555c7590b0384e5F6a9D55659f");
+      App.contracts.RariFundToken = new App.web3.eth.Contract(data, "0x9366B7C00894c3555c7590b0384e5F6a9D55659f");
 
       if (App.selectedAccount) {
         App.getTokenBalance();
@@ -877,14 +877,14 @@ App = {
       }
     });
     $.getJSON('abi/RariFundProxy.json', function (data) {
-      App.contracts.RariFundProxy = new web3.eth.Contract(data, "0x27C4E34163b5FD2122cE43a40e3eaa4d58eEbeaF");
+      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0x27C4E34163b5FD2122cE43a40e3eaa4d58eEbeaF");
     });
     $.getJSON('abi/ERC20.json', function (data) {
       App.erc20Abi = data;
 
       for (var _i3 = 0, _Object$keys2 = Object.keys(App.tokens); _i3 < _Object$keys2.length; _i3++) {
         var symbol = _Object$keys2[_i3];
-        App.tokens[symbol].contract = new web3.eth.Contract(data, App.tokens[symbol].address);
+        App.tokens[symbol].contract = new App.web3.eth.Contract(data, App.tokens[symbol].address);
       }
     });
     $.getJSON('https://api.0x.org/swap/v0/tokens', function (data) {
@@ -902,7 +902,7 @@ App = {
           App.tokens[token.symbol] = {
             address: token.address,
             decimals: token.decimals,
-            contract: App.erc20Abi ? new web3.eth.Contract(App.erc20Abi, token.address) : null
+            contract: App.erc20Abi ? new App.web3.eth.Contract(App.erc20Abi, token.address) : null
           };
           $('#DepositToken').append('<option>' + token.symbol + '</option>');
           $('#WithdrawToken').append('<option>' + token.symbol + '</option>');
@@ -996,17 +996,17 @@ App = {
           return a.makerAssetAmount / (a.takerAssetAmount + a.takerFee) < b.makerAssetAmount / (b.takerAssetAmount + b.takerFee) ? 1 : -1;
         });
         var orders = [];
-        var inputFilledAmountBN = web3.utils.toBN(0);
-        var takerAssetFilledAmountBN = web3.utils.toBN(0);
-        var makerAssetFilledAmountBN = web3.utils.toBN(0);
+        var inputFilledAmountBN = Web3.utils.toBN(0);
+        var takerAssetFilledAmountBN = Web3.utils.toBN(0);
+        var makerAssetFilledAmountBN = Web3.utils.toBN(0);
 
         for (var i = 0; i < decoded.orders.length; i++) {
           if (decoded.orders[i].takerFee > 0 && decoded.orders[i].takerFeeAssetData !== "0xf47261b0000000000000000000000000" + inputTokenAddress) continue;
-          var takerAssetAmountBN = web3.utils.toBN(decoded.orders[i].takerAssetAmount);
-          var takerFeeBN = web3.utils.toBN(decoded.orders[i].takerFee);
+          var takerAssetAmountBN = Web3.utils.toBN(decoded.orders[i].takerAssetAmount);
+          var takerFeeBN = Web3.utils.toBN(decoded.orders[i].takerFee);
           var orderInputAmountBN = takerAssetAmountBN.add(takerFeeBN); // Maximum amount we can send to this order including the taker fee
 
-          var makerAssetAmountBN = web3.utils.toBN(decoded.orders[i].makerAssetAmount);
+          var makerAssetAmountBN = Web3.utils.toBN(decoded.orders[i].makerAssetAmount);
 
           if (maxMakerAssetFillAmountBN !== undefined) {
             // maxMakerAssetFillAmountBN is specified, so use it
@@ -1020,7 +1020,7 @@ App = {
 
               while (makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN).lt(orderMakerAssetFillAmountBN)) {
                 if (tries >= 1000) return toastr["error"]("Failed to get increment order input amount to achieve desired output amount: " + err, "Withdrawal failed");
-                orderInputFillAmountBN.iadd(web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
+                orderInputFillAmountBN.iadd(Web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
 
                 tries++;
               }
@@ -1103,7 +1103,7 @@ App = {
               return _context9.abrupt("return", toastr["error"]("Amount must be greater than 0!", "Deposit failed"));
 
             case 7:
-              amountBN = web3.utils.toBN(amount * Math.pow(10, token == "ETH" ? 18 : App.tokens[token].decimals));
+              amountBN = Web3.utils.toBN(amount * Math.pow(10, token == "ETH" ? 18 : App.tokens[token].decimals));
               $('#depositButton').prop("disabled", true);
               $('#depositButton').text("...");
               _context9.next = 12;
@@ -1144,7 +1144,7 @@ App = {
                         console.log('Deposit ' + amount + ' ' + token + ' directly'); // Approve tokens to RariFundManager
 
                         _context8.prev = 12;
-                        _context8.t1 = web3.utils;
+                        _context8.t1 = Web3.utils;
                         _context8.next = 16;
                         return App.tokens[token].contract.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call();
 
@@ -1352,7 +1352,7 @@ App = {
                           break;
                         }
 
-                        _context8.t12 = web3.utils;
+                        _context8.t12 = Web3.utils;
                         _context8.next = 107;
                         return App.tokens[token].contract.methods.allowance(App.selectedAccount, App.contracts.RariFundProxy.options.address).call();
 
@@ -1399,7 +1399,7 @@ App = {
                         _context8.next = 117;
                         return App.contracts.RariFundProxy.methods.exchangeAndDeposit(token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.tokens[token].address, amountBN, acceptedCurrency, orders, signatures, takerAssetFilledAmountBN).send({
                           from: App.selectedAccount,
-                          value: token === "ETH" ? web3.utils.toBN(protocolFee).add(amountBN).toString() : protocolFee,
+                          value: token === "ETH" ? Web3.utils.toBN(protocolFee).add(amountBN).toString() : protocolFee,
                           gasPrice: gasPrice
                         });
 
@@ -1482,7 +1482,7 @@ App = {
               return _context11.abrupt("return", toastr["error"]("Amount must be greater than 0!", "Withdrawal failed"));
 
             case 7:
-              amountBN = web3.utils.toBN(amount * Math.pow(10, token == "ETH" ? 18 : App.tokens[token].decimals));
+              amountBN = Web3.utils.toBN(amount * Math.pow(10, token == "ETH" ? 18 : App.tokens[token].decimals));
               $('#withdrawButton').prop("disabled", true);
               $('#withdrawButton').text("...");
               _context11.next = 12;
@@ -1496,7 +1496,7 @@ App = {
                         App.getDirectlyWithdrawableCurrencies(); // Approve RFT to RariFundManager
 
                         _context10.prev = 1;
-                        _context10.t0 = web3.utils;
+                        _context10.t0 = Web3.utils;
                         _context10.next = 5;
                         return App.contracts.RariFundToken.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call();
 
@@ -1504,13 +1504,13 @@ App = {
                         _context10.t1 = _context10.sent;
                         allowanceBN = _context10.t0.toBN.call(_context10.t0, _context10.t1);
 
-                        if (!allowanceBN.lt(web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1))) {
+                        if (!allowanceBN.lt(Web3.utils.toBN(2).pow(Web3.utils.toBN(256)).subn(1))) {
                           _context10.next = 10;
                           break;
                         }
 
                         _context10.next = 10;
-                        return App.contracts.RariFundToken.methods.approve(App.contracts.RariFundManager.options.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1)).send({
+                        return App.contracts.RariFundToken.methods.approve(App.contracts.RariFundManager.options.address, Web3.utils.toBN(2).pow(Web3.utils.toBN(256)).subn(1)).send({
                           from: App.selectedAccount
                         });
 
@@ -1525,7 +1525,7 @@ App = {
 
                       case 15:
                         // See how much we can withdraw directly if token is not ETH
-                        tokenRawFundBalanceBN = web3.utils.toBN(0);
+                        tokenRawFundBalanceBN = Web3.utils.toBN(0);
 
                         if (!(["DAI", "USDC", "USDT"].indexOf(token) >= 0)) {
                           _context10.next = 28;
@@ -1533,7 +1533,7 @@ App = {
                         }
 
                         _context10.prev = 17;
-                        _context10.t3 = web3.utils;
+                        _context10.t3 = Web3.utils;
                         _context10.next = 21;
                         return App.contracts.RariFundManager.methods["getRawFundBalance(string)"](token).call();
 
@@ -1574,9 +1574,9 @@ App = {
                         allSignatures = [];
                         makerAssetFillAmountBNs = [];
                         protocolFeeBNs = [];
-                        amountInputtedUsdBN = web3.utils.toBN(0);
-                        amountWithdrawnBN = web3.utils.toBN(0);
-                        totalProtocolFeeBN = web3.utils.toBN(0); // Get input candidates
+                        amountInputtedUsdBN = Web3.utils.toBN(0);
+                        amountWithdrawnBN = Web3.utils.toBN(0);
+                        totalProtocolFeeBN = Web3.utils.toBN(0); // Get input candidates
 
                         inputCandidates = [];
                         _i6 = 0, _arr4 = ["DAI", "USDC", "USDT"];
@@ -1589,7 +1589,7 @@ App = {
 
                         inputToken = _arr4[_i6];
 
-                        if (!(inputToken === token && tokenRawFundBalanceBN.gt(web3.utils.toBN(0)))) {
+                        if (!(inputToken === token && tokenRawFundBalanceBN.gt(Web3.utils.toBN(0)))) {
                           _context10.next = 59;
                           break;
                         }
@@ -1601,20 +1601,20 @@ App = {
                         allSignatures.push([]);
                         makerAssetFillAmountBNs.push(0);
                         protocolFeeBNs.push(0);
-                        amountInputtedUsdBN.iadd(tokenRawFundBalanceBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(Math.pow(10, token == "ETH" ? 18 : App.tokens[token].decimals))));
+                        amountInputtedUsdBN.iadd(tokenRawFundBalanceBN.mul(Web3.utils.toBN(1e18)).div(Web3.utils.toBN(Math.pow(10, token == "ETH" ? 18 : App.tokens[token].decimals))));
                         amountWithdrawnBN.iadd(tokenRawFundBalanceBN);
                         _context10.next = 65;
                         break;
 
                       case 59:
-                        _context10.t6 = web3.utils;
+                        _context10.t6 = Web3.utils;
                         _context10.next = 62;
                         return App.contracts.RariFundManager.methods["getRawFundBalance(string)"](inputToken).call();
 
                       case 62:
                         _context10.t7 = _context10.sent;
                         rawFundBalanceBN = _context10.t6.toBN.call(_context10.t6, _context10.t7);
-                        if (rawFundBalanceBN.gt(web3.utils.toBN(0))) inputCandidates.push({
+                        if (rawFundBalanceBN.gt(Web3.utils.toBN(0))) inputCandidates.push({
                           currencyCode: inputToken,
                           rawFundBalanceBN: rawFundBalanceBN
                         });
@@ -1729,7 +1729,7 @@ App = {
                         return _context10.abrupt("return", toastr["error"]("Failed to get increment order input amount to achieve desired output amount: " + err, "Withdrawal failed"));
 
                       case 109:
-                        thisInputAmountBN.iadd(web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
+                        thisInputAmountBN.iadd(Web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
 
                         tries++;
                         _context10.next = 106;
@@ -1742,10 +1742,10 @@ App = {
                         allOrders.push(inputCandidates[i].orders);
                         allSignatures.push(inputCandidates[i].signatures);
                         makerAssetFillAmountBNs.push(thisOutputAmountBN);
-                        protocolFeeBNs.push(web3.utils.toBN(inputCandidates[i].protocolFee));
-                        amountInputtedUsdBN.iadd(thisInputAmountBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
+                        protocolFeeBNs.push(Web3.utils.toBN(inputCandidates[i].protocolFee));
+                        amountInputtedUsdBN.iadd(thisInputAmountBN.mul(Web3.utils.toBN(1e18)).div(Web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
                         amountWithdrawnBN.iadd(thisOutputAmountBN);
-                        totalProtocolFeeBN.iadd(web3.utils.toBN(inputCandidates[i].protocolFee));
+                        totalProtocolFeeBN.iadd(Web3.utils.toBN(inputCandidates[i].protocolFee));
                         return _context10.abrupt("break", 130);
 
                       case 124:
@@ -1756,10 +1756,10 @@ App = {
                           allOrders.push(inputCandidates[i].orders);
                           allSignatures.push(inputCandidates[i].signatures);
                           makerAssetFillAmountBNs.push(inputCandidates[i].makerAssetFillAmountBN);
-                          protocolFeeBNs.push(web3.utils.toBN(inputCandidates[i].protocolFee));
-                          amountInputtedUsdBN.iadd(inputCandidates[i].inputFillAmountBN.mul(web3.utils.toBN(1e18)).div(web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
+                          protocolFeeBNs.push(Web3.utils.toBN(inputCandidates[i].protocolFee));
+                          amountInputtedUsdBN.iadd(inputCandidates[i].inputFillAmountBN.mul(Web3.utils.toBN(1e18)).div(Web3.utils.toBN(inputCandidates[i].currencyCode === "DAI" ? 1e18 : 1e6)));
                           amountWithdrawnBN.iadd(inputCandidates[i].makerAssetFillAmountBN);
-                          totalProtocolFeeBN.iadd(web3.utils.toBN(inputCandidates[i].protocolFee));
+                          totalProtocolFeeBN.iadd(Web3.utils.toBN(inputCandidates[i].protocolFee));
                           i = -1;
                           inputCandidates.pop();
                         } // Stop if we have filled the withdrawal
@@ -1856,7 +1856,7 @@ App = {
                         _context10.t14 = totalProtocolFeeBN;
                         _context10.t15 = gasPrice;
                         _context10.next = 166;
-                        return web3.eth.getTransactionCount(App.selectedAccount);
+                        return App.web3.eth.getTransactionCount(App.selectedAccount);
 
                       case 166:
                         _context10.t16 = _context10.sent;
@@ -1986,7 +1986,7 @@ App = {
                         console.log('Transfer ' + amount + ' RFT to ' + toAddress);
                         _context12.prev = 1;
                         _context12.next = 4;
-                        return App.contracts.RariFundToken.methods.transfer(toAddress, web3.utils.toBN(amount * 1e18)).send({
+                        return App.contracts.RariFundToken.methods.transfer(toAddress, Web3.utils.toBN(amount * 1e18)).send({
                           from: App.selectedAccount
                         });
 
