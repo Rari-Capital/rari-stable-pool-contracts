@@ -515,15 +515,15 @@ App = {
    * Disconnect wallet button pressed.
    */
   disconnectWallet: async function() {
-    console.log("Killing the wallet connection", provider);
+    console.log("Killing the wallet connection", App.web3Provider);
   
     // TODO: MetamaskInpageProvider does not provide disconnect?
-    if (provider.close) {
-      await provider.close();
-      provider = null;
+    if (App.web3Provider.close) {
+      await App.web3Provider.close();
+      App.web3Provider = null;
     }
   
-    selectedAccount = null;
+    App.selectedAccount = null;
   
     // Set the UI back to the initial state
     $("#selected-account").empty();
@@ -755,7 +755,7 @@ App = {
     if (token !== "ETH" && !App.tokens[token]) return toastr["error"]("Invalid token!", "Deposit failed");
     var amount = parseFloat($('#DepositAmount').val());
     if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Deposit failed");
-    var amountBN = Web3.utils.toBN(amount * (10 ** (token == "ETH" ? 18 : App.tokens[token].decimals)));
+    var amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(Web3.utils.toBN(10).pow(Web3.utils.toBN(token == "ETH" ? 18 : App.tokens[token].decimals)).toString())).toFixed());
 
     $('#depositButton').prop("disabled", true);
     $('#depositButton').text("...");
@@ -889,7 +889,7 @@ App = {
     if (token !== "ETH" && !App.tokens[token]) return toastr["error"]("Invalid token!", "Withdrawal failed");
     var amount = parseFloat($('#WithdrawAmount').val());
     if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Withdrawal failed");
-    var amountBN = Web3.utils.toBN(amount * (10 ** (token == "ETH" ? 18 : App.tokens[token].decimals)));
+    var amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(Web3.utils.toBN(10).pow(Web3.utils.toBN(token == "ETH" ? 18 : App.tokens[token].decimals)).toString())).toFixed());
 
     $('#withdrawButton').prop("disabled", true);
     $('#withdrawButton').text("...");

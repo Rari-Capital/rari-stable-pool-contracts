@@ -36,7 +36,8 @@
         <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
           <div class="panel panel-default panel-horizontal">
             <div class="panel-heading">
-              <h3 class="panel-title" style="white-space: nowrap; font-size: 2.5rem;">APY Now</h3>
+              <h3 class="panel-title m-0" style="white-space: nowrap; font-size: 2.5rem;">APY Now</h3>
+              <small class="d-inline-block text-right">*real</small>
             </div>
             <div class="panel-body flex-grow-1 text-md-right">
               <kbd class="d-inline-block display-4" id="APYNow">?%</kbd>
@@ -50,6 +51,7 @@
           <div class="panel panel-default panel-horizontal">
             <div class="panel-heading">
               <h3 class="panel-title" style="white-space: nowrap;">APY Today</h3>
+              <small class="d-inline-block text-right">*theoretical</small>
             </div>
             <div class="panel-body flex-grow-1 text-md-right">
               <kbd class="d-inline-block" id="APYToday">?%</kbd>
@@ -151,7 +153,7 @@
             <div class="panel-body">
               <h4 style="margin-top: 0;">Balance</h4>
               <kbd class="d-inline-block mb-2">$<span id="MyUSDBalance">?</span> USD (DAI + USDC + USDT)</kbd><br />
-              <small>Please note the temporary $250 USD deposit limit.</small>
+              <small class="d-inline-block">Please note the temporary $250 USD deposit limit.</small>
               <br /><br />
               <h4>Deposit</h4>
               <div class="form-group input-group">
@@ -176,7 +178,8 @@
                 </select>
               </div>
               <div class="form-group" id="WithdrawSlippage" style="display: none;">Slippage: <kbd class="text-red">0%</kbd></div>
-              <button class="btn btn-danger" id="withdrawButton" type="button" disabled>Withdraw</button>
+              <button class="btn btn-danger mb-2" id="withdrawButton" type="button" disabled>Withdraw</button><br />
+              <small class="d-inline-block">All COMP earned by the fund is liquidated into additional interest for RFT holders every 3 days.</small>
             </div>
           </div>
         </div>
@@ -188,7 +191,7 @@
             <div class="panel-body">
               <h4 style="margin-top: 0;">Balance</h4>
               <kbd class="d-inline-block mb-2"><span id="RFTBalance">?</span> RFT</kbd><br />
-              <small>This balance is convertible at any time to any supported currency (without exchange slippage for select stablecoins) using the withdraw function.</small>
+              <small class="d-inline-block">This balance is convertible at any time to any supported currency (without exchange slippage for select stablecoins) using the withdraw function.</small>
               <br /><br />
               <h4>Transfer</h4>
               <div class="form-group"><input type="text" class="form-control" id="RFTTransferAddress" placeholder="Address" /></div>
@@ -215,6 +218,9 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+    <!-- big.js -->
+    <script type="text/javascript" src="https://unpkg.com/big.js@5.2.2/big.min.js"></script>
 
     <!-- Web3Modal -->
     <!--<script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>-->

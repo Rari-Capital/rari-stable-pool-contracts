@@ -740,21 +740,21 @@ App = {
         while (1) {
           switch (_context7.prev = _context7.next) {
             case 0:
-              console.log("Killing the wallet connection", provider); // TODO: MetamaskInpageProvider does not provide disconnect?
+              console.log("Killing the wallet connection", App.web3Provider); // TODO: MetamaskInpageProvider does not provide disconnect?
 
-              if (!provider.close) {
+              if (!App.web3Provider.close) {
                 _context7.next = 5;
                 break;
               }
 
               _context7.next = 4;
-              return provider.close();
+              return App.web3Provider.close();
 
             case 4:
-              provider = null;
+              App.web3Provider = null;
 
             case 5:
-              selectedAccount = null; // Set the UI back to the initial state
+              App.selectedAccount = null; // Set the UI back to the initial state
 
               $("#selected-account").empty();
               $("#btn-disconnect").hide();
@@ -1051,7 +1051,7 @@ App = {
               return _context9.abrupt("return", toastr["error"]("Amount must be greater than 0!", "Deposit failed"));
 
             case 7:
-              amountBN = Web3.utils.toBN(amount * Math.pow(10, token == "ETH" ? 18 : App.tokens[token].decimals));
+              amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(Web3.utils.toBN(10).pow(Web3.utils.toBN(token == "ETH" ? 18 : App.tokens[token].decimals)).toString())).toFixed());
               $('#depositButton').prop("disabled", true);
               $('#depositButton').text("...");
               _context9.next = 12;
@@ -1433,7 +1433,7 @@ App = {
               return _context11.abrupt("return", toastr["error"]("Amount must be greater than 0!", "Withdrawal failed"));
 
             case 7:
-              amountBN = Web3.utils.toBN(amount * Math.pow(10, token == "ETH" ? 18 : App.tokens[token].decimals));
+              amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(Web3.utils.toBN(10).pow(Web3.utils.toBN(token == "ETH" ? 18 : App.tokens[token].decimals)).toString())).toFixed());
               $('#withdrawButton').prop("disabled", true);
               $('#withdrawButton').text("...");
               _context11.next = 12;
