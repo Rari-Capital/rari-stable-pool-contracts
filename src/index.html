@@ -24,19 +24,30 @@
     <link href="css/app.css" rel="stylesheet">
   </head>
   <body>
-    <div class="container">
+    <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 bg-white">
+      <h5 class="my-0 mr-md-auto font-weight-normal"><a href="https://rari.capital" class="text-dark">Rari Capital</a></h5>
+      <nav class="my-2 my-md-0 mr-md-3">
+        <a class="p-2 text-dark" href="https://rari.capital">Return Home</a>
+        <a class="p-2 text-dark" href="#" onclick="$('#tab-account').hide(); $('#tab-fund').show();">The Fund</a>
+        <a class="p-2 text-dark" href="#" onclick="$('#tab-fund').hide(); $('#tab-account').show();">My Account</a>
+      </nav>
+      <button class="btn btn-primary btn-connect" type="button">Connect Wallet</button>
+      <button class="btn btn-danger" type="button" id="btn-disconnect" style="display: none;">Disconnect Wallet</button>
+    </div>
+
+    <div class="container" id="tab-fund">
       <div class="row">
         <div class="col-12">
           <h1 class="text-center">Our Fund</h1>
-          <p class="text-center">Centralization is to creation as decentralization is to evolution. Check out our phenomenal returns.</p>
+          <p class="text-center">We generate yield through a variety of trusted DeFi protocols with the stability of the US dollar.</p>
         </div>
       </div>
       
-      <div class="row">
+      <!--<div class="row">
         <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
           <div class="panel panel-default panel-horizontal">
             <div class="panel-heading">
-              <h3 class="panel-title m-0" style="white-space: nowrap; font-size: 2.5rem;">APY Now</h3>
+              <h3 class="panel-title" style="white-space: nowrap; font-size: 2.5rem;">APY Now</h3>
               <small class="d-inline-block text-right">*real</small>
             </div>
             <div class="panel-body flex-grow-1 text-md-right">
@@ -44,17 +55,17 @@
             </div>
           </div>
         </div>
-      </div>
+      </div>-->
       
       <div class="row">
         <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
           <div class="panel panel-default panel-horizontal">
             <div class="panel-heading">
-              <h3 class="panel-title" style="white-space: nowrap;">APY Today</h3>
-              <small class="d-inline-block text-right">*theoretical</small>
+              <h3 class="panel-title" style="white-space: nowrap; font-size: 2.5rem;">APY Today</h3>
+              <!--<small class="d-inline-block text-right">*theoretical</small>-->
             </div>
             <div class="panel-body flex-grow-1 text-md-right">
-              <kbd class="d-inline-block" id="APYToday">?%</kbd>
+              <kbd class="d-inline-block display-4" id="APYToday">?%</kbd>
             </div>
           </div>
         </div>
@@ -101,11 +112,13 @@
           </div>
         </div>
       </div>
-      
+    </div>
+
+    <div class="container" id="tab-account" style="display: none;">
       <div class="row">
         <div class="col-12">
-          <h1 class="text-center mt-3">Get Started</h1>
-          <p class="mb-2 text-center">The quicker you can make a deposit, the quicker you can start beating inflation.</p>
+          <h1 class="text-center">My Account</h1>
+          <p class="mb-2 text-center">Earn yield every block as soon as you deposit.</p>
           <p class="text-center text-danger">WARNING: Our contracts have undergone security reviews but have not yet been audited.</p>
         </div>
       </div>
@@ -117,15 +130,10 @@
               <h3 class="panel-title" style="white-space: nowrap;">My Account</h3>
             </div>
             <div class="panel-body">
-              <div class="input-group">
-                <select class="custom-select" id="selected-account">
-                  <option disabled selected>Please connect your wallet...</option>
-                </select>
-                <div class="input-group-append">
-                  <button class="btn btn-light" type="button" id="btn-connect">Connect</button>
-                  <button class="btn btn-light" type="button" id="btn-connect" style="display: none;">Disconnect</button>
-                </div>
-              </div>
+              <button class="btn btn-primary btn-block btn-connect" type="button">Connect Wallet</button>
+              <select class="custom-select" id="selected-account" style="display: none;">
+                <option disabled selected>Please connect your wallet...</option>
+              </select>
             </div>
           </div>
         </div>
@@ -196,7 +204,7 @@
               <h4>Transfer</h4>
               <div class="form-group"><input type="text" class="form-control" id="RFTTransferAddress" placeholder="Address" /></div>
               <div class="form-group"><input type="text" class="form-control" id="RFTTransferAmount" placeholder="Amount" /></div>
-              <button class="btn btn-primary" id="transferButton" type="button" disabled>Transfer</button>
+              <button class="btn btn-info" id="transferButton" type="button" disabled>Transfer</button>
             </div>
           </div>
         </div>

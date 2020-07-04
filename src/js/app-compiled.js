@@ -645,18 +645,21 @@ App = {
               // with Ethereum node via JSON-RPC and loads chain data
               // over an API call.
 
-              $("#btn-connect").text("Loading...");
-              $("#btn-connect").prop("disabled", true);
+              $(".btn-connect").text("Loading...");
+              $(".btn-connect").prop("disabled", true);
               _context5.next = 5;
               return App.fetchAccountData();
 
             case 5:
-              $("#btn-connect").hide();
-              $("#btn-connect").text("Connect");
-              $("#btn-connect").prop("disabled", false);
+              $(".btn-connect").hide();
+              $(".btn-connect").text("Connect");
+              $(".btn-connect").prop("disabled", false);
               $("#btn-disconnect").show();
+              $("#selected-account").show();
+              $('#tab-fund').hide();
+              $('#tab-account').show();
 
-            case 9:
+            case 12:
             case "end":
               return _context5.stop();
           }
@@ -758,7 +761,7 @@ App = {
 
               $("#selected-account").empty();
               $("#btn-disconnect").hide();
-              $("#btn-connect").show();
+              $(".btn-connect").show();
 
             case 9:
             case "end":
@@ -797,8 +800,9 @@ App = {
   initContracts: function initContracts() {
     $.getJSON('abi/RariFundManager.json', function (data) {
       App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0x686Ac9D046418416d3ed9eA9206F3dacE4943027");
-      App.getCurrentApy();
-      setInterval(App.getCurrentApy, 5 * 60 * 1000);
+      /* App.getCurrentApy();
+      setInterval(App.getCurrentApy, 5 * 60 * 1000); */
+
       App.getFundBalance();
       setInterval(App.getFundBalance, 5 * 60 * 1000);
 
@@ -891,7 +895,7 @@ App = {
    * Bind button click events.
    */
   bindEvents: function bindEvents() {
-    $(document).on('click', '#btn-connect', App.connectWallet);
+    $(document).on('click', '.btn-connect', App.connectWallet);
     $(document).on('click', '#btn-disconnect', App.disconnectWallet);
     $(document).on('change', '#selected-account', function () {
       // Set selected account
@@ -1025,7 +1029,7 @@ App = {
    */
   handleDeposit: function () {
     var _handleDeposit = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee9(event) {
-      var token, amount, amountBN;
+      var token, amount, amountBN, accountBalanceBN;
       return regeneratorRuntime.wrap(function _callee9$(_context9) {
         while (1) {
           switch (_context9.prev = _context9.next) {
@@ -1051,10 +1055,26 @@ App = {
               return _context9.abrupt("return", toastr["error"]("Amount must be greater than 0!", "Deposit failed"));
 
             case 7:
-              amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(Web3.utils.toBN(10).pow(Web3.utils.toBN(token == "ETH" ? 18 : App.tokens[token].decimals)).toString())).toFixed());
+              amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(10).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toFixed());
+              _context9.t0 = Web3.utils;
+              _context9.next = 11;
+              return token == "ETH" ? App.web3.eth.getBalance(App.selectedAccount) : App.tokens[token].contract.methods.balanceOf(App.selectedAccount).call();
+
+            case 11:
+              _context9.t1 = _context9.sent;
+              accountBalanceBN = _context9.t0.toBN.call(_context9.t0, _context9.t1);
+
+              if (!amountBN.gt(accountBalanceBN)) {
+                _context9.next = 15;
+                break;
+              }
+
+              return _context9.abrupt("return", toastr["error"]("Not enough balance in your account to make a deposit of this amount. Current account balance: " + new Big(accountBalanceBN.toString()).div(new Big(10).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toString() + " " + token, "Deposit failed"));
+
+            case 15:
               $('#depositButton').prop("disabled", true);
               $('#depositButton').text("...");
-              _context9.next = 12;
+              _context9.next = 19;
               return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee8() {
                 var accepted, allowanceBN, acceptedCurrency, _yield$App$get0xSwapO, _yield$App$get0xSwapO2, orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, gasPrice, amountInputtedUsd, amountOutputtedUsd, slippage, slippageAbsPercentageString, signatures, j;
 
@@ -1383,11 +1403,11 @@ App = {
                 }, _callee8, null, [[12, 23], [26, 31], [64, 77], [114, 119]]);
               }))();
 
-            case 12:
+            case 19:
               $('#depositButton').text("Deposit");
               $('#depositButton').prop("disabled", false);
 
-            case 14:
+            case 21:
             case "end":
               return _context9.stop();
           }
@@ -1433,7 +1453,7 @@ App = {
               return _context11.abrupt("return", toastr["error"]("Amount must be greater than 0!", "Withdrawal failed"));
 
             case 7:
-              amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(Web3.utils.toBN(10).pow(Web3.utils.toBN(token == "ETH" ? 18 : App.tokens[token].decimals)).toString())).toFixed());
+              amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(10).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toFixed());
               $('#withdrawButton').prop("disabled", true);
               $('#withdrawButton').text("...");
               _context11.next = 12;
@@ -1877,7 +1897,7 @@ App = {
   getFundBalance: function getFundBalance() {
     console.log('Getting fund balance...');
     App.contracts.RariFundManager.methods.getFundBalance().call().then(function (result) {
-      $('#USDBalance').text(result / 1e18);
+      $('#USDBalance').text(new Big(result).div(new Big(10).pow(18)).toFixed(8));
     }).catch(function (err) {
       console.error(err);
     });
@@ -1889,7 +1909,7 @@ App = {
   getMyFundBalance: function getMyFundBalance() {
     console.log('Getting my fund balance...');
     App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call().then(function (result) {
-      $('#MyUSDBalance').text(result / 1e18);
+      $('#MyUSDBalance').text(new Big(result).div(new Big(10).pow(18)).toString());
     }).catch(function (err) {
       console.error(err);
     });
@@ -1901,7 +1921,7 @@ App = {
   getMyInterestAccrued: function getMyInterestAccrued() {
     console.log('Getting my interest accrued...');
     App.contracts.RariFundManager.methods.interestAccruedBy(App.selectedAccount).call().then(function (result) {
-      $('#MyInterestAccrued').text(result / 1e18);
+      $('#MyInterestAccrued').text(new Big(result).div(new Big(10).pow(18)).toString());
     }).catch(function (err) {
       console.error(err);
     });
@@ -1912,7 +1932,7 @@ App = {
    */
   handleTransfer: function () {
     var _handleTransfer = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee13(event) {
-      var amount, toAddress;
+      var amount, amountBN, toAddress;
       return regeneratorRuntime.wrap(function _callee13$(_context13) {
         while (1) {
           switch (_context13.prev = _context13.next) {
@@ -1928,10 +1948,11 @@ App = {
               return _context13.abrupt("return", toastr["error"]("Amount must be greater than 0!", "Transfer failed"));
 
             case 4:
+              amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(10).pow(18)).toFixed());
               toAddress = $('#RFTTransferAddress').val();
               $('#transferButton').prop("disabled", true);
               $('#transferButton').text("...");
-              _context13.next = 9;
+              _context13.next = 10;
               return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee12() {
                 return regeneratorRuntime.wrap(function _callee12$(_context12) {
                   while (1) {
@@ -1940,7 +1961,7 @@ App = {
                         console.log('Transfer ' + amount + ' RFT to ' + toAddress);
                         _context12.prev = 1;
                         _context12.next = 4;
-                        return App.contracts.RariFundToken.methods.transfer(toAddress, Web3.utils.toBN(amount * 1e18)).send({
+                        return App.contracts.RariFundToken.methods.transfer(toAddress, amountBN).send({
                           from: App.selectedAccount
                         });
 
@@ -1968,11 +1989,11 @@ App = {
                 }, _callee12, null, [[1, 6]]);
               }))();
 
-            case 9:
+            case 10:
               $('#transferButton').text("Transfer");
               $('#transferButton').prop("disabled", false);
 
-            case 11:
+            case 12:
             case "end":
               return _context13.stop();
           }
@@ -1993,7 +2014,7 @@ App = {
   getTokenBalance: function getTokenBalance() {
     console.log('Getting token balance...');
     App.contracts.RariFundToken.methods.balanceOf(App.selectedAccount).call().then(function (result) {
-      $('#RFTBalance').text(result / 1e18);
+      $('#RFTBalance').text(new Big(result).div(new Big(10).pow(18)).toString());
     }).catch(function (err) {
       console.error(err);
     });

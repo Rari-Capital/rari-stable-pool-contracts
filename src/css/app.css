@@ -16,13 +16,15 @@ body {
   background: black;
   color: white;
   font-family: Avenir-Book, sans-serif;
+}
+
+body > .container {
   padding: 30px 0;
-  display: flex;
 }
 
 @media (min-width: 576px) {
-  body {
-    padding: 50px 0;
+  body > .container {
+    padding: 40px 0;
   }
 }
 
@@ -34,7 +36,7 @@ h1 {
   margin: 0 0 10px;
   text-transform: uppercase;
   font-family: Avenir-Black, sans-serif;
-  color: #f5f5f7;
+  color: white;
   font-weight: 600;
 }
 
@@ -97,6 +99,7 @@ p:last-child {
 .panel-horizontal > .panel-heading {
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 .panel-horizontal > .panel-heading .panel-title {

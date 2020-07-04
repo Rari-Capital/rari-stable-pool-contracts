@@ -466,13 +466,16 @@ App = {
     // fetchAccountData() will take a while as it communicates
     // with Ethereum node via JSON-RPC and loads chain data
     // over an API call.
-    $("#btn-connect").text("Loading...");
-    $("#btn-connect").prop("disabled", true);
+    $(".btn-connect").text("Loading...");
+    $(".btn-connect").prop("disabled", true);
     await App.fetchAccountData();
-    $("#btn-connect").hide();
-    $("#btn-connect").text("Connect");
-    $("#btn-connect").prop("disabled", false);
+    $(".btn-connect").hide();
+    $(".btn-connect").text("Connect");
+    $(".btn-connect").prop("disabled", false);
     $("#btn-disconnect").show();
+    $("#selected-account").show();
+    $('#tab-fund').hide();
+    $('#tab-account').show();
   },
   
   
@@ -528,7 +531,7 @@ App = {
     // Set the UI back to the initial state
     $("#selected-account").empty();
     $("#btn-disconnect").hide();
-    $("#btn-connect").show();
+    $(".btn-connect").show();
   },
   
   /**
@@ -553,8 +556,8 @@ App = {
   initContracts: function() {
     $.getJSON('abi/RariFundManager.json', function(data) {
       App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0x686Ac9D046418416d3ed9eA9206F3dacE4943027");
-      App.getCurrentApy();
-      setInterval(App.getCurrentApy, 5 * 60 * 1000);
+      /* App.getCurrentApy();
+      setInterval(App.getCurrentApy, 5 * 60 * 1000); */
       App.getFundBalance();
       setInterval(App.getFundBalance, 5 * 60 * 1000);
       if (App.selectedAccount) {
@@ -615,7 +618,7 @@ App = {
    * Bind button click events.
    */
   bindEvents: function() {
-    $(document).on('click', '#btn-connect', App.connectWallet);
+    $(document).on('click', '.btn-connect', App.connectWallet);
     $(document).on('click', '#btn-disconnect', App.disconnectWallet);
 
     $(document).on('change', '#selected-account', function() {
@@ -755,7 +758,9 @@ App = {
     if (token !== "ETH" && !App.tokens[token]) return toastr["error"]("Invalid token!", "Deposit failed");
     var amount = parseFloat($('#DepositAmount').val());
     if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Deposit failed");
-    var amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(Web3.utils.toBN(10).pow(Web3.utils.toBN(token == "ETH" ? 18 : App.tokens[token].decimals)).toString())).toFixed());
+    var amountBN = Web3.utils.toBN((new Big(amount)).mul((new Big(10)).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toFixed());
+    var accountBalanceBN = Web3.utils.toBN(await (token == "ETH" ? App.web3.eth.getBalance(App.selectedAccount) : App.tokens[token].contract.methods.balanceOf(App.selectedAccount).call()));
+    if (amountBN.gt(accountBalanceBN)) return toastr["error"]("Not enough balance in your account to make a deposit of this amount. Current account balance: " + (new Big(accountBalanceBN.toString())).div((new Big(10)).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toString() + " " + token, "Deposit failed");
 
     $('#depositButton').prop("disabled", true);
     $('#depositButton').text("...");
@@ -889,7 +894,7 @@ App = {
     if (token !== "ETH" && !App.tokens[token]) return toastr["error"]("Invalid token!", "Withdrawal failed");
     var amount = parseFloat($('#WithdrawAmount').val());
     if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Withdrawal failed");
-    var amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(Web3.utils.toBN(10).pow(Web3.utils.toBN(token == "ETH" ? 18 : App.tokens[token].decimals)).toString())).toFixed());
+    var amountBN = Web3.utils.toBN((new Big(amount)).mul((new Big(10)).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toFixed());
 
     $('#withdrawButton').prop("disabled", true);
     $('#withdrawButton').text("...");
@@ -1114,7 +1119,7 @@ App = {
     console.log('Getting fund balance...');
 
     App.contracts.RariFundManager.methods.getFundBalance().call().then(function(result) {
-      $('#USDBalance').text(result / 1e18);
+      $('#USDBalance').text((new Big(result)).div((new Big(10)).pow(18)).toFixed(8));
     }).catch(function(err) {
       console.error(err);
     });
@@ -1127,7 +1132,7 @@ App = {
     console.log('Getting my fund balance...');
 
     App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call().then(function(result) {
-      $('#MyUSDBalance').text(result / 1e18);
+      $('#MyUSDBalance').text((new Big(result)).div((new Big(10)).pow(18)).toString());
     }).catch(function(err) {
       console.error(err);
     });
@@ -1140,7 +1145,7 @@ App = {
     console.log('Getting my interest accrued...');
 
     App.contracts.RariFundManager.methods.interestAccruedBy(App.selectedAccount).call().then(function(result) {
-      $('#MyInterestAccrued').text(result / 1e18);
+      $('#MyInterestAccrued').text((new Big(result)).div((new Big(10)).pow(18)).toString());
     }).catch(function(err) {
       console.error(err);
     });
@@ -1154,6 +1159,7 @@ App = {
 
     var amount = parseFloat($('#RFTTransferAmount').val());
     if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Transfer failed");
+    var amountBN = Web3.utils.toBN((new Big(amount)).mul((new Big(10)).pow(18)).toFixed());
     var toAddress = $('#RFTTransferAddress').val();
 
     $('#transferButton').prop("disabled", true);
@@ -1163,7 +1169,7 @@ App = {
       console.log('Transfer ' + amount + ' RFT to ' + toAddress);
 
       try {
-        await App.contracts.RariFundToken.methods.transfer(toAddress, Web3.utils.toBN(amount * 1e18)).send({ from: App.selectedAccount });
+        await App.contracts.RariFundToken.methods.transfer(toAddress, amountBN).send({ from: App.selectedAccount });
       } catch (err) {
         return toastr["error"](err, "Transfer failed");
       }
@@ -1186,7 +1192,7 @@ App = {
     console.log('Getting token balance...');
 
     App.contracts.RariFundToken.methods.balanceOf(App.selectedAccount).call().then(function(result) {
-      $('#RFTBalance').text(result / 1e18);
+      $('#RFTBalance').text((new Big(result)).div((new Big(10)).pow(18)).toString());
     }).catch(function(err) {
       console.error(err);
     });
