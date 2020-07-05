@@ -28,14 +28,14 @@
       <h5 class="my-0 mr-md-auto font-weight-normal"><a href="https://rari.capital" class="text-dark">Rari Capital</a></h5>
       <nav class="my-2 my-md-0 mr-md-3">
         <a class="p-2 text-dark" href="https://rari.capital">Return Home</a>
-        <a class="p-2 text-dark" href="#" onclick="$('#tab-account').hide(); $('#tab-fund').show();">The Fund</a>
-        <a class="p-2 text-dark" href="#" onclick="$('#tab-fund').hide(); $('#tab-account').show();">My Account</a>
+        <a class="p-2 text-dark" href="#fund" id="tab-fund" style="text-decoration: underline;">The Fund</a>
+        <a class="p-2 text-dark" href="#account" id="tab-account">My Account</a>
       </nav>
       <button class="btn btn-primary btn-connect" type="button">Connect Wallet</button>
       <button class="btn btn-danger" type="button" id="btn-disconnect" style="display: none;">Disconnect Wallet</button>
     </div>
 
-    <div class="container" id="tab-fund">
+    <div class="container" id="container-fund">
       <div class="row">
         <div class="col-12">
           <h1 class="text-center">Our Fund</h1>
@@ -114,7 +114,7 @@
       </div>
     </div>
 
-    <div class="container" id="tab-account" style="display: none;">
+    <div class="container" id="container-account" style="display: none;">
       <div class="row">
         <div class="col-12">
           <h1 class="text-center">My Account</h1>

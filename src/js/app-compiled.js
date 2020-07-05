@@ -47,6 +47,25 @@ App = {
   },
   erc20Abi: null,
   init: function init() {
+    if (location.hash === "#account") {
+      $('#container-fund').hide();
+      $('#container-account').show();
+      $('#tab-fund').css('text-decoration', '');
+      $('#tab-account').css('text-decoration', 'underline');
+    }
+
+    $('#tab-fund').click(function () {
+      $('#container-account').hide();
+      $('#container-fund').show();
+      $('#tab-account').css('text-decoration', '');
+      $('#tab-fund').css('text-decoration', 'underline');
+    });
+    $('#tab-account').click(function () {
+      $('#container-fund').hide();
+      $('#container-account').show();
+      $('#tab-fund').css('text-decoration', '');
+      $('#tab-account').css('text-decoration', 'underline');
+    });
     App.initChartColors();
     App.initAprChart();
     App.initWeb3();
@@ -568,7 +587,8 @@ App = {
    */
   fetchAccountData: function () {
     var _fetchAccountData = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee4() {
-      var chainId, i;
+      var chainId, _i3, _Object$keys2, symbol, _i4, _Object$keys3, _symbol, i;
+
       return regeneratorRuntime.wrap(function _callee4$(_context4) {
         while (1) {
           switch (_context4.prev = _context4.next) {
@@ -586,7 +606,18 @@ App = {
 
             case 6:
               App.accounts = _context4.sent;
-              App.selectedAccount = App.accounts[0]; // Get user's account balance in the quant fund and RFT balance
+              App.selectedAccount = App.accounts[0]; // Refresh contracts to use new Web3
+
+              for (_i3 = 0, _Object$keys2 = Object.keys(App.contracts); _i3 < _Object$keys2.length; _i3++) {
+                symbol = _Object$keys2[_i3];
+                App.contracts[symbol] = new App.web3.eth.Contract(App.contracts[symbol].options.jsonInterface, App.contracts[symbol].options.address);
+              }
+
+              for (_i4 = 0, _Object$keys3 = Object.keys(App.tokens); _i4 < _Object$keys3.length; _i4++) {
+                _symbol = _Object$keys3[_i4];
+                if (App.tokens[_symbol].contract) App.tokens[_symbol].contract = new App.web3.eth.Contract(App.tokens[_symbol].contract.options.jsonInterface, App.tokens[_symbol].address);
+              } // Get user's account balance in the quant fund and RFT balance
+
 
               if (App.contracts.RariFundManager) {
                 App.getMyFundBalance();
@@ -610,7 +641,7 @@ App = {
 
               $('#depositButton, #withdrawButton, #transferButton').prop("disabled", false);
 
-            case 13:
+            case 15:
             case "end":
               return _context4.stop();
           }
@@ -656,10 +687,12 @@ App = {
               $(".btn-connect").prop("disabled", false);
               $("#btn-disconnect").show();
               $("#selected-account").show();
-              $('#tab-fund').hide();
-              $('#tab-account').show();
+              $('#fund').hide();
+              $('#account').show();
+              $('#tab-fund').removeClass('active');
+              $('#tab-account').addClass('active');
 
-            case 12:
+            case 14:
             case "end":
               return _context5.stop();
           }
@@ -838,8 +871,8 @@ App = {
     $.getJSON('abi/ERC20.json', function (data) {
       App.erc20Abi = data;
 
-      for (var _i3 = 0, _Object$keys2 = Object.keys(App.tokens); _i3 < _Object$keys2.length; _i3++) {
-        var symbol = _Object$keys2[_i3];
+      for (var _i5 = 0, _Object$keys4 = Object.keys(App.tokens); _i5 < _Object$keys4.length; _i5++) {
+        var symbol = _Object$keys4[_i5];
         App.tokens[symbol].contract = new App.web3.eth.Contract(data, App.tokens[symbol].address);
       }
     });
@@ -872,25 +905,25 @@ App = {
   },
   getDirectlyDepositableCurrencies: function getDirectlyDepositableCurrencies() {
     var _loop = function _loop() {
-      var currencyCode = _arr2[_i4];
+      var currencyCode = _arr2[_i6];
       App.contracts.RariFundManager.methods.isCurrencyAccepted(currencyCode).call().then(function (accepted) {
         $('#DepositToken > option[value="' + currencyCode + '"]').text(currencyCode + (accepted ? " (no slippage)" : ""));
       });
     };
 
-    for (var _i4 = 0, _arr2 = ["DAI", "USDC", "USDT"]; _i4 < _arr2.length; _i4++) {
+    for (var _i6 = 0, _arr2 = ["DAI", "USDC", "USDT"]; _i6 < _arr2.length; _i6++) {
       _loop();
     }
   },
   getDirectlyWithdrawableCurrencies: function getDirectlyWithdrawableCurrencies() {
     var _loop2 = function _loop2() {
-      var currencyCode = _arr3[_i5];
+      var currencyCode = _arr3[_i7];
       App.contracts.RariFundManager.methods["getRawFundBalance(string)"](currencyCode).call().then(function (rawFundBalance) {
         $('#WithdrawToken > option[value="' + currencyCode + '"]').text(currencyCode + (parseFloat(rawFundBalance) > 0 ? " (no slippage up to " + (parseFloat(rawFundBalance) / (currencyCode === "DAI" ? 1e18 : 1e6)).toPrecision(4) + ")" : ""));
       });
     };
 
-    for (var _i5 = 0, _arr3 = ["DAI", "USDC", "USDT"]; _i5 < _arr3.length; _i5++) {
+    for (var _i7 = 0, _arr3 = ["DAI", "USDC", "USDT"]; _i7 < _arr3.length; _i7++) {
       _loop2();
     }
   },
@@ -1462,7 +1495,7 @@ App = {
               $('#withdrawButton').text("...");
               _context11.next = 12;
               return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
-                var allowanceBN, tokenRawFundBalanceBN, inputCurrencyCodes, inputAmountBNs, allOrders, allSignatures, makerAssetFillAmountBNs, protocolFeeBNs, amountInputtedUsdBN, amountWithdrawnBN, totalProtocolFeeBN, inputCandidates, _i6, _arr4, inputToken, rawFundBalanceBN, i, _yield$App$get0xSwapO3, _yield$App$get0xSwapO4, orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, gasPrice, signatures, j, thisOutputAmountBN, thisInputAmountBN, tries, amountOutputtedUsd, slippage, slippageAbsPercentageString, inputAmountStrings, makerAssetFillAmountStrings, protocolFeeStrings;
+                var allowanceBN, tokenRawFundBalanceBN, inputCurrencyCodes, inputAmountBNs, allOrders, allSignatures, makerAssetFillAmountBNs, protocolFeeBNs, amountInputtedUsdBN, amountWithdrawnBN, totalProtocolFeeBN, inputCandidates, _i8, _arr4, inputToken, rawFundBalanceBN, i, _yield$App$get0xSwapO3, _yield$App$get0xSwapO4, orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, gasPrice, signatures, j, thisOutputAmountBN, thisInputAmountBN, tries, amountOutputtedUsd, slippage, slippageAbsPercentageString, inputAmountStrings, makerAssetFillAmountStrings, protocolFeeStrings;
 
                 return regeneratorRuntime.wrap(function _callee10$(_context10) {
                   while (1) {
@@ -1554,15 +1587,15 @@ App = {
                         totalProtocolFeeBN = Web3.utils.toBN(0); // Get input candidates
 
                         inputCandidates = [];
-                        _i6 = 0, _arr4 = ["DAI", "USDC", "USDT"];
+                        _i8 = 0, _arr4 = ["DAI", "USDC", "USDT"];
 
                       case 46:
-                        if (!(_i6 < _arr4.length)) {
+                        if (!(_i8 < _arr4.length)) {
                           _context10.next = 68;
                           break;
                         }
 
-                        inputToken = _arr4[_i6];
+                        inputToken = _arr4[_i8];
 
                         if (!(inputToken === token && tokenRawFundBalanceBN.gt(Web3.utils.toBN(0)))) {
                           _context10.next = 59;
@@ -1595,7 +1628,7 @@ App = {
                         });
 
                       case 65:
-                        _i6++;
+                        _i8++;
                         _context10.next = 46;
                         break;
 

@@ -22,6 +22,27 @@ App = {
   erc20Abi: null,
 
   init: function() {
+    if (location.hash === "#account") {
+      $('#container-fund').hide();
+      $('#container-account').show();
+      $('#tab-fund').css('text-decoration', '');
+      $('#tab-account').css('text-decoration', 'underline');
+    }
+
+    $('#tab-fund').click(function() {
+      $('#container-account').hide();
+      $('#container-fund').show();
+      $('#tab-account').css('text-decoration', '');
+      $('#tab-fund').css('text-decoration', 'underline');
+    });
+
+    $('#tab-account').click(function() {
+      $('#container-fund').hide();
+      $('#container-account').show();
+      $('#tab-fund').css('text-decoration', '');
+      $('#tab-account').css('text-decoration', 'underline');
+    });
+
     App.initChartColors();
     App.initAprChart();
     App.initWeb3();
@@ -430,6 +451,10 @@ App = {
     App.accounts = await App.web3.eth.getAccounts();
     App.selectedAccount = App.accounts[0];
 
+    // Refresh contracts to use new Web3
+    for (const symbol of Object.keys(App.contracts)) App.contracts[symbol] = new App.web3.eth.Contract(App.contracts[symbol].options.jsonInterface, App.contracts[symbol].options.address);
+    for (const symbol of Object.keys(App.tokens)) if (App.tokens[symbol].contract) App.tokens[symbol].contract = new App.web3.eth.Contract(App.tokens[symbol].contract.options.jsonInterface, App.tokens[symbol].address);
+
     // Get user's account balance in the quant fund and RFT balance
     if (App.contracts.RariFundManager) {
       App.getMyFundBalance();
@@ -474,10 +499,11 @@ App = {
     $(".btn-connect").prop("disabled", false);
     $("#btn-disconnect").show();
     $("#selected-account").show();
-    $('#tab-fund').hide();
-    $('#tab-account').show();
+    $('#fund').hide();
+    $('#account').show();
+    $('#tab-fund').removeClass('active');
+    $('#tab-account').addClass('active');
   },
-  
   
   /**
    * Connect wallet button pressed.
