@@ -530,8 +530,12 @@ App = {
   
     // Set the UI back to the initial state
     $("#selected-account").empty();
+    $("#selected-account").hide();
     $("#btn-disconnect").hide();
     $(".btn-connect").show();
+    $('#MyUSDBalance').text("?");
+    $('#RFTBalance').text("?");
+    $('#MyInterestAccrued').text("?");
   },
   
   /**
