@@ -112,6 +112,12 @@
           </div>
         </div>
       </div>
+
+      <div class="row">
+        <div class="col-12">
+          <p class="text-center m-0"><a style="color: #aaa;" href="#" data-toggle="modal" data-target="#modal-how-it-works">Read more about how Rari works under the hood by clicking here.</a></p>
+        </div>
+      </div>
     </div>
 
     <div class="container" id="container-account" style="display: none;">
@@ -209,7 +215,48 @@
           </div>
         </div>
       </div>
+
+      <div class="row">
+        <div class="col-12">
+          <p class="text-center m-0"><a style="color: #aaa;" href="#" data-toggle="modal" data-target="#modal-how-it-works">Read more about how Rari works under the hood by clicking here.</a></p>
+        </div>
+      </div>
     </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="modal-how-it-works">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title text-dark">How Rari Works</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <h4 class="text-dark">RFT (Rari Fund Token)</h4>
+            <p class="text-dark">Each user's share of the fund is determined by their RFT balance. When you deposit funds to Rari, an equivalent amount of RFT (Rari Fund Token) is minted to your account. When you withdraw funds to Rari, the equivalent amount of RFT is burned from your account. As soon as you deposit, you start earning yield. Essentially, fund holdings and yield are split up proportionally across RFT holders by their USD balances.</p>
+            <h4 class="text-dark">Generating Yield</h4>
+            <p class="text-dark">Currently, Rari generates yield by depositing a combination of DAI and USDC to the lending protocol <a href="https://dydx.exchange/">dYdX</a> as well as DAI, USDC, and USDT to the lending protocol <a href="https://compound.finance/">Compound</a>. In the near future, we will be generating yield from more currencies across more lending protocols, among other strategies.</p>
+            <h4 class="text-dark">Deposits</h4>
+            <p class="text-dark">Only certain stablecoins are accepted for direct deposits (direct meaning without exchange to an accepted currency). When depositing one of these stablecoins, the Rari web client approves tokens to <code>RariFundManager</code> and calls <code>RariFundManager.deposit(string currencyCode, uint256 amount)</code>. When you deposit another currency, the Rari web client approves tokens to <code>RariFundProxy</code> and calls <code>RariFundProxy.exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string outputCurrencyCode, LibOrder.Order[] orders, bytes[] signatures, uint256 takerAssetFillAmount)</code> to exchange your tokens via <a href="https://0x.org/">0x</a> and then deposit them (please be aware that 0x charges an ETH protocol fee).</p>
+            <h4 class="text-dark">Withdrawals</h4>
+            <p class="text-dark">Just like only certain stablecoins are accepted for direct deposits, only stablecoins held by the fund are availble for direct withdrawals. When withdrawing one of these stablecoins, the Rari web client approves RFT to <code>RariFundManager</code> and calls <code>RariFundManager.withdraw(string currencyCode, uint256 amount)</code>. When you withdraw another currency, the Rari web client approves RFT to <code>RariFundProxy</code> and calls <code>RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)</code> to withdraw your tokens and then exchange them via <a href="https://0x.org/">0x</a> (please be aware that 0x charges an ETH protocol fee).</p>
+            <h4 class="text-dark">Security</h4>
+            <p class="text-dark">Rari's Ethereum-based smart contracts are written in Solidity and reviewed by multiple partners for security. Rari does not have control over your funds: instead, the Ethereum blockchain executes all secure code across its entire decentralized network (making it very difficult and extremely costly to rewrite history), and your funds are only withdrawable by you (or an upgrade of <code>RariFundManager</code>). However, upgrades will become decentralized in the future via a governance protocol based on a new token. Please note that using our web client online at <a href="https://app.rari.capital">app.rari.capital</a> is not nearly as trustworthy as downloading, verifying, and using it offline. Lastly, the rebalancer is centralized, but it can only rebalance funds to different currencies and pools. In the near future, we will be implementing a smart-contract-based (and therefore decentralized) slippage limit.</p>
+            <h4 class="text-dark">Smart Contract Structure</h4>
+            <p class="text-dark"><code>RariFundManager</code> handles deposits and withdrawals to the fund, as well as all other external functions, other than <code>RariFundToken</code>'s functions as well as the <code>exchangeAndDeposit</code> and <code>withdrawAndExchange</code> functions of <code>RariFundProxy</code> (see <strong>Deposits</strong> and <strong>Withdrawals</strong> above for more information on RariFundProxy). <code>RariFundManager</code> depends on the external library <code>RariFundController</code> (a library useful only to RariFundManager).</p>
+            <h4 class="text-dark">Performance Fee</h4>
+            <p class="text-dark">A 20% performance fee is deducted from all interest earned by RFT holders. This fee is liable to change in the future, but fees on past interest cannot be changed.</p>
+            <h4 class="text-dark">COMP</h4>
+            <p class="text-dark">All <a href="https://compound.finance/governance/comp">COMP (Compound's governance token)</a> earned by the fund is liquidated into additional interest for RFT holders every 3 days.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary">Save changes</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>    
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
