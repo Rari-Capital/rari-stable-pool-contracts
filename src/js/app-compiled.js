@@ -687,10 +687,10 @@ App = {
               $(".btn-connect").prop("disabled", false);
               $("#btn-disconnect").show();
               $("#selected-account").show();
-              $('#fund').hide();
-              $('#account').show();
-              $('#tab-fund').removeClass('active');
-              $('#tab-account').addClass('active');
+              $('#container-fund').hide();
+              $('#container-account').show();
+              $('#tab-fund').css('text-decoration', '');
+              $('#tab-account').css('text-decoration', 'underline');
 
             case 14:
             case "end":
