@@ -4,13 +4,17 @@ Welcome to `rari-contracts`, the central repository for the Solidity source code
 
 ## Using the contracts
 
-API documentation for our smart contracts is available in **API.md**.
+API documentation for our smart contracts is available in `API.md`.
 
 ## How it works
 
-Documentation on how the fund works is available in **FUND.md**.
+Documentation on how the fund works is available in `FUND.md`.
 
 ## Installation
+
+You'll want to run Truffle on Node.js v10.21.0 (latest Dubnium LTS because latest Erbium LTS doesn't work) with the latest version of NPM.
+
+`npm i -g truffle`
 
 `npm i` or `npm install`
 
