@@ -96,7 +96,7 @@ contract("RariFundManager", accounts => {
     nowRawInterestAccrued = await fundManagerInstance.getRawInterestAccrued.call();
     assert(nowRawInterestAccrued.gt(initialRawInterestAccrued));
     nowInterestAccrued = await fundManagerInstance.getInterestAccrued.call();
-    assert(nowInterestAccrued.gt(initialRawInterestAccrued));
+    assert(nowInterestAccrued.gt(initialInterestAccrued));
     nowInterestFeesGenerated = await fundManagerInstance.getInterestFeesGenerated.call();
     assert(nowInterestFeesGenerated.gte(initialInterestFeesGenerated.add(nowRawInterestAccrued.sub(initialRawInterestAccrued).divn(10))));
 
