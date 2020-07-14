@@ -11,7 +11,7 @@ module.exports = {
       },
       network_id: 1,
       gasPrice: 1e8,
-      from: process.env.DEVELOPMENT_PRIVATE_KEY
+      from: process.env.DEVELOPMENT_ADDRESS
     },
     live: {
       provider: function() {
@@ -19,7 +19,7 @@ module.exports = {
       },
       network_id: 1,
       gasPrice: 1e9,
-      from: process.env.LIVE_DEPLOYER_PRIVATE_KEY
+      from: process.env.LIVE_DEPLOYER_ADDRESS
     }
   },
   compilers: {
