@@ -116,7 +116,7 @@ module.exports = function(deployer, network, accounts) {
     }).then(async function() {
       // Claim COMP from the old RariFundManager, withdraw it to the owner, and forward it to the new RariFundManager
       var comptroller = new web3.eth.Contract(comptrollerAbi, "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B");
-      await comptroller.methods.claimComp(process.env.UPGRADE_OLD_FUND_MANAGER).send({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+      await comptroller.methods.claimComp([process.env.UPGRADE_OLD_FUND_MANAGER], ["0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643", "0x39AA39c021dfbaE8faC545936693aC917d5E7563", "0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9"], false, true).send({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       var compToken = new web3.eth.Contract(erc20Abi, "0xc00e94Cb662C3520282E6f5717214004A7f26888");
       var compBalanceBN = web3.utils.toBN(await compToken.methods.balanceOf(process.env.UPGRADE_OLD_FUND_MANAGER).call());
 
