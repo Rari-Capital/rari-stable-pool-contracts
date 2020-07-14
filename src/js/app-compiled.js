@@ -965,8 +965,8 @@ App = {
   get0xPrice: function get0xPrice(inputTokenSymbol, outputTokenSymbol) {
     return new Promise(function (resolve, reject) {
       $.getJSON('https://api.0x.org/swap/v0/prices?sellToken=' + inputTokenSymbol, function (decoded) {
-        if (!decoded) reject("Failed to decode prices from 0x swap API");
-        if (!decoded.records) reject("No prices found on 0x swap API");
+        if (!decoded) return reject("Failed to decode prices from 0x swap API");
+        if (!decoded.records) return reject("No prices found on 0x swap API");
 
         for (var i = 0; i < decoded.records.length; i++) {
           if (decoded.records[i].symbol === outputTokenSymbol) resolve(decoded.records[i].price);
@@ -981,8 +981,8 @@ App = {
   get0xSwapOrders: function get0xSwapOrders(inputTokenAddress, outputTokenAddress, maxInputAmountBN, maxMakerAssetFillAmountBN) {
     return new Promise(function (resolve, reject) {
       $.getJSON('https://api.0x.org/swap/v0/quote?sellToken=' + inputTokenAddress + '&buyToken=' + outputTokenAddress + (maxMakerAssetFillAmountBN !== undefined ? '&buyAmount=' + maxMakerAssetFillAmountBN.toString() : '&sellAmount=' + maxInputAmountBN.toString()), function (decoded) {
-        if (!decoded) reject("Failed to decode quote from 0x swap API");
-        if (!decoded.orders) reject("No orders found on 0x swap API");
+        if (!decoded) return reject("Failed to decode quote from 0x swap API");
+        if (!decoded.orders) return reject("No orders found on 0x swap API");
         decoded.orders.sort(function (a, b) {
           return a.makerAssetAmount / (a.takerAssetAmount + a.takerFee) < b.makerAssetAmount / (b.takerAssetAmount + b.takerFee) ? 1 : -1;
         });
@@ -1055,7 +1055,7 @@ App = {
           if (inputFilledAmountBN.gte(maxInputAmountBN) || maxMakerAssetFillAmountBN !== undefined && makerAssetFilledAmountBN.gte(maxMakerAssetFillAmountBN)) break;
         }
 
-        if (takerAssetFilledAmountBN.isZero()) reject("No orders found on 0x swap API");
+        if (takerAssetFilledAmountBN.isZero()) return reject("No orders found on 0x swap API");
         resolve([orders, inputFilledAmountBN, decoded.protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, decoded.gasPrice]);
       }).fail(function (err) {
         reject("Error requesting quote from 0x swap API: " + err.message);
