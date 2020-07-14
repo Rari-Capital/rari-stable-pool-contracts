@@ -45,7 +45,19 @@ library DydxPoolController {
     }
 
     /**
-     * @dev Returns the calling address's balance of the specified currency in the dYdX pool.
+     * @dev Returns the fund's balances of all currencies supported by dYdX.
+     * @return An array of ERC20 token contract addresses and a corresponding array of balances.
+     */
+    function getBalances() internal view returns (address[] memory, uint256[] memory) {
+        Account.Info memory account = Account.Info(address(this), 0);
+        (address[] memory tokens, , Types.Wei[] memory weis) = _soloMargin.getAccountBalances(account);
+        uint256[] memory balances = new uint256[](weis.length);
+        for (uint256 i = 0; i < weis.length; i++) balances[i] = weis[i].sign ? weis[i].value : 0;
+        return (tokens, balances);
+    }
+
+    /**
+     * @dev Returns the fund's balance of the specified currency in the dYdX pool.
      * @param erc20Contract The ERC20 contract address of the token.
      */
     function getBalance(address erc20Contract) internal view returns (uint256) {
@@ -64,8 +76,9 @@ library DydxPoolController {
     function approve(address erc20Contract, uint256 amount) internal returns (bool) {
         IERC20 token = IERC20(erc20Contract);
         uint256 allowance = token.allowance(address(this), SOLO_MARGIN_CONTRACT);
-        if (amount < allowance) token.safeDecreaseAllowance(SOLO_MARGIN_CONTRACT, allowance.sub(amount));
-        else if (amount > allowance) token.safeIncreaseAllowance(SOLO_MARGIN_CONTRACT, amount.sub(allowance));
+        if (allowance == amount) return true;
+        if (amount > 0 && allowance > 0) token.safeApprove(SOLO_MARGIN_CONTRACT, 0);
+        token.safeApprove(SOLO_MARGIN_CONTRACT, amount);
         return true;
     }
 
@@ -76,6 +89,7 @@ library DydxPoolController {
      * @return Boolean indicating success.
      */
     function deposit(address erc20Contract, uint256 amount) internal returns (bool) {
+        require(amount > 0, "Amount must be greater than 0.");
         uint256 marketId = getMarketId(erc20Contract);
 
         Account.Info memory account = Account.Info(address(this), 0);
@@ -111,6 +125,7 @@ library DydxPoolController {
      * @return Boolean indicating success.
      */
     function withdraw(address erc20Contract, uint256 amount) internal returns (bool) {
+        require(amount > 0, "Amount must be greater than 0.");
         uint256 marketId = getMarketId(erc20Contract);
 
         Account.Info memory account = Account.Info(address(this), 0);

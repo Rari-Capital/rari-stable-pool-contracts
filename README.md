@@ -42,6 +42,8 @@ Then, test: `npm t` or `npm test`
 
 In `.env`, configure `LIVE_DEPLOYER_ADDRESS`, `LIVE_DEPLOYER_PRIVATE_KEY`, `LIVE_INFURA_PROJECT_ID`, `LIVE_FUND_OWNER`, `LIVE_FUND_REBALANCER`, and `LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY` to deploy to the mainnet.
 
+If you are upgrading from `v1.0.0`, set `UPGRADE_FROM_LAST_VERSION=1` to enable upgrading and configure `UPGRADE_OLD_FUND_MANAGER`, `UPGRADE_FUND_TOKEN`, `UPGRADE_FUND_OWNER_ADDRESS`, and `UPGRADE_FUND_OWNER_PRIVATE_KEY` as well.
+
 Then, set the gas price for the `live` network in truffle-config.js to the "fast" price listed by [ETH Gas Station](https://www.ethgasstation.info/).
 
 Then, migrate: `truffle migrate --network live`

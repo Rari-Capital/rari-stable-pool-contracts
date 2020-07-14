@@ -18,6 +18,7 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/drafts/SignedSafeMath.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 
@@ -70,7 +71,12 @@ contract RariFundProxy is Ownable {
     /**
      * @dev Address of the RariFundManager.
      */
-    address payable private _rariFundManagerContract;
+    address private _rariFundManagerContract;
+
+    /**
+     * @dev Contract of the RariFundManager.
+     */
+    RariFundManager private _rariFundManager;
 
     /**
      * @dev Emitted when the RariFundManager of the RariFundProxy is set.
@@ -81,15 +87,16 @@ contract RariFundProxy is Ownable {
      * @dev Sets or upgrades the RariFundManager of the RariFundProxy.
      * @param newContract The address of the new RariFundManager contract.
      */
-    function setFundManager(address payable newContract) external onlyOwner {
+    function setFundManager(address newContract) external onlyOwner {
         // Approve maximum output tokens to RariFundManager for deposit
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             IERC20 token = IERC20(_erc20Contracts[_supportedCurrencies[i]]);
-            if (_rariFundManagerContract != address(0)) token.safeDecreaseAllowance(_rariFundManagerContract, uint256(-1));
-            if (newContract != address(0)) token.safeIncreaseAllowance(newContract, uint256(-1));
+            if (_rariFundManagerContract != address(0)) token.safeApprove(_rariFundManagerContract, 0);
+            if (newContract != address(0)) token.safeApprove(newContract, uint256(-1));
         }
 
         _rariFundManagerContract = newContract;
+        _rariFundManager = RariFundManager(_rariFundManagerContract);
         emit FundManagerSet(newContract);
     }
 
@@ -146,7 +153,7 @@ contract RariFundProxy is Ownable {
         }
 
         // Approve and exchange tokens
-        ZeroExExchangeController.approve(inputErc20Contract == address(0) ? WETH_CONTRACT : inputErc20Contract, inputAmount);
+        if (inputAmount > ZeroExExchangeController.allowance(inputErc20Contract == address(0) ? WETH_CONTRACT : inputErc20Contract)) ZeroExExchangeController.approve(inputErc20Contract == address(0) ? WETH_CONTRACT : inputErc20Contract, uint256(-1));
         uint256[2] memory filledAmounts = ZeroExExchangeController.marketSellOrdersFillOrKill(orders, signatures, takerAssetFillAmount, inputErc20Contract == address(0) ? msg.value.sub(inputAmount) : msg.value);
 
         if (inputErc20Contract == address(0)) {
@@ -164,7 +171,7 @@ contract RariFundProxy is Ownable {
         emit PreDepositExchange(inputErc20Contract, outputCurrencyCode, msg.sender, filledAmounts[0], filledAmounts[1]);
 
         // Deposit output tokens
-        require(RariFundManager(_rariFundManagerContract).depositTo(msg.sender, outputCurrencyCode, filledAmounts[1]));
+        require(_rariFundManager.depositTo(msg.sender, outputCurrencyCode, filledAmounts[1]));
 
         // Refund unused ETH
         uint256 ethBalance = address(this).balance;
@@ -199,7 +206,7 @@ contract RariFundProxy is Ownable {
             require(inputAmounts[i] > 0, "All input amounts must be greater than 0.");
 
             // Withdraw input tokens
-            require(RariFundManager(_rariFundManagerContract).withdrawFrom(msg.sender, inputCurrencyCodes[i], inputAmounts[i]));
+            require(_rariFundManager.withdrawFrom(msg.sender, inputCurrencyCodes[i], inputAmounts[i]));
 
             if (orders[i].length > 0 && signatures[i].length > 0 && makerAssetFillAmounts[i] > 0) {
                 // Input validation

@@ -7,31 +7,32 @@ const cErc20DelegatorAbi = require('./abi/CErc20Delegator.json');
 const currencies = require('./fixtures/currencies.json');
 const pools = require('./fixtures/pools.json');
 
+const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
 
-var fundManagerWeb3Instance = new web3.eth.Contract(RariFundManager.abi, RariFundManager.address);
+var fundControllerWeb3Instance = new web3.eth.Contract(RariFundController.abi, RariFundController.address);
 var zeroExExchange = new ZeroExExchange(web3);
 
-async function getFundManagerUnderlyingDydxBalance(currencyCode) {
+async function getFundControllerUnderlyingDydxBalance(currencyCode) {
   var marketId = pools["dYdX"].currencies[currencyCode].marketId;
   var soloMarginContract = new web3.eth.Contract(soloMarginAbi, pools["dYdX"].soloMarginAddress);
-  var result = await soloMarginContract.methods.getAccountBalances({ owner: RariFundManager.address, number: 0 }).call();
+  var result = await soloMarginContract.methods.getAccountBalances({ owner: RariFundController.address, number: 0 }).call();
   var balance = result[2][marketId].value;
   return web3.utils.toBN(balance);
 }
 
-async function getFundManagerUnderlyingCompoundBalance(currencyCode) {
+async function getFundControllerUnderlyingCompoundBalance(currencyCode) {
   var cErc20Contract = new web3.eth.Contract(cErc20DelegatorAbi, pools["Compound"].currencies[currencyCode].cTokenAddress);
-  var balance = await cErc20Contract.methods.balanceOfUnderlying(RariFundManager.address).call();
+  var balance = await cErc20Contract.methods.balanceOfUnderlying(RariFundController.address).call();
   return web3.utils.toBN(balance);
 }
 
-// These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
+// These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to accounts[0]
 contract("RariFundManager", accounts => {
   it("should set accepted currencies", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await RariFundToken.deployed();
+    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
     
     // Use DAI as an example and set amount to deposit/withdraw
     var currencyCode = "DAI";
@@ -67,7 +68,7 @@ contract("RariFundManager", accounts => {
     let myOldBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
     await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
     let myPostDepositBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
-    assert(myPostDepositBalance.gte(myOldBalance.add(amountUsdBN)));
+    assert(myPostDepositBalance.gte(myOldBalance.add(amountUsdBN).mul(web3.utils.toBN(999999)).div(web3.utils.toBN(1000000))));
     
     // Withdraw what we deposited
     await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
@@ -75,8 +76,11 @@ contract("RariFundManager", accounts => {
     let myNewBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
     assert(myNewBalance.lt(myPostDepositBalance));
   });
+});
 
-  it("should deposit to the fund, approve deposits to pools, and deposit to pools", async () => {
+contract("RariFundController, RariFundManager", accounts => {
+  it("should deposit to the fund, approve deposits to pools via RariFundController.approveToPool, and deposit to pools via RariFundController.depositToPool", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
     
     // Use DAI as an example
@@ -96,67 +100,64 @@ contract("RariFundManager", accounts => {
     // For each each pool (using DAI as an example):
     for (const poolName of Object.keys(pools)) {
       // Check initial pool balance
-      var initialBalanceOfUnderlying = await (poolName == "Compound" ? getFundManagerUnderlyingCompoundBalance(currencyCode) : getFundManagerUnderlyingDydxBalance(currencyCode));
+      var initialBalanceOfUnderlying = await (poolName == "Compound" ? getFundControllerUnderlyingCompoundBalance(currencyCode) : getFundControllerUnderlyingDydxBalance(currencyCode));
 
       // Approve and deposit to pool
       // TODO: Ideally, we add actually call rari-fund-rebalancer
-      await fundManagerInstance.approveToPool(poolName == "Compound" ? 1 : 0, currencyCode, amountBN, { from: accounts[0] });
-      await fundManagerInstance.depositToPool(poolName == "Compound" ? 1 : 0, currencyCode, amountBN, { from: accounts[0] });
+      await fundControllerInstance.approveToPool(poolName == "Compound" ? 1 : 0, currencyCode, amountBN, { from: accounts[0] });
+      await fundControllerInstance.depositToPool(poolName == "Compound" ? 1 : 0, currencyCode, amountBN, { from: accounts[0] });
 
       // Check new pool balance
       // Accounting for dYdX and Compound losing some dust using amountBN.mul(9999).div(10000)
-      var postDepositBalanceOfUnderlying = await (poolName == "Compound" ? getFundManagerUnderlyingCompoundBalance(currencyCode) : getFundManagerUnderlyingDydxBalance(currencyCode));
+      var postDepositBalanceOfUnderlying = await (poolName == "Compound" ? getFundControllerUnderlyingCompoundBalance(currencyCode) : getFundControllerUnderlyingDydxBalance(currencyCode));
       assert(postDepositBalanceOfUnderlying.gte(initialBalanceOfUnderlying.add(amountBN.mul(web3.utils.toBN(9999)).div(web3.utils.toBN(10000)))));
     }
   });
 
-  it("should withdraw half from all pools via RariFundManager.withdrawFromPool", async () => {
-    let fundManagerInstance = await RariFundManager.deployed();
+  it("should withdraw half from all pools via RariFundController.withdrawFromPool", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
     
     // Use DAI as an example
     let currencyCode = "DAI";
 
     // For each each pool (using DAI as an example):
     for (const poolName of Object.keys(pools)) {
-      var cErc20Contract = new web3.eth.Contract(cErc20DelegatorAbi, pools[poolName].currencies[currencyCode].cTokenAddress);
-
       // Check initial pool balance
-      var oldBalanceOfUnderlying = await (poolName == "Compound" ? getFundManagerUnderlyingCompoundBalance(currencyCode) : getFundManagerUnderlyingDydxBalance(currencyCode));
+      var oldBalanceOfUnderlying = await (poolName == "Compound" ? getFundControllerUnderlyingCompoundBalance(currencyCode) : getFundControllerUnderlyingDydxBalance(currencyCode));
       
       // Calculate amount to deposit to & withdraw from the pool
       var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
 
       // RariFundManager.withdrawFromPool
       // TODO: Ideally, we add actually call rari-fund-rebalancer
-      await fundManagerInstance.withdrawFromPool(poolName == "Compound" ? 1 : 0, currencyCode, amountBN.div(web3.utils.toBN(2)), { from: accounts[0] });
+      await fundControllerInstance.withdrawFromPool(poolName == "Compound" ? 1 : 0, currencyCode, amountBN.div(web3.utils.toBN(2)), { from: accounts[0] });
 
       // Check new pool balance
-      var newBalanceOfUnderlying = await (poolName == "Compound" ? getFundManagerUnderlyingCompoundBalance(currencyCode) : getFundManagerUnderlyingDydxBalance(currencyCode));
+      var newBalanceOfUnderlying = await (poolName == "Compound" ? getFundControllerUnderlyingCompoundBalance(currencyCode) : getFundControllerUnderlyingDydxBalance(currencyCode));
       assert(newBalanceOfUnderlying.lt(oldBalanceOfUnderlying));
     }
   });
 
-  it("should withdraw everything from all pools via RariFundManager.withdrawAllFromPool", async () => {
-    let fundManagerInstance = await RariFundManager.deployed();
+  it("should withdraw everything from all pools via RariFundController.withdrawAllFromPool", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
     
     // Use DAI as an example
     let currencyCode = "DAI";
 
     // For each each pool (using DAI as an example):
     for (const poolName of Object.keys(pools)) {
-      var cErc20Contract = new web3.eth.Contract(cErc20DelegatorAbi, pools[poolName].currencies[currencyCode].cTokenAddress);
-
       // RariFundManager.withdrawAllFromPool
       // TODO: Ideally, we add actually call rari-fund-rebalancer
-      await fundManagerInstance.withdrawAllFromPool(poolName == "Compound" ? 1 : 0, currencyCode, { from: accounts[0] });
+      await fundControllerInstance.withdrawAllFromPool(poolName == "Compound" ? 1 : 0, currencyCode, { from: accounts[0] });
 
       // Check new pool balance
-      var newBalanceOfUnderlying = await (poolName == "Compound" ? getFundManagerUnderlyingCompoundBalance(currencyCode) : getFundManagerUnderlyingDydxBalance(currencyCode));
+      var newBalanceOfUnderlying = await (poolName == "Compound" ? getFundControllerUnderlyingCompoundBalance(currencyCode) : getFundControllerUnderlyingDydxBalance(currencyCode));
       assert(newBalanceOfUnderlying.isZero());
     }
   });
 
   it("should exchange tokens", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
 
     // For each currency combination:
@@ -178,8 +179,8 @@ contract("RariFundManager", accounts => {
       // Check source and destination wallet balances
       var inputErc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCombinations[i][0]].tokenAddress);
       var outputErc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCombinations[i][1]].tokenAddress);
-      let oldInputBalanceBN = web3.utils.toBN(await inputErc20Contract.methods.balanceOf(RariFundManager.address).call());
-      let oldOutputBalanceBN = web3.utils.toBN(await outputErc20Contract.methods.balanceOf(RariFundManager.address).call());
+      let oldInputBalanceBN = web3.utils.toBN(await inputErc20Contract.methods.balanceOf(RariFundController.address).call());
+      let oldOutputBalanceBN = web3.utils.toBN(await outputErc20Contract.methods.balanceOf(RariFundController.address).call());
       
       // Calculate amount to exchange
       var maxInputAmountBN = web3.utils.toBN(10 ** (currencies[currencyCombinations[i][0]].decimals - 1));
@@ -221,12 +222,12 @@ contract("RariFundManager", accounts => {
       
       // Fill 0x orders
       // TODO: Ideally, we add actually call rari-fund-rebalancer
-      await fundManagerInstance.approveTo0x(currencyCombinations[i][0], maxInputAmountBN);
-      await fundManagerWeb3Instance.methods.marketSell0xOrdersFillOrKill(orders, signatures, takerAssetFilledAmountBN.toString()).send({ from: accounts[0], value: web3.utils.toBN(protocolFee).toString() });
+      await fundControllerInstance.approveTo0x(currencies[currencyCombinations[i][0]].tokenAddress, maxInputAmountBN);
+      await fundControllerWeb3Instance.methods.marketSell0xOrdersFillOrKill(orders, signatures, takerAssetFilledAmountBN.toString()).send({ from: accounts[0], value: web3.utils.toBN(protocolFee).toString() });
 
       // Check source and destination wallet balances
-      let newInputBalanceBN = web3.utils.toBN(await inputErc20Contract.methods.balanceOf(RariFundManager.address).call());
-      let newOutputBalanceBN = web3.utils.toBN(await outputErc20Contract.methods.balanceOf(RariFundManager.address).call());
+      let newInputBalanceBN = web3.utils.toBN(await inputErc20Contract.methods.balanceOf(RariFundController.address).call());
+      let newOutputBalanceBN = web3.utils.toBN(await outputErc20Contract.methods.balanceOf(RariFundController.address).call());
       assert(newInputBalanceBN.lt(oldInputBalanceBN));
       assert(newOutputBalanceBN.gte(oldOutputBalanceBN.add(web3.utils.toBN(Math.trunc(oldInputBalanceBN.sub(newInputBalanceBN).toString() / (10 ** currencies[currencyCombinations[i][0]].decimals) * minMarginalOutputAmountBN.toString())))));
     }

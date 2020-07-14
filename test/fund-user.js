@@ -4,6 +4,7 @@ const cErc20DelegatorAbi = require('./abi/CErc20Delegator.json');
 const currencies = require('./fixtures/currencies.json');
 const pools = require('./fixtures/pools.json');
 
+const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
 
@@ -22,10 +23,11 @@ async function forceAccrueCompound(currencyCode, account) {
 }
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
-contract("RariFundManager", accounts => {
-  it("should make a deposit, deposit to pools, accrue interest, make a withdrawal, withdraw from pools, and process pending withdrawals", async () => {
+contract("RariFundManager, RariFundController", accounts => {
+  it("should make a deposit, deposit to pools, accrue interest, and make a withdrawal", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await RariFundToken.deployed();
+    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
 
     // Use Compound as an example
     for (const currencyCode of Object.keys(pools["Compound"].currencies)) {
@@ -46,17 +48,17 @@ contract("RariFundManager", accounts => {
 
       // Check balances and interest
       let postDepositAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
-      assert(postDepositAccountBalance.eq(initialAccountBalance.add(amountUsdBN)));
+      assert(postDepositAccountBalance.gte(initialAccountBalance.add(amountUsdBN).mul(web3.utils.toBN(999999)).div(web3.utils.toBN(1000000))));
       let postDepositFundBalance = await fundManagerInstance.getFundBalance.call();
-      assert(postDepositFundBalance.eq(initialFundBalance.add(amountUsdBN)));
+      assert(postDepositFundBalance.gte(initialFundBalance.add(amountUsdBN).mul(web3.utils.toBN(999999)).div(web3.utils.toBN(1000000))));
       let postDepositRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
       assert(postDepositRftBalance.gt(initialRftBalance));
       let postDepositInterestAccrued = await fundManagerInstance.getInterestAccrued.call();
 
       // Deposit to pool (using Compound as an example)
       // TODO: Ideally, deposit to pool via rari-fund-rebalancer
-      await fundManagerInstance.approveToPool(1, currencyCode, amountBN, { from: accounts[0] });
-      await fundManagerInstance.depositToPool(1, currencyCode, amountBN, { from: accounts[0] });
+      await fundControllerInstance.approveToPool(1, currencyCode, amountBN, { from: accounts[0] });
+      await fundControllerInstance.depositToPool(1, currencyCode, amountBN, { from: accounts[0] });
 
       // Force accrue interest
       await forceAccrueCompound(currencyCode, accounts[0]);

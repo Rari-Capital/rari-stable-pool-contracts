@@ -29,10 +29,18 @@ import "@0x/contracts-exchange/contracts/src/interfaces/IExchange.sol";
 library ZeroExExchangeController {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
-    
+
     address constant private EXCHANGE_CONTRACT = 0x61935CbDd02287B511119DDb11Aeb42F1593b7Ef;
     IExchange constant private _exchange = IExchange(EXCHANGE_CONTRACT);
     address constant private ERC20_PROXY_CONTRACT = 0x95E6F48254609A6ee006F7D493c8e5fB97094ceF;
+
+    /**
+     * @dev Gets allowance of the specified token to 0x.
+     * @param erc20Contract The ERC20 contract address of the token.
+     */
+    function allowance(address erc20Contract) internal view returns (uint256) {
+        return IERC20(erc20Contract).allowance(address(this), ERC20_PROXY_CONTRACT);
+    }
 
     /**
      * @dev Approves tokens to 0x without spending gas on every deposit.
@@ -42,9 +50,10 @@ library ZeroExExchangeController {
      */
     function approve(address erc20Contract, uint256 amount) internal returns (bool) {
         IERC20 token = IERC20(erc20Contract);
-        uint256 allowance = token.allowance(address(this), ERC20_PROXY_CONTRACT);
-        if (amount < allowance) token.safeDecreaseAllowance(ERC20_PROXY_CONTRACT, allowance.sub(amount));
-        else if (amount > allowance) token.safeIncreaseAllowance(ERC20_PROXY_CONTRACT, amount.sub(allowance));
+        uint256 _allowance = token.allowance(address(this), ERC20_PROXY_CONTRACT);
+        if (_allowance == amount) return true;
+        if (amount > 0 && _allowance > 0) token.safeApprove(ERC20_PROXY_CONTRACT, 0);
+        token.safeApprove(ERC20_PROXY_CONTRACT, amount);
         return true;
     }
 

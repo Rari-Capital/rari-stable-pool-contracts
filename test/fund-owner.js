@@ -9,12 +9,18 @@ const currencies = require('./fixtures/currencies.json');
 const dummyRariFundManagerAbi = JSON.parse(fs.readFileSync(__dirname + '/fixtures/DummyRariFundManager_sol_DummyRariFundManager.abi'));
 const dummyRariFundManagerBin = fs.readFileSync(__dirname + '/fixtures/DummyRariFundManager_sol_DummyRariFundManager.bin');
 
+// To compile DummyRariFundController, run the following command using solc-js v0.5.17
+// solcjs DummyRariFundController.sol --abi --bin
+const dummyRariFundControllerAbi = JSON.parse(fs.readFileSync(__dirname + '/fixtures/DummyRariFundController_sol_DummyRariFundController.abi'));
+const dummyRariFundControllerBin = fs.readFileSync(__dirname + '/fixtures/DummyRariFundController_sol_DummyRariFundController.bin');
+
+const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
-contract("RariFundManager", accounts => {
-  it("should upgrade the fund owner", async () => {
+contract("RariFundController, RariFundManager", accounts => {
+  it("should upgrade the fund manager owner", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
 
     // RariFundManager.transferOwnership()
@@ -28,11 +34,27 @@ contract("RariFundManager", accounts => {
     await fundManagerInstance.transferOwnership(accounts[0], { from: accounts[1] });
   });
 
-  it("should disable and re-enable the fund", async () => {
-    let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await RariFundToken.deployed();
+  it("should upgrade the fund controller owner", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
 
-    // RariFundManager.disableFund()
+    // RariFundManager.transferOwnership()
+    await fundControllerInstance.transferOwnership(accounts[1], { from: accounts[0] });
+
+    // Test disabling and enabling the fund from the new owner address
+    await fundControllerInstance.disableFund({ from: accounts[1] });
+    await fundControllerInstance.enableFund({ from: accounts[1] });
+
+    // Transfer ownership back
+    await fundControllerInstance.transferOwnership(accounts[0], { from: accounts[1] });
+  });
+
+  it("should disable and re-enable the fund", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
+    let fundManagerInstance = await RariFundManager.deployed();
+    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+
+    // Disable the fund (via RariFundController and RariFundManager)
+    await fundControllerInstance.disableFund({ from: accounts[0] });
     await fundManagerInstance.disableFund({ from: accounts[0] });
 
     // TODO: Check _fundDisabled (no way to do this as of now)
@@ -42,7 +64,7 @@ contract("RariFundManager", accounts => {
     var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
     var amountUsdBN = 18 >= currencies[currencyCode].decimals ? amountBN.mul(web3.utils.toBN(10 ** (18 - currencies[currencyCode].decimals))) : amountBN.div(web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 18)));
     
-    // Make sure we can't deposit or withdraw now (using DAI as an example)
+    // Test disabled RariFundManager: make sure we can't deposit or withdraw now (using DAI as an example)
     var erc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
     await erc20Contract.methods.approve(RariFundManager.address, amountBN.toString()).send({ from: accounts[0] });
   
@@ -56,18 +78,27 @@ contract("RariFundManager", accounts => {
     await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
     
     try {
-      await fundManagerInstance.withdraw(currencyCode, amountBN, { from: accounts[0] });
+      await fundManagerInstance.withdraw(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
       assert.fail();
     } catch (error) {
       assert.include(error.message, "This fund manager contract is disabled. This may be due to an upgrade.");
     }
 
-    // RariFundManager.enableFund()
+    // Test disabled RariFundController: make sure we can't approve to pools now (using DAI on dYdX as an example)
+    try {
+      await fundControllerInstance.approveToPool(0, "DAI", amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+      assert.fail();
+    } catch (error) {
+      assert.include(error.message, "This fund controller contract is disabled. This may be due to an upgrade.");
+    }
+
+    // Re-enable the fund (via RariFundManager and RariFundController)
     await fundManagerInstance.enableFund({ from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    await fundControllerInstance.enableFund({ from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
 
     // TODO: Check _fundDisabled (no way to do this as of now)
 
-    // Make sure we can deposit and withdraw now (using DAI as an example)
+    // Test re-enabled RariFundManager: make sure we can deposit and withdraw now (using DAI as an example)
     let myInitialBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
     await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
     let myPostDepositBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
@@ -77,73 +108,36 @@ contract("RariFundManager", accounts => {
     await fundManagerInstance.withdraw(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
     let myPostWithdrawalBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
     assert(myPostWithdrawalBalance.lt(myPostDepositBalance));
+
+    // Test re-enabled RariFundController: make sure we can approve to pools now (using DAI on dYdX as an example)
+    await fundControllerInstance.approveToPool(0, "DAI", amountBN, { from: accounts[0] });
   });
 
-  it("should transfer ETH to the fund manager and withdraw it to the owner", async () => {
-    let fundManagerInstance = await RariFundManager.deployed();
-    
-    // Check initial ETH balance of RariFundManager
-    let initialBalance = web3.utils.toBN(await web3.eth.getBalance(RariFundManager.address));
-    
-    // Transfer ETH to RariFundManager
-    var amountBN = web3.utils.toBN(1e15);
-    await fundManagerInstance.send(amountBN, { from: accounts[0] });
-    
-    // Check post-deposit ETH balance of RariFundManager
-    let postDepositBalance = web3.utils.toBN(await web3.eth.getBalance(RariFundManager.address));
-    assert(postDepositBalance.eq(initialBalance.add(amountBN)));
-    
-    // Transfer ETH from RariFundManager
-    await fundManagerInstance.ownerWithdraw("ETH", { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-    
-    // Check post-withdrawal ETH balance of RariFundManager
-    let postWithdrawalBalance = web3.utils.toBN(await web3.eth.getBalance(RariFundManager.address));
-    assert(postWithdrawalBalance.isZero());
-  });
-
-  it("should transfer COMP to the fund manager and withdraw it to the owner", async () => {
+  it("should put upgrade the fund rebalancer", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
 
-    // Check initial COMP balance of RariFundManager
-    var erc20Contract = new web3.eth.Contract(erc20Abi, "0xc00e94Cb662C3520282E6f5717214004A7f26888");
-    let initialBalance = web3.utils.toBN(await erc20Contract.methods.balanceOf(RariFundManager.address).call());
-    
-    // Transfer COMP to RariFundManager
-    var amountBN = web3.utils.toBN(1e18);
-    await erc20Contract.methods.transfer(RariFundManager.address, amountBN.toString()).send({ from: accounts[0] });
-    
-    // Check post-deposit COMP balance of RariFundManager
-    let postDepositBalance = web3.utils.toBN(await erc20Contract.methods.balanceOf(RariFundManager.address).call());
-    assert(postDepositBalance.eq(initialBalance.add(amountBN)));
-    
-    // Transfer COMP from RariFundManager
-    await fundManagerInstance.ownerWithdraw("COMP", { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-    
-    // Check post-withdrawal COMP balance of RariFundManager
-    let postWithdrawalBalance = web3.utils.toBN(await erc20Contract.methods.balanceOf(RariFundManager.address).call());
-    assert(postWithdrawalBalance.isZero());
-  });
-
-  it("should put upgrade the FundRebalancer", async () => {
-    let fundManagerInstance = await RariFundManager.deployed();
-
-    // RariFundManager.setFundRebalancer(address newAddress)
+    // Set fund rebalancer addresses
+    await fundControllerInstance.setFundRebalancer(accounts[1], { from: accounts[0] });
     await fundManagerInstance.setFundRebalancer(accounts[1], { from: accounts[0] });
 
     // TODO: Check RariFundManager._rariFundRebalancerAddress (no way to do this as of now)
 
-    // Test fund rebalancer functions from the second account
+    // Test fund rebalancer functions from the second account via RariFundManager and RariFundController
     // TODO: Ideally, we actually test the fund rebalancer itself
     await fundManagerInstance.setAcceptedCurrency("DAI", false, { from: accounts[1] });
     await fundManagerInstance.setAcceptedCurrency("DAI", true, { from: accounts[1] });
+    await fundControllerInstance.approveToPool(0, "DAI", web3.utils.toBN(10 ** (currencies["DAI"].decimals - 1)), { from: accounts[1] });
 
-    // Reset fund rebalancer address
+    // Reset fund rebalancer addresses
     await fundManagerInstance.setFundRebalancer(accounts[0], { from: accounts[0] });
+    await fundControllerInstance.setFundRebalancer(accounts[0], { from: accounts[0] });
   });
 });
 
 contract("RariFundManager", accounts => {
-  it("should put upgrade the FundManager to a copy of its code by disabling the old contract, withdrawing all tokens from all pools, transferring them to the new FundManager, and passing data to the new FundManager", async () => {
+  it("should put upgrade the FundManager to a copy of its code by disabling the FundController and old FundManager and passing data to the new FundManager", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
     
     // Approve and deposit tokens to the fund (using DAI as an example)
@@ -153,22 +147,24 @@ contract("RariFundManager", accounts => {
     await fundManagerInstance.deposit("DAI", amountBN, { from: accounts[0] });
 
     // Approve and deposit to pool (using Compound as an example)
-    await fundManagerInstance.approveToPool(1, "DAI", amountBN, { from: accounts[0] });
-    await fundManagerInstance.depositToPool(1, "DAI", amountBN, { from: accounts[0] });
+    await fundControllerInstance.approveToPool(1, "DAI", amountBN, { from: accounts[0] });
+    await fundControllerInstance.depositToPool(1, "DAI", amountBN, { from: accounts[0] });
 
     // Check balance of original FundManager
     var oldRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
     var oldFundBalance = await fundManagerInstance.getFundBalance.call();
     var oldAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
 
-    // Disable original FundManager
+    // Disable FundController and original FundManager
+    await fundControllerInstance.disableFund({ from: accounts[0] });
     await fundManagerInstance.disableFund({ from: accounts[0] });
 
     // TODO: Check _fundDisabled (no way to do this as of now)
 
     // Create new FundManager
     var newFundManagerInstance = await RariFundManager.new({ from: accounts[0] });
-    await newFundManagerInstance.setFundToken(RariFundToken.address, { from: accounts[0] });
+    await newFundManagerInstance.setFundController(RariFundController.address, { from: accounts[0] });
+    await newFundManagerInstance.setFundToken(parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? process.env.UPGRADE_FUND_TOKEN : RariFundToken.address, { from: accounts[0] });
 
     // Upgrade!
     await newFundManagerInstance.authorizeFundManagerDataSource(fundManagerInstance.address);
@@ -186,7 +182,8 @@ contract("RariFundManager", accounts => {
 });
 
 contract("RariFundManager", accounts => {
-  it("should put upgrade the FundManager to new code by disabling the old contract, withdrawing all tokens from all pools, transferring them to the new FundManager, and passing data to the new FundManager", async () => {
+  it("should put upgrade the FundManager to new code by disabling the FundController and old FundManager and passing data to the new FundManager", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
     
     // Approve and deposit tokens to the fund (using DAI as an example)
@@ -196,10 +193,11 @@ contract("RariFundManager", accounts => {
     await fundManagerInstance.deposit("DAI", amountBN, { from: accounts[0] });
 
     // Approve and deposit to pool (using Compound as an example)
-    await fundManagerInstance.approveToPool(1, "DAI", amountBN, { from: accounts[0] });
-    await fundManagerInstance.depositToPool(1, "DAI", amountBN, { from: accounts[0] });
+    await fundControllerInstance.approveToPool(1, "DAI", amountBN, { from: accounts[0] });
+    await fundControllerInstance.depositToPool(1, "DAI", amountBN, { from: accounts[0] });
 
-    // Disable original FundManager
+    // Disable FundController and original FundManager
+    await fundControllerInstance.disableFund({ from: accounts[0] });
     await fundManagerInstance.disableFund({ from: accounts[0] });
 
     // TODO: Check _fundDisabled (no way to do this as of now)
@@ -215,11 +213,97 @@ contract("RariFundManager", accounts => {
   });
 });
 
+contract("RariFundController", accounts => {
+  it("should put upgrade the FundController to a copy of its code by disabling the old FundController and the FundManager, withdrawing all tokens from all pools, and transferring them to the new FundController", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
+    let fundManagerInstance = await RariFundManager.deployed();
+    
+    // Approve and deposit tokens to the fund (using DAI as an example)
+    var amountBN = web3.utils.toBN(10 ** (currencies["DAI"].decimals - 1));
+    var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
+    await erc20Contract.methods.approve(RariFundManager.address, amountBN.toString()).send({ from: accounts[0] });
+    await fundManagerInstance.deposit("DAI", amountBN, { from: accounts[0] });
+
+    // Approve and deposit to pool (using Compound as an example)
+    await fundControllerInstance.approveToPool(1, "DAI", amountBN, { from: accounts[0] });
+    await fundControllerInstance.depositToPool(1, "DAI", amountBN, { from: accounts[0] });
+
+    // Check balance of original FundManager
+    var oldRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
+    var oldFundBalance = await fundManagerInstance.getFundBalance.call();
+    var oldAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+
+    // Disable FundController and original FundManager
+    await fundControllerInstance.disableFund({ from: accounts[0] });
+    await fundManagerInstance.disableFund({ from: accounts[0] });
+
+    // TODO: Check _fundDisabled (no way to do this as of now)
+
+    // Create new FundController
+    var newFundControllerInstance = await RariFundController.new({ from: accounts[0] });
+    await newFundControllerInstance.setFundManager(RariFundManager.address, { from: accounts[0] });
+
+    // Upgrade!
+    await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: accounts[0] });
+
+    // Check balance of new FundController
+    let newRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
+    assert(newRawFundBalance.gte(oldRawFundBalance));
+    let newFundBalance = await fundManagerInstance.getFundBalance.call();
+    assert(newFundBalance.gte(oldFundBalance));
+    let newAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+    assert(newAccountBalance.gte(oldAccountBalance));
+  });
+});
+
+contract("RariFundController", accounts => {
+  it("should put upgrade the FundController to new code by disabling the old FundController and the FundManager, withdrawing all tokens from all pools, and transferring them to the new FundController", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
+    let fundManagerInstance = await RariFundManager.deployed();
+    
+    // Approve and deposit tokens to the fund (using DAI as an example)
+    var amountBN = web3.utils.toBN(10 ** (currencies["DAI"].decimals - 1));
+    var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
+    await erc20Contract.methods.approve(RariFundManager.address, amountBN.toString()).send({ from: accounts[0] });
+    await fundManagerInstance.deposit("DAI", amountBN, { from: accounts[0] });
+
+    // Approve and deposit to pool (using Compound as an example)
+    await fundControllerInstance.approveToPool(1, "DAI", amountBN, { from: accounts[0] });
+    await fundControllerInstance.depositToPool(1, "DAI", amountBN, { from: accounts[0] });
+
+    // Check balance of original FundController
+    var oldRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
+    var oldFundBalance = await fundManagerInstance.getFundBalance.call();
+    var oldAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+
+    // Disable FundController and original FundManager
+    await fundControllerInstance.disableFund({ from: accounts[0] });
+    await fundManagerInstance.disableFund({ from: accounts[0] });
+
+    // TODO: Check _fundDisabled (no way to do this as of now)
+
+    // Create new FundController
+    let newFundControllerWeb3Instance = new web3.eth.Contract(dummyRariFundControllerAbi);
+    newFundControllerWeb3Instance = await newFundControllerWeb3Instance.deploy({ data: "0x" + dummyRariFundControllerBin }).send({ from: accounts[0] });
+
+    // Upgrade!
+    await fundManagerInstance.setFundController(newFundControllerWeb3Instance.options.address, { from: accounts[0] });
+
+    // Check balance of new FundController
+    let newRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
+    assert(newRawFundBalance.gte(oldRawFundBalance));
+    let newFundBalance = await fundManagerInstance.getFundBalance.call();
+    assert(newFundBalance.gte(oldFundBalance));
+    let newAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+    assert(newAccountBalance.gte(oldAccountBalance));
+  });
+});
+
 contract("RariFundToken", accounts => {
   // Disabled for now as we do not yet have an upgrade function on the token because it will only be necessary on a future upgrade
   /* it("should put upgrade the FundToken", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await RariFundToken.deployed();
+    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
 
     // Create new FundToken
     // TODO: Test that we can make changes to the code of the new fund token before deploying it and upgrading to it

@@ -165,25 +165,25 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.17+commit.d19bba13\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"}],\"internalType\":\"struct Account.Info\",\"name\":\"account\",\"type\":\"tuple\"}],\"name\":\"getAccountBalances\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"sign\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"value\",\"type\":\"uint128\"}],\"internalType\":\"struct Types.Par[]\",\"name\":\"\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"sign\",\"type\":\"bool\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"internalType\":\"struct Types.Wei[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"}],\"internalType\":\"struct Account.Info[]\",\"name\":\"accounts\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"enum Actions.ActionType\",\"name\":\"actionType\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"accountId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"sign\",\"type\":\"bool\"},{\"internalType\":\"enum Types.AssetDenomination\",\"name\":\"denomination\",\"type\":\"uint8\"},{\"internalType\":\"enum Types.AssetReference\",\"name\":\"ref\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"internalType\":\"struct Types.AssetAmount\",\"name\":\"amount\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"primaryMarketId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"secondaryMarketId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"otherAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"otherAccountId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct Actions.ActionArgs[]\",\"name\":\"actions\",\"type\":\"tuple[]\"}],\"name\":\"operate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"dYdX * Main contract that inherits from other contracts\",\"methods\":{\"getAccountBalances((address,uint256))\":{\"params\":{\"account\":\"The account to query\"},\"return\":\"The following values:                  - The ERC20 token address for each market                  - The account's principal value for each market                  - The account's (supplied or borrowed) number of tokens for each market\"},\"operate((address,uint256)[],(uint8,uint256,(bool,uint8,uint8,uint256),uint256,uint256,address,uint256,bytes)[])\":{\"params\":{\"accounts\":\"A list of all accounts that will be used in this operation. Cannot contain                  duplicates. In each action, the relevant account will be referred-to by its                  index in the list.\",\"actions\":\"An ordered list of all actions that will be taken in this operation. The                  actions will be processed in order.\"}}},\"title\":\"SoloMargin\"},\"userdoc\":{\"methods\":{\"getAccountBalances((address,uint256))\":{\"notice\":\"Get an account's summary for each market.\"},\"operate((address,uint256)[],(uint8,uint256,(bool,uint8,uint8,uint256),uint256,uint256,address,uint256,bytes)[])\":{\"notice\":\"The main entry-point to Solo that allows users and contracts to manage accounts. Take one or more actions on one or more accounts. The msg.sender must be the owner or operator of all accounts except for those being liquidated, vaporized, or traded with. One call to operate() is considered a singular \\\"operation\\\". Account collateralization is ensured only after the completion of the entire operation.\"}}}},\"settings\":{\"compilationTarget\":{\"/home/david/rari-contracts-launch/contracts/external/dydx/SoloMargin.sol\":\"SoloMargin\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/david/rari-contracts-launch/contracts/external/dydx/Getters.sol\":{\"keccak256\":\"0x4a9b28daee59e2b87c5beed1076e95fbc96f769e42423bda01ec723b44549d91\",\"urls\":[\"bzz-raw://2cf107cdee5647d069439ba6c5f17d9370d4ae718ebc4f6ae297d123f98af95d\",\"dweb:/ipfs/QmbthqBfbawLZZ9EJmpcdwtFPMMvr7vhcHcxoaBrAXUiiT\"]},\"/home/david/rari-contracts-launch/contracts/external/dydx/Operation.sol\":{\"keccak256\":\"0x202d5c176ebe31605576a91f2bb6c631137331c225a7b067558eee86c4a84974\",\"urls\":[\"bzz-raw://bf9cefea1126cf6eec6ec9bc0cc0c5271fda0d690b7cfe627412371c27f185f1\",\"dweb:/ipfs/QmQN7JgRdvsLGFTZyAsRqbc6BrWFKzLHJRQ7jntVgx6bt6\"]},\"/home/david/rari-contracts-launch/contracts/external/dydx/SoloMargin.sol\":{\"keccak256\":\"0x2b4ffe2834f34174e74388f29e41a6d7613da3c2e31ff3431aa5cab340a786ec\",\"urls\":[\"bzz-raw://9595a5d0ec6882a083c3c051ec56d6254954fbb3649b2c0c77160b30f308b755\",\"dweb:/ipfs/QmeHHCPiwPjtCdRfpFwGrjqjKpuVzuQKbeAbbCRVFFNjjx\"]},\"/home/david/rari-contracts-launch/contracts/external/dydx/lib/Account.sol\":{\"keccak256\":\"0xa6ddfaeadda74522bfc34d1effa41ec16f61c2ca8507357199f28069f8a5a422\",\"urls\":[\"bzz-raw://abe54954f5e3fb6cd6af6d0d94ebba97d257b02875e45788e4c5ae5ef074853f\",\"dweb:/ipfs/QmQ4rBopBUNUYQABMj3g2YQqbSAmKtuQoXgMFp4aMa338v\"]},\"/home/david/rari-contracts-launch/contracts/external/dydx/lib/Actions.sol\":{\"keccak256\":\"0xc26bbe9bf4bac61cb7da76e976d99bfee033dcc7a86f581f1df27ad843efb44b\",\"urls\":[\"bzz-raw://30d88c181b7ea0f1e3c47d7acc5c38efda93fc40e54a1d1e303415be2cf013f9\",\"dweb:/ipfs/QmduNLGfprnVgG3JBr4HcpT67ie547oEZDuVQL7QGub9Lk\"]},\"/home/david/rari-contracts-launch/contracts/external/dydx/lib/Types.sol\":{\"keccak256\":\"0xb8e6b2a30658b94417df2e5922efa6e834963952cb25f6737aaa2375ea26e7a1\",\"urls\":[\"bzz-raw://291775fbd7fc2021e8eb3c5ed0986d58e6192c081a94fd1c11e1af6e6aee9053\",\"dweb:/ipfs/Qmev7mWwXFUYnf68cG3WsuF3SS5mfbiTv2FLZ3zCAoYSby\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.17+commit.d19bba13\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"}],\"internalType\":\"struct Account.Info\",\"name\":\"account\",\"type\":\"tuple\"}],\"name\":\"getAccountBalances\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"sign\",\"type\":\"bool\"},{\"internalType\":\"uint128\",\"name\":\"value\",\"type\":\"uint128\"}],\"internalType\":\"struct Types.Par[]\",\"name\":\"\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"sign\",\"type\":\"bool\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"internalType\":\"struct Types.Wei[]\",\"name\":\"\",\"type\":\"tuple[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"number\",\"type\":\"uint256\"}],\"internalType\":\"struct Account.Info[]\",\"name\":\"accounts\",\"type\":\"tuple[]\"},{\"components\":[{\"internalType\":\"enum Actions.ActionType\",\"name\":\"actionType\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"accountId\",\"type\":\"uint256\"},{\"components\":[{\"internalType\":\"bool\",\"name\":\"sign\",\"type\":\"bool\"},{\"internalType\":\"enum Types.AssetDenomination\",\"name\":\"denomination\",\"type\":\"uint8\"},{\"internalType\":\"enum Types.AssetReference\",\"name\":\"ref\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"}],\"internalType\":\"struct Types.AssetAmount\",\"name\":\"amount\",\"type\":\"tuple\"},{\"internalType\":\"uint256\",\"name\":\"primaryMarketId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"secondaryMarketId\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"otherAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"otherAccountId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct Actions.ActionArgs[]\",\"name\":\"actions\",\"type\":\"tuple[]\"}],\"name\":\"operate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"author\":\"dYdX  * Main contract that inherits from other contracts\",\"methods\":{\"getAccountBalances((address,uint256))\":{\"params\":{\"account\":\"The account to query\"},\"return\":\"The following values:                  - The ERC20 token address for each market                  - The account's principal value for each market                  - The account's (supplied or borrowed) number of tokens for each market\"},\"operate((address,uint256)[],(uint8,uint256,(bool,uint8,uint8,uint256),uint256,uint256,address,uint256,bytes)[])\":{\"params\":{\"accounts\":\"A list of all accounts that will be used in this operation. Cannot contain                  duplicates. In each action, the relevant account will be referred-to by its                  index in the list.\",\"actions\":\"An ordered list of all actions that will be taken in this operation. The                  actions will be processed in order.\"}}},\"title\":\"SoloMargin\"},\"userdoc\":{\"methods\":{\"getAccountBalances((address,uint256))\":{\"notice\":\"Get an account's summary for each market. \"},\"operate((address,uint256)[],(uint8,uint256,(bool,uint8,uint8,uint256),uint256,uint256,address,uint256,bytes)[])\":{\"notice\":\"The main entry-point to Solo that allows users and contracts to manage accounts. Take one or more actions on one or more accounts. The msg.sender must be the owner or operator of all accounts except for those being liquidated, vaporized, or traded with. One call to operate() is considered a singular \\\"operation\\\". Account collateralization is ensured only after the completion of the entire operation. \"}}}},\"settings\":{\"compilationTarget\":{\"/home/david/rari-contracts-v1.1.0/contracts/external/dydx/SoloMargin.sol\":\"SoloMargin\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/david/rari-contracts-v1.1.0/contracts/external/dydx/Getters.sol\":{\"keccak256\":\"0x9ad597244dec4278c43ee39d89fe23d00e09133f37455941594c9a5cabed6382\",\"urls\":[\"bzz-raw://27b9638a4c24a9d26ec778cb96c8f0f1cc9e087e76cc9f6dc6f8a2a318c07a52\",\"dweb:/ipfs/QmaM8Kc1RR1TBPHdVXeewzCWUM4BDYLiSVA3NYGrYSAq4Q\"]},\"/home/david/rari-contracts-v1.1.0/contracts/external/dydx/Operation.sol\":{\"keccak256\":\"0x679036ca898bc5516b8f63f44c07fbe8ebe3ce233eb215a2b1c4c4a6d502786a\",\"urls\":[\"bzz-raw://fd63c5daf3333935f1444ce5c4c671c6faa8e4106cd96b14b6309a6116b5d3a2\",\"dweb:/ipfs/QmWunGGWG3QNMcUMxnjU2kfkrSYdA3T2vsJPnuYtYqQbVj\"]},\"/home/david/rari-contracts-v1.1.0/contracts/external/dydx/SoloMargin.sol\":{\"keccak256\":\"0x2e0cec52c5b88a240816bc5d7ca062f08490ac3dd8bfd75c4b564f9c91584079\",\"urls\":[\"bzz-raw://25362d56c5e96e872cb7089a8c9761b01583254ecaff39213fd8ccb87b77be1c\",\"dweb:/ipfs/QmVFcfToWp8ECu5yK9VrXEUs1fzemBHdJDpo9ABRsErKRv\"]},\"/home/david/rari-contracts-v1.1.0/contracts/external/dydx/lib/Account.sol\":{\"keccak256\":\"0x835464a7d38af8c8825e933589db0c4287b838b268126069309bcfb308f87c12\",\"urls\":[\"bzz-raw://bf42139cc2a5fd9b453942a919374c3286dda133faf4716e18f172eef6bccc5c\",\"dweb:/ipfs/QmVdKxBkkANe9dYPBUUDkNXZsYETyXnsJcRG2kyDChgqsJ\"]},\"/home/david/rari-contracts-v1.1.0/contracts/external/dydx/lib/Actions.sol\":{\"keccak256\":\"0xc4cd95970a4bb457f0c821c5e80d69460a62aff68f0eb409b7a1cb7a7b08401b\",\"urls\":[\"bzz-raw://c4ac4146b7622bb33b2c47329ceef7db27b469695e14073cf4c1351f2e932ef8\",\"dweb:/ipfs/QmRpHWeAFBcjfdPGeq3PoufmQ2TQmN4iKuCBzcRJJbLx3A\"]},\"/home/david/rari-contracts-v1.1.0/contracts/external/dydx/lib/Types.sol\":{\"keccak256\":\"0x69e8b86b4fce20739c4fd65c8285388c099e8c9580e25652c72d8bade4df7a31\",\"urls\":[\"bzz-raw://cfdf9c9956f8b22e3084d780d331d6f8ae75d57cf058a55a2391a206e8d2e2e6\",\"dweb:/ipfs/QmVe4D9DXdAepZaCP3bx6WECQZU5NwFiko6VAPzi59MD8X\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "/*\n\n    Copyright 2019 dYdX Trading Inc.\n\n    Licensed under the Apache License, Version 2.0 (the \"License\");\n    you may not use this file except in compliance with the License.\n    You may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\n    Unless required by applicable law or agreed to in writing, software\n    distributed under the License is distributed on an \"AS IS\" BASIS,\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n    See the License for the specific language governing permissions and\n    limitations under the License.\n\n*/\n\npragma solidity ^0.5.7;\npragma experimental ABIEncoderV2;\n\nimport { Getters } from \"./Getters.sol\";\nimport { Operation } from \"./Operation.sol\";\n\n\n/**\n * @title SoloMargin\n * @author dYdX\n *\n * Main contract that inherits from other contracts\n */\ncontract SoloMargin is\n    Getters,\n    Operation\n{ }\n",
-  "sourcePath": "/home/david/rari-contracts-launch/contracts/external/dydx/SoloMargin.sol",
+  "source": "/*\r\n\r\n    Copyright 2019 dYdX Trading Inc.\r\n\r\n    Licensed under the Apache License, Version 2.0 (the \"License\");\r\n    you may not use this file except in compliance with the License.\r\n    You may obtain a copy of the License at\r\n\r\n    http://www.apache.org/licenses/LICENSE-2.0\r\n\r\n    Unless required by applicable law or agreed to in writing, software\r\n    distributed under the License is distributed on an \"AS IS\" BASIS,\r\n    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\r\n    See the License for the specific language governing permissions and\r\n    limitations under the License.\r\n\r\n*/\r\n\r\npragma solidity ^0.5.7;\r\npragma experimental ABIEncoderV2;\r\n\r\nimport { Getters } from \"./Getters.sol\";\r\nimport { Operation } from \"./Operation.sol\";\r\n\r\n\r\n/**\r\n * @title SoloMargin\r\n * @author dYdX\r\n *\r\n * Main contract that inherits from other contracts\r\n */\r\ncontract SoloMargin is\r\n    Getters,\r\n    Operation\r\n{ }\r\n",
+  "sourcePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/SoloMargin.sol",
   "ast": {
-    "absolutePath": "/home/david/rari-contracts-launch/contracts/external/dydx/SoloMargin.sol",
+    "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/SoloMargin.sol",
     "exportedSymbols": {
       "SoloMargin": [
-        3973
+        4848
       ]
     },
-    "id": 3974,
+    "id": 4849,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3963,
+        "id": 4838,
         "literals": [
           "solidity",
           "^",
@@ -191,44 +191,44 @@
           ".7"
         ],
         "nodeType": "PragmaDirective",
-        "src": "603:23:10"
+        "src": "621:23:11"
       },
       {
-        "id": 3964,
+        "id": 4839,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "627:33:10"
+        "src": "646:33:11"
       },
       {
-        "absolutePath": "/home/david/rari-contracts-launch/contracts/external/dydx/Getters.sol",
+        "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/Getters.sol",
         "file": "./Getters.sol",
-        "id": 3966,
+        "id": 4841,
         "nodeType": "ImportDirective",
-        "scope": 3974,
-        "sourceUnit": 3945,
-        "src": "662:40:10",
+        "scope": 4849,
+        "sourceUnit": 4820,
+        "src": "683:40:11",
         "symbolAliases": [
           {
-            "foreign": 3965,
+            "foreign": 4840,
             "local": null
           }
         ],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/home/david/rari-contracts-launch/contracts/external/dydx/Operation.sol",
+        "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/Operation.sol",
         "file": "./Operation.sol",
-        "id": 3968,
+        "id": 4843,
         "nodeType": "ImportDirective",
-        "scope": 3974,
-        "sourceUnit": 3962,
-        "src": "703:44:10",
+        "scope": 4849,
+        "sourceUnit": 4837,
+        "src": "725:44:11",
         "symbolAliases": [
           {
-            "foreign": 3967,
+            "foreign": 4842,
             "local": null
           }
         ],
@@ -240,73 +240,73 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3969,
+              "id": 4844,
               "name": "Getters",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3944,
-              "src": "877:7:10",
+              "referencedDeclaration": 4819,
+              "src": "909:7:11",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Getters_$3944",
+                "typeIdentifier": "t_contract$_Getters_$4819",
                 "typeString": "contract Getters"
               }
             },
-            "id": 3970,
+            "id": 4845,
             "nodeType": "InheritanceSpecifier",
-            "src": "877:7:10"
+            "src": "909:7:11"
           },
           {
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3971,
+              "id": 4846,
               "name": "Operation",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3961,
-              "src": "890:9:10",
+              "referencedDeclaration": 4836,
+              "src": "923:9:11",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Operation_$3961",
+                "typeIdentifier": "t_contract$_Operation_$4836",
                 "typeString": "contract Operation"
               }
             },
-            "id": 3972,
+            "id": 4847,
             "nodeType": "InheritanceSpecifier",
-            "src": "890:9:10"
+            "src": "923:9:11"
           }
         ],
         "contractDependencies": [
-          3944,
-          3961
+          4819,
+          4836
         ],
         "contractKind": "contract",
-        "documentation": "@title SoloMargin\n@author dYdX\n * Main contract that inherits from other contracts",
+        "documentation": "@title SoloMargin\n@author dYdX\n\n * Main contract that inherits from other contracts",
         "fullyImplemented": false,
-        "id": 3973,
+        "id": 4848,
         "linearizedBaseContracts": [
-          3973,
-          3961,
-          3944
+          4848,
+          4836,
+          4819
         ],
         "name": "SoloMargin",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 3974,
-        "src": "850:53:10"
+        "scope": 4849,
+        "src": "881:56:11"
       }
     ],
-    "src": "603:301:10"
+    "src": "621:318:11"
   },
   "legacyAST": {
-    "absolutePath": "/home/david/rari-contracts-launch/contracts/external/dydx/SoloMargin.sol",
+    "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/SoloMargin.sol",
     "exportedSymbols": {
       "SoloMargin": [
-        3973
+        4848
       ]
     },
-    "id": 3974,
+    "id": 4849,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 3963,
+        "id": 4838,
         "literals": [
           "solidity",
           "^",
@@ -314,44 +314,44 @@
           ".7"
         ],
         "nodeType": "PragmaDirective",
-        "src": "603:23:10"
+        "src": "621:23:11"
       },
       {
-        "id": 3964,
+        "id": 4839,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "627:33:10"
+        "src": "646:33:11"
       },
       {
-        "absolutePath": "/home/david/rari-contracts-launch/contracts/external/dydx/Getters.sol",
+        "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/Getters.sol",
         "file": "./Getters.sol",
-        "id": 3966,
+        "id": 4841,
         "nodeType": "ImportDirective",
-        "scope": 3974,
-        "sourceUnit": 3945,
-        "src": "662:40:10",
+        "scope": 4849,
+        "sourceUnit": 4820,
+        "src": "683:40:11",
         "symbolAliases": [
           {
-            "foreign": 3965,
+            "foreign": 4840,
             "local": null
           }
         ],
         "unitAlias": ""
       },
       {
-        "absolutePath": "/home/david/rari-contracts-launch/contracts/external/dydx/Operation.sol",
+        "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/Operation.sol",
         "file": "./Operation.sol",
-        "id": 3968,
+        "id": 4843,
         "nodeType": "ImportDirective",
-        "scope": 3974,
-        "sourceUnit": 3962,
-        "src": "703:44:10",
+        "scope": 4849,
+        "sourceUnit": 4837,
+        "src": "725:44:11",
         "symbolAliases": [
           {
-            "foreign": 3967,
+            "foreign": 4842,
             "local": null
           }
         ],
@@ -363,70 +363,70 @@
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3969,
+              "id": 4844,
               "name": "Getters",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3944,
-              "src": "877:7:10",
+              "referencedDeclaration": 4819,
+              "src": "909:7:11",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Getters_$3944",
+                "typeIdentifier": "t_contract$_Getters_$4819",
                 "typeString": "contract Getters"
               }
             },
-            "id": 3970,
+            "id": 4845,
             "nodeType": "InheritanceSpecifier",
-            "src": "877:7:10"
+            "src": "909:7:11"
           },
           {
             "arguments": null,
             "baseName": {
               "contractScope": null,
-              "id": 3971,
+              "id": 4846,
               "name": "Operation",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3961,
-              "src": "890:9:10",
+              "referencedDeclaration": 4836,
+              "src": "923:9:11",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Operation_$3961",
+                "typeIdentifier": "t_contract$_Operation_$4836",
                 "typeString": "contract Operation"
               }
             },
-            "id": 3972,
+            "id": 4847,
             "nodeType": "InheritanceSpecifier",
-            "src": "890:9:10"
+            "src": "923:9:11"
           }
         ],
         "contractDependencies": [
-          3944,
-          3961
+          4819,
+          4836
         ],
         "contractKind": "contract",
-        "documentation": "@title SoloMargin\n@author dYdX\n * Main contract that inherits from other contracts",
+        "documentation": "@title SoloMargin\n@author dYdX\n\n * Main contract that inherits from other contracts",
         "fullyImplemented": false,
-        "id": 3973,
+        "id": 4848,
         "linearizedBaseContracts": [
-          3973,
-          3961,
-          3944
+          4848,
+          4836,
+          4819
         ],
         "name": "SoloMargin",
         "nodeType": "ContractDefinition",
         "nodes": [],
-        "scope": 3974,
-        "src": "850:53:10"
+        "scope": 4849,
+        "src": "881:56:11"
       }
     ],
-    "src": "603:301:10"
+    "src": "621:318:11"
   },
   "compiler": {
     "name": "solc",
     "version": "0.5.17+commit.d19bba13.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.2.0",
-  "updatedAt": "2020-06-29T20:03:34.179Z",
+  "schemaVersion": "3.2.2",
+  "updatedAt": "2020-07-13T20:22:16.772Z",
   "devdoc": {
-    "author": "dYdX * Main contract that inherits from other contracts",
+    "author": "dYdX  * Main contract that inherits from other contracts",
     "methods": {
       "getAccountBalances((address,uint256))": {
         "params": {
@@ -446,10 +446,10 @@
   "userdoc": {
     "methods": {
       "getAccountBalances((address,uint256))": {
-        "notice": "Get an account's summary for each market."
+        "notice": "Get an account's summary for each market. "
       },
       "operate((address,uint256)[],(uint8,uint256,(bool,uint8,uint8,uint256),uint256,uint256,address,uint256,bytes)[])": {
-        "notice": "The main entry-point to Solo that allows users and contracts to manage accounts. Take one or more actions on one or more accounts. The msg.sender must be the owner or operator of all accounts except for those being liquidated, vaporized, or traded with. One call to operate() is considered a singular \"operation\". Account collateralization is ensured only after the completion of the entire operation."
+        "notice": "The main entry-point to Solo that allows users and contracts to manage accounts. Take one or more actions on one or more accounts. The msg.sender must be the owner or operator of all accounts except for those being liquidated, vaporized, or traded with. One call to operate() is considered a singular \"operation\". Account collateralization is ensured only after the completion of the entire operation. "
       }
     }
   }

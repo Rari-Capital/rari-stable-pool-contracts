@@ -3,12 +3,13 @@ const erc20Abi = require('./abi/ERC20.json');
 const currencies = require('./fixtures/currencies.json');
 const pools = require('./fixtures/pools.json');
 
+const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
-const RariFundToken = artifacts.require("RariFundToken");
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
-contract("RariFundManager", accounts => {
-  it("should put upgrade the FundManager with funds in all pools in all currencies without using too much gas", async () => {
+contract("RariFundController", accounts => {
+  it("should put upgrade the FundController with funds in all pools in all currencies without using too much gas", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
 
     // Check balance before deposits
@@ -27,25 +28,25 @@ contract("RariFundManager", accounts => {
       await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0] });
 
       // Approve and deposit to pool (using Compound as an example)
-      await fundManagerInstance.approveToPool(poolName === "Compound" ? 1 : 0, currencyCode, amountBN, { from: accounts[0] });
-      await fundManagerInstance.depositToPool(poolName === "Compound" ? 1 : 0, currencyCode, amountBN, { from: accounts[0] });
+      await fundControllerInstance.approveToPool(poolName === "Compound" ? 1 : 0, currencyCode, amountBN, { from: accounts[0] });
+      await fundControllerInstance.depositToPool(poolName === "Compound" ? 1 : 0, currencyCode, amountBN, { from: accounts[0] });
     }
 
-    // Disable original FundManager
+    // Disable original FundController and FundManager
+    await fundControllerInstance.disableFund({ from: accounts[0] });
     await fundManagerInstance.disableFund({ from: accounts[0] });
 
-    // Create new FundManager
-    var newFundManagerInstance = await RariFundManager.new({ from: accounts[0] });
-    await newFundManagerInstance.setFundToken(RariFundToken.address, { from: accounts[0] });
+    // Create new FundController and set its FundManager
+    var newFundControllerInstance = await RariFundController.new({ from: accounts[0] });
+    await newFundControllerInstance.setFundManager(RariFundManager.address, { from: accounts[0] });
 
     // Upgrade!
-    await newFundManagerInstance.authorizeFundManagerDataSource(fundManagerInstance.address, { from: accounts[0] });
-    var result = await fundManagerInstance.upgradeFundManager(newFundManagerInstance.address, { from: accounts[0] });
+    var result = await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: accounts[0] });
+    console.log("Gas usage of RariFundManager.setFundController:", result.receipt.gasUsed);
     assert.isAtMost(result.receipt.gasUsed, 5000000); // Assert it uses no more than 5 million gas
-    await newFundManagerInstance.authorizeFundManagerDataSource("0x0000000000000000000000000000000000000000", { from: accounts[0] });
 
     // Check balance of new FundManager
-    let newRawFundBalance = await newFundManagerInstance.getRawFundBalance.call();
-    assert(newRawFundBalance.gte(oldRawFundBalance.add(amountBN.mul(web3.utils.toBN(9999)).div(web3.utils.toBN(10000)))));
+    let newRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
+    assert(newRawFundBalance.gte(oldRawFundBalance.add(totalUsdBN.mul(web3.utils.toBN(9999)).div(web3.utils.toBN(10000)))));
   });
 });

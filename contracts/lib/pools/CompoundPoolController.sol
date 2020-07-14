@@ -59,8 +59,9 @@ library CompoundPoolController {
         address cErc20Contract = getCErc20Contract(erc20Contract);
         IERC20 token = IERC20(erc20Contract);
         uint256 allowance = token.allowance(address(this), cErc20Contract);
-        if (amount < allowance) token.safeDecreaseAllowance(cErc20Contract, allowance.sub(amount));
-        else if (amount > allowance) token.safeIncreaseAllowance(cErc20Contract, amount.sub(allowance));
+        if (allowance == amount) return true;
+        if (amount > 0 && allowance > 0) token.safeApprove(cErc20Contract, 0);
+        token.safeApprove(cErc20Contract, amount);
         return true;
     }
 
@@ -71,6 +72,7 @@ library CompoundPoolController {
      * @return Boolean indicating success.
      */
     function deposit(address erc20Contract, uint256 amount) internal returns (bool) {
+        require(amount > 0, "Amount must be greater than 0.");
         CErc20 cErc20 = CErc20(getCErc20Contract(erc20Contract));
         uint256 mintResult = cErc20.mint(amount);
         require(mintResult == 0, "Error calling mint on Compound cToken: error code not equal to 0");
@@ -84,6 +86,7 @@ library CompoundPoolController {
      * @return Boolean indicating success.
      */
     function withdraw(address erc20Contract, uint256 amount) internal returns (bool) {
+        require(amount > 0, "Amount must be greater than to 0.");
         CErc20 cErc20 = CErc20(getCErc20Contract(erc20Contract));
         uint256 redeemResult = cErc20.redeemUnderlying(amount);
         require(redeemResult == 0, "Error calling redeemUnderlying on Compound cToken: error code not equal to 0");

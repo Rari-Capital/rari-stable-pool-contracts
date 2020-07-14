@@ -7,7 +7,10 @@ module.exports = {
   networks: {
     development: {
       provider: function() {
-        return new HDWalletProvider([process.env.DEVELOPMENT_PRIVATE_KEY, process.env.DEVELOPMENT_PRIVATE_KEY_SECONDARY], "http://localhost:8546"); // Fork mainnet geth instance with compound-finance/ganache-core (Compound's fork fixes a false reentrancy error)
+        var keys = [process.env.DEVELOPMENT_PRIVATE_KEY];
+        if (process.env.DEVELOPMENT_PRIVATE_KEY_SECONDARY) keys.push(process.env.DEVELOPMENT_PRIVATE_KEY_SECONDARY);
+        if (process.env.UPGRADE_FUND_OWNER_PRIVATE_KEY) keys.push(process.env.UPGRADE_FUND_OWNER_PRIVATE_KEY);
+        return new HDWalletProvider(keys, "http://localhost:8546"); // Fork mainnet geth instance with compound-finance/ganache-core (Compound's fork fixes a false reentrancy error)
       },
       network_id: 1,
       gasPrice: 1e8,
@@ -15,7 +18,9 @@ module.exports = {
     },
     live: {
       provider: function() {
-        return new HDWalletProvider([process.env.LIVE_DEPLOYER_PRIVATE_KEY], "https://mainnet.infura.io/v3/" + process.env.LIVE_INFURA_PROJECT_ID);
+        var keys = [process.env.LIVE_DEPLOYER_PRIVATE_KEY];
+        if (process.env.UPGRADE_FUND_OWNER_PRIVATE_KEY) keys.push(process.env.UPGRADE_FUND_OWNER_PRIVATE_KEY);
+        return new HDWalletProvider(keys, "https://mainnet.infura.io/v3/" + process.env.LIVE_INFURA_PROJECT_ID);
       },
       network_id: 1,
       gasPrice: 1e9,

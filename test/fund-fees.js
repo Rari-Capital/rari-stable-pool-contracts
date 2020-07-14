@@ -4,6 +4,7 @@ const cErc20DelegatorAbi = require('./abi/CErc20Delegator.json');
 const currencies = require('./fixtures/currencies.json');
 const pools = require('./fixtures/pools.json');
 
+const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
 
@@ -21,23 +22,23 @@ async function forceAccrueCompound(currencyCode, account) {
   }
 }
 
-// These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
+// These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to accounts[0]
 contract("RariFundManager", accounts => {
   it("should deposit to pools, set the interest fee rate, wait for interest, set the master beneficiary of interest fees, deposit fees, wait for interest again, and withdraw fees", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await RariFundToken.deployed();
+    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
     
     // Approve and deposit tokens to the fund (using DAI as an example)
     var currencyCode = "DAI";
     var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
-    var amountUsdBN = 18 >= currencies[currencyCode].decimals ? amountBN.mul(web3.utils.toBN(10 ** (18 - currencies[currencyCode].decimals))) : amountBN.div(web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 18)));
     var erc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
     await erc20Contract.methods.approve(RariFundManager.address, amountBN.toString()).send({ from: accounts[0] });
     await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0] });
 
     // Approve and deposit to pool (using Compound as an example)
-    await fundManagerInstance.approveToPool(1, currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-    await fundManagerInstance.depositToPool(1, currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    await fundControllerInstance.approveToPool(1, currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+    await fundControllerInstance.depositToPool(1, currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
 
     // Set interest fee rate
     await fundManagerInstance.setInterestFeeRate(web3.utils.toBN(1e17), { from: accounts[0] });
@@ -58,7 +59,7 @@ contract("RariFundManager", accounts => {
     let nowRawInterestAccrued = await fundManagerInstance.getRawInterestAccrued.call();
     assert(nowRawInterestAccrued.gt(initialRawInterestAccrued));
     let nowInterestAccrued = await fundManagerInstance.getInterestAccrued.call();
-    assert(nowInterestAccrued.gt(initialRawInterestAccrued));
+    assert(nowInterestAccrued.gt(initialInterestAccrued));
     let nowInterestFeesGenerated = await fundManagerInstance.getInterestFeesGenerated.call();
     assert(nowInterestFeesGenerated.gte(initialInterestFeesGenerated.add(nowRawInterestAccrued.sub(initialRawInterestAccrued).divn(10))));
 
@@ -104,7 +105,7 @@ contract("RariFundManager", accounts => {
 
     // Withdraw from pool and withdraw fees!
     // TODO: Withdraw exact amount from pool instead of simply withdrawing all
-    await fundManagerInstance.withdrawAllFromPool(1, currencyCode, { from: accounts[0] });
+    await fundControllerInstance.withdrawAllFromPool(1, currencyCode, { from: accounts[0] });
     await fundManagerInstance.withdrawFees(currencyCode, { from: accounts[0] });
 
     // Check that we claimed fees
