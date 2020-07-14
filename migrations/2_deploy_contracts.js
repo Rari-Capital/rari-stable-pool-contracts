@@ -93,8 +93,6 @@ module.exports = function(deployer, network, accounts) {
     }).then(function() {
       return rariFundManager.setInterestFeeMasterBeneficiary(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY : accounts[0]);
     }).then(function() {
-      return rariFundManager.setInterestFeeRate(web3.utils.toBN(2e17));
-    }).then(function() {
       if (["live", "live-fork"].indexOf(network) >= 0) {
         // Live network: transfer ownership of deployed contracts from the deployer to the owner
         return rariFundController.transferOwnership(process.env.LIVE_FUND_OWNER).then(function() {

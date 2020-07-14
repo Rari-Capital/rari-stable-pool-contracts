@@ -186,11 +186,11 @@ contract RariFundManager is Ownable {
      */
     function setFundManagerData(FundManagerData calldata data) external {
         require(_authorizedFundManagerDataSource != address(0) && msg.sender == _authorizedFundManagerDataSource, "Caller is not an authorized source.");
-        
         _netDeposits = data.netDeposits;
         _rawInterestAccruedAtLastFeeRateChange = data.rawInterestAccruedAtLastFeeRateChange;
         _interestFeesGeneratedAtLastFeeRateChange = data.interestFeesGeneratedAtLastFeeRateChange;
         _interestFeesClaimed = data.interestFeesClaimed;
+        _interestFeeRate = RariFundManager(_authorizedFundManagerDataSource).getInterestFeeRate();
     }
 
     /**
