@@ -3,12 +3,22 @@ const erc20Abi = require('./abi/ERC20.json');
 const currencies = require('./fixtures/currencies.json');
 
 const RariFundManager = artifacts.require("RariFundManager");
+const RariFundToken = artifacts.require("RariFundToken");
 
-// These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
+// The owner of RariFundManager should be set to accounts[0] and accounts[1] should own at least a couple dollars in DAI
 contract("RariFundManager", accounts => {
   it("should make deposits until the default (global) account balance limit is hit", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
-    
+    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+
+    // Get account balance in the fund and withdraw all before we start
+    let accountBalance = await fundManagerInstance.balanceOf.call(accounts[1]);
+
+    if (accountBalance.gt(web3.utils.toBN(0))) {
+      await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[1], nonce: await web3.eth.getTransactionCount(accounts[1]) });
+      await fundManagerInstance.withdraw("DAI", accountBalance, { from: accounts[1], nonce: await web3.eth.getTransactionCount(accounts[1]) });
+    }
+
     // Set default account balance limit
     var defaultAccountBalanceLimitUsdBN = web3.utils.toBN(1e18);
     await fundManagerInstance.setDefaultAccountBalanceLimit(defaultAccountBalanceLimitUsdBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
@@ -17,7 +27,7 @@ contract("RariFundManager", accounts => {
     var depositAmountBN = web3.utils.toBN(1e17);
     
     // Check account balance
-    let accountBalance = await fundManagerInstance.balanceOf.call(accounts[1]);
+    accountBalance = await fundManagerInstance.balanceOf.call(accounts[1]);
     
     // Approve tokens to RariFundManager
     var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
@@ -37,14 +47,20 @@ contract("RariFundManager", accounts => {
     }
 
     assert.fail();
-
-    // Withdraw all for next test
-    await fundManagerInstance.withdraw("DAI", accountBalance, { from: accounts[1], nonce: await web3.eth.getTransactionCount(accounts[1]) });
   });
   
   it("should make deposits until the individual account balance limit is hit", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
-    
+    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+
+    // Get account balance in the fund and withdraw all before we start
+    let accountBalance = await fundManagerInstance.balanceOf.call(accounts[1]);
+
+    if (accountBalance.gt(web3.utils.toBN(0))) {
+      await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[1], nonce: await web3.eth.getTransactionCount(accounts[1]) });
+      await fundManagerInstance.withdraw("DAI", accountBalance, { from: accounts[1], nonce: await web3.eth.getTransactionCount(accounts[1]) });
+    }
+
     // Set default account balance limit
     var defaultAccountBalanceLimitUsdBN = web3.utils.toBN(5e17);
     await fundManagerInstance.setDefaultAccountBalanceLimit(defaultAccountBalanceLimitUsdBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
@@ -57,7 +73,7 @@ contract("RariFundManager", accounts => {
     var depositAmountBN = web3.utils.toBN(1e17);
     
     // Check account balance
-    let accountBalance = await fundManagerInstance.balanceOf.call(accounts[1]);
+    accountBalance = await fundManagerInstance.balanceOf.call(accounts[1]);
     
     // Approve tokens to RariFundManager
     var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
@@ -77,14 +93,20 @@ contract("RariFundManager", accounts => {
     }
 
     assert.fail();
-
-    // Withdraw all for next test
-    await fundManagerInstance.withdraw("DAI", accountBalance, { from: accounts[1], nonce: await web3.eth.getTransactionCount(accounts[1]) });
   });
   
   it("should make no deposits due to an individual account balance limit of 0", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
-    
+    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+
+    // Get account balance in the fund and withdraw all before we start
+    let accountBalance = await fundManagerInstance.balanceOf.call(accounts[1]);
+
+    if (accountBalance.gt(web3.utils.toBN(0))) {
+      await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[1], nonce: await web3.eth.getTransactionCount(accounts[1]) });
+      await fundManagerInstance.withdraw("DAI", accountBalance, { from: accounts[1], nonce: await web3.eth.getTransactionCount(accounts[1]) });
+    }
+
     // Set default account balance limit
     var defaultAccountBalanceLimitUsdBN = web3.utils.toBN(5e17);
     await fundManagerInstance.setDefaultAccountBalanceLimit(defaultAccountBalanceLimitUsdBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
