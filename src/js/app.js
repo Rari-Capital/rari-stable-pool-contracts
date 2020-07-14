@@ -585,13 +585,13 @@ App = {
    */
   initContracts: function() {
     $.getJSON('abi/RariFundController.json', function(data) {
-      App.contracts.RariFundController = new App.web3.eth.Contract(data, "0x8D16aca4A9A47299D373CEd4a2A9cB889C5a357B");
+      App.contracts.RariFundController = new App.web3.eth.Contract(data, "0x15c4ae284fbb3a6ceb41fa8eb5f3408ac485fabb");
       /* App.getCurrentApy();
       setInterval(App.getCurrentApy, 5 * 60 * 1000); */
     });
 
     $.getJSON('abi/RariFundManager.json', function(data) {
-      App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0x2af1325281Ec17F7Bac733F14D2AC04EFBfA2Fc6");
+      App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0x6bdaf490c5b6bb58564b3e79c8d18e8dfd270464");
       App.getFundBalance();
       setInterval(App.getFundBalance, 5 * 60 * 1000);
       if (App.selectedAccount) {
@@ -617,7 +617,7 @@ App = {
     });
 
     $.getJSON('abi/RariFundProxy.json', function(data) {
-      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0x5C9c17BF585e05d8A54Ea0D4B30fbDB3Aa13d38b");
+      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0x318cfd99b60a63d265d2291a4ab982073fbf245d");
     });
 
     $.getJSON('abi/ERC20.json', function(data) {
