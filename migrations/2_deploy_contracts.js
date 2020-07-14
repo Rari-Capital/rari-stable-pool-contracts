@@ -52,13 +52,6 @@ module.exports = function(deployer, network, accounts) {
       return rariFundManager.authorizeFundManagerDataSource("0x0000000000000000000000000000000000000000");
     }).then(function() {
       return rariFundManager.forwardToFundController();
-    }).then(function() {
-      return rariFundManager.setFundToken(process.env.UPGRADE_FUND_TOKEN);
-    }).then(function() {
-      return RariFundToken.at(process.env.UPGRADE_FUND_TOKEN);
-    }).then(function(_rariFundToken) {
-      rariFundToken = _rariFundToken;
-      return rariFundToken.setFundManager(RariFundManager.address, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
     }).then(async function() {
       // Get all past and current RFT holders who might have have nonzero net deposits
       var pastRftHolders = [];
@@ -75,6 +68,13 @@ module.exports = function(deployer, network, accounts) {
 
       // Initialize net deposits for all accounts
       return rariFundManager.initNetDeposits(pastRftHolders, netDeposits);
+    }).then(function() {
+      return rariFundManager.setFundToken(process.env.UPGRADE_FUND_TOKEN);
+    }).then(function() {
+      return RariFundToken.at(process.env.UPGRADE_FUND_TOKEN);
+    }).then(function(_rariFundToken) {
+      rariFundToken = _rariFundToken;
+      return rariFundToken.setFundManager(RariFundManager.address, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
     }).then(function() {
       return deployer.deploy(RariFundProxy);
     }).then(function() {
