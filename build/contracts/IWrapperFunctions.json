@@ -1140,14 +1140,14 @@
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/IWrapperFunctions.sol",
     "exportedSymbols": {
       "IWrapperFunctions": [
-        7649
+        7765
       ]
     },
-    "id": 7650,
+    "id": 7766,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7531,
+        "id": 7647,
         "literals": [
           "solidity",
           "^",
@@ -1158,7 +1158,7 @@
         "src": "580:23:33"
       },
       {
-        "id": 7532,
+        "id": 7648,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -1169,10 +1169,10 @@
       {
         "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
         "file": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
-        "id": 7533,
+        "id": 7649,
         "nodeType": "ImportDirective",
-        "scope": 7650,
-        "sourceUnit": 7069,
+        "scope": 7766,
+        "sourceUnit": 7185,
         "src": "639:64:33",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1180,10 +1180,10 @@
       {
         "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol",
         "file": "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol",
-        "id": 7534,
+        "id": 7650,
         "nodeType": "ImportDirective",
-        "scope": 7650,
-        "sourceUnit": 6643,
+        "scope": 7766,
+        "sourceUnit": 6759,
         "src": "704:70:33",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1194,9 +1194,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7649,
+        "id": 7765,
         "linearizedBaseContracts": [
-          7649
+          7765
         ],
         "name": "IWrapperFunctions",
         "nodeType": "ContractDefinition",
@@ -1204,38 +1204,38 @@
           {
             "body": null,
             "documentation": "@dev Fills the input order. Reverts if exact takerAssetFillAmount not filled.\n @param order Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.",
-            "id": 7545,
+            "id": 7661,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "fillOrKillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7541,
+              "id": 7657,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7536,
+                  "id": 7652,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7545,
+                  "scope": 7661,
                   "src": "1141:27:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$7003_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$7119_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7535,
+                    "id": 7651,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7003,
+                    "referencedDeclaration": 7119,
                     "src": "1141:14:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -1244,10 +1244,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7538,
+                  "id": 7654,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7545,
+                  "scope": 7661,
                   "src": "1178:28:33",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1256,7 +1256,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7537,
+                    "id": 7653,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1178:7:33",
@@ -1270,10 +1270,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7540,
+                  "id": 7656,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7545,
+                  "scope": 7661,
                   "src": "1216:22:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1282,7 +1282,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7539,
+                    "id": 7655,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1216:5:33",
@@ -1298,31 +1298,31 @@
               "src": "1131:113:33"
             },
             "returnParameters": {
-              "id": 7544,
+              "id": 7660,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7543,
+                  "id": 7659,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7545,
+                  "scope": 7661,
                   "src": "1293:45:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7542,
+                    "id": 7658,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "1293:26:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -1332,7 +1332,7 @@
               ],
               "src": "1292:47:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "1107:233:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1341,48 +1341,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of fillOrder.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Array of amounts filled and fees paid by makers and taker.",
-            "id": 7560,
+            "id": 7676,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "batchFillOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7555,
+              "id": 7671,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7548,
+                  "id": 7664,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7560,
+                  "scope": 7676,
                   "src": "1728:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7546,
+                      "id": 7662,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "1728:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7547,
+                    "id": 7663,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1728:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -1391,10 +1391,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7551,
+                  "id": 7667,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7560,
+                  "scope": 7676,
                   "src": "1768:38:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1404,7 +1404,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7549,
+                      "id": 7665,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "1768:7:33",
@@ -1413,7 +1413,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7550,
+                    "id": 7666,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1768:9:33",
@@ -1427,10 +1427,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7554,
+                  "id": 7670,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7560,
+                  "scope": 7676,
                   "src": "1816:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1440,7 +1440,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7552,
+                      "id": 7668,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "1816:5:33",
@@ -1449,7 +1449,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7553,
+                    "id": 7669,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1816:7:33",
@@ -1465,41 +1465,41 @@
               "src": "1718:129:33"
             },
             "returnParameters": {
-              "id": 7559,
+              "id": 7675,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7558,
+                  "id": 7674,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7560,
+                  "scope": 7676,
                   "src": "1896:47:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_memory_$dyn_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7556,
+                      "id": 7672,
                       "name": "LibFillResults.FillResults",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 5986,
+                      "referencedDeclaration": 6102,
                       "src": "1896:26:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                        "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                         "typeString": "struct LibFillResults.FillResults"
                       }
                     },
-                    "id": 7557,
+                    "id": 7673,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1896:28:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_storage_$dyn_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults[]"
                     }
                   },
@@ -1509,7 +1509,7 @@
               ],
               "src": "1895:49:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "1694:251:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1518,48 +1518,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of fillOrKillOrder.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Array of amounts filled and fees paid by makers and taker.",
-            "id": 7575,
+            "id": 7691,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "batchFillOrKillOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7570,
+              "id": 7686,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7563,
+                  "id": 7679,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7575,
+                  "scope": 7691,
                   "src": "2345:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7561,
+                      "id": 7677,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "2345:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7562,
+                    "id": 7678,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2345:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -1568,10 +1568,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7566,
+                  "id": 7682,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7575,
+                  "scope": 7691,
                   "src": "2385:38:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1581,7 +1581,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7564,
+                      "id": 7680,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "2385:7:33",
@@ -1590,7 +1590,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7565,
+                    "id": 7681,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2385:9:33",
@@ -1604,10 +1604,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7569,
+                  "id": 7685,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7575,
+                  "scope": 7691,
                   "src": "2433:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1617,7 +1617,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7567,
+                      "id": 7683,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "2433:5:33",
@@ -1626,7 +1626,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7568,
+                    "id": 7684,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2433:7:33",
@@ -1642,41 +1642,41 @@
               "src": "2335:129:33"
             },
             "returnParameters": {
-              "id": 7574,
+              "id": 7690,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7573,
+                  "id": 7689,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7575,
+                  "scope": 7691,
                   "src": "2513:47:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_memory_$dyn_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7571,
+                      "id": 7687,
                       "name": "LibFillResults.FillResults",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 5986,
+                      "referencedDeclaration": 6102,
                       "src": "2513:26:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                        "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                         "typeString": "struct LibFillResults.FillResults"
                       }
                     },
-                    "id": 7572,
+                    "id": 7688,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2513:28:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_storage_$dyn_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults[]"
                     }
                   },
@@ -1686,7 +1686,7 @@
               ],
               "src": "2512:49:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "2305:257:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1695,48 +1695,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of fillOrder. If any fill reverts, the error is caught and ignored.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Array of amounts filled and fees paid by makers and taker.",
-            "id": 7590,
+            "id": 7706,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "batchFillOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7585,
+              "id": 7701,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7578,
+                  "id": 7694,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7706,
                   "src": "3011:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7576,
+                      "id": 7692,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "3011:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7577,
+                    "id": 7693,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3011:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -1745,10 +1745,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7581,
+                  "id": 7697,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7706,
                   "src": "3051:38:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1758,7 +1758,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7579,
+                      "id": 7695,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "3051:7:33",
@@ -1767,7 +1767,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7580,
+                    "id": 7696,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3051:9:33",
@@ -1781,10 +1781,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7584,
+                  "id": 7700,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7706,
                   "src": "3099:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1794,7 +1794,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7582,
+                      "id": 7698,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "3099:5:33",
@@ -1803,7 +1803,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7583,
+                    "id": 7699,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3099:7:33",
@@ -1819,41 +1819,41 @@
               "src": "3001:129:33"
             },
             "returnParameters": {
-              "id": 7589,
+              "id": 7705,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7588,
+                  "id": 7704,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7706,
                   "src": "3179:47:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_memory_$dyn_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7586,
+                      "id": 7702,
                       "name": "LibFillResults.FillResults",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 5986,
+                      "referencedDeclaration": 6102,
                       "src": "3179:26:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                        "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                         "typeString": "struct LibFillResults.FillResults"
                       }
                     },
-                    "id": 7587,
+                    "id": 7703,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3179:28:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_storage_$dyn_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults[]"
                     }
                   },
@@ -1863,7 +1863,7 @@
               ],
               "src": "3178:49:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "2970:258:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1872,48 +1872,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of fillOrder until total amount of takerAsset is sold by taker.\n      If any fill reverts, the error is caught and ignored.\n      NOTE: This function does not enforce that the takerAsset is the same for each order.\n @param orders Array of order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 7603,
+            "id": 7719,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "marketSellOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7599,
+              "id": 7715,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7593,
+                  "id": 7709,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7603,
+                  "scope": 7719,
                   "src": "3808:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7591,
+                      "id": 7707,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "3808:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7592,
+                    "id": 7708,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3808:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -1922,10 +1922,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7595,
+                  "id": 7711,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7603,
+                  "scope": 7719,
                   "src": "3848:28:33",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1934,7 +1934,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7594,
+                    "id": 7710,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3848:7:33",
@@ -1948,10 +1948,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7598,
+                  "id": 7714,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7603,
+                  "scope": 7719,
                   "src": "3886:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1961,7 +1961,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7596,
+                      "id": 7712,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "3886:5:33",
@@ -1970,7 +1970,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7597,
+                    "id": 7713,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3886:7:33",
@@ -1986,31 +1986,31 @@
               "src": "3798:119:33"
             },
             "returnParameters": {
-              "id": 7602,
+              "id": 7718,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7601,
+                  "id": 7717,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7603,
+                  "scope": 7719,
                   "src": "3966:45:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7600,
+                    "id": 7716,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "3966:26:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2020,7 +2020,7 @@
               ],
               "src": "3965:47:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "3766:247:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2029,48 +2029,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of fillOrder until total amount of makerAsset is bought by taker.\n      If any fill reverts, the error is caught and ignored.\n      NOTE: This function does not enforce that the makerAsset is the same for each order.\n @param orders Array of order specifications.\n @param makerAssetFillAmount Desired amount of makerAsset to buy.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 7616,
+            "id": 7732,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "marketBuyOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7612,
+              "id": 7728,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7606,
+                  "id": 7722,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7616,
+                  "scope": 7732,
                   "src": "4593:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7604,
+                      "id": 7720,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "4593:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7605,
+                    "id": 7721,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "4593:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -2079,10 +2079,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7608,
+                  "id": 7724,
                   "name": "makerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7616,
+                  "scope": 7732,
                   "src": "4633:28:33",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2091,7 +2091,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7607,
+                    "id": 7723,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4633:7:33",
@@ -2105,10 +2105,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7611,
+                  "id": 7727,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7616,
+                  "scope": 7732,
                   "src": "4671:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -2118,7 +2118,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7609,
+                      "id": 7725,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "4671:5:33",
@@ -2127,7 +2127,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7610,
+                    "id": 7726,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "4671:7:33",
@@ -2143,31 +2143,31 @@
               "src": "4583:119:33"
             },
             "returnParameters": {
-              "id": 7615,
+              "id": 7731,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7614,
+                  "id": 7730,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7616,
+                  "scope": 7732,
                   "src": "4751:45:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7613,
+                    "id": 7729,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "4751:26:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2177,7 +2177,7 @@
               ],
               "src": "4750:47:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "4552:246:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2186,48 +2186,48 @@
           {
             "body": null,
             "documentation": "@dev Calls marketSellOrdersNoThrow then reverts if < takerAssetFillAmount has been sold.\n      NOTE: This function does not enforce that the takerAsset is the same for each order.\n @param orders Array of order specifications.\n @param takerAssetFillAmount Minimum amount of takerAsset to sell.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 7629,
+            "id": 7745,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "marketSellOrdersFillOrKill",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7625,
+              "id": 7741,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7619,
+                  "id": 7735,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7629,
+                  "scope": 7745,
                   "src": "5310:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7617,
+                      "id": 7733,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "5310:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7618,
+                    "id": 7734,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "5310:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -2236,10 +2236,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7621,
+                  "id": 7737,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7629,
+                  "scope": 7745,
                   "src": "5350:28:33",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2248,7 +2248,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7620,
+                    "id": 7736,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "5350:7:33",
@@ -2262,10 +2262,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7624,
+                  "id": 7740,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7629,
+                  "scope": 7745,
                   "src": "5388:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -2275,7 +2275,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7622,
+                      "id": 7738,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "5388:5:33",
@@ -2284,7 +2284,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7623,
+                    "id": 7739,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "5388:7:33",
@@ -2300,31 +2300,31 @@
               "src": "5300:119:33"
             },
             "returnParameters": {
-              "id": 7628,
+              "id": 7744,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7627,
+                  "id": 7743,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7629,
+                  "scope": 7745,
                   "src": "5468:45:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7626,
+                    "id": 7742,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "5468:26:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2334,7 +2334,7 @@
               ],
               "src": "5467:47:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "5265:250:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2343,48 +2343,48 @@
           {
             "body": null,
             "documentation": "@dev Calls marketBuyOrdersNoThrow then reverts if < makerAssetFillAmount has been bought.\n      NOTE: This function does not enforce that the makerAsset is the same for each order.\n @param orders Array of order specifications.\n @param makerAssetFillAmount Minimum amount of makerAsset to buy.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 7642,
+            "id": 7758,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "marketBuyOrdersFillOrKill",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7638,
+              "id": 7754,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7632,
+                  "id": 7748,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7642,
+                  "scope": 7758,
                   "src": "6026:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7630,
+                      "id": 7746,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "6026:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7631,
+                    "id": 7747,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "6026:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -2393,10 +2393,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7634,
+                  "id": 7750,
                   "name": "makerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7642,
+                  "scope": 7758,
                   "src": "6066:28:33",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2405,7 +2405,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7633,
+                    "id": 7749,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "6066:7:33",
@@ -2419,10 +2419,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7637,
+                  "id": 7753,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7642,
+                  "scope": 7758,
                   "src": "6104:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -2432,7 +2432,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7635,
+                      "id": 7751,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "6104:5:33",
@@ -2441,7 +2441,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7636,
+                    "id": 7752,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "6104:7:33",
@@ -2457,31 +2457,31 @@
               "src": "6016:119:33"
             },
             "returnParameters": {
-              "id": 7641,
+              "id": 7757,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7640,
+                  "id": 7756,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7642,
+                  "scope": 7758,
                   "src": "6184:45:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7639,
+                    "id": 7755,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "6184:26:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2491,7 +2491,7 @@
               ],
               "src": "6183:47:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "5982:249:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2500,48 +2500,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of cancelOrder.\n @param orders Array of order specifications.",
-            "id": 7648,
+            "id": 7764,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "batchCancelOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7646,
+              "id": 7762,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7645,
+                  "id": 7761,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7648,
+                  "scope": 7764,
                   "src": "6370:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7643,
+                      "id": 7759,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "6370:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7644,
+                    "id": 7760,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "6370:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -2552,19 +2552,19 @@
               "src": "6369:32:33"
             },
             "returnParameters": {
-              "id": 7647,
+              "id": 7763,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "6432:0:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "6343:90:33",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7650,
+        "scope": 7766,
         "src": "777:5658:33"
       }
     ],
@@ -2574,14 +2574,14 @@
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/IWrapperFunctions.sol",
     "exportedSymbols": {
       "IWrapperFunctions": [
-        7649
+        7765
       ]
     },
-    "id": 7650,
+    "id": 7766,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7531,
+        "id": 7647,
         "literals": [
           "solidity",
           "^",
@@ -2592,7 +2592,7 @@
         "src": "580:23:33"
       },
       {
-        "id": 7532,
+        "id": 7648,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -2603,10 +2603,10 @@
       {
         "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
         "file": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
-        "id": 7533,
+        "id": 7649,
         "nodeType": "ImportDirective",
-        "scope": 7650,
-        "sourceUnit": 7069,
+        "scope": 7766,
+        "sourceUnit": 7185,
         "src": "639:64:33",
         "symbolAliases": [],
         "unitAlias": ""
@@ -2614,10 +2614,10 @@
       {
         "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol",
         "file": "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol",
-        "id": 7534,
+        "id": 7650,
         "nodeType": "ImportDirective",
-        "scope": 7650,
-        "sourceUnit": 6643,
+        "scope": 7766,
+        "sourceUnit": 6759,
         "src": "704:70:33",
         "symbolAliases": [],
         "unitAlias": ""
@@ -2628,9 +2628,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7649,
+        "id": 7765,
         "linearizedBaseContracts": [
-          7649
+          7765
         ],
         "name": "IWrapperFunctions",
         "nodeType": "ContractDefinition",
@@ -2638,38 +2638,38 @@
           {
             "body": null,
             "documentation": "@dev Fills the input order. Reverts if exact takerAssetFillAmount not filled.\n @param order Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.",
-            "id": 7545,
+            "id": 7661,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "fillOrKillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7541,
+              "id": 7657,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7536,
+                  "id": 7652,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7545,
+                  "scope": 7661,
                   "src": "1141:27:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$7003_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$7119_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7535,
+                    "id": 7651,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7003,
+                    "referencedDeclaration": 7119,
                     "src": "1141:14:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -2678,10 +2678,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7538,
+                  "id": 7654,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7545,
+                  "scope": 7661,
                   "src": "1178:28:33",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2690,7 +2690,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7537,
+                    "id": 7653,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1178:7:33",
@@ -2704,10 +2704,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7540,
+                  "id": 7656,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7545,
+                  "scope": 7661,
                   "src": "1216:22:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -2716,7 +2716,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7539,
+                    "id": 7655,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1216:5:33",
@@ -2732,31 +2732,31 @@
               "src": "1131:113:33"
             },
             "returnParameters": {
-              "id": 7544,
+              "id": 7660,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7543,
+                  "id": 7659,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7545,
+                  "scope": 7661,
                   "src": "1293:45:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7542,
+                    "id": 7658,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "1293:26:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2766,7 +2766,7 @@
               ],
               "src": "1292:47:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "1107:233:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2775,48 +2775,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of fillOrder.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Array of amounts filled and fees paid by makers and taker.",
-            "id": 7560,
+            "id": 7676,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "batchFillOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7555,
+              "id": 7671,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7548,
+                  "id": 7664,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7560,
+                  "scope": 7676,
                   "src": "1728:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7546,
+                      "id": 7662,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "1728:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7547,
+                    "id": 7663,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1728:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -2825,10 +2825,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7551,
+                  "id": 7667,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7560,
+                  "scope": 7676,
                   "src": "1768:38:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -2838,7 +2838,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7549,
+                      "id": 7665,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "1768:7:33",
@@ -2847,7 +2847,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7550,
+                    "id": 7666,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1768:9:33",
@@ -2861,10 +2861,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7554,
+                  "id": 7670,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7560,
+                  "scope": 7676,
                   "src": "1816:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -2874,7 +2874,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7552,
+                      "id": 7668,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "1816:5:33",
@@ -2883,7 +2883,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7553,
+                    "id": 7669,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1816:7:33",
@@ -2899,41 +2899,41 @@
               "src": "1718:129:33"
             },
             "returnParameters": {
-              "id": 7559,
+              "id": 7675,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7558,
+                  "id": 7674,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7560,
+                  "scope": 7676,
                   "src": "1896:47:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_memory_$dyn_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7556,
+                      "id": 7672,
                       "name": "LibFillResults.FillResults",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 5986,
+                      "referencedDeclaration": 6102,
                       "src": "1896:26:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                        "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                         "typeString": "struct LibFillResults.FillResults"
                       }
                     },
-                    "id": 7557,
+                    "id": 7673,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1896:28:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_storage_$dyn_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults[]"
                     }
                   },
@@ -2943,7 +2943,7 @@
               ],
               "src": "1895:49:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "1694:251:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2952,48 +2952,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of fillOrKillOrder.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Array of amounts filled and fees paid by makers and taker.",
-            "id": 7575,
+            "id": 7691,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "batchFillOrKillOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7570,
+              "id": 7686,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7563,
+                  "id": 7679,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7575,
+                  "scope": 7691,
                   "src": "2345:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7561,
+                      "id": 7677,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "2345:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7562,
+                    "id": 7678,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2345:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3002,10 +3002,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7566,
+                  "id": 7682,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7575,
+                  "scope": 7691,
                   "src": "2385:38:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -3015,7 +3015,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7564,
+                      "id": 7680,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "2385:7:33",
@@ -3024,7 +3024,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7565,
+                    "id": 7681,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2385:9:33",
@@ -3038,10 +3038,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7569,
+                  "id": 7685,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7575,
+                  "scope": 7691,
                   "src": "2433:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -3051,7 +3051,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7567,
+                      "id": 7683,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "2433:5:33",
@@ -3060,7 +3060,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7568,
+                    "id": 7684,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2433:7:33",
@@ -3076,41 +3076,41 @@
               "src": "2335:129:33"
             },
             "returnParameters": {
-              "id": 7574,
+              "id": 7690,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7573,
+                  "id": 7689,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7575,
+                  "scope": 7691,
                   "src": "2513:47:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_memory_$dyn_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7571,
+                      "id": 7687,
                       "name": "LibFillResults.FillResults",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 5986,
+                      "referencedDeclaration": 6102,
                       "src": "2513:26:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                        "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                         "typeString": "struct LibFillResults.FillResults"
                       }
                     },
-                    "id": 7572,
+                    "id": 7688,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "2513:28:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_storage_$dyn_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults[]"
                     }
                   },
@@ -3120,7 +3120,7 @@
               ],
               "src": "2512:49:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "2305:257:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -3129,48 +3129,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of fillOrder. If any fill reverts, the error is caught and ignored.\n @param orders Array of order specifications.\n @param takerAssetFillAmounts Array of desired amounts of takerAsset to sell in orders.\n @param signatures Proofs that orders have been created by makers.\n @return Array of amounts filled and fees paid by makers and taker.",
-            "id": 7590,
+            "id": 7706,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "batchFillOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7585,
+              "id": 7701,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7578,
+                  "id": 7694,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7706,
                   "src": "3011:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7576,
+                      "id": 7692,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "3011:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7577,
+                    "id": 7693,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3011:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3179,10 +3179,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7581,
+                  "id": 7697,
                   "name": "takerAssetFillAmounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7706,
                   "src": "3051:38:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -3192,7 +3192,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7579,
+                      "id": 7695,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "3051:7:33",
@@ -3201,7 +3201,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7580,
+                    "id": 7696,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3051:9:33",
@@ -3215,10 +3215,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7584,
+                  "id": 7700,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7706,
                   "src": "3099:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -3228,7 +3228,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7582,
+                      "id": 7698,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "3099:5:33",
@@ -3237,7 +3237,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7583,
+                    "id": 7699,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3099:7:33",
@@ -3253,41 +3253,41 @@
               "src": "3001:129:33"
             },
             "returnParameters": {
-              "id": 7589,
+              "id": 7705,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7588,
+                  "id": 7704,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7590,
+                  "scope": 7706,
                   "src": "3179:47:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_memory_$dyn_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7586,
+                      "id": 7702,
                       "name": "LibFillResults.FillResults",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 5986,
+                      "referencedDeclaration": 6102,
                       "src": "3179:26:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                        "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                         "typeString": "struct LibFillResults.FillResults"
                       }
                     },
-                    "id": 7587,
+                    "id": 7703,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3179:28:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_FillResults_$5986_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_FillResults_$6102_storage_$dyn_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults[]"
                     }
                   },
@@ -3297,7 +3297,7 @@
               ],
               "src": "3178:49:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "2970:258:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -3306,48 +3306,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of fillOrder until total amount of takerAsset is sold by taker.\n      If any fill reverts, the error is caught and ignored.\n      NOTE: This function does not enforce that the takerAsset is the same for each order.\n @param orders Array of order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 7603,
+            "id": 7719,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "marketSellOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7599,
+              "id": 7715,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7593,
+                  "id": 7709,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7603,
+                  "scope": 7719,
                   "src": "3808:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7591,
+                      "id": 7707,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "3808:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7592,
+                    "id": 7708,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3808:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3356,10 +3356,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7595,
+                  "id": 7711,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7603,
+                  "scope": 7719,
                   "src": "3848:28:33",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3368,7 +3368,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7594,
+                    "id": 7710,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3848:7:33",
@@ -3382,10 +3382,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7598,
+                  "id": 7714,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7603,
+                  "scope": 7719,
                   "src": "3886:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -3395,7 +3395,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7596,
+                      "id": 7712,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "3886:5:33",
@@ -3404,7 +3404,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7597,
+                    "id": 7713,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "3886:7:33",
@@ -3420,31 +3420,31 @@
               "src": "3798:119:33"
             },
             "returnParameters": {
-              "id": 7602,
+              "id": 7718,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7601,
+                  "id": 7717,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7603,
+                  "scope": 7719,
                   "src": "3966:45:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7600,
+                    "id": 7716,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "3966:26:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -3454,7 +3454,7 @@
               ],
               "src": "3965:47:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "3766:247:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -3463,48 +3463,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of fillOrder until total amount of makerAsset is bought by taker.\n      If any fill reverts, the error is caught and ignored.\n      NOTE: This function does not enforce that the makerAsset is the same for each order.\n @param orders Array of order specifications.\n @param makerAssetFillAmount Desired amount of makerAsset to buy.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 7616,
+            "id": 7732,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "marketBuyOrdersNoThrow",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7612,
+              "id": 7728,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7606,
+                  "id": 7722,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7616,
+                  "scope": 7732,
                   "src": "4593:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7604,
+                      "id": 7720,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "4593:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7605,
+                    "id": 7721,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "4593:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3513,10 +3513,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7608,
+                  "id": 7724,
                   "name": "makerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7616,
+                  "scope": 7732,
                   "src": "4633:28:33",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3525,7 +3525,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7607,
+                    "id": 7723,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4633:7:33",
@@ -3539,10 +3539,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7611,
+                  "id": 7727,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7616,
+                  "scope": 7732,
                   "src": "4671:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -3552,7 +3552,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7609,
+                      "id": 7725,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "4671:5:33",
@@ -3561,7 +3561,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7610,
+                    "id": 7726,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "4671:7:33",
@@ -3577,31 +3577,31 @@
               "src": "4583:119:33"
             },
             "returnParameters": {
-              "id": 7615,
+              "id": 7731,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7614,
+                  "id": 7730,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7616,
+                  "scope": 7732,
                   "src": "4751:45:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7613,
+                    "id": 7729,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "4751:26:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -3611,7 +3611,7 @@
               ],
               "src": "4750:47:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "4552:246:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -3620,48 +3620,48 @@
           {
             "body": null,
             "documentation": "@dev Calls marketSellOrdersNoThrow then reverts if < takerAssetFillAmount has been sold.\n      NOTE: This function does not enforce that the takerAsset is the same for each order.\n @param orders Array of order specifications.\n @param takerAssetFillAmount Minimum amount of takerAsset to sell.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 7629,
+            "id": 7745,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "marketSellOrdersFillOrKill",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7625,
+              "id": 7741,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7619,
+                  "id": 7735,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7629,
+                  "scope": 7745,
                   "src": "5310:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7617,
+                      "id": 7733,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "5310:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7618,
+                    "id": 7734,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "5310:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3670,10 +3670,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7621,
+                  "id": 7737,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7629,
+                  "scope": 7745,
                   "src": "5350:28:33",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3682,7 +3682,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7620,
+                    "id": 7736,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "5350:7:33",
@@ -3696,10 +3696,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7624,
+                  "id": 7740,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7629,
+                  "scope": 7745,
                   "src": "5388:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -3709,7 +3709,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7622,
+                      "id": 7738,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "5388:5:33",
@@ -3718,7 +3718,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7623,
+                    "id": 7739,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "5388:7:33",
@@ -3734,31 +3734,31 @@
               "src": "5300:119:33"
             },
             "returnParameters": {
-              "id": 7628,
+              "id": 7744,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7627,
+                  "id": 7743,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7629,
+                  "scope": 7745,
                   "src": "5468:45:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7626,
+                    "id": 7742,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "5468:26:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -3768,7 +3768,7 @@
               ],
               "src": "5467:47:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "5265:250:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -3777,48 +3777,48 @@
           {
             "body": null,
             "documentation": "@dev Calls marketBuyOrdersNoThrow then reverts if < makerAssetFillAmount has been bought.\n      NOTE: This function does not enforce that the makerAsset is the same for each order.\n @param orders Array of order specifications.\n @param makerAssetFillAmount Minimum amount of makerAsset to buy.\n @param signatures Proofs that orders have been signed by makers.\n @return Amounts filled and fees paid by makers and taker.",
-            "id": 7642,
+            "id": 7758,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "marketBuyOrdersFillOrKill",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7638,
+              "id": 7754,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7632,
+                  "id": 7748,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7642,
+                  "scope": 7758,
                   "src": "6026:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7630,
+                      "id": 7746,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "6026:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7631,
+                    "id": 7747,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "6026:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3827,10 +3827,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7634,
+                  "id": 7750,
                   "name": "makerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7642,
+                  "scope": 7758,
                   "src": "6066:28:33",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -3839,7 +3839,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7633,
+                    "id": 7749,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "6066:7:33",
@@ -3853,10 +3853,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7637,
+                  "id": 7753,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7642,
+                  "scope": 7758,
                   "src": "6104:25:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -3866,7 +3866,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7635,
+                      "id": 7751,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "6104:5:33",
@@ -3875,7 +3875,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7636,
+                    "id": 7752,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "6104:7:33",
@@ -3891,31 +3891,31 @@
               "src": "6016:119:33"
             },
             "returnParameters": {
-              "id": 7641,
+              "id": 7757,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7640,
+                  "id": 7756,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7642,
+                  "scope": 7758,
                   "src": "6184:45:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7639,
+                    "id": 7755,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "6184:26:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -3925,7 +3925,7 @@
               ],
               "src": "6183:47:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "5982:249:33",
             "stateMutability": "payable",
             "superFunction": null,
@@ -3934,48 +3934,48 @@
           {
             "body": null,
             "documentation": "@dev Executes multiple calls of cancelOrder.\n @param orders Array of order specifications.",
-            "id": 7648,
+            "id": 7764,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "batchCancelOrders",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7646,
+              "id": 7762,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7645,
+                  "id": 7761,
                   "name": "orders",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7648,
+                  "scope": 7764,
                   "src": "6370:30:33",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Order_$7003_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Order_$7119_memory_$dyn_memory_ptr",
                     "typeString": "struct LibOrder.Order[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7643,
+                      "id": 7759,
                       "name": "LibOrder.Order",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7003,
+                      "referencedDeclaration": 7119,
                       "src": "6370:14:33",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                        "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                         "typeString": "struct LibOrder.Order"
                       }
                     },
-                    "id": 7644,
+                    "id": 7760,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "6370:16:33",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Order_$7003_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Order_$7119_storage_$dyn_storage_ptr",
                       "typeString": "struct LibOrder.Order[]"
                     }
                   },
@@ -3986,19 +3986,19 @@
               "src": "6369:32:33"
             },
             "returnParameters": {
-              "id": 7647,
+              "id": 7763,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "6432:0:33"
             },
-            "scope": 7649,
+            "scope": 7765,
             "src": "6343:90:33",
             "stateMutability": "payable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7650,
+        "scope": 7766,
         "src": "777:5658:33"
       }
     ],
@@ -4010,7 +4010,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.2",
-  "updatedAt": "2020-07-13T20:22:16.831Z",
+  "updatedAt": "2020-07-14T13:19:28.222Z",
   "devdoc": {
     "methods": {
       "batchCancelOrders((address,address,address,address,uint256,uint256,uint256,uint256,uint256,uint256,bytes,bytes,bytes,bytes)[])": {

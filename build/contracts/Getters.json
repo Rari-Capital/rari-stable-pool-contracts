@@ -80,14 +80,14 @@
     "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/Getters.sol",
     "exportedSymbols": {
       "Getters": [
-        4819
+        4827
       ]
     },
-    "id": 4820,
+    "id": 4828,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4796,
+        "id": 4804,
         "literals": [
           "solidity",
           "^",
@@ -98,7 +98,7 @@
         "src": "621:23:9"
       },
       {
-        "id": 4797,
+        "id": 4805,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -109,14 +109,14 @@
       {
         "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/lib/Account.sol",
         "file": "./lib/Account.sol",
-        "id": 4799,
+        "id": 4807,
         "nodeType": "ImportDirective",
-        "scope": 4820,
-        "sourceUnit": 4858,
+        "scope": 4828,
+        "sourceUnit": 4866,
         "src": "683:44:9",
         "symbolAliases": [
           {
-            "foreign": 4798,
+            "foreign": 4806,
             "local": null
           }
         ],
@@ -125,14 +125,14 @@
       {
         "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/lib/Types.sol",
         "file": "./lib/Types.sol",
-        "id": 4801,
+        "id": 4809,
         "nodeType": "ImportDirective",
-        "scope": 4820,
-        "sourceUnit": 4920,
+        "scope": 4828,
+        "sourceUnit": 4928,
         "src": "729:40:9",
         "symbolAliases": [
           {
-            "foreign": 4800,
+            "foreign": 4808,
             "local": null
           }
         ],
@@ -144,24 +144,24 @@
         "contractKind": "contract",
         "documentation": "@title Getters\n@author dYdX\n\n * Public read-only functions that allow transparency into the state of Solo",
         "fullyImplemented": false,
-        "id": 4819,
+        "id": 4827,
         "linearizedBaseContracts": [
-          4819
+          4827
         ],
         "name": "Getters",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 4804,
+            "id": 4812,
             "libraryName": {
               "contractScope": null,
-              "id": 4802,
+              "id": 4810,
               "name": "Types",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4919,
+              "referencedDeclaration": 4927,
               "src": "933:5:9",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Types_$4919",
+                "typeIdentifier": "t_contract$_Types_$4927",
                 "typeString": "library Types"
               }
             },
@@ -169,13 +169,13 @@
             "src": "927:26:9",
             "typeName": {
               "contractScope": null,
-              "id": 4803,
+              "id": 4811,
               "name": "Types.Par",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4913,
+              "referencedDeclaration": 4921,
               "src": "943:9:9",
               "typeDescriptions": {
-                "typeIdentifier": "t_struct$_Par_$4913_storage_ptr",
+                "typeIdentifier": "t_struct$_Par_$4921_storage_ptr",
                 "typeString": "struct Types.Par"
               }
             }
@@ -183,38 +183,38 @@
           {
             "body": null,
             "documentation": "Get an account's summary for each market.\n\n     * @param  account  The account to query\n@return          The following values:\n                  - The ERC20 token address for each market\n                  - The account's principal value for each market\n                  - The account's (supplied or borrowed) number of tokens for each market",
-            "id": 4818,
+            "id": 4826,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getAccountBalances",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4807,
+              "id": 4815,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4806,
+                  "id": 4814,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4818,
+                  "scope": 4826,
                   "src": "1408:27:9",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Info_$4856_memory_ptr",
+                    "typeIdentifier": "t_struct$_Info_$4864_memory_ptr",
                     "typeString": "struct Account.Info"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4805,
+                    "id": 4813,
                     "name": "Account.Info",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4856,
+                    "referencedDeclaration": 4864,
                     "src": "1408:12:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Info_$4856_storage_ptr",
+                      "typeIdentifier": "t_struct$_Info_$4864_storage_ptr",
                       "typeString": "struct Account.Info"
                     }
                   },
@@ -225,15 +225,15 @@
               "src": "1397:45:9"
             },
             "returnParameters": {
-              "id": 4817,
+              "id": 4825,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4810,
+                  "id": 4818,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4818,
+                  "scope": 4826,
                   "src": "1505:16:9",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -243,7 +243,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4808,
+                      "id": 4816,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1505:7:9",
@@ -253,7 +253,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 4809,
+                    "id": 4817,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1505:9:9",
@@ -267,36 +267,36 @@
                 },
                 {
                   "constant": false,
-                  "id": 4813,
+                  "id": 4821,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4818,
+                  "scope": 4826,
                   "src": "1536:18:9",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Par_$4913_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Par_$4921_memory_$dyn_memory_ptr",
                     "typeString": "struct Types.Par[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 4811,
+                      "id": 4819,
                       "name": "Types.Par",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 4913,
+                      "referencedDeclaration": 4921,
                       "src": "1536:9:9",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Par_$4913_storage_ptr",
+                        "typeIdentifier": "t_struct$_Par_$4921_storage_ptr",
                         "typeString": "struct Types.Par"
                       }
                     },
-                    "id": 4812,
+                    "id": 4820,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1536:11:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Par_$4913_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Par_$4921_storage_$dyn_storage_ptr",
                       "typeString": "struct Types.Par[]"
                     }
                   },
@@ -305,36 +305,36 @@
                 },
                 {
                   "constant": false,
-                  "id": 4816,
+                  "id": 4824,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4818,
+                  "scope": 4826,
                   "src": "1569:18:9",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Wei_$4918_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Wei_$4926_memory_$dyn_memory_ptr",
                     "typeString": "struct Types.Wei[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 4814,
+                      "id": 4822,
                       "name": "Types.Wei",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 4918,
+                      "referencedDeclaration": 4926,
                       "src": "1569:9:9",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Wei_$4918_storage_ptr",
+                        "typeIdentifier": "t_struct$_Wei_$4926_storage_ptr",
                         "typeString": "struct Types.Wei"
                       }
                     },
-                    "id": 4815,
+                    "id": 4823,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1569:11:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Wei_$4918_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Wei_$4926_storage_$dyn_storage_ptr",
                       "typeString": "struct Types.Wei[]"
                     }
                   },
@@ -344,14 +344,14 @@
               ],
               "src": "1490:108:9"
             },
-            "scope": 4819,
+            "scope": 4827,
             "src": "1370:229:9",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 4820,
+        "scope": 4828,
         "src": "903:699:9"
       }
     ],
@@ -361,14 +361,14 @@
     "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/Getters.sol",
     "exportedSymbols": {
       "Getters": [
-        4819
+        4827
       ]
     },
-    "id": 4820,
+    "id": 4828,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 4796,
+        "id": 4804,
         "literals": [
           "solidity",
           "^",
@@ -379,7 +379,7 @@
         "src": "621:23:9"
       },
       {
-        "id": 4797,
+        "id": 4805,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -390,14 +390,14 @@
       {
         "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/lib/Account.sol",
         "file": "./lib/Account.sol",
-        "id": 4799,
+        "id": 4807,
         "nodeType": "ImportDirective",
-        "scope": 4820,
-        "sourceUnit": 4858,
+        "scope": 4828,
+        "sourceUnit": 4866,
         "src": "683:44:9",
         "symbolAliases": [
           {
-            "foreign": 4798,
+            "foreign": 4806,
             "local": null
           }
         ],
@@ -406,14 +406,14 @@
       {
         "absolutePath": "/home/david/rari-contracts-v1.1.0/contracts/external/dydx/lib/Types.sol",
         "file": "./lib/Types.sol",
-        "id": 4801,
+        "id": 4809,
         "nodeType": "ImportDirective",
-        "scope": 4820,
-        "sourceUnit": 4920,
+        "scope": 4828,
+        "sourceUnit": 4928,
         "src": "729:40:9",
         "symbolAliases": [
           {
-            "foreign": 4800,
+            "foreign": 4808,
             "local": null
           }
         ],
@@ -425,24 +425,24 @@
         "contractKind": "contract",
         "documentation": "@title Getters\n@author dYdX\n\n * Public read-only functions that allow transparency into the state of Solo",
         "fullyImplemented": false,
-        "id": 4819,
+        "id": 4827,
         "linearizedBaseContracts": [
-          4819
+          4827
         ],
         "name": "Getters",
         "nodeType": "ContractDefinition",
         "nodes": [
           {
-            "id": 4804,
+            "id": 4812,
             "libraryName": {
               "contractScope": null,
-              "id": 4802,
+              "id": 4810,
               "name": "Types",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4919,
+              "referencedDeclaration": 4927,
               "src": "933:5:9",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_Types_$4919",
+                "typeIdentifier": "t_contract$_Types_$4927",
                 "typeString": "library Types"
               }
             },
@@ -450,13 +450,13 @@
             "src": "927:26:9",
             "typeName": {
               "contractScope": null,
-              "id": 4803,
+              "id": 4811,
               "name": "Types.Par",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 4913,
+              "referencedDeclaration": 4921,
               "src": "943:9:9",
               "typeDescriptions": {
-                "typeIdentifier": "t_struct$_Par_$4913_storage_ptr",
+                "typeIdentifier": "t_struct$_Par_$4921_storage_ptr",
                 "typeString": "struct Types.Par"
               }
             }
@@ -464,38 +464,38 @@
           {
             "body": null,
             "documentation": "Get an account's summary for each market.\n\n     * @param  account  The account to query\n@return          The following values:\n                  - The ERC20 token address for each market\n                  - The account's principal value for each market\n                  - The account's (supplied or borrowed) number of tokens for each market",
-            "id": 4818,
+            "id": 4826,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getAccountBalances",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 4807,
+              "id": 4815,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4806,
+                  "id": 4814,
                   "name": "account",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4818,
+                  "scope": 4826,
                   "src": "1408:27:9",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Info_$4856_memory_ptr",
+                    "typeIdentifier": "t_struct$_Info_$4864_memory_ptr",
                     "typeString": "struct Account.Info"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 4805,
+                    "id": 4813,
                     "name": "Account.Info",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 4856,
+                    "referencedDeclaration": 4864,
                     "src": "1408:12:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Info_$4856_storage_ptr",
+                      "typeIdentifier": "t_struct$_Info_$4864_storage_ptr",
                       "typeString": "struct Account.Info"
                     }
                   },
@@ -506,15 +506,15 @@
               "src": "1397:45:9"
             },
             "returnParameters": {
-              "id": 4817,
+              "id": 4825,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 4810,
+                  "id": 4818,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4818,
+                  "scope": 4826,
                   "src": "1505:16:9",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -524,7 +524,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 4808,
+                      "id": 4816,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1505:7:9",
@@ -534,7 +534,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 4809,
+                    "id": 4817,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1505:9:9",
@@ -548,36 +548,36 @@
                 },
                 {
                   "constant": false,
-                  "id": 4813,
+                  "id": 4821,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4818,
+                  "scope": 4826,
                   "src": "1536:18:9",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Par_$4913_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Par_$4921_memory_$dyn_memory_ptr",
                     "typeString": "struct Types.Par[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 4811,
+                      "id": 4819,
                       "name": "Types.Par",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 4913,
+                      "referencedDeclaration": 4921,
                       "src": "1536:9:9",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Par_$4913_storage_ptr",
+                        "typeIdentifier": "t_struct$_Par_$4921_storage_ptr",
                         "typeString": "struct Types.Par"
                       }
                     },
-                    "id": 4812,
+                    "id": 4820,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1536:11:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Par_$4913_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Par_$4921_storage_$dyn_storage_ptr",
                       "typeString": "struct Types.Par[]"
                     }
                   },
@@ -586,36 +586,36 @@
                 },
                 {
                   "constant": false,
-                  "id": 4816,
+                  "id": 4824,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 4818,
+                  "scope": 4826,
                   "src": "1569:18:9",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_Wei_$4918_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_Wei_$4926_memory_$dyn_memory_ptr",
                     "typeString": "struct Types.Wei[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 4814,
+                      "id": 4822,
                       "name": "Types.Wei",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 4918,
+                      "referencedDeclaration": 4926,
                       "src": "1569:9:9",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_Wei_$4918_storage_ptr",
+                        "typeIdentifier": "t_struct$_Wei_$4926_storage_ptr",
                         "typeString": "struct Types.Wei"
                       }
                     },
-                    "id": 4815,
+                    "id": 4823,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1569:11:9",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_Wei_$4918_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_Wei_$4926_storage_$dyn_storage_ptr",
                       "typeString": "struct Types.Wei[]"
                     }
                   },
@@ -625,14 +625,14 @@
               ],
               "src": "1490:108:9"
             },
-            "scope": 4819,
+            "scope": 4827,
             "src": "1370:229:9",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 4820,
+        "scope": 4828,
         "src": "903:699:9"
       }
     ],
@@ -644,7 +644,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.2",
-  "updatedAt": "2020-07-13T20:22:16.771Z",
+  "updatedAt": "2020-07-14T13:19:28.195Z",
   "devdoc": {
     "author": "dYdX  * Public read-only functions that allow transparency into the state of Solo",
     "methods": {

@@ -132,14 +132,14 @@
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/ITransactions.sol",
     "exportedSymbols": {
       "ITransactions": [
-        7510
+        7626
       ]
     },
-    "id": 7511,
+    "id": 7627,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7477,
+        "id": 7593,
         "literals": [
           "solidity",
           "^",
@@ -150,7 +150,7 @@
         "src": "580:23:31"
       },
       {
-        "id": 7478,
+        "id": 7594,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -161,10 +161,10 @@
       {
         "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibZeroExTransaction.sol",
         "file": "@0x/contracts-exchange-libs/contracts/src/LibZeroExTransaction.sol",
-        "id": 7479,
+        "id": 7595,
         "nodeType": "ImportDirective",
-        "scope": 7511,
-        "sourceUnit": 7153,
+        "scope": 7627,
+        "sourceUnit": 7269,
         "src": "639:76:31",
         "symbolAliases": [],
         "unitAlias": ""
@@ -175,9 +175,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7510,
+        "id": 7626,
         "linearizedBaseContracts": [
-          7510
+          7626
         ],
         "name": "ITransactions",
         "nodeType": "ContractDefinition",
@@ -185,20 +185,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 7483,
+            "id": 7599,
             "name": "TransactionExecution",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 7482,
+              "id": 7598,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7481,
+                  "id": 7597,
                   "indexed": true,
                   "name": "transactionHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7483,
+                  "scope": 7599,
                   "src": "858:31:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -207,7 +207,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7480,
+                    "id": 7596,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "858:7:31",
@@ -227,38 +227,38 @@
           {
             "body": null,
             "documentation": "@dev Executes an Exchange method call in the context of signer.\n @param transaction 0x transaction containing salt, signerAddress, and data.\n @param signature Proof that transaction has been signed by signer.\n @return ABI encoded return data of the underlying Exchange function call.",
-            "id": 7492,
+            "id": 7608,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "executeTransaction",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7488,
+              "id": 7604,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7485,
+                  "id": 7601,
                   "name": "transaction",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7492,
+                  "scope": 7608,
                   "src": "1247:57:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ZeroExTransaction_$7089_memory_ptr",
+                    "typeIdentifier": "t_struct$_ZeroExTransaction_$7205_memory_ptr",
                     "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7484,
+                    "id": 7600,
                     "name": "LibZeroExTransaction.ZeroExTransaction",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7089,
+                    "referencedDeclaration": 7205,
                     "src": "1247:38:31",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ZeroExTransaction_$7089_storage_ptr",
+                      "typeIdentifier": "t_struct$_ZeroExTransaction_$7205_storage_ptr",
                       "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
                     }
                   },
@@ -267,10 +267,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7487,
+                  "id": 7603,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7492,
+                  "scope": 7608,
                   "src": "1314:22:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -279,7 +279,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7486,
+                    "id": 7602,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1314:5:31",
@@ -295,15 +295,15 @@
               "src": "1237:105:31"
             },
             "returnParameters": {
-              "id": 7491,
+              "id": 7607,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7490,
+                  "id": 7606,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7492,
+                  "scope": 7608,
                   "src": "1391:12:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -312,7 +312,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7489,
+                    "id": 7605,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1391:5:31",
@@ -327,7 +327,7 @@
               ],
               "src": "1390:14:31"
             },
-            "scope": 7510,
+            "scope": 7626,
             "src": "1210:195:31",
             "stateMutability": "payable",
             "superFunction": null,
@@ -336,48 +336,48 @@
           {
             "body": null,
             "documentation": "@dev Executes a batch of Exchange method calls in the context of signer(s).\n @param transactions Array of 0x transactions containing salt, signerAddress, and data.\n @param signatures Array of proofs that transactions have been signed by signer(s).\n @return Array containing ABI encoded return data for each of the underlying Exchange function calls.",
-            "id": 7504,
+            "id": 7620,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "batchExecuteTransactions",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7499,
+              "id": 7615,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7495,
+                  "id": 7611,
                   "name": "transactions",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7504,
+                  "scope": 7620,
                   "src": "1833:60:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_ZeroExTransaction_$7089_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_ZeroExTransaction_$7205_memory_$dyn_memory_ptr",
                     "typeString": "struct LibZeroExTransaction.ZeroExTransaction[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7493,
+                      "id": 7609,
                       "name": "LibZeroExTransaction.ZeroExTransaction",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7089,
+                      "referencedDeclaration": 7205,
                       "src": "1833:38:31",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ZeroExTransaction_$7089_storage_ptr",
+                        "typeIdentifier": "t_struct$_ZeroExTransaction_$7205_storage_ptr",
                         "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
                       }
                     },
-                    "id": 7494,
+                    "id": 7610,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1833:40:31",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_ZeroExTransaction_$7089_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_ZeroExTransaction_$7205_storage_$dyn_storage_ptr",
                       "typeString": "struct LibZeroExTransaction.ZeroExTransaction[]"
                     }
                   },
@@ -386,10 +386,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7498,
+                  "id": 7614,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7504,
+                  "scope": 7620,
                   "src": "1903:25:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -399,7 +399,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7496,
+                      "id": 7612,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "1903:5:31",
@@ -408,7 +408,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7497,
+                    "id": 7613,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1903:7:31",
@@ -424,15 +424,15 @@
               "src": "1823:111:31"
             },
             "returnParameters": {
-              "id": 7503,
+              "id": 7619,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7502,
+                  "id": 7618,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7504,
+                  "scope": 7620,
                   "src": "1983:14:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -442,7 +442,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7500,
+                      "id": 7616,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "1983:5:31",
@@ -451,7 +451,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7501,
+                    "id": 7617,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1983:7:31",
@@ -466,7 +466,7 @@
               ],
               "src": "1982:16:31"
             },
-            "scope": 7510,
+            "scope": 7626,
             "src": "1790:209:31",
             "stateMutability": "payable",
             "superFunction": null,
@@ -475,28 +475,28 @@
           {
             "body": null,
             "documentation": "@dev The current function will be called in the context of this address (either 0x transaction signer or `msg.sender`).\n      If calling a fill function, this address will represent the taker.\n      If calling a cancel function, this address will represent the maker.\n @return Signer of 0x transaction if entry point is `executeTransaction`.\n         `msg.sender` if entry point is any other function.",
-            "id": 7509,
+            "id": 7625,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "_getCurrentContextAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7505,
+              "id": 7621,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2477:2:31"
             },
             "returnParameters": {
-              "id": 7508,
+              "id": 7624,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7507,
+                  "id": 7623,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7509,
+                  "scope": 7625,
                   "src": "2527:7:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -505,7 +505,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7506,
+                    "id": 7622,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2527:7:31",
@@ -521,14 +521,14 @@
               ],
               "src": "2526:9:31"
             },
-            "scope": 7510,
+            "scope": 7626,
             "src": "2443:93:31",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 7511,
+        "scope": 7627,
         "src": "718:1820:31"
       }
     ],
@@ -538,14 +538,14 @@
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/ITransactions.sol",
     "exportedSymbols": {
       "ITransactions": [
-        7510
+        7626
       ]
     },
-    "id": 7511,
+    "id": 7627,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7477,
+        "id": 7593,
         "literals": [
           "solidity",
           "^",
@@ -556,7 +556,7 @@
         "src": "580:23:31"
       },
       {
-        "id": 7478,
+        "id": 7594,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -567,10 +567,10 @@
       {
         "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibZeroExTransaction.sol",
         "file": "@0x/contracts-exchange-libs/contracts/src/LibZeroExTransaction.sol",
-        "id": 7479,
+        "id": 7595,
         "nodeType": "ImportDirective",
-        "scope": 7511,
-        "sourceUnit": 7153,
+        "scope": 7627,
+        "sourceUnit": 7269,
         "src": "639:76:31",
         "symbolAliases": [],
         "unitAlias": ""
@@ -581,9 +581,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7510,
+        "id": 7626,
         "linearizedBaseContracts": [
-          7510
+          7626
         ],
         "name": "ITransactions",
         "nodeType": "ContractDefinition",
@@ -591,20 +591,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 7483,
+            "id": 7599,
             "name": "TransactionExecution",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 7482,
+              "id": 7598,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7481,
+                  "id": 7597,
                   "indexed": true,
                   "name": "transactionHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7483,
+                  "scope": 7599,
                   "src": "858:31:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -613,7 +613,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7480,
+                    "id": 7596,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "858:7:31",
@@ -633,38 +633,38 @@
           {
             "body": null,
             "documentation": "@dev Executes an Exchange method call in the context of signer.\n @param transaction 0x transaction containing salt, signerAddress, and data.\n @param signature Proof that transaction has been signed by signer.\n @return ABI encoded return data of the underlying Exchange function call.",
-            "id": 7492,
+            "id": 7608,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "executeTransaction",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7488,
+              "id": 7604,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7485,
+                  "id": 7601,
                   "name": "transaction",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7492,
+                  "scope": 7608,
                   "src": "1247:57:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_ZeroExTransaction_$7089_memory_ptr",
+                    "typeIdentifier": "t_struct$_ZeroExTransaction_$7205_memory_ptr",
                     "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7484,
+                    "id": 7600,
                     "name": "LibZeroExTransaction.ZeroExTransaction",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7089,
+                    "referencedDeclaration": 7205,
                     "src": "1247:38:31",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_ZeroExTransaction_$7089_storage_ptr",
+                      "typeIdentifier": "t_struct$_ZeroExTransaction_$7205_storage_ptr",
                       "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
                     }
                   },
@@ -673,10 +673,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7487,
+                  "id": 7603,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7492,
+                  "scope": 7608,
                   "src": "1314:22:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -685,7 +685,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7486,
+                    "id": 7602,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1314:5:31",
@@ -701,15 +701,15 @@
               "src": "1237:105:31"
             },
             "returnParameters": {
-              "id": 7491,
+              "id": 7607,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7490,
+                  "id": 7606,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7492,
+                  "scope": 7608,
                   "src": "1391:12:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -718,7 +718,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7489,
+                    "id": 7605,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1391:5:31",
@@ -733,7 +733,7 @@
               ],
               "src": "1390:14:31"
             },
-            "scope": 7510,
+            "scope": 7626,
             "src": "1210:195:31",
             "stateMutability": "payable",
             "superFunction": null,
@@ -742,48 +742,48 @@
           {
             "body": null,
             "documentation": "@dev Executes a batch of Exchange method calls in the context of signer(s).\n @param transactions Array of 0x transactions containing salt, signerAddress, and data.\n @param signatures Array of proofs that transactions have been signed by signer(s).\n @return Array containing ABI encoded return data for each of the underlying Exchange function calls.",
-            "id": 7504,
+            "id": 7620,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "batchExecuteTransactions",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7499,
+              "id": 7615,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7495,
+                  "id": 7611,
                   "name": "transactions",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7504,
+                  "scope": 7620,
                   "src": "1833:60:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_array$_t_struct$_ZeroExTransaction_$7089_memory_$dyn_memory_ptr",
+                    "typeIdentifier": "t_array$_t_struct$_ZeroExTransaction_$7205_memory_$dyn_memory_ptr",
                     "typeString": "struct LibZeroExTransaction.ZeroExTransaction[]"
                   },
                   "typeName": {
                     "baseType": {
                       "contractScope": null,
-                      "id": 7493,
+                      "id": 7609,
                       "name": "LibZeroExTransaction.ZeroExTransaction",
                       "nodeType": "UserDefinedTypeName",
-                      "referencedDeclaration": 7089,
+                      "referencedDeclaration": 7205,
                       "src": "1833:38:31",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_struct$_ZeroExTransaction_$7089_storage_ptr",
+                        "typeIdentifier": "t_struct$_ZeroExTransaction_$7205_storage_ptr",
                         "typeString": "struct LibZeroExTransaction.ZeroExTransaction"
                       }
                     },
-                    "id": 7494,
+                    "id": 7610,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1833:40:31",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_array$_t_struct$_ZeroExTransaction_$7089_storage_$dyn_storage_ptr",
+                      "typeIdentifier": "t_array$_t_struct$_ZeroExTransaction_$7205_storage_$dyn_storage_ptr",
                       "typeString": "struct LibZeroExTransaction.ZeroExTransaction[]"
                     }
                   },
@@ -792,10 +792,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7498,
+                  "id": 7614,
                   "name": "signatures",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7504,
+                  "scope": 7620,
                   "src": "1903:25:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -805,7 +805,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7496,
+                      "id": 7612,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "1903:5:31",
@@ -814,7 +814,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7497,
+                    "id": 7613,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1903:7:31",
@@ -830,15 +830,15 @@
               "src": "1823:111:31"
             },
             "returnParameters": {
-              "id": 7503,
+              "id": 7619,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7502,
+                  "id": 7618,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7504,
+                  "scope": 7620,
                   "src": "1983:14:31",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -848,7 +848,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7500,
+                      "id": 7616,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "1983:5:31",
@@ -857,7 +857,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7501,
+                    "id": 7617,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1983:7:31",
@@ -872,7 +872,7 @@
               ],
               "src": "1982:16:31"
             },
-            "scope": 7510,
+            "scope": 7626,
             "src": "1790:209:31",
             "stateMutability": "payable",
             "superFunction": null,
@@ -881,28 +881,28 @@
           {
             "body": null,
             "documentation": "@dev The current function will be called in the context of this address (either 0x transaction signer or `msg.sender`).\n      If calling a fill function, this address will represent the taker.\n      If calling a cancel function, this address will represent the maker.\n @return Signer of 0x transaction if entry point is `executeTransaction`.\n         `msg.sender` if entry point is any other function.",
-            "id": 7509,
+            "id": 7625,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "_getCurrentContextAddress",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7505,
+              "id": 7621,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "2477:2:31"
             },
             "returnParameters": {
-              "id": 7508,
+              "id": 7624,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7507,
+                  "id": 7623,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7509,
+                  "scope": 7625,
                   "src": "2527:7:31",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -911,7 +911,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7506,
+                    "id": 7622,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2527:7:31",
@@ -927,14 +927,14 @@
               ],
               "src": "2526:9:31"
             },
-            "scope": 7510,
+            "scope": 7626,
             "src": "2443:93:31",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
-        "scope": 7511,
+        "scope": 7627,
         "src": "718:1820:31"
       }
     ],
@@ -946,7 +946,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.2",
-  "updatedAt": "2020-07-13T20:22:16.829Z",
+  "updatedAt": "2020-07-14T13:19:28.222Z",
   "devdoc": {
     "methods": {
       "batchExecuteTransactions((uint256,uint256,uint256,address,bytes)[],bytes[])": {

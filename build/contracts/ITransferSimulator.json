@@ -43,14 +43,14 @@
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/ITransferSimulator.sol",
     "exportedSymbols": {
       "ITransferSimulator": [
-        7529
+        7645
       ]
     },
-    "id": 7530,
+    "id": 7646,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7512,
+        "id": 7628,
         "literals": [
           "solidity",
           "^",
@@ -61,7 +61,7 @@
         "src": "580:23:32"
       },
       {
-        "id": 7513,
+        "id": 7629,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -75,9 +75,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7529,
+        "id": 7645,
         "linearizedBaseContracts": [
-          7529
+          7645
         ],
         "name": "ITransferSimulator",
         "nodeType": "ContractDefinition",
@@ -85,22 +85,22 @@
           {
             "body": null,
             "documentation": "@dev This function may be used to simulate any amount of transfers\n As they would occur through the Exchange contract. Note that this function\n will always revert, even if all transfers are successful. However, it may\n be used with eth_call or with a try/catch pattern in order to simulate\n the results of the transfers.\n @param assetData Array of asset details, each encoded per the AssetProxy contract specification.\n @param fromAddresses Array containing the `from` addresses that correspond with each transfer.\n @param toAddresses Array containing the `to` addresses that correspond with each transfer.\n @param amounts Array containing the amounts that correspond to each transfer.\n @return This function does not return a value. However, it will always revert with\n `Error(\"TRANSFERS_SUCCESSFUL\")` if all of the transfers were successful.",
-            "id": 7528,
+            "id": 7644,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "simulateDispatchTransferFromCalls",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7526,
+              "id": 7642,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7516,
+                  "id": 7632,
                   "name": "assetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7528,
+                  "scope": 7644,
                   "src": "1649:24:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -110,7 +110,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7514,
+                      "id": 7630,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "1649:5:32",
@@ -119,7 +119,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7515,
+                    "id": 7631,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1649:7:32",
@@ -133,10 +133,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7519,
+                  "id": 7635,
                   "name": "fromAddresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7528,
+                  "scope": 7644,
                   "src": "1683:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -146,7 +146,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7517,
+                      "id": 7633,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1683:7:32",
@@ -156,7 +156,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 7518,
+                    "id": 7634,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1683:9:32",
@@ -170,10 +170,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7522,
+                  "id": 7638,
                   "name": "toAddresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7528,
+                  "scope": 7644,
                   "src": "1723:28:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -183,7 +183,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7520,
+                      "id": 7636,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1723:7:32",
@@ -193,7 +193,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 7521,
+                    "id": 7637,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1723:9:32",
@@ -207,10 +207,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7525,
+                  "id": 7641,
                   "name": "amounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7528,
+                  "scope": 7644,
                   "src": "1761:24:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -220,7 +220,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7523,
+                      "id": 7639,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "1761:7:32",
@@ -229,7 +229,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7524,
+                    "id": 7640,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1761:9:32",
@@ -245,19 +245,19 @@
               "src": "1639:152:32"
             },
             "returnParameters": {
-              "id": 7527,
+              "id": 7643,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1806:0:32"
             },
-            "scope": 7529,
+            "scope": 7645,
             "src": "1597:210:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7530,
+        "scope": 7646,
         "src": "640:1169:32"
       }
     ],
@@ -267,14 +267,14 @@
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/ITransferSimulator.sol",
     "exportedSymbols": {
       "ITransferSimulator": [
-        7529
+        7645
       ]
     },
-    "id": 7530,
+    "id": 7646,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7512,
+        "id": 7628,
         "literals": [
           "solidity",
           "^",
@@ -285,7 +285,7 @@
         "src": "580:23:32"
       },
       {
-        "id": 7513,
+        "id": 7629,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -299,9 +299,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7529,
+        "id": 7645,
         "linearizedBaseContracts": [
-          7529
+          7645
         ],
         "name": "ITransferSimulator",
         "nodeType": "ContractDefinition",
@@ -309,22 +309,22 @@
           {
             "body": null,
             "documentation": "@dev This function may be used to simulate any amount of transfers\n As they would occur through the Exchange contract. Note that this function\n will always revert, even if all transfers are successful. However, it may\n be used with eth_call or with a try/catch pattern in order to simulate\n the results of the transfers.\n @param assetData Array of asset details, each encoded per the AssetProxy contract specification.\n @param fromAddresses Array containing the `from` addresses that correspond with each transfer.\n @param toAddresses Array containing the `to` addresses that correspond with each transfer.\n @param amounts Array containing the amounts that correspond to each transfer.\n @return This function does not return a value. However, it will always revert with\n `Error(\"TRANSFERS_SUCCESSFUL\")` if all of the transfers were successful.",
-            "id": 7528,
+            "id": 7644,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "simulateDispatchTransferFromCalls",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7526,
+              "id": 7642,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7516,
+                  "id": 7632,
                   "name": "assetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7528,
+                  "scope": 7644,
                   "src": "1649:24:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -334,7 +334,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7514,
+                      "id": 7630,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
                       "src": "1649:5:32",
@@ -343,7 +343,7 @@
                         "typeString": "bytes"
                       }
                     },
-                    "id": 7515,
+                    "id": 7631,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1649:7:32",
@@ -357,10 +357,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7519,
+                  "id": 7635,
                   "name": "fromAddresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7528,
+                  "scope": 7644,
                   "src": "1683:30:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -370,7 +370,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7517,
+                      "id": 7633,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1683:7:32",
@@ -380,7 +380,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 7518,
+                    "id": 7634,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1683:9:32",
@@ -394,10 +394,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7522,
+                  "id": 7638,
                   "name": "toAddresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7528,
+                  "scope": 7644,
                   "src": "1723:28:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -407,7 +407,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7520,
+                      "id": 7636,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
                       "src": "1723:7:32",
@@ -417,7 +417,7 @@
                         "typeString": "address"
                       }
                     },
-                    "id": 7521,
+                    "id": 7637,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1723:9:32",
@@ -431,10 +431,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7525,
+                  "id": 7641,
                   "name": "amounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7528,
+                  "scope": 7644,
                   "src": "1761:24:32",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -444,7 +444,7 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 7523,
+                      "id": 7639,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
                       "src": "1761:7:32",
@@ -453,7 +453,7 @@
                         "typeString": "uint256"
                       }
                     },
-                    "id": 7524,
+                    "id": 7640,
                     "length": null,
                     "nodeType": "ArrayTypeName",
                     "src": "1761:9:32",
@@ -469,19 +469,19 @@
               "src": "1639:152:32"
             },
             "returnParameters": {
-              "id": 7527,
+              "id": 7643,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "1806:0:32"
             },
-            "scope": 7529,
+            "scope": 7645,
             "src": "1597:210:32",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7530,
+        "scope": 7646,
         "src": "640:1169:32"
       }
     ],
@@ -493,7 +493,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.2",
-  "updatedAt": "2020-07-13T20:22:16.830Z",
+  "updatedAt": "2020-07-14T13:19:28.222Z",
   "devdoc": {
     "methods": {
       "simulateDispatchTransferFromCalls(bytes[],address[],address[],uint256[])": {

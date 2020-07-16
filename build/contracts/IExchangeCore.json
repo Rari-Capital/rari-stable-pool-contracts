@@ -514,14 +514,14 @@
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/IExchangeCore.sol",
     "exportedSymbols": {
       "IExchangeCore": [
-        7287
+        7403
       ]
     },
-    "id": 7288,
+    "id": 7404,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7203,
+        "id": 7319,
         "literals": [
           "solidity",
           "^",
@@ -532,7 +532,7 @@
         "src": "580:23:27"
       },
       {
-        "id": 7204,
+        "id": 7320,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -543,10 +543,10 @@
       {
         "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
         "file": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
-        "id": 7205,
+        "id": 7321,
         "nodeType": "ImportDirective",
-        "scope": 7288,
-        "sourceUnit": 7069,
+        "scope": 7404,
+        "sourceUnit": 7185,
         "src": "639:64:27",
         "symbolAliases": [],
         "unitAlias": ""
@@ -554,10 +554,10 @@
       {
         "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol",
         "file": "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol",
-        "id": 7206,
+        "id": 7322,
         "nodeType": "ImportDirective",
-        "scope": 7288,
-        "sourceUnit": 6643,
+        "scope": 7404,
+        "sourceUnit": 6759,
         "src": "704:70:27",
         "symbolAliases": [],
         "unitAlias": ""
@@ -568,9 +568,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7287,
+        "id": 7403,
         "linearizedBaseContracts": [
-          7287
+          7403
         ],
         "name": "IExchangeCore",
         "nodeType": "ContractDefinition",
@@ -578,20 +578,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 7236,
+            "id": 7352,
             "name": "Fill",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 7235,
+              "id": 7351,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7208,
+                  "id": 7324,
                   "indexed": true,
                   "name": "makerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "885:28:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -600,7 +600,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7207,
+                    "id": 7323,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "885:7:27",
@@ -615,11 +615,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7210,
+                  "id": 7326,
                   "indexed": true,
                   "name": "feeRecipientAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "966:35:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -628,7 +628,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7209,
+                    "id": 7325,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "966:7:27",
@@ -643,11 +643,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7212,
+                  "id": 7328,
                   "indexed": false,
                   "name": "makerAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1043:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -656,7 +656,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7211,
+                    "id": 7327,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1043:5:27",
@@ -670,11 +670,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7214,
+                  "id": 7330,
                   "indexed": false,
                   "name": "takerAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1129:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -683,7 +683,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7213,
+                    "id": 7329,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1129:5:27",
@@ -697,11 +697,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7216,
+                  "id": 7332,
                   "indexed": false,
                   "name": "makerFeeAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1215:23:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -710,7 +710,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7215,
+                    "id": 7331,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1215:5:27",
@@ -724,11 +724,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7218,
+                  "id": 7334,
                   "indexed": false,
                   "name": "takerFeeAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1304:23:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -737,7 +737,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7217,
+                    "id": 7333,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1304:5:27",
@@ -751,11 +751,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7220,
+                  "id": 7336,
                   "indexed": true,
                   "name": "orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1393:25:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -764,7 +764,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7219,
+                    "id": 7335,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1393:7:27",
@@ -778,11 +778,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7222,
+                  "id": 7338,
                   "indexed": false,
                   "name": "takerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1496:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -791,7 +791,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7221,
+                    "id": 7337,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1496:7:27",
@@ -806,11 +806,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7224,
+                  "id": 7340,
                   "indexed": false,
                   "name": "senderAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1576:21:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -819,7 +819,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7223,
+                    "id": 7339,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1576:7:27",
@@ -834,11 +834,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7226,
+                  "id": 7342,
                   "indexed": false,
                   "name": "makerAssetFilledAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1681:30:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -847,7 +847,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7225,
+                    "id": 7341,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1681:7:27",
@@ -861,11 +861,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7228,
+                  "id": 7344,
                   "indexed": false,
                   "name": "takerAssetFilledAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1786:30:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -874,7 +874,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7227,
+                    "id": 7343,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1786:7:27",
@@ -888,11 +888,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7230,
+                  "id": 7346,
                   "indexed": false,
                   "name": "makerFeePaid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1891:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -901,7 +901,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7229,
+                    "id": 7345,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1891:7:27",
@@ -915,11 +915,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7232,
+                  "id": 7348,
                   "indexed": false,
                   "name": "takerFeePaid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1999:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -928,7 +928,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7231,
+                    "id": 7347,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1999:7:27",
@@ -942,11 +942,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7234,
+                  "id": 7350,
                   "indexed": false,
                   "name": "protocolFeePaid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "2107:23:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -955,7 +955,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7233,
+                    "id": 7349,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2107:7:27",
@@ -975,20 +975,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 7250,
+            "id": 7366,
             "name": "Cancel",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 7249,
+              "id": 7365,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7238,
+                  "id": 7354,
                   "indexed": true,
                   "name": "makerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2308:28:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -997,7 +997,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7237,
+                    "id": 7353,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2308:7:27",
@@ -1012,11 +1012,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7240,
+                  "id": 7356,
                   "indexed": true,
                   "name": "feeRecipientAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2389:35:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1025,7 +1025,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7239,
+                    "id": 7355,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2389:7:27",
@@ -1040,11 +1040,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7242,
+                  "id": 7358,
                   "indexed": false,
                   "name": "makerAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2497:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1053,7 +1053,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7241,
+                    "id": 7357,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "2497:5:27",
@@ -1067,11 +1067,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7244,
+                  "id": 7360,
                   "indexed": false,
                   "name": "takerAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2583:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1080,7 +1080,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7243,
+                    "id": 7359,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "2583:5:27",
@@ -1094,11 +1094,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7246,
+                  "id": 7362,
                   "indexed": false,
                   "name": "senderAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2669:21:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1107,7 +1107,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7245,
+                    "id": 7361,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2669:7:27",
@@ -1122,11 +1122,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7248,
+                  "id": 7364,
                   "indexed": true,
                   "name": "orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2774:25:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1135,7 +1135,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7247,
+                    "id": 7363,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "2774:7:27",
@@ -1155,20 +1155,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 7258,
+            "id": 7374,
             "name": "CancelUpTo",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 7257,
+              "id": 7373,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7252,
+                  "id": 7368,
                   "indexed": true,
                   "name": "makerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7258,
+                  "scope": 7374,
                   "src": "2995:28:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1177,7 +1177,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7251,
+                    "id": 7367,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2995:7:27",
@@ -1192,11 +1192,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7254,
+                  "id": 7370,
                   "indexed": true,
                   "name": "orderSenderAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7258,
+                  "scope": 7374,
                   "src": "3101:34:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1205,7 +1205,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7253,
+                    "id": 7369,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3101:7:27",
@@ -1220,11 +1220,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7256,
+                  "id": 7372,
                   "indexed": false,
                   "name": "orderEpoch",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7258,
+                  "scope": 7374,
                   "src": "3218:18:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1233,7 +1233,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7255,
+                    "id": 7371,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3218:7:27",
@@ -1253,22 +1253,22 @@
           {
             "body": null,
             "documentation": "@dev Cancels all orders created by makerAddress with a salt less than or equal to the targetOrderEpoch\n      and senderAddress equal to msg.sender (or null address if msg.sender == makerAddress).\n @param targetOrderEpoch Orders created with a salt less or equal to this value will be cancelled.",
-            "id": 7263,
+            "id": 7379,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "cancelOrdersUpTo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7261,
+              "id": 7377,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7260,
+                  "id": 7376,
                   "name": "targetOrderEpoch",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7263,
+                  "scope": 7379,
                   "src": "3726:24:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1277,7 +1277,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7259,
+                    "id": 7375,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3726:7:27",
@@ -1293,12 +1293,12 @@
               "src": "3725:26:27"
             },
             "returnParameters": {
-              "id": 7262,
+              "id": 7378,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3784:0:27"
             },
-            "scope": 7287,
+            "scope": 7403,
             "src": "3700:85:27",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1307,38 +1307,38 @@
           {
             "body": null,
             "documentation": "@dev Fills the input order.\n @param order Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.\n @return Amounts filled and fees paid by maker and taker.",
-            "id": 7274,
+            "id": 7390,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "fillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7270,
+              "id": 7386,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7265,
+                  "id": 7381,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7274,
+                  "scope": 7390,
                   "src": "4130:27:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$7003_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$7119_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7264,
+                    "id": 7380,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7003,
+                    "referencedDeclaration": 7119,
                     "src": "4130:14:27",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -1347,10 +1347,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7267,
+                  "id": 7383,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7274,
+                  "scope": 7390,
                   "src": "4167:28:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1359,7 +1359,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7266,
+                    "id": 7382,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4167:7:27",
@@ -1373,10 +1373,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7269,
+                  "id": 7385,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7274,
+                  "scope": 7390,
                   "src": "4205:22:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -1385,7 +1385,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7268,
+                    "id": 7384,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "4205:5:27",
@@ -1401,31 +1401,31 @@
               "src": "4120:113:27"
             },
             "returnParameters": {
-              "id": 7273,
+              "id": 7389,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7272,
+                  "id": 7388,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7274,
+                  "scope": 7390,
                   "src": "4282:45:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7271,
+                    "id": 7387,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "4282:26:27",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -1435,7 +1435,7 @@
               ],
               "src": "4281:47:27"
             },
-            "scope": 7287,
+            "scope": 7403,
             "src": "4102:227:27",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1444,38 +1444,38 @@
           {
             "body": null,
             "documentation": "@dev After calling, the order can not be filled anymore.\n @param order Order struct containing order specifications.",
-            "id": 7279,
+            "id": 7395,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "cancelOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7277,
+              "id": 7393,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7276,
+                  "id": 7392,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7279,
+                  "scope": 7395,
                   "src": "4488:27:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$7003_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$7119_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7275,
+                    "id": 7391,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7003,
+                    "referencedDeclaration": 7119,
                     "src": "4488:14:27",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -1486,12 +1486,12 @@
               "src": "4487:29:27"
             },
             "returnParameters": {
-              "id": 7278,
+              "id": 7394,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "4547:0:27"
             },
-            "scope": 7287,
+            "scope": 7403,
             "src": "4467:81:27",
             "stateMutability": "payable",
             "superFunction": null,
@@ -1500,38 +1500,38 @@
           {
             "body": null,
             "documentation": "@dev Gets information about an order: status, hash, and amount filled.\n @param order Order to gather information on.\n @return OrderInfo Information about the order and its state.\n                   See LibOrder.OrderInfo for a complete description.",
-            "id": 7286,
+            "id": 7402,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getOrderInfo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7282,
+              "id": 7398,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7281,
+                  "id": 7397,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7286,
+                  "scope": 7402,
                   "src": "4854:27:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$7003_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$7119_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7280,
+                    "id": 7396,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7003,
+                    "referencedDeclaration": 7119,
                     "src": "4854:14:27",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -1542,31 +1542,31 @@
               "src": "4853:29:27"
             },
             "returnParameters": {
-              "id": 7285,
+              "id": 7401,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7284,
+                  "id": 7400,
                   "name": "orderInfo",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7286,
+                  "scope": 7402,
                   "src": "4928:35:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_OrderInfo_$7010_memory_ptr",
+                    "typeIdentifier": "t_struct$_OrderInfo_$7126_memory_ptr",
                     "typeString": "struct LibOrder.OrderInfo"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7283,
+                    "id": 7399,
                     "name": "LibOrder.OrderInfo",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7010,
+                    "referencedDeclaration": 7126,
                     "src": "4928:18:27",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_OrderInfo_$7010_storage_ptr",
+                      "typeIdentifier": "t_struct$_OrderInfo_$7126_storage_ptr",
                       "typeString": "struct LibOrder.OrderInfo"
                     }
                   },
@@ -1576,14 +1576,14 @@
               ],
               "src": "4927:37:27"
             },
-            "scope": 7287,
+            "scope": 7403,
             "src": "4832:133:27",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7288,
+        "scope": 7404,
         "src": "777:4190:27"
       }
     ],
@@ -1593,14 +1593,14 @@
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/IExchangeCore.sol",
     "exportedSymbols": {
       "IExchangeCore": [
-        7287
+        7403
       ]
     },
-    "id": 7288,
+    "id": 7404,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7203,
+        "id": 7319,
         "literals": [
           "solidity",
           "^",
@@ -1611,7 +1611,7 @@
         "src": "580:23:27"
       },
       {
-        "id": 7204,
+        "id": 7320,
         "literals": [
           "experimental",
           "ABIEncoderV2"
@@ -1622,10 +1622,10 @@
       {
         "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
         "file": "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol",
-        "id": 7205,
+        "id": 7321,
         "nodeType": "ImportDirective",
-        "scope": 7288,
-        "sourceUnit": 7069,
+        "scope": 7404,
+        "sourceUnit": 7185,
         "src": "639:64:27",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1633,10 +1633,10 @@
       {
         "absolutePath": "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol",
         "file": "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol",
-        "id": 7206,
+        "id": 7322,
         "nodeType": "ImportDirective",
-        "scope": 7288,
-        "sourceUnit": 6643,
+        "scope": 7404,
+        "sourceUnit": 6759,
         "src": "704:70:27",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1647,9 +1647,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7287,
+        "id": 7403,
         "linearizedBaseContracts": [
-          7287
+          7403
         ],
         "name": "IExchangeCore",
         "nodeType": "ContractDefinition",
@@ -1657,20 +1657,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 7236,
+            "id": 7352,
             "name": "Fill",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 7235,
+              "id": 7351,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7208,
+                  "id": 7324,
                   "indexed": true,
                   "name": "makerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "885:28:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1679,7 +1679,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7207,
+                    "id": 7323,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "885:7:27",
@@ -1694,11 +1694,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7210,
+                  "id": 7326,
                   "indexed": true,
                   "name": "feeRecipientAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "966:35:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1707,7 +1707,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7209,
+                    "id": 7325,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "966:7:27",
@@ -1722,11 +1722,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7212,
+                  "id": 7328,
                   "indexed": false,
                   "name": "makerAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1043:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1735,7 +1735,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7211,
+                    "id": 7327,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1043:5:27",
@@ -1749,11 +1749,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7214,
+                  "id": 7330,
                   "indexed": false,
                   "name": "takerAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1129:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1762,7 +1762,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7213,
+                    "id": 7329,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1129:5:27",
@@ -1776,11 +1776,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7216,
+                  "id": 7332,
                   "indexed": false,
                   "name": "makerFeeAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1215:23:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1789,7 +1789,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7215,
+                    "id": 7331,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1215:5:27",
@@ -1803,11 +1803,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7218,
+                  "id": 7334,
                   "indexed": false,
                   "name": "takerFeeAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1304:23:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1816,7 +1816,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7217,
+                    "id": 7333,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "1304:5:27",
@@ -1830,11 +1830,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7220,
+                  "id": 7336,
                   "indexed": true,
                   "name": "orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1393:25:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1843,7 +1843,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7219,
+                    "id": 7335,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "1393:7:27",
@@ -1857,11 +1857,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7222,
+                  "id": 7338,
                   "indexed": false,
                   "name": "takerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1496:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1870,7 +1870,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7221,
+                    "id": 7337,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1496:7:27",
@@ -1885,11 +1885,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7224,
+                  "id": 7340,
                   "indexed": false,
                   "name": "senderAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1576:21:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1898,7 +1898,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7223,
+                    "id": 7339,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "1576:7:27",
@@ -1913,11 +1913,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7226,
+                  "id": 7342,
                   "indexed": false,
                   "name": "makerAssetFilledAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1681:30:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1926,7 +1926,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7225,
+                    "id": 7341,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1681:7:27",
@@ -1940,11 +1940,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7228,
+                  "id": 7344,
                   "indexed": false,
                   "name": "takerAssetFilledAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1786:30:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1953,7 +1953,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7227,
+                    "id": 7343,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1786:7:27",
@@ -1967,11 +1967,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7230,
+                  "id": 7346,
                   "indexed": false,
                   "name": "makerFeePaid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1891:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -1980,7 +1980,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7229,
+                    "id": 7345,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1891:7:27",
@@ -1994,11 +1994,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7232,
+                  "id": 7348,
                   "indexed": false,
                   "name": "takerFeePaid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "1999:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2007,7 +2007,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7231,
+                    "id": 7347,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "1999:7:27",
@@ -2021,11 +2021,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7234,
+                  "id": 7350,
                   "indexed": false,
                   "name": "protocolFeePaid",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7236,
+                  "scope": 7352,
                   "src": "2107:23:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2034,7 +2034,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7233,
+                    "id": 7349,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "2107:7:27",
@@ -2054,20 +2054,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 7250,
+            "id": 7366,
             "name": "Cancel",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 7249,
+              "id": 7365,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7238,
+                  "id": 7354,
                   "indexed": true,
                   "name": "makerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2308:28:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2076,7 +2076,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7237,
+                    "id": 7353,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2308:7:27",
@@ -2091,11 +2091,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7240,
+                  "id": 7356,
                   "indexed": true,
                   "name": "feeRecipientAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2389:35:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2104,7 +2104,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7239,
+                    "id": 7355,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2389:7:27",
@@ -2119,11 +2119,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7242,
+                  "id": 7358,
                   "indexed": false,
                   "name": "makerAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2497:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2132,7 +2132,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7241,
+                    "id": 7357,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "2497:5:27",
@@ -2146,11 +2146,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7244,
+                  "id": 7360,
                   "indexed": false,
                   "name": "takerAssetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2583:20:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2159,7 +2159,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7243,
+                    "id": 7359,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "2583:5:27",
@@ -2173,11 +2173,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7246,
+                  "id": 7362,
                   "indexed": false,
                   "name": "senderAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2669:21:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2186,7 +2186,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7245,
+                    "id": 7361,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2669:7:27",
@@ -2201,11 +2201,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7248,
+                  "id": 7364,
                   "indexed": true,
                   "name": "orderHash",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7250,
+                  "scope": 7366,
                   "src": "2774:25:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2214,7 +2214,7 @@
                     "typeString": "bytes32"
                   },
                   "typeName": {
-                    "id": 7247,
+                    "id": 7363,
                     "name": "bytes32",
                     "nodeType": "ElementaryTypeName",
                     "src": "2774:7:27",
@@ -2234,20 +2234,20 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 7258,
+            "id": 7374,
             "name": "CancelUpTo",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 7257,
+              "id": 7373,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7252,
+                  "id": 7368,
                   "indexed": true,
                   "name": "makerAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7258,
+                  "scope": 7374,
                   "src": "2995:28:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2256,7 +2256,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7251,
+                    "id": 7367,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "2995:7:27",
@@ -2271,11 +2271,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7254,
+                  "id": 7370,
                   "indexed": true,
                   "name": "orderSenderAddress",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7258,
+                  "scope": 7374,
                   "src": "3101:34:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2284,7 +2284,7 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7253,
+                    "id": 7369,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
                     "src": "3101:7:27",
@@ -2299,11 +2299,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 7256,
+                  "id": 7372,
                   "indexed": false,
                   "name": "orderEpoch",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7258,
+                  "scope": 7374,
                   "src": "3218:18:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2312,7 +2312,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7255,
+                    "id": 7371,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3218:7:27",
@@ -2332,22 +2332,22 @@
           {
             "body": null,
             "documentation": "@dev Cancels all orders created by makerAddress with a salt less than or equal to the targetOrderEpoch\n      and senderAddress equal to msg.sender (or null address if msg.sender == makerAddress).\n @param targetOrderEpoch Orders created with a salt less or equal to this value will be cancelled.",
-            "id": 7263,
+            "id": 7379,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "cancelOrdersUpTo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7261,
+              "id": 7377,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7260,
+                  "id": 7376,
                   "name": "targetOrderEpoch",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7263,
+                  "scope": 7379,
                   "src": "3726:24:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2356,7 +2356,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7259,
+                    "id": 7375,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "3726:7:27",
@@ -2372,12 +2372,12 @@
               "src": "3725:26:27"
             },
             "returnParameters": {
-              "id": 7262,
+              "id": 7378,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "3784:0:27"
             },
-            "scope": 7287,
+            "scope": 7403,
             "src": "3700:85:27",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2386,38 +2386,38 @@
           {
             "body": null,
             "documentation": "@dev Fills the input order.\n @param order Order struct containing order specifications.\n @param takerAssetFillAmount Desired amount of takerAsset to sell.\n @param signature Proof that order has been created by maker.\n @return Amounts filled and fees paid by maker and taker.",
-            "id": 7274,
+            "id": 7390,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "fillOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7270,
+              "id": 7386,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7265,
+                  "id": 7381,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7274,
+                  "scope": 7390,
                   "src": "4130:27:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$7003_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$7119_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7264,
+                    "id": 7380,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7003,
+                    "referencedDeclaration": 7119,
                     "src": "4130:14:27",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -2426,10 +2426,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7267,
+                  "id": 7383,
                   "name": "takerAssetFillAmount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7274,
+                  "scope": 7390,
                   "src": "4167:28:27",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -2438,7 +2438,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 7266,
+                    "id": 7382,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "4167:7:27",
@@ -2452,10 +2452,10 @@
                 },
                 {
                   "constant": false,
-                  "id": 7269,
+                  "id": 7385,
                   "name": "signature",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7274,
+                  "scope": 7390,
                   "src": "4205:22:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
@@ -2464,7 +2464,7 @@
                     "typeString": "bytes"
                   },
                   "typeName": {
-                    "id": 7268,
+                    "id": 7384,
                     "name": "bytes",
                     "nodeType": "ElementaryTypeName",
                     "src": "4205:5:27",
@@ -2480,31 +2480,31 @@
               "src": "4120:113:27"
             },
             "returnParameters": {
-              "id": 7273,
+              "id": 7389,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7272,
+                  "id": 7388,
                   "name": "fillResults",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7274,
+                  "scope": 7390,
                   "src": "4282:45:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_FillResults_$5986_memory_ptr",
+                    "typeIdentifier": "t_struct$_FillResults_$6102_memory_ptr",
                     "typeString": "struct LibFillResults.FillResults"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7271,
+                    "id": 7387,
                     "name": "LibFillResults.FillResults",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 5986,
+                    "referencedDeclaration": 6102,
                     "src": "4282:26:27",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_FillResults_$5986_storage_ptr",
+                      "typeIdentifier": "t_struct$_FillResults_$6102_storage_ptr",
                       "typeString": "struct LibFillResults.FillResults"
                     }
                   },
@@ -2514,7 +2514,7 @@
               ],
               "src": "4281:47:27"
             },
-            "scope": 7287,
+            "scope": 7403,
             "src": "4102:227:27",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2523,38 +2523,38 @@
           {
             "body": null,
             "documentation": "@dev After calling, the order can not be filled anymore.\n @param order Order struct containing order specifications.",
-            "id": 7279,
+            "id": 7395,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "cancelOrder",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7277,
+              "id": 7393,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7276,
+                  "id": 7392,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7279,
+                  "scope": 7395,
                   "src": "4488:27:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$7003_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$7119_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7275,
+                    "id": 7391,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7003,
+                    "referencedDeclaration": 7119,
                     "src": "4488:14:27",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -2565,12 +2565,12 @@
               "src": "4487:29:27"
             },
             "returnParameters": {
-              "id": 7278,
+              "id": 7394,
               "nodeType": "ParameterList",
               "parameters": [],
               "src": "4547:0:27"
             },
-            "scope": 7287,
+            "scope": 7403,
             "src": "4467:81:27",
             "stateMutability": "payable",
             "superFunction": null,
@@ -2579,38 +2579,38 @@
           {
             "body": null,
             "documentation": "@dev Gets information about an order: status, hash, and amount filled.\n @param order Order to gather information on.\n @return OrderInfo Information about the order and its state.\n                   See LibOrder.OrderInfo for a complete description.",
-            "id": 7286,
+            "id": 7402,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getOrderInfo",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7282,
+              "id": 7398,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7281,
+                  "id": 7397,
                   "name": "order",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7286,
+                  "scope": 7402,
                   "src": "4854:27:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_Order_$7003_memory_ptr",
+                    "typeIdentifier": "t_struct$_Order_$7119_memory_ptr",
                     "typeString": "struct LibOrder.Order"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7280,
+                    "id": 7396,
                     "name": "LibOrder.Order",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7003,
+                    "referencedDeclaration": 7119,
                     "src": "4854:14:27",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_Order_$7003_storage_ptr",
+                      "typeIdentifier": "t_struct$_Order_$7119_storage_ptr",
                       "typeString": "struct LibOrder.Order"
                     }
                   },
@@ -2621,31 +2621,31 @@
               "src": "4853:29:27"
             },
             "returnParameters": {
-              "id": 7285,
+              "id": 7401,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7284,
+                  "id": 7400,
                   "name": "orderInfo",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7286,
+                  "scope": 7402,
                   "src": "4928:35:27",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
-                    "typeIdentifier": "t_struct$_OrderInfo_$7010_memory_ptr",
+                    "typeIdentifier": "t_struct$_OrderInfo_$7126_memory_ptr",
                     "typeString": "struct LibOrder.OrderInfo"
                   },
                   "typeName": {
                     "contractScope": null,
-                    "id": 7283,
+                    "id": 7399,
                     "name": "LibOrder.OrderInfo",
                     "nodeType": "UserDefinedTypeName",
-                    "referencedDeclaration": 7010,
+                    "referencedDeclaration": 7126,
                     "src": "4928:18:27",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_struct$_OrderInfo_$7010_storage_ptr",
+                      "typeIdentifier": "t_struct$_OrderInfo_$7126_storage_ptr",
                       "typeString": "struct LibOrder.OrderInfo"
                     }
                   },
@@ -2655,14 +2655,14 @@
               ],
               "src": "4927:37:27"
             },
-            "scope": 7287,
+            "scope": 7403,
             "src": "4832:133:27",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 7288,
+        "scope": 7404,
         "src": "777:4190:27"
       }
     ],
@@ -2674,7 +2674,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.2",
-  "updatedAt": "2020-07-13T20:22:16.824Z",
+  "updatedAt": "2020-07-14T13:19:28.219Z",
   "devdoc": {
     "methods": {
       "cancelOrder((address,address,address,address,uint256,uint256,uint256,uint256,uint256,uint256,bytes,bytes,bytes,bytes))": {

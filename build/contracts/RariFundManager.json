@@ -5937,7 +5937,7 @@
                                   "name": "this",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 9314,
+                                  "referencedDeclaration": 9316,
                                   "src": "9196:4:2",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_contract$_RariFundManager_$3484",
@@ -8844,7 +8844,7 @@
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 9314,
+                                "referencedDeclaration": 9316,
                                 "src": "12594:4:2",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_RariFundManager_$3484",
@@ -39648,7 +39648,7 @@
                                   "name": "this",
                                   "nodeType": "Identifier",
                                   "overloadedDeclarations": [],
-                                  "referencedDeclaration": 9314,
+                                  "referencedDeclaration": 9316,
                                   "src": "9196:4:2",
                                   "typeDescriptions": {
                                     "typeIdentifier": "t_contract$_RariFundManager_$3484",
@@ -42555,7 +42555,7 @@
                                 "name": "this",
                                 "nodeType": "Identifier",
                                 "overloadedDeclarations": [],
-                                "referencedDeclaration": 9314,
+                                "referencedDeclaration": 9316,
                                 "src": "12594:4:2",
                                 "typeDescriptions": {
                                   "typeIdentifier": "t_contract$_RariFundManager_$3484",
@@ -68355,249 +68355,9 @@
     "name": "solc",
     "version": "0.5.17+commit.d19bba13.Emscripten.clang"
   },
-  "networks": {
-    "1": {
-      "events": {
-        "0xb78af891b0e8c2e617c2a91471c40accb2559e2aa533b41746a9d2e580b4bc33": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "string",
-              "name": "currencyCode",
-              "type": "string"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "sender",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "payee",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "amount",
-              "type": "uint256"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "amountUsd",
-              "type": "uint256"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "rftMinted",
-              "type": "uint256"
-            }
-          ],
-          "name": "Deposit",
-          "type": "event"
-        },
-        "0xd545a79667dd5d91e91b5b3e5179968d1a0ab745039f0a8cbf4c40f420d86c47": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "newContract",
-              "type": "address"
-            }
-          ],
-          "name": "FundControllerSet",
-          "type": "event"
-        },
-        "0x0a6b9c6c74d93f230c4346c52ac415dd7dda5a0efb4f7394c0bfb5baa87d3265": {
-          "anonymous": false,
-          "inputs": [],
-          "name": "FundDisabled",
-          "type": "event"
-        },
-        "0x8e1c35fbf7cd686deedf8310574cf4ad038a00a86d3317c831afaeec58f1eeae": {
-          "anonymous": false,
-          "inputs": [],
-          "name": "FundEnabled",
-          "type": "event"
-        },
-        "0x2afa12c0897533a1c5215a86cc5a031360c72d4eaf123563b68681533191f72a": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "newContract",
-              "type": "address"
-            }
-          ],
-          "name": "FundManagerUpgraded",
-          "type": "event"
-        },
-        "0x908128485de48e02c38d92b81cd0a3a9cbe8eab3976faa1d3758c7bb6a25e948": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "newContract",
-              "type": "address"
-            }
-          ],
-          "name": "FundProxySet",
-          "type": "event"
-        },
-        "0xeb9b68c1cca2a0c5d180f75c6324fad517a04867907b0f3bee85d98fdf57ee94": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "newAddress",
-              "type": "address"
-            }
-          ],
-          "name": "FundRebalancerSet",
-          "type": "event"
-        },
-        "0xcb757ed74a6206afe4cd637317744abe1dafdf32fcbacdd94a785d91e7c13043": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "newContract",
-              "type": "address"
-            }
-          ],
-          "name": "FundTokenSet",
-          "type": "event"
-        },
-        "0x93375fea511bbf0428eb2f5476dfac0a1fa56fb5ea6dbffb2291b320d4160cbb": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "beneficiary",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "amountUsd",
-              "type": "uint256"
-            }
-          ],
-          "name": "InterestFeeDeposit",
-          "type": "event"
-        },
-        "0x94e472f4a450e2820c43c92c88c5b1b791c2295ce26457bfd583e356c1ef969a": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": false,
-              "internalType": "address",
-              "name": "beneficiary",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "amountUsd",
-              "type": "uint256"
-            },
-            {
-              "indexed": false,
-              "internalType": "string",
-              "name": "currencyCode",
-              "type": "string"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "amount",
-              "type": "uint256"
-            }
-          ],
-          "name": "InterestFeeWithdrawal",
-          "type": "event"
-        },
-        "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "previousOwner",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "newOwner",
-              "type": "address"
-            }
-          ],
-          "name": "OwnershipTransferred",
-          "type": "event"
-        },
-        "0xac30acbb7d293051e36270400e75ca11db5877b6450005ceedac80a44eea4f82": {
-          "anonymous": false,
-          "inputs": [
-            {
-              "indexed": true,
-              "internalType": "string",
-              "name": "currencyCode",
-              "type": "string"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "sender",
-              "type": "address"
-            },
-            {
-              "indexed": true,
-              "internalType": "address",
-              "name": "payee",
-              "type": "address"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "amount",
-              "type": "uint256"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "amountUsd",
-              "type": "uint256"
-            },
-            {
-              "indexed": false,
-              "internalType": "uint256",
-              "name": "rftBurned",
-              "type": "uint256"
-            }
-          ],
-          "name": "Withdrawal",
-          "type": "event"
-        }
-      },
-      "links": {},
-      "address": "0x2af1325281Ec17F7Bac733F14D2AC04EFBfA2Fc6",
-      "transactionHash": "0x71fddd43091ee1623947ccf97f3b16d8d129c0154c63ad9666f6e1218331480a"
-    }
-  },
+  "networks": {},
   "schemaVersion": "3.2.2",
-  "updatedAt": "2020-07-14T07:21:21.896Z",
+  "updatedAt": "2020-07-14T14:24:17.202Z",
   "networkType": "ethereum",
   "devdoc": {
     "details": "This contract is the primary contract powering RariFund. Anyone can deposit to the fund with deposit(string currencyCode, uint256 amount). Anyone can withdraw their funds (with interest) from the fund with withdraw(string currencyCode, uint256 amount).",
