@@ -444,7 +444,7 @@ App = {
       fortmatic: {
         package: Fortmatic,
         options: {
-          key: "pk_live_F95FEECB1BE324B5" // TODO: Replace API key
+          key: "pk_live_A5F3924825DC427D"
         }
       },
 
@@ -456,7 +456,7 @@ App = {
       portis: {
         package: Portis,
         options: {
-          id: "7e4ce7f9-7cd0-42da-a634-44e682aacd73" // TODO: Replace API key
+          id: "1fd446cc-629b-46bc-a50c-6b7fe9251f05"
         }
       },
 
