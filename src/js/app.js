@@ -753,7 +753,7 @@ App = {
         var makerAssetFilledAmountBN = Web3.utils.toBN(0);
 
         for (var i = 0; i < decoded.orders.length; i++) {
-          if (decoded.orders[i].takerFee > 0 && decoded.orders[i].takerFeeAssetData !== "0xf47261b0000000000000000000000000" + inputTokenAddress) continue;
+          if (decoded.orders[i].takerFee > 0 && decoded.orders[i].takerFeeAssetData.toLowerCase() !== "0xf47261b0000000000000000000000000" + inputTokenAddress.toLowerCase()) continue;
           var takerAssetAmountBN = Web3.utils.toBN(decoded.orders[i].takerAssetAmount);
           var takerFeeBN = Web3.utils.toBN(decoded.orders[i].takerFee);
           var orderInputAmountBN = takerAssetAmountBN.add(takerFeeBN); // Maximum amount we can send to this order including the taker fee

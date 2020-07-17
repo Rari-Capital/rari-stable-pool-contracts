@@ -51,7 +51,7 @@ class ZeroExExchange {
                     var totalInputAmountBN = this.web3.utils.toBN(0);
                     var takerAssetFilledAmountBN = this.web3.utils.toBN(0);
                     for (var i = 0; i < decoded.orders.length; i++) {
-                        if (decoded.orders[i].takerFee > 0 && decoded.orders[i].takerFeeAssetData !== "0xf47261b0000000000000000000000000" + inputTokenAddress)
+                        if (decoded.orders[i].takerFee > 0 && decoded.orders[i].takerFeeAssetData.toLowerCase() !== "0xf47261b0000000000000000000000000" + inputTokenAddress.toLowerCase())
                             continue;
                         var takerAssetAmountBN = this.web3.utils.toBN(decoded.orders[i].takerAssetAmount);
                         var takerFeeBN = this.web3.utils.toBN(decoded.orders[i].takerFee);
