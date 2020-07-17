@@ -1,6 +1,6 @@
 # Rari Capital Ethereum API Documentation
 
-Welcome to the API docs for `RariFundManager`, `RariFundToken`, and `RariFundProxy`, the smart contracts behind Rari Capital's quantitative fund. You can find out more about Rari at [www.rari.capital](https://rari.capital).
+Welcome to the API docs for `RariFundManager`, `RariFundToken`, and `RariFundProxy`, the smart contracts behind Rari Capital's stablecoin fund. You can find out more about Rari at [www.rari.capital](https://rari.capital).
 
 ## uint256 RariFundToken.balanceOf(address account)
 

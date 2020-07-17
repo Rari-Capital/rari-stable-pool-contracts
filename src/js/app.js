@@ -496,7 +496,7 @@ App = {
     for (const symbol of Object.keys(App.contracts)) App.contracts[symbol] = new App.web3.eth.Contract(App.contracts[symbol].options.jsonInterface, App.contracts[symbol].options.address);
     for (const symbol of Object.keys(App.tokens)) if (App.tokens[symbol].contract) App.tokens[symbol].contract = new App.web3.eth.Contract(App.tokens[symbol].contract.options.jsonInterface, App.tokens[symbol].address);
 
-    // Get user's account balance in the quant fund and RFT balance
+    // Get user's account balance in the stablecoin fund and RFT balance
     if (App.contracts.RariFundManager) {
       App.getMyFundBalance();
       if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
@@ -700,7 +700,7 @@ App = {
       // Set selected account
       App.selectedAccount = $(this).val();
 
-      // Get user's account balance in the quant fund and RFT balance
+      // Get user's account balance in the stablecoin fund and RFT balance
       if (App.contracts.RariFundManager) {
         App.getMyFundBalance();
         if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
@@ -824,7 +824,7 @@ App = {
   },
   
   /**
-   * Deposit funds to the quant fund.
+   * Deposit funds to the stablecoin fund.
    */
   handleDeposit: async function(event) {
     event.preventDefault();
@@ -960,7 +960,7 @@ App = {
   },
   
   /**
-   * Withdraw funds from the quant fund.
+   * Withdraw funds from the stablecoin fund.
    */
   handleWithdraw: async function(event) {
     event.preventDefault();
@@ -1188,7 +1188,7 @@ App = {
   },
 
   /**
-   * Get the total balance of the quant fund in USD.
+   * Get the total balance of the stablecoin fund in USD.
    */
   getFundBalance: function() {
     console.log('Getting fund balance...');
@@ -1201,7 +1201,7 @@ App = {
   },
 
   /**
-   * Get the user's account balance in the quant fund in USD.
+   * Get the user's account balance in the stablecoin fund in USD.
    */
   getMyFundBalance: function() {
     console.log('Getting my fund balance...');
@@ -1214,7 +1214,7 @@ App = {
   },
 
   /**
-   * Get the user's interest accrued in the quant fund in USD.
+   * Get the user's interest accrued in the stablecoin fund in USD.
    */
   getMyInterestAccrued: function() {
     console.log('Getting my interest accrued...');

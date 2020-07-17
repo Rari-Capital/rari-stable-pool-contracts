@@ -1,6 +1,6 @@
 # Rari Capital Contracts & dApp
 
-Welcome to `rari-contracts`, the central repository for the Solidity source code behind Rari Capital's Ethereum-based smart contracts (with automated tests), our quantitative fund's dApp (web client), and the documentation for it all.
+Welcome to `rari-contracts`, the central repository for the Solidity source code behind Rari Capital's Ethereum-based smart contracts (with automated tests), our stablecoin fund's dApp (web client), and the documentation for it all.
 
 ## Using the contracts
 
