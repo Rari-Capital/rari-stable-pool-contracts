@@ -23,7 +23,7 @@ module.exports = {
         return new HDWalletProvider(keys, "https://mainnet.infura.io/v3/" + process.env.LIVE_INFURA_PROJECT_ID);
       },
       network_id: 1,
-      gasPrice: 1e9,
+      gasPrice: parseInt(process.env.LIVE_GAS_PRICE),
       from: process.env.LIVE_DEPLOYER_ADDRESS
     }
   },

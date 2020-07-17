@@ -10,6 +10,7 @@ var erc20Abi = require('./abi/ERC20.json');
 
 module.exports = function(deployer, network, accounts) {
   if (["live", "live-fork"].indexOf(network) >= 0) {
+    if (!process.env.LIVE_GAS_PRICE) return console.error("LIVE_GAS_PRICE is missing for live deployment");
     if (!process.env.LIVE_FUND_OWNER) return console.error("LIVE_FUND_OWNER is missing for live deployment");
     if (!process.env.LIVE_FUND_REBALANCER) return console.error("LIVE_FUND_REBALANCER is missing for live deployment");
     if (!process.env.LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY) return console.error("LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY is missing for live deployment");
@@ -43,12 +44,20 @@ module.exports = function(deployer, network, accounts) {
     }).then(function() {
       return rariFundManager.setFundController(RariFundController.address);
     }).then(function() {
-      return oldRariFundManager.methods.disableFund().send({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+      var options = { from: process.env.UPGRADE_FUND_OWNER_ADDRESS };
+      if (["live", "live-fork"].indexOf(network) >= 0) {
+        options.gas = 1e6;
+        options.gasPrice = parseInt(process.env.LIVE_GAS_PRICE);
+      }
+      return oldRariFundManager.methods.disableFund().send(options);
     }).then(function() {
       return rariFundManager.authorizeFundManagerDataSource(process.env.UPGRADE_OLD_FUND_MANAGER);
     }).then(function() {
       var options = { from: process.env.UPGRADE_FUND_OWNER_ADDRESS };
-      if (["live", "live-fork"].indexOf(network) >= 0) options.gas = 5e6;
+      if (["live", "live-fork"].indexOf(network) >= 0) {
+        options.gas = 5e6;
+        options.gasPrice = parseInt(process.env.LIVE_GAS_PRICE);
+      }
       return oldRariFundManager.methods.upgradeFundManager(RariFundManager.address).send(options);
     }).then(function() {
       return rariFundManager.authorizeFundManagerDataSource("0x0000000000000000000000000000000000000000");
@@ -62,7 +71,8 @@ module.exports = function(deployer, network, accounts) {
       // Get all past and current RFT holders who might have have nonzero net deposits
       var pastRftHolders = [];
 
-      event_loop: for (const event of await rariFundToken.getPastEvents("Transfer", { fromBlock: 0 })) {
+      // getPastEvents only works on Infura and full nodes (not Ganache), so manually replace the array below to test on Ganache
+      event_loop: for (const event of network == "live" ? await rariFundToken.getPastEvents("Transfer", { fromBlock: 0 }) : []) {
         if (event.returnValues.to == "0x0000000000000000000000000000000000000000") continue;
         for (var i = 0; i < pastRftHolders.length; i++) if (event.returnValues.to == pastRftHolders[i]) continue event_loop;
           pastRftHolders.push(event.returnValues.to);
@@ -117,15 +127,15 @@ module.exports = function(deployer, network, accounts) {
     }).then(async function() {
       // Claim COMP from the old RariFundManager, withdraw it to the owner, and forward it to the new RariFundManager
       var comptroller = new web3.eth.Contract(comptrollerAbi, "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B");
-      var options = { from: process.env.LIVE_FUND_OWNER };
-      if (["live", "live-fork"].indexOf(network) >= 0) options.gas = 2e6;
+      var options = { from: accounts[0] };
+      if (["live", "live-fork"].indexOf(network) >= 0) options = { from: process.env.LIVE_FUND_OWNER, gas: 2e6, gasPrice: parseInt(process.env.LIVE_GAS_PRICE) };
       await comptroller.methods.claimComp([process.env.UPGRADE_OLD_FUND_MANAGER], ["0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643", "0x39AA39c021dfbaE8faC545936693aC917d5E7563", "0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9"], false, true).send(options);
       var compToken = new web3.eth.Contract(erc20Abi, "0xc00e94Cb662C3520282E6f5717214004A7f26888");
       var compBalanceBN = web3.utils.toBN(await compToken.methods.balanceOf(process.env.UPGRADE_OLD_FUND_MANAGER).call());
 
       if (compBalanceBN.gt(web3.utils.toBN(0))) {
-        await oldRariFundManager.methods.ownerWithdraw("COMP").send({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
-        await compToken.methods.transfer(RariFundController.address, compBalanceBN.toString()).send({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+        await oldRariFundManager.methods.ownerWithdraw("COMP").send({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS, gasPrice: parseInt(process.env.LIVE_GAS_PRICE) });
+        await compToken.methods.transfer(RariFundController.address, compBalanceBN.toString()).send({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS, gasPrice: parseInt(process.env.LIVE_GAS_PRICE) });
       }
     });
   } else {
