@@ -770,7 +770,7 @@ App = {
               console.log(orderMakerAssetFillAmountBN.toString(), orderInputFillAmountBN.toString(), makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN).toString());
               var tries = 0;
               while (makerAssetAmountBN.mul(orderInputFillAmountBN).div(orderInputAmountBN).lt(orderMakerAssetFillAmountBN)) {
-                if (tries >= 1000) return toastr["error"]("Failed to get increment order input amount to achieve desired output amount: " + err, "Withdrawal failed");
+                if (tries >= 1000) return toastr["error"]("Failed to get increment order input amount to achieve desired output amount: " + err, "Internal error");
                 orderInputFillAmountBN.iadd(Web3.utils.toBN(1)); // Make sure we have enough input fill amount to achieve this maker asset fill amount
                 tries++;
               }
@@ -893,12 +893,12 @@ App = {
 
         if (!$('#DepositSlippage').is(':visible')) {
           $('#DepositSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "danger") + '">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
-          return toastr["warning"]("Please note the exchange slippage required to make a deposit of this currency.", "Deposit canceled");
+          return toastr["warning"]("Please note the exchange slippage required to make a deposit of this currency.", "Please try again");
         }
 
         if ($('#DepositSlippage kbd').text() !== slippageAbsPercentageString + "%") {
           $('#DepositSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "danger") + '">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
-          return toastr["warning"]("Exchange slippage changed.", "Deposit canceled");
+          return toastr["warning"]("Exchange slippage changed.", "Please try again");
         }
 
         console.log('Exchange ' + amount + ' ' + token + ' to deposit ' + acceptedCurrency);
@@ -1144,12 +1144,12 @@ App = {
 
         if (!$('#WithdrawSlippage').is(':visible')) {
           $('#WithdrawSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "danger") + '">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
-          return toastr["warning"]("Please note the exchange slippage required to make a withdrawal of this currency.", "Withdrawal canceled");
+          return toastr["warning"]("Please note the exchange slippage required to make a withdrawal of this currency.", "Please try again");
         }
 
         if ($('#WithdrawSlippage kbd').text() !== slippageAbsPercentageString + "%") {
           $('#WithdrawSlippage').html(slippage >= 0 ? 'Slippage: <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "danger") + '">' + slippageAbsPercentageString + '%</kbd>' : 'Bonus: <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>').show();
-          return toastr["warning"]("Exchange slippage changed.", "Withdrawal canceled");
+          return toastr["warning"]("Exchange slippage changed.", "Please try again");
         }
 
         console.log('Withdraw and exchange to ' + (amountWithdrawnBN.toString() / (["DAI", "ETH"].indexOf(token) >= 0 ? 1e18 : 1e6)) + ' ' + token);
