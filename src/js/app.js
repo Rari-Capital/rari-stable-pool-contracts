@@ -886,7 +886,7 @@ App = {
         }
 
         // Warn user of slippage
-        var amountInputtedUsd = ["DAI", "USDC", "USDT"].indexOf(token) >= 0 ? amount : amount / (await App.get0xPrice(token === "ETH" ? "WETH" : token, acceptedCurrency));
+        var amountInputtedUsd = amount / (await App.get0xPrice(token === "ETH" ? "WETH" : token, acceptedCurrency));
         var amountOutputtedUsd = makerAssetFilledAmountBN.toString() / (10 ** App.tokens[acceptedCurrency].decimals);
         var slippage = 1 - (amountOutputtedUsd / amountInputtedUsd);
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
@@ -1138,7 +1138,7 @@ App = {
         }
 
         // Warn user of slippage
-        var amountOutputtedUsd = ["DAI", "USDC", "USDT"].indexOf(token) >= 0 ? amount : amount * (await App.get0xPrice("DAI", token === "ETH" ? "WETH" : token)); // TODO: Use actual input currencies instead of using DAI for USD price
+        var amountOutputtedUsd = amount * (await App.get0xPrice("DAI", token === "ETH" ? "WETH" : token)); // TODO: Use actual input currencies instead of using DAI for USD price
         var slippage = 1 - (amountOutputtedUsd / (amountInputtedUsdBN.toString() / 1e18));
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
