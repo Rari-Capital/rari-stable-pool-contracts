@@ -20,6 +20,8 @@ App = {
     "USDT": { decimals: 6, address: "0xdAC17F958D2ee523a2206206994597C13D831ec7" }
   },
   erc20Abi: null,
+  compApyPrices: {},
+  compApyPricesLastUpdated: 0,
 
   init: function() {
     if (location.hash === "#account") {
@@ -78,7 +80,7 @@ App = {
         for (var i = 0; i < poolBalances["0"].length; i++) {
             var poolBalanceBN = Web3.utils.toBN(poolBalances["1"][i]);
             var poolBalanceUsdBN = poolBalanceBN.mul(Web3.utils.toBN(currencyCode === "DAI" ? 1e18 : 1e6)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
-            var apyBN = poolBalances["0"][i] == 1 ? compoundApyBNs[currencyCode] : dydxApyBNs[currencyCode];
+            var apyBN = poolBalances["0"][i] == 1 ? compoundApyBNs[currencyCode][0].add(compoundApyBNs[currencyCode][1]) : dydxApyBNs[currencyCode];
             factors.push([poolBalanceUsdBN, apyBN]);
             totalBalanceUsdBN = totalBalanceUsdBN.add(poolBalanceUsdBN);
         }
@@ -106,28 +108,84 @@ App = {
     return apyBNs;
   },
 
-  getCompoundApyBNs: async function(currencyCode) {
+  getCompoundApyBNs: async function() {
     const data = await $.getJSON("https://api.compound.finance/api/v2/ctoken");
     var apyBNs = {};
 
-    for (var i = 0; i < data.cToken.length; i++)
-      if (["DAI", "USDC", "USDT"].indexOf(data.cToken[i].underlying_symbol) >= 0)
-        apyBNs[data.cToken[i].underlying_symbol] = Web3.utils.toBN(Math.trunc(parseFloat(data.cToken[i].supply_rate.value) * 1e18));
+    for (var i = 0; i < data.cToken.length; i++) {
+      if (["DAI", "USDC", "USDT"].indexOf(data.cToken[i].underlying_symbol) >= 0) {
+        var supplyApy = Web3.utils.toBN(Math.trunc(parseFloat(data.cToken[i].supply_rate.value) * 1e18));
+        var compApy = Web3.utils.toBN(Math.trunc((await App.getApyFromComp(data.cToken[i].underlying_symbol, data.cToken)) * 1e18));
+        apyBNs[data.cToken[i].underlying_symbol] = [supplyApy, compApy];
+      }
+    }
 
     return apyBNs;
   },
 
-  initAprChart: function() {
-    var compoundData = {};
-    var dydxData = {};
-    var epoch = Math.floor((new Date()).getTime() / 1000);
-    var epochOneYearAgo = epoch - (86400 * 365);
+  get0xPrices: function(inputTokenSymbol, outputTokenSymbols) {
+    return new Promise((resolve, reject) => {
+      $.getJSON('https://api.0x.org/swap/v0/prices?sellToken=' + inputTokenSymbol, function(decoded) {
+        if (!decoded) reject("Failed to decode prices from 0x swap API");
+        if (!decoded.records) reject("No prices found on 0x swap API");
+        var prices = {};
+        for (var i = 0; i < decoded.records.length; i++)
+          if (outputTokenSymbols.indexOf(decoded.records[i].symbol) >= 0) prices[decoded.records[i].symbol] = ["DAI", "USDC", "USDT", "SAI"].indexOf(decoded.records[i].symbol) >= 0 ? 1.0 : decoded.records[i].price;
+        if (prices.length != outputTokenSymbols.length) return reject("One or more prices not found on 0x swap API");
+        resolve(prices);
+      }).fail(function(err) {
+        reject("Error requesting prices from 0x swap API: " + err.message);
+      });
+    });
+  },
 
+  getApyFromComp: async function(currencyCode, cTokens) {
+    // Get cToken USD prices
+    var currencyCodes = ["COMP"];
+    var priceMissing = false;
+
+    for (const cToken of cTokens) {
+      currencyCodes.push(cToken.underlying_symbol);
+      if (!App.compApyPrices[cToken.underlying_symbol]) priceMissing = true;
+    }
+
+    var now = (new Date()).getTime() / 1000;
+
+    if (now > App.compApyPricesLastUpdated + 900 || priceMissing) {
+      App.compApyPrices = await App.get0xPrices("DAI", currencyCodes); // TODO: Get real USD prices, not DAI prices
+      App.compApyPricesLastUpdated = now;
+    }
+    
+    // Get currency APY and total yearly interest
+    var currencyUnderlyingSupply = 0;
+    var currencyBorrowUsd = 0;
+    var totalBorrowUsd = 0;
+    
+    for (const cToken of cTokens) {
+      var underlyingBorrow = cToken.total_borrows.value * cToken.exchange_rate.value;
+      var borrowUsd = underlyingBorrow * App.compApyPrices[cToken.underlying_symbol];
+
+      if (cToken.underlying_symbol === currencyCode) {
+        currencyUnderlyingSupply = cToken.total_supply.value * cToken.exchange_rate.value;
+        currencyBorrowUsd = borrowUsd;
+      }
+
+      totalBorrowUsd += borrowUsd;
+    }
+    
+    // Get APY from COMP per block for this currency
+    var compPerBlock = 0.5;
+    var marketCompPerBlock = compPerBlock * (currencyBorrowUsd / totalBorrowUsd);
+    var marketSupplierCompPerBlock = marketCompPerBlock / 2;
+    var marketSupplierCompPerBlockPerUsd = marketSupplierCompPerBlock / currencyUnderlyingSupply; // Assumes that the value of currencyCode is $1
+    var marketSupplierUsdFromCompPerBlockPerUsd = marketSupplierCompPerBlockPerUsd * App.compApyPrices["COMP"];
+    return marketSupplierUsdFromCompPerBlockPerUsd * 2102400;
+  },
+
+  initAprChart: function() {
     Promise.all([
       $.getJSON("dydx-aprs.json"),
-      $.getJSON("https://api.compound.finance/api/v2/market_history/graph?asset=0x5d3a536e4d6dbd6114cc1ead35777bab948e3643&min_block_timestamp=" + epochOneYearAgo + "&max_block_timestamp=" + epoch + "&num_buckets=365"),
-      $.getJSON("https://api.compound.finance/api/v2/market_history/graph?asset=0x39AA39c021dfbaE8faC545936693aC917d5E7563&min_block_timestamp=" + epochOneYearAgo + "&max_block_timestamp=" + epoch + "&num_buckets=365"),
-      $.getJSON("https://api.compound.finance/api/v2/market_history/graph?asset=0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9&min_block_timestamp=" + epochOneYearAgo + "&max_block_timestamp=" + epoch + "&num_buckets=365")
+      $.getJSON("compound-aprs.json")
     ]).then(function(values) {
       var ourData = {};
 
@@ -151,43 +209,26 @@ App = {
         ourData[flooredEpoch] = max;
       }
 
-      for (var i = 0; i < values[1].supply_rates.length; i++) {
-        var rateEpoch = values[1].supply_rates[i].block_timestamp * 1000;
-        if (compoundData[rateEpoch] === undefined) compoundData[rateEpoch] = [];
-        compoundData[rateEpoch].push(values[1].supply_rates[i].rate);
-      }
-      
-      for (var i = 0; i < values[2].supply_rates.length; i++) {
-        var rateEpoch = values[2].supply_rates[i].block_timestamp * 1000;
-        if (compoundData[rateEpoch] === undefined) compoundData[rateEpoch] = [];
-        compoundData[rateEpoch].push(values[2].supply_rates[i].rate);
-      }
-
-      for (var i = 0; i < values[3].supply_rates.length; i++) {
-        var rateEpoch = values[3].supply_rates[i].block_timestamp * 1000;
-        if (compoundData[rateEpoch] === undefined) compoundData[rateEpoch] = [];
-        compoundData[rateEpoch].push(values[3].supply_rates[i].rate);
-      }
-
       var compoundAvgs = [];
-      var epochs = Object.keys(compoundData).sort();
+      var epochs = Object.keys(values[1]).sort();
 
       for (var i = 0; i < epochs.length; i++) {
-        // Calculate average for Compound graph and max for our graph
+        // Calculate average for Compound graph and max with COMP for our graph
         var sum = 0;
-        var max = 0;
+        var maxWithComp = 0;
 
-        for (var j = 0; j < compoundData[epochs[i]].length; j++) {
-          sum += compoundData[epochs[i]][j];
-          if (compoundData[epochs[i]][j] > max) max = compoundData[epochs[i]][j];
+        for (const currencyCode of Object.keys(values[1][epochs[i]])) {
+          sum += values[1][epochs[i]][currencyCode][0];
+          var apyWithComp = values[1][epochs[i]][currencyCode][0] + values[1][epochs[i]][currencyCode][1];
+          if (apyWithComp > maxWithComp) maxWithComp = apyWithComp;
         }
 
-        var avg =  sum / compoundData[epochs[i]].length;
+        var avg = sum / Object.keys(values[1][epochs[i]]).length;
         compoundAvgs.push({ t: new Date(parseInt(epochs[i])), y: avg * 100 });
 
         // Add data for Rari graph
         var flooredEpoch = Math.floor(epochs[i] / 86400 / 1000) * 86400 * 1000;
-        if (ourData[flooredEpoch] === undefined || max > ourData[flooredEpoch]) ourData[flooredEpoch] = max;
+        if (ourData[flooredEpoch] === undefined || maxWithComp > ourData[flooredEpoch]) ourData[flooredEpoch] = maxWithComp;
       }
 
       // Turn Rari data into object for graph
