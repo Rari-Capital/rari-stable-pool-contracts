@@ -47,12 +47,18 @@ module.exports = function(deployer, network, accounts) {
     }).then(function() {
       return rariFundManager.authorizeFundManagerDataSource(process.env.UPGRADE_OLD_FUND_MANAGER);
     }).then(function() {
-      return oldRariFundManager.methods.upgradeFundManager(RariFundManager.address).send({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+      var options = { from: process.env.UPGRADE_FUND_OWNER_ADDRESS };
+      if (["live", "live-fork"].indexOf(network) >= 0) options.gas = 5e6;
+      return oldRariFundManager.methods.upgradeFundManager(RariFundManager.address).send(options);
     }).then(function() {
       return rariFundManager.authorizeFundManagerDataSource("0x0000000000000000000000000000000000000000");
     }).then(function() {
       return rariFundManager.forwardToFundController();
-    }).then(async function() {
+    }).then(function() {
+      return RariFundToken.at(process.env.UPGRADE_FUND_TOKEN);
+    }).then(async function(_rariFundToken) {
+      rariFundToken = _rariFundToken;
+      
       // Get all past and current RFT holders who might have have nonzero net deposits
       var pastRftHolders = [];
 
@@ -71,9 +77,6 @@ module.exports = function(deployer, network, accounts) {
     }).then(function() {
       return rariFundManager.setFundToken(process.env.UPGRADE_FUND_TOKEN);
     }).then(function() {
-      return RariFundToken.at(process.env.UPGRADE_FUND_TOKEN);
-    }).then(function(_rariFundToken) {
-      rariFundToken = _rariFundToken;
       return rariFundToken.setFundManager(RariFundManager.address, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
     }).then(function() {
       return deployer.deploy(RariFundProxy);
@@ -101,7 +104,7 @@ module.exports = function(deployer, network, accounts) {
           return rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
         }).then(function() {
           // Also transfer ownership of RariFundToken from the old owner to the new owner if the owner has changed
-          if (process.env.LIVE_FUND_OWNER !== process.env.UPGRADE_FUND_OWNER_ADDRESS) return rariFundToken.transferOwnership(process.env.LIVE_FUND_OWNER, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+          if (process.env.LIVE_FUND_OWNER.toLowerCase() !== process.env.UPGRADE_FUND_OWNER_ADDRESS.toLowerCase()) return rariFundToken.transferOwnership(process.env.LIVE_FUND_OWNER, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
         });
       } else {
         // Development network: set all currencies to accepted
@@ -114,7 +117,9 @@ module.exports = function(deployer, network, accounts) {
     }).then(async function() {
       // Claim COMP from the old RariFundManager, withdraw it to the owner, and forward it to the new RariFundManager
       var comptroller = new web3.eth.Contract(comptrollerAbi, "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B");
-      await comptroller.methods.claimComp([process.env.UPGRADE_OLD_FUND_MANAGER], ["0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643", "0x39AA39c021dfbaE8faC545936693aC917d5E7563", "0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9"], false, true).send({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+      var options = { from: process.env.LIVE_FUND_OWNER };
+      if (["live", "live-fork"].indexOf(network) >= 0) options.gas = 2e6;
+      await comptroller.methods.claimComp([process.env.UPGRADE_OLD_FUND_MANAGER], ["0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643", "0x39AA39c021dfbaE8faC545936693aC917d5E7563", "0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9"], false, true).send(options);
       var compToken = new web3.eth.Contract(erc20Abi, "0xc00e94Cb662C3520282E6f5717214004A7f26888");
       var compBalanceBN = web3.utils.toBN(await compToken.methods.balanceOf(process.env.UPGRADE_OLD_FUND_MANAGER).call());
 
