@@ -482,7 +482,7 @@ App = {
     App.web3 = new Web3(App.web3Provider);
     const approveFunction = async ({ from, to, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayerAddress, relayHubAddress }) => {
       try {
-        var response = await $.ajax('https://davidlucid.com:3000/checkSig', { data: JSON.stringify({ from, to, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayerAddress, relayHubAddress }), contentType: 'application/json', type: 'POST' });
+        var response = await $.ajax('checkSig.php', { data: JSON.stringify({ from, to, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayerAddress, relayHubAddress }), contentType: 'application/json', type: 'POST' });
       } catch (error) {
         return console.error("checkSig error:", error);
       }
@@ -639,13 +639,13 @@ App = {
    * Initialize FundManager and FundToken contracts.
    */
   initContracts: function() {
-    $.getJSON('abi/RariFundController.json', function(data) {
+    $.getJSON('abi/RariFundController.json?v=1595276956', function(data) {
       App.contracts.RariFundController = new App.web3.eth.Contract(data, "0x15c4ae284fbb3a6ceb41fa8eb5f3408ac485fabb");
       /* App.getCurrentApy();
       setInterval(App.getCurrentApy, 5 * 60 * 1000); */
     });
 
-    $.getJSON('abi/RariFundManager.json', function(data) {
+    $.getJSON('abi/RariFundManager.json?v=1595276956', function(data) {
       App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0x6bdaf490c5b6bb58564b3e79c8d18e8dfd270464");
       App.getFundBalance();
       setInterval(App.getFundBalance, 5 * 60 * 1000);
@@ -663,7 +663,7 @@ App = {
       }, 5 * 60 * 1000);
     });
 
-    $.getJSON('abi/RariFundToken.json', function(data) {
+    $.getJSON('abi/RariFundToken.json?v=1595276956', function(data) {
       App.contracts.RariFundToken = new App.web3.eth.Contract(data, "0x9366B7C00894c3555c7590b0384e5F6a9D55659f");
       if (App.selectedAccount) {
         App.getTokenBalance();
@@ -671,7 +671,7 @@ App = {
       }
     });
 
-    $.getJSON('abi/RariFundProxy.json', function(data) {
+    $.getJSON('abi/RariFundProxy.json?v=1595276956', function(data) {
       App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0xb6b79d857858004bf475e4a57d4a446da4884866");
     });
 
