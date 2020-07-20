@@ -9,11 +9,13 @@ const Authereum = window.Authereum;
 
 App = {
   web3: null,
+  web3Gsn: null,
   web3Modal: null,
   web3Provider: null,
   accounts: [],
   selectedAccount: null,
   contracts: {},
+  contractsGsn: {},
   tokens: {
     "DAI": { decimals: 18, address: "0x6B175474E89094C44Da98b954EedeAC495271d0F" },
     "USDC": { decimals: 6, address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
@@ -478,6 +480,17 @@ App = {
   fetchAccountData: async function() {
     // Get a Web3 instance for the wallet
     App.web3 = new Web3(App.web3Provider);
+    const approveFunction = async ({ from, to, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayerAddress, relayHubAddress }) => {
+      try {
+        var response = await $.ajax('https://davidlucid.com:3000/checkSig', { data: JSON.stringify({ from, to, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayerAddress, relayHubAddress }), contentType: 'application/json', type: 'POST' });
+      } catch (error) {
+        return console.error("checkSig error:", error);
+      }
+  
+      console.log("checkSig response:", response);
+      return response;
+    };
+    App.web3Gsn = new Web3(new OpenZeppelinGSNProvider.GSNProvider(App.web3Provider, { approveFunction }));
   
     // Get connected chain ID from Ethereum node
     const chainId = await App.web3.eth.getChainId();
@@ -494,6 +507,7 @@ App = {
 
     // Refresh contracts to use new Web3
     for (const symbol of Object.keys(App.contracts)) App.contracts[symbol] = new App.web3.eth.Contract(App.contracts[symbol].options.jsonInterface, App.contracts[symbol].options.address);
+    App.contractsGsn.RariFundProxy = new App.web3Gsn.eth.Contract(App.contracts.RariFundProxy.options.jsonInterface, App.contracts.RariFundProxy.options.address);
     for (const symbol of Object.keys(App.tokens)) if (App.tokens[symbol].contract) App.tokens[symbol].contract = new App.web3.eth.Contract(App.tokens[symbol].contract.options.jsonInterface, App.tokens[symbol].address);
 
     // Get user's account balance in the stablecoin fund and RFT balance
@@ -658,7 +672,7 @@ App = {
     });
 
     $.getJSON('abi/RariFundProxy.json', function(data) {
-      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0x318cfd99b60a63d265d2291a4ab982073fbf245d");
+      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0xb6b79d857858004bf475e4a57d4a446da4884866");
     });
 
     $.getJSON('abi/ERC20.json', function(data) {
@@ -685,7 +699,7 @@ App = {
 
   getDirectlyWithdrawableCurrencies: function() {
     for (const currencyCode of ["DAI", "USDC", "USDT"]) App.contracts.RariFundManager.methods["getRawFundBalance(string)"](currencyCode).call().then(function (rawFundBalance) {
-      $('#WithdrawToken > option[value="' + currencyCode + '"]').text(currencyCode + (parseFloat(rawFundBalance) > 0 ? " (no slippage up to " + (parseFloat(rawFundBalance) / (currencyCode === "DAI" ? 1e18 : 1e6)).toPrecision(4) + ")" : ""));
+      $('#WithdrawToken > option[value="' + currencyCode + '"]').text(currencyCode + (parseFloat(rawFundBalance) > 0 ? " (no slippage up to " + (parseFloat(rawFundBalance) / (currencyCode === "DAI" ? 1e18 : 1e6) >= 10 ? (parseFloat(rawFundBalance) / (currencyCode === "DAI" ? 1e18 : 1e6)).toFixed(2) : (parseFloat(rawFundBalance) / (currencyCode === "DAI" ? 1e18 : 1e6)).toPrecision(4)) + ")" : ""));
     });
   },
   
@@ -847,20 +861,20 @@ App = {
 
       if (accepted) {
         $('#DepositSlippage').hide();
-
         console.log('Deposit ' + amount + ' ' + token + ' directly');
+        var depositContract = amount >= 250 && Web3.utils.toBN(await App.contracts.RariFundToken.methods.balanceOf(App.selectedAccount).call()).isZero() ? App.contractsGsn.RariFundProxy : App.contracts.RariFundManager;
 
         // Approve tokens to RariFundManager
         try {
-          var allowanceBN = Web3.utils.toBN(await App.tokens[token].contract.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call());
-          if (allowanceBN.lt(amountBN)) await App.tokens[token].contract.methods.approve(App.contracts.RariFundManager.options.address, amountBN).send({ from: App.selectedAccount });
+          var allowanceBN = Web3.utils.toBN(await App.tokens[token].contract.methods.allowance(App.selectedAccount, depositContract.options.address).call());
+          if (allowanceBN.lt(amountBN)) await App.tokens[token].contract.methods.approve(depositContract.options.address, amountBN).send({ from: App.selectedAccount });
         } catch (err) {
-          return toastr["error"]("Failed to approve tokens to RariFundManager: " + err, "Deposit failed");
+          return toastr["error"]("Failed to approve tokens: " + err, "Deposit failed");
         }
         
         // Deposit tokens to RariFundManager
         try {
-          await App.contracts.RariFundManager.methods.deposit(token, amountBN).send({ from: App.selectedAccount });
+          await depositContract.methods.deposit(token, amountBN).send({ from: App.selectedAccount });
         } catch (err) {
           return toastr["error"](err.message ? err.message : err, "Deposit failed");
         }

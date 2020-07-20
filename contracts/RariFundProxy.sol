@@ -21,6 +21,8 @@ import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
+import "@openzeppelin/contracts/GSN/GSNRecipient.sol";
+import "@openzeppelin/contracts/cryptography/ECDSA.sol";
 
 import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
 import "@0x/contracts-erc20/contracts/src/interfaces/IEtherToken.sol";
@@ -32,10 +34,16 @@ import "./RariFundManager.sol";
  * @title RariFundProxy
  * @dev This contract faciliates deposits to RariFundManager from exchanges and withdrawals from RariFundManager for exchanges.
  */
-contract RariFundProxy is Ownable {
+contract RariFundProxy is Ownable, GSNRecipient {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
+    using ECDSA for bytes32;
     using SafeERC20 for IERC20;
+
+    /**
+     * @notice Package version of `rari-contracts` when this contract was deployed.
+     */
+    string public constant VERSION = "1.2.0";
 
     /**
      * @dev Array of currencies supported by the fund.
@@ -79,6 +87,11 @@ contract RariFundProxy is Ownable {
     RariFundManager private _rariFundManager;
 
     /**
+     * @dev Address of the trusted GSN signer.
+     */
+    address private _gsnTrustedSigner;
+
+    /**
      * @dev Emitted when the RariFundManager of the RariFundProxy is set.
      */
     event FundManagerSet(address newContract);
@@ -102,6 +115,20 @@ contract RariFundProxy is Ownable {
 
     address constant private WETH_CONTRACT = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     IEtherToken constant private _weth = IEtherToken(WETH_CONTRACT);
+
+    /**
+     * @dev Emitted when the trusted GSN signer of the RariFundProxy is set.
+     */
+    event GsnTrustedSignerSet(address newAddress);
+
+    /**
+     * @dev Sets or upgrades the trusted GSN signer of the RariFundProxy.
+     * @param newAddress The Ethereum address of the new trusted GSN signer.
+     */
+    function setGsnTrustedSigner(address newAddress) external onlyOwner {
+        _gsnTrustedSigner = newAddress;
+        emit GsnTrustedSignerSet(newAddress);
+    }
 
     /**
      * @dev Payable fallback function called by 0x exchange to refund unspent protocol fee.
@@ -180,7 +207,7 @@ contract RariFundProxy is Ownable {
         // Return true
         return true;
     }
-    
+
     /**
      * @notice Exchanges and deposits funds to RariFund in exchange for RFT.
      * You can retrieve orders from the 0x swap API (https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
@@ -235,5 +262,64 @@ contract RariFundProxy is Ownable {
 
         // Return true
         return true;
+    }
+
+    /**
+     * @notice Deposits funds to RariFund in exchange for RFT (with GSN support).
+     * You may only deposit currencies accepted by the fund (see `RariFundManager.isCurrencyAccepted(string currencyCode)`).
+     * Please note that you must approve RariFundProxy to transfer at least `amount`.
+     * @param currencyCode The currency code of the token to be deposited.
+     * @param amount The amount of tokens to be deposited.
+     * @return Boolean indicating success.
+     */
+    function deposit(string calldata currencyCode, uint256 amount) external returns (bool) {
+        address erc20Contract = _erc20Contracts[currencyCode];
+        require(erc20Contract != address(0), "Invalid currency code.");
+        IERC20(erc20Contract).safeTransferFrom(_msgSender(), address(this), amount); // The user must approve the transfer of tokens beforehand
+        return _rariFundManager.depositTo(_msgSender(), currencyCode, amount);
+    }
+
+    /**
+     * @dev Ensures that only transactions with a trusted signature can be relayed through the GSN.
+     */
+    function acceptRelayedCall(
+        address relay,
+        address from,
+        bytes calldata encodedFunction,
+        uint256 transactionFee,
+        uint256 gasPrice,
+        uint256 gasLimit,
+        uint256 nonce,
+        bytes calldata approvalData,
+        uint256
+    ) external view returns (uint256, bytes memory) {
+        bytes memory blob = abi.encodePacked(
+            relay,
+            from,
+            encodedFunction,
+            transactionFee,
+            gasPrice,
+            gasLimit,
+            nonce, // Prevents replays on RelayHub
+            getHubAddr(), // Prevents replays in multiple RelayHubs
+            address(this) // Prevents replays in multiple recipients
+        );
+        if (keccak256(blob).toEthSignedMessageHash().recover(approvalData) != _gsnTrustedSigner) return _rejectRelayedCall(0);
+        if (_gsnTrustedSigner == address(0)) return _rejectRelayedCall(1);
+        return _approveRelayedCall();
+    }
+
+    /**
+     * @dev Code executed before processing a call relayed through the GSN.
+     */
+    function _preRelayedCall(bytes memory) internal returns (bytes32) {
+        // solhint-disable-previous-line no-empty-blocks
+    }
+
+    /**
+     * @dev Code executed after processing a call relayed through the GSN.
+     */
+    function _postRelayedCall(bytes memory, bool, uint256, bytes32) internal {
+        // solhint-disable-previous-line no-empty-blocks
     }
 }

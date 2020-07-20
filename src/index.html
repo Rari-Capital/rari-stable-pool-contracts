@@ -167,7 +167,7 @@
             <div class="panel-body">
               <h4 style="margin-top: 0;">Balance <small>(supplied to Rari)</small></h4>
               <kbd class="d-inline-block mb-2">$<span id="MyUSDBalance">?</span> USD <small>(DAI + USDC + USDT)</small></kbd><br />
-              <small class="d-inline-block">Please note the temporary <strong>$350 USD balance limit</strong> (does not apply to interest--only depositing). Your USD balance above is represented internally by an equivalent RFT balance.</small>
+              <small class="d-inline-block">Gas is covered for first-time deposits of at least <strong>250 DAI</strong>. Please note the temporary <strong>$350 USD balance limit</strong> (does not apply to interest--only depositing). Your USD balance above is represented internally by an equivalent RFT balance.</small>
               <br /><br />
               <h4>Deposit</h4>
               <div class="form-group input-group">
@@ -285,6 +285,9 @@
     <script type="text/javascript" src="https://unpkg.com/@toruslabs/torus-embed"></script>
     <script type="text/javascript" src="https://unpkg.com/@portis/web3"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/authereum@latest/authereum.js"></script>
+
+    <!-- GSN -->
+    <script type="text/javascript" src="js/openzeppelin-gsn-provider.js"></script>
 
     <!-- Rari Fund Web App -->
     <script src="js/app-compiled.js"></script>
