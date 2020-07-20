@@ -24,6 +24,7 @@ App = {
   erc20Abi: null,
   compApyPrices: {},
   compApyPricesLastUpdated: 0,
+  checkAccountBalanceLimit: true,
 
   init: function() {
     if (location.hash === "#account") {
@@ -45,6 +46,18 @@ App = {
       $('#container-account').show();
       $('#tab-fund').css('text-decoration', '');
       $('#tab-account').css('text-decoration', 'underline');
+    });
+
+    // Bypass account balance limit checking (client-side only)
+    var zKeyDown = false;
+    var mKeyDown = false;
+    document.addEventListener('keydown', function (e) {
+        if (e.keyCode == 90) zKeyDown = true;
+        if (mKeyDown) App.checkAccountBalanceLimit = false;
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.keyCode == 77) mKeyDown = true;
+        if (zKeyDown) App.checkAccountBalanceLimit = false;
     });
 
     App.initChartColors();
@@ -861,8 +874,10 @@ App = {
 
       if (accepted) {
         $('#DepositSlippage').hide();
+        var myFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call());
+        if (App.checkAccountBalanceLimit && myFundBalanceBN.add(amountBN.mul(Web3.utils.toBN(10).pow(Web3.utils.toBN(18 - App.tokens[token].decimals)))).gt(Web3.utils.toBN(350e18))) return toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $350 USD.", "Deposit failed");
         console.log('Deposit ' + amount + ' ' + token + ' directly');
-        var depositContract = amount >= 250 && Web3.utils.toBN(await App.contracts.RariFundToken.methods.balanceOf(App.selectedAccount).call()).isZero() ? App.contractsGsn.RariFundProxy : App.contracts.RariFundManager;
+        var depositContract = amount >= 250 && myFundBalanceBN.isZero() ? App.contractsGsn.RariFundProxy : App.contracts.RariFundManager;
 
         // Approve tokens to RariFundManager
         try {
@@ -892,6 +907,15 @@ App = {
         } catch (err) {
           return toastr["error"]("Failed to get swap orders from 0x API: " + err, "Deposit failed");
         }
+
+        // Check account balance limit
+        if (App.checkAccountBalanceLimit) {
+          var myFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call());
+          if (myFundBalanceBN.add(makerAssetFilledAmountBN.mul(Web3.utils.toBN(10).pow(Web3.utils.toBN(18 - App.tokens[acceptedCurrency].decimals)))).gt(Web3.utils.toBN(350e18))) return toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $350 USD.", "Deposit failed");
+        }
+
+        var amountOutputtedUsd = makerAssetFilledAmountBN.toString() / (10 ** App.tokens[acceptedCurrency].decimals);
+        console.log('Exchange ' + amount + ' ' + token + ' to ' + amountOutputtedUsd + ' ' + acceptedCurrency + ' and deposit');
         
         // Make sure input amount is completely filled
         if (inputFilledAmountBN.lt(amountBN)) {
@@ -901,7 +925,6 @@ App = {
 
         // Warn user of slippage
         var amountInputtedUsd = amount / (await App.get0xPrice(token === "ETH" ? "WETH" : token, acceptedCurrency));
-        var amountOutputtedUsd = makerAssetFilledAmountBN.toString() / (10 ** App.tokens[acceptedCurrency].decimals);
         var slippage = 1 - (amountOutputtedUsd / amountInputtedUsd);
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
