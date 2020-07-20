@@ -42,6 +42,23 @@ Parameters:
 
 * `currencyCode` (string): The currency code to check.
 
+## bool RariFundProxy.deposit(string currencyCode, uint256 amount)
+
+***For a limited time only, we are paying gas fees for first-time deposits of at least 250 DAI!***
+
+Deposits funds to RariFund in exchange for RFT (with GSN support).
+
+You may only deposit currencies accepted by the fund (see `RariFundManager.isCurrencyAccepted(string currencyCode)`).
+
+Please note that you must approve RariFundProxy to transfer at least `amount`.
+
+Parameters:
+
+* `currencyCode` (string): The currency code of the token to be deposited.
+* `amount` (uint256): The amount of tokens to be deposited.
+
+Return value: Boolean indicating success.
+
 ## bool RariFundManager.deposit(string currencyCode, uint256 amount)
 
 Deposits funds to RariFund in exchange for RFT.
