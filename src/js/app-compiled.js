@@ -924,22 +924,25 @@ App = {
               return _context8.abrupt("return");
 
             case 11:
-              // Subscribe to accounts change
-              App.web3Provider.on("accountsChanged", function (accounts) {
-                App.fetchAccountData();
-              }); // Subscribe to chainId change
+              if (App.web3Provider.on) {
+                // Subscribe to accounts change
+                App.web3Provider.on("accountsChanged", function (accounts) {
+                  App.fetchAccountData();
+                }); // Subscribe to chainId change
 
-              App.web3Provider.on("chainChanged", function (chainId) {
-                App.fetchAccountData();
-              }); // Subscribe to networkId change
+                App.web3Provider.on("chainChanged", function (chainId) {
+                  App.fetchAccountData();
+                }); // Subscribe to networkId change
 
-              App.web3Provider.on("networkChanged", function (networkId) {
-                App.fetchAccountData();
-              });
-              _context8.next = 16;
+                App.web3Provider.on("networkChanged", function (networkId) {
+                  App.fetchAccountData();
+                });
+              }
+
+              _context8.next = 14;
               return App.refreshAccountData();
 
-            case 16:
+            case 14:
             case "end":
               return _context8.stop();
           }
@@ -1273,12 +1276,12 @@ App = {
             case 4:
               amount = parseFloat($('#DepositAmount').val());
 
-              if (!(amount <= 0)) {
+              if (!(!amount || amount <= 0)) {
                 _context11.next = 7;
                 break;
               }
 
-              return _context11.abrupt("return", toastr["error"]("Amount must be greater than 0!", "Deposit failed"));
+              return _context11.abrupt("return", toastr["error"]("Deposit amount must be greater than 0!", "Deposit failed"));
 
             case 7:
               amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(10).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toFixed());
@@ -1698,12 +1701,12 @@ App = {
             case 4:
               amount = parseFloat($('#WithdrawAmount').val());
 
-              if (!(amount <= 0)) {
+              if (!(!amount || amount <= 0)) {
                 _context13.next = 7;
                 break;
               }
 
-              return _context13.abrupt("return", toastr["error"]("Amount must be greater than 0!", "Withdrawal failed"));
+              return _context13.abrupt("return", toastr["error"]("Withdrawal amount must be greater than 0!", "Withdrawal failed"));
 
             case 7:
               amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(10).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toFixed());
@@ -2180,19 +2183,28 @@ App = {
               event.preventDefault();
               amount = parseFloat($('#RFTTransferAmount').val());
 
-              if (!(amount <= 0)) {
+              if (!(!amount || amount <= 0)) {
                 _context15.next = 4;
                 break;
               }
 
-              return _context15.abrupt("return", toastr["error"]("Amount must be greater than 0!", "Transfer failed"));
+              return _context15.abrupt("return", toastr["error"]("Transfer amount must be greater than 0!", "Transfer failed"));
 
             case 4:
               amountBN = Web3.utils.toBN(new Big(amount).mul(new Big(10).pow(18)).toFixed());
               toAddress = $('#RFTTransferAddress').val();
+
+              if (toAddress) {
+                _context15.next = 8;
+                break;
+              }
+
+              return _context15.abrupt("return", toastr["error"]("You must enter a destination address!", "Transfer failed"));
+
+            case 8:
               $('#transferButton').prop("disabled", true);
               $('#transferButton').text("...");
-              _context15.next = 10;
+              _context15.next = 12;
               return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee14() {
                 return regeneratorRuntime.wrap(function _callee14$(_context14) {
                   while (1) {
@@ -2229,11 +2241,11 @@ App = {
                 }, _callee14, null, [[1, 6]]);
               }))();
 
-            case 10:
+            case 12:
               $('#transferButton').text("Transfer");
               $('#transferButton').prop("disabled", false);
 
-            case 12:
+            case 14:
             case "end":
               return _context15.stop();
           }

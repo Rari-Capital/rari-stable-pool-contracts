@@ -589,21 +589,23 @@ App = {
       console.error("Could not get a wallet connection", e);
       return;
     }
-  
-    // Subscribe to accounts change
-    App.web3Provider.on("accountsChanged", (accounts) => {
-      App.fetchAccountData();
-    });
-  
-    // Subscribe to chainId change
-    App.web3Provider.on("chainChanged", (chainId) => {
-      App.fetchAccountData();
-    });
-  
-    // Subscribe to networkId change
-    App.web3Provider.on("networkChanged", (networkId) => {
-      App.fetchAccountData();
-    });
+
+    if (App.web3Provider.on) {
+      // Subscribe to accounts change
+      App.web3Provider.on("accountsChanged", (accounts) => {
+        App.fetchAccountData();
+      });
+    
+      // Subscribe to chainId change
+      App.web3Provider.on("chainChanged", (chainId) => {
+        App.fetchAccountData();
+      });
+    
+      // Subscribe to networkId change
+      App.web3Provider.on("networkChanged", (networkId) => {
+        App.fetchAccountData();
+      });
+    }
   
     await App.refreshAccountData();
   },
@@ -859,7 +861,7 @@ App = {
     var token = $('#DepositToken').val();
     if (token !== "ETH" && !App.tokens[token]) return toastr["error"]("Invalid token!", "Deposit failed");
     var amount = parseFloat($('#DepositAmount').val());
-    if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Deposit failed");
+    if (!amount || amount <= 0) return toastr["error"]("Deposit amount must be greater than 0!", "Deposit failed");
     var amountBN = Web3.utils.toBN((new Big(amount)).mul((new Big(10)).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toFixed());
     var accountBalanceBN = Web3.utils.toBN(await (token == "ETH" ? App.web3.eth.getBalance(App.selectedAccount) : App.tokens[token].contract.methods.balanceOf(App.selectedAccount).call()));
     if (amountBN.gt(accountBalanceBN)) return toastr["error"]("Not enough balance in your account to make a deposit of this amount. Current account balance: " + (new Big(accountBalanceBN.toString())).div((new Big(10)).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toString() + " " + token, "Deposit failed");
@@ -1005,7 +1007,7 @@ App = {
     var token = $('#WithdrawToken').val();
     if (token !== "ETH" && !App.tokens[token]) return toastr["error"]("Invalid token!", "Withdrawal failed");
     var amount = parseFloat($('#WithdrawAmount').val());
-    if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Withdrawal failed");
+    if (!amount || amount <= 0) return toastr["error"]("Withdrawal amount must be greater than 0!", "Withdrawal failed");
     var amountBN = Web3.utils.toBN((new Big(amount)).mul((new Big(10)).pow(token == "ETH" ? 18 : App.tokens[token].decimals)).toFixed());
 
     $('#withdrawButton').prop("disabled", true);
@@ -1270,9 +1272,10 @@ App = {
     event.preventDefault();
 
     var amount = parseFloat($('#RFTTransferAmount').val());
-    if (amount <= 0) return toastr["error"]("Amount must be greater than 0!", "Transfer failed");
+    if (!amount || amount <= 0) return toastr["error"]("Transfer amount must be greater than 0!", "Transfer failed");
     var amountBN = Web3.utils.toBN((new Big(amount)).mul((new Big(10)).pow(18)).toFixed());
     var toAddress = $('#RFTTransferAddress').val();
+    if (!toAddress) return toastr["error"]("You must enter a destination address!", "Transfer failed");
 
     $('#transferButton').prop("disabled", true);
     $('#transferButton').text("...");
