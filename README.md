@@ -12,7 +12,7 @@ Documentation on how the fund works is available in `FUND.md`.
 
 ## Installation
 
-You'll want to run Truffle on Node.js v10.21.0 (latest Dubnium LTS because latest Erbium LTS doesn't work) with the latest version of NPM.
+You'll want to run Truffle on Node.js `v10.21.0` (latest Dubnium LTS because latest Erbium LTS doesn't work) with the latest version of NPM.
 
 To compile `v1.2.0`, we used Soldity version `0.5.17+commit.d19bba13` (should be chosen automatically by Truffle). To deploy and test `v1.2.0`, we used Truffle `v5.1.34` (should use Web3.js `v1.2.1`).
 
@@ -24,29 +24,41 @@ To compile `v1.2.0`, we used Soldity version `0.5.17+commit.d19bba13` (should be
 
 `npm run compile`
 
-## Testing deployment
-
-In `.env`, configure `DEVELOPMENT_ADDRESS` and `DEVELOPMENT_PRIVATE_KEY` to test deployment.
-
-First, fork the mainnet with `ganache-core`. You'll want to use [this `ganache-core` fork from Compound](https://github.com/compound-finance/ganache-core/tree/jflatow/unbreak-fork) to fix a bug (false reentrancy revert). Make sure the `development` network in `truffle-config.js` is configured correctly to use your `ganache-core` instance.
-
-Then, migrate: `truffle migrate --network development`
-
-If you'd like to test gasless deposits via `RariFundProxy.deposit` via the Gas Station Network, making sure `npx` is installed, run `chmod +x test.sh bin/gsn-relay` and `sh test.sh`. Then, fund `RariFundProxy` using `npx @openzeppelin/gsn-helpers fund-recipient --recipient $RARI_FUND_PROXY_ADDRESS -n http://localhost:8546 -f $FROM_ADDRESS` or [this tool](https://www.opengsn.org/recipients) (or manually send ETH to `RelayHub(0xD216153c06E857cD7f72665E0aF1d7D82172F494).depositFor(address target)`). Finally, run `rari-gsn-signer` with `pm2 start ecosystem.config.js` after configuring `ecosystem.config.js`. Please note that as of now, the web client and the GSN signer are configured so that gas is paid only for deposits of least 250 DAI by first-time users.
-
 ## Testing the contracts
 
 In `.env`, configure `DEVELOPMENT_ADDRESS` and `DEVELOPMENT_PRIVATE_KEY` to test deployment and `DEVELOPMENT_PRIVATE_KEY_SECONDARY` to run automated tests.
 
-First, fork the mainnet with `ganache-core`. You'll want to use [this `ganache-core` fork from Compound](https://github.com/compound-finance/ganache-core/tree/jflatow/unbreak-fork) to fix a bug (false reentrancy revert). Make sure the `development` network in `truffle-config.js` is configured correctly to use your `ganache-core` instance.
+First, fork the mainnet with `ganache-core`. You'll want to use [this `ganache-core` fork from Compound](https://github.com/compound-finance/ganache-core/tree/jflatow/unbreak-fork) to fix a bug (false reentrancy revert):
 
-Then, test: `npm t` or `npm test`
+    git clone https://github.com/compound-finance/ganache-core.git -b jflatow/unbreak-fork
+    cd ganache-core
+    npm install -g webpack-cli
+    npm install --save-dev webpack
+    npm run build
+    cd ..
+
+Then, create a file called `ganache.js` with the following code (replacing `http://localhost:8545` with the JSON-RPC URL of an Ethereum mainnet node):
+
+    const ganache = require("./ganache-core");
+    const server = ganache.server({ fork: "http://localhost:8545" });
+
+    server.listen(8546, function(err, blockchain) {
+        if (err) return console.log(err);
+        console.log("Server started!");
+    });
+
+Finally, run `node ganache.js`. Make sure the `development` network in `truffle-config.js` is configured correctly to use your `ganache-core` instance.
+
+To deploy the contracts to your private mainnet fork: `truffle migrate --network development`
+To run automated tests on the contracts on your private mainnet fork: `npm t` or `npm test`
+
+If you'd like to test gasless deposits via `RariFundProxy.deposit` via the Gas Station Network, making sure `npx` is installed, run `chmod +x test.sh bin/gsn-relay` and `sh test.sh`. Then, fund `RariFundProxy` using `npx @openzeppelin/gsn-helpers fund-recipient --recipient $RARI_FUND_PROXY_ADDRESS -n http://localhost:8546 -f $FROM_ADDRESS` or [this tool](https://www.opengsn.org/recipients) (or manually send ETH to `RelayHub(0xD216153c06E857cD7f72665E0aF1d7D82172F494).depositFor(address target)`). Finally, run `rari-gsn-signer` with `pm2 start ecosystem.config.js` after configuring `ecosystem.config.js`. Please note that as of now, the web client and the GSN signer are configured so that gas is paid only for deposits of least 250 DAI by first-time users.
 
 ## Live deployment
 
 In `.env`, configure `LIVE_DEPLOYER_ADDRESS`, `LIVE_DEPLOYER_PRIVATE_KEY`, `LIVE_INFURA_PROJECT_ID`, `LIVE_FUND_OWNER`, `LIVE_FUND_REBALANCER`, `LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY`, and `LIVE_FUND_GSN_TRUSTED_SIGNER` to deploy to the mainnet.
 
-If you are upgrading from `v1.0.0`, set `UPGRADE_FROM_LAST_VERSION=1` to enable upgrading and configure `UPGRADE_OLD_FUND_PROXY`, `UPGRADE_FUND_MANAGER`, `UPGRADE_FUND_OWNER_ADDRESS`, and `UPGRADE_FUND_OWNER_PRIVATE_KEY` as well.
+If you are upgrading from `v1.1.0`, set `UPGRADE_FROM_LAST_VERSION=1` to enable upgrading and configure `UPGRADE_OLD_FUND_PROXY`, `UPGRADE_FUND_MANAGER`, `UPGRADE_FUND_OWNER_ADDRESS`, and `UPGRADE_FUND_OWNER_PRIVATE_KEY` as well.
 
 Then, set the gas price for the `live` network in truffle-config.js to the "fast" price listed by [ETH Gas Station](https://www.ethgasstation.info/).
 
