@@ -192,15 +192,16 @@ Development notes:
 
 * *Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `RariFundController.getPoolBalance`) potentially modifies the state.*
 
+## uint256 RariFundController.getPoolBalances(string currencyCode)
 
-## uint256 RariFundManager.getRawPoolBalances(string currencyCode)
-
-Returns the fund's raw balance (all RFT holders' funds + all unclaimed fees) in each pool of the specified currency.
+Returns the fund controller's balance of each pool of the specified currency.
 
 Parameters:
 
-* `currencyCode` (string): The currency code of the balance to be calculated.
+* `currencyCode` (string): The currency code whose balance is to be calculated.
+
+Return value: An array of pool indexes and an array of corresponding balances.
 
 Development notes:
 
-* *Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `RariFundController.getPoolBalance`) potentially modifies the state.*
+* *Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getPoolBalance`) potentially modifies the state.*
