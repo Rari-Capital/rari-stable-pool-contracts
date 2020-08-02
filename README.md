@@ -28,7 +28,7 @@ To compile `v1.2.0`, we used Soldity version `0.5.17+commit.d19bba13` (should be
 
 In `.env`, configure `DEVELOPMENT_ADDRESS` and `DEVELOPMENT_PRIVATE_KEY` to test deployment and `DEVELOPMENT_PRIVATE_KEY_SECONDARY` to run automated tests.
 
-First, fork the mainnet with `ganache-core`. You'll want to use [this `ganache-core` fork from Compound](https://github.com/compound-finance/ganache-core/tree/jflatow/unbreak-fork) to fix a bug (false reentrancy revert):
+First, fork the Ethereum mainnet with `ganache-core`. You'll want to use [this `ganache-core` fork from Compound](https://github.com/compound-finance/ganache-core/tree/jflatow/unbreak-fork) to fix a bug (false reentrancy revert):
 
     git clone https://github.com/compound-finance/ganache-core.git -b jflatow/unbreak-fork
     cd ganache-core
@@ -37,7 +37,7 @@ First, fork the mainnet with `ganache-core`. You'll want to use [this `ganache-c
     npm run build
     cd ..
 
-Then, create a file called `ganache.js` with the following code (replacing `http://localhost:8545` with the JSON-RPC URL of an Ethereum mainnet node):
+Create a file called `ganache.js` with the following code (replacing `http://localhost:8545` with the JSON-RPC URL of a mainnet node):
 
     const ganache = require("./ganache-core");
     const server = ganache.server({ fork: "http://localhost:8545" });
@@ -47,7 +47,7 @@ Then, create a file called `ganache.js` with the following code (replacing `http
         console.log("Server started!");
     });
 
-Finally, run `node ganache.js`. Make sure the `development` network in `truffle-config.js` is configured correctly to use your `ganache-core` instance.
+To start the fork, run `node ganache.js`. Make sure the `development` network in `truffle-config.js` is configured correctly to use your `ganache-core` instance. Note that you will likely have to regularly restart your fork, especially when forking from a node without archive data or when using live 0x API responses to make currency exchanges.
 
 To deploy the contracts to your private mainnet fork: `truffle migrate --network development`
 To run automated tests on the contracts on your private mainnet fork: `npm t` or `npm test`
