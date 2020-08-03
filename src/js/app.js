@@ -1287,9 +1287,11 @@ App = {
         }
 
         // Mixpanel
-        var inputs = [];
-        for (var i = 0; i < inputCurrencyCodes.length; i++) inputs.push({ currencyCode: inputCurrencyCodes[i], amount: inputAmountBNs[i].toString() / (10 ** App.tokens[inputCurrencyCodes[i]].decimals) });
-        if (typeof mixpanel !== 'undefined') mixpanel.track("Withdraw and exchange", { transactionHash: receipt.transactionHash, inputs, outputCurrencyCode: token, outputAmount: amount });
+        if (typeof mixpanel !== 'undefined') {
+          var inputs = [];
+          for (var i = 0; i < inputCurrencyCodes.length; i++) inputs.push({ currencyCode: inputCurrencyCodes[i], amount: inputAmountBNs[i].toString() / (10 ** App.tokens[inputCurrencyCodes[i]].decimals) });
+          mixpanel.track("Withdraw and exchange", { transactionHash: receipt.transactionHash, inputs, outputCurrencyCode: token, outputAmount: amount });
+        }
 
         // Hide old slippage after exchange success
         $('#modal-confirm-withdrawal').modal('hide');
@@ -1369,15 +1371,15 @@ App = {
 
     await (async function() {
       console.log('Transfer ' + amount + ' ' + currency + ' to ' + toAddress);
-
       var amountBN = Web3.utils.toBN((new Big(amount)).mul((new Big(10)).pow(18)).toFixed());
 
       try {
-        await App.contracts.RariFundToken.methods.transfer(toAddress, rftAmountBN).send({ from: App.selectedAccount });
+        var receipt = await App.contracts.RariFundToken.methods.transfer(toAddress, rftAmountBN).send({ from: App.selectedAccount });
       } catch (err) {
         return toastr["error"](err, "Transfer failed");
       }
 
+      if (typeof mixpanel !== 'undefined') mixpanel.track("RFT transfer", { transactionHash: receipt.transactionHash, currencyCode: currency, amount });
       toastr["success"]("Transfer of " + (currency === "USD" ? "$" : "") + amount + " " + currency + " confirmed!", "Transfer successful");
       $('#RFTBalance').text("?");
       App.getTokenBalance();

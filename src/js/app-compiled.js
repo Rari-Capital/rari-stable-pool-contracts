@@ -1916,7 +1916,7 @@ App = {
                           currencyCode: token,
                           amount: amount
                         });
-                        _context12.next = 184;
+                        _context12.next = 182;
                         break;
 
                       case 43:
@@ -2254,25 +2254,28 @@ App = {
 
                       case 180:
                         // Mixpanel
-                        inputs = [];
+                        if (typeof mixpanel !== 'undefined') {
+                          inputs = [];
 
-                        for (i = 0; i < inputCurrencyCodes.length; i++) {
-                          inputs.push({
-                            currencyCode: inputCurrencyCodes[i],
-                            amount: inputAmountBNs[i].toString() / Math.pow(10, App.tokens[inputCurrencyCodes[i]].decimals)
+                          for (i = 0; i < inputCurrencyCodes.length; i++) {
+                            inputs.push({
+                              currencyCode: inputCurrencyCodes[i],
+                              amount: inputAmountBNs[i].toString() / Math.pow(10, App.tokens[inputCurrencyCodes[i]].decimals)
+                            });
+                          }
+
+                          mixpanel.track("Withdraw and exchange", {
+                            transactionHash: receipt.transactionHash,
+                            inputs: inputs,
+                            outputCurrencyCode: token,
+                            outputAmount: amount
                           });
-                        }
+                        } // Hide old slippage after exchange success
 
-                        if (typeof mixpanel !== 'undefined') mixpanel.track("Withdraw and exchange", {
-                          transactionHash: receipt.transactionHash,
-                          inputs: inputs,
-                          outputCurrencyCode: token,
-                          outputAmount: amount
-                        }); // Hide old slippage after exchange success
 
                         $('#modal-confirm-withdrawal').modal('hide');
 
-                      case 184:
+                      case 182:
                         // Alert success and refresh balances
                         toastr["success"]("Withdrawal of " + amount + " " + token + " confirmed!", "Withdrawal successful");
                         $('#USDBalance').text("?");
@@ -2283,7 +2286,7 @@ App = {
                         App.getTokenBalance();
                         App.getDirectlyWithdrawableCurrencies();
 
-                      case 192:
+                      case 190:
                       case "end":
                         return _context12.stop();
                     }
@@ -2393,7 +2396,7 @@ App = {
               $('#transferButton').html('<div class="loading-icon"><div></div><div></div><div></div></div>');
               _context15.next = 15;
               return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee14() {
-                var amountBN;
+                var amountBN, receipt;
                 return regeneratorRuntime.wrap(function _callee14$(_context14) {
                   while (1) {
                     switch (_context14.prev = _context14.next) {
@@ -2407,27 +2410,33 @@ App = {
                         });
 
                       case 5:
-                        _context14.next = 10;
+                        receipt = _context14.sent;
+                        _context14.next = 11;
                         break;
 
-                      case 7:
-                        _context14.prev = 7;
+                      case 8:
+                        _context14.prev = 8;
                         _context14.t0 = _context14["catch"](2);
                         return _context14.abrupt("return", toastr["error"](_context14.t0, "Transfer failed"));
 
-                      case 10:
+                      case 11:
+                        if (typeof mixpanel !== 'undefined') mixpanel.track("RFT transfer", {
+                          transactionHash: receipt.transactionHash,
+                          currencyCode: currency,
+                          amount: amount
+                        });
                         toastr["success"]("Transfer of " + (currency === "USD" ? "$" : "") + amount + " " + currency + " confirmed!", "Transfer successful");
                         $('#RFTBalance').text("?");
                         App.getTokenBalance();
                         $('#MyUSDBalance').text("?");
                         App.getMyFundBalance();
 
-                      case 15:
+                      case 17:
                       case "end":
                         return _context14.stop();
                     }
                   }
-                }, _callee14, null, [[2, 7]]);
+                }, _callee14, null, [[2, 8]]);
               }))();
 
             case 15:
