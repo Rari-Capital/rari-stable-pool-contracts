@@ -44,7 +44,7 @@ Parameters:
 
 ## bool RariFundProxy.deposit(string currencyCode, uint256 amount)
 
-***For a limited time only, we are paying gas fees for first-time deposits of at least 250 DAI!***
+***For a limited time only, we are paying gas fees for first-time deposits of at least 250 DAI/USDC/USDT!***
 
 Deposits funds to RariFund in exchange for RFT (with GSN support).
 
