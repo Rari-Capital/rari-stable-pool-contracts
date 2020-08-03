@@ -1,15 +1,10 @@
 /**
- * @file
- * @author David Lucid <david@rari.capital>
- *
- * @section LICENSE
- *
- * All rights reserved to David Lucid of David Lucid LLC.
- * Any disclosure, reproduction, distribution or other use of this code by any individual or entity other than David Lucid of David Lucid LLC, unless given explicit permission by David Lucid of David Lucid LLC, is prohibited.
- *
- * @section DESCRIPTION
- *
- * This file includes the Ethereum contract code for RariFundToken, the ERC20 token contract accounting for the ownership of the funds invested in Rari Capital's RariFund.
+ * COPYRIGHT © 2020 RARI CAPITAL, INC. ALL RIGHTS RESERVED.
+ * Anyone is free to integrate the public APIs (described in `API.md` of the `rari-contracts` package) of the official smart contract instances deployed by Rari Capital, Inc. in any application (commercial or noncommercial and under any license) benefitting Rari Capital, Inc.
+ * Only those with explicit permission from a co-founder of Rari Capital (Jai Bhavnani, Jack Lipstone, or David Lucid) are permitted to study, review, or analyze any part of the source code contained in the `rari-contracts` package.
+ * Reuse (including deployment of smart contracts other than private testing on a private network), modification, redistribution, or sublicensing of any source code contained in the `rari-contracts` package is not permitted without the explicit permission of David Lucid of Rari Capital, Inc.
+ * No one is permitted to use the software for any purpose other than those allowed by this license.
+ * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
  */
 
 pragma solidity ^0.5.7;
@@ -23,7 +18,8 @@ import "./erc20/ERC20Burnable.sol";
 
 /**
  * @title RariFundToken
- * @dev RariFundToken is the ERC20 token contract accounting for the ownership of RariFund's funds.
+ * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
+ * @notice RariFundToken is the ERC20 token contract accounting for the ownership of RariFund's funds.
  */
 contract RariFundToken is ERC20, ERC20Detailed, ERC20Mintable, ERC20Burnable {
     using SafeMath for uint256;

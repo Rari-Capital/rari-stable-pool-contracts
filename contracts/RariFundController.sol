@@ -1,15 +1,10 @@
 /**
- * @file
- * @author David Lucid <david@rari.capital>
- *
- * @section LICENSE
- *
- * All rights reserved to David Lucid of David Lucid LLC.
- * Any disclosure, reproduction, distribution or other use of this code by any individual or entity other than David Lucid of David Lucid LLC, unless given explicit permission by David Lucid of David Lucid LLC, is prohibited.
- *
- * @section DESCRIPTION
- *
- * This file includes the Ethereum contract code for RariFundController, our library handling deposits to and withdrawals from the liquidity pools that power RariFund as well as currency exchanges via 0x.
+ * COPYRIGHT © 2020 RARI CAPITAL, INC. ALL RIGHTS RESERVED.
+ * Anyone is free to integrate the public APIs (described in `API.md` of the `rari-contracts` package) of the official smart contract instances deployed by Rari Capital, Inc. in any application (commercial or noncommercial and under any license) benefitting Rari Capital, Inc.
+ * Only those with explicit permission from a co-founder of Rari Capital (Jai Bhavnani, Jack Lipstone, or David Lucid) are permitted to study, review, or analyze any part of the source code contained in the `rari-contracts` package.
+ * Reuse (including deployment of smart contracts other than private testing on a private network), modification, redistribution, or sublicensing of any source code contained in the `rari-contracts` package is not permitted without the explicit permission of David Lucid of Rari Capital, Inc.
+ * No one is permitted to use the software for any purpose other than those allowed by this license.
+ * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
  */
 
 pragma solidity ^0.5.7;
@@ -29,7 +24,8 @@ import "./lib/exchanges/ZeroExExchangeController.sol";
 
 /**
  * @title RariFundController
- * @dev This contract handles deposits to and withdrawals from the liquidity pools that power RariFund as well as currency exchanges via 0x.
+ * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
+ * @notice This contract handles deposits to and withdrawals from the liquidity pools that power RariFund as well as currency exchanges via 0x.
  */
 contract RariFundController is Ownable {
     using SafeMath for uint256;
@@ -201,7 +197,7 @@ contract RariFundController is Ownable {
     }
 
     /**
-     * @dev Returns the fund controller's balance of the specified currency in the specified pool.
+     * @dev Returns the fund controller's balance of the specified currency in the specified pool (checking `_poolsWithFunds` first to save gas).
      * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.
@@ -215,7 +211,7 @@ contract RariFundController is Ownable {
     }
 
     /**
-     * @dev Returns the fund controller's balance of the specified currency in the specified pool.
+     * @dev Returns the fund controller's balance of the specified currency in the specified pool (without checking `_poolsWithFunds` first).
      * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.

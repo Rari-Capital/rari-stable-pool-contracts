@@ -74,6 +74,10 @@ If you'd like to provide gasless deposits via `RariFundProxy.deposit` via the Ga
 
 `npm run dev`
 
+## License
+
+See `LICENSE`.
+
 ## Credits
 
 Rari Capital's smart contracts are developed by [David Lucid](https://github.com/davidlucid) of David Lucid LLC.
