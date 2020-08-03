@@ -21,11 +21,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" integrity="sha256-R91pD48xW+oHbpJYGn5xR0Q7tMhH4xOrWn1QqMRINtA=" crossorigin="anonymous" />
 
     <!-- Rari Fund Web App -->
-    <link href="css/app.css?v=1595276956" rel="stylesheet">
+    <link href="css/app.css?v=1595961244" rel="stylesheet">
   </head>
   <body>
     <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 bg-white">
-      <h5 class="my-0 mr-md-auto font-weight-normal"><a href="https://rari.capital" class="text-dark">Rari Capital</a></h5>
+      <h5 class="my-0 mr-md-auto font-weight-normal"><a href="https://rari.capital" class="text-dark text-uppercase" style="font-family: Avenir-Black; font-weight: 600; letter-spacing: 1px; font-size: 22px; display: flex; align-items: center;"><img src="favicon.png" style="height: 32px; margin-right: 8px;">Rari Capital</a></h5>
       <nav class="my-2 my-md-0 mr-md-3">
         <a class="p-2 text-dark" href="https://rari.capital">Return Home</a>
         <a class="p-2 text-dark" href="#fund" id="tab-fund" style="text-decoration: underline;">The Fund</a>
@@ -35,92 +35,77 @@
       <button class="btn btn-danger" type="button" id="btn-disconnect" style="display: none;">Disconnect Wallet</button>
     </div>
 
-    <div class="container" id="container-fund">
-      <div class="row">
-        <div class="col-12">
-          <h1 class="text-center">The Fund</h1>
-          <p class="text-center">Earn through a variety of trusted DeFi protocols, optimized for the highest returns. <a href="https://www.rari.capital/current.html">Learn more here.</a></p>
-        </div>
-      </div>
-      
-      <!--<div class="row">
-        <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
-          <div class="panel panel-default panel-horizontal">
-            <div class="panel-heading">
-              <h3 class="panel-title" style="white-space: nowrap; font-size: 2.5rem;">APY Now</h3>
-              <small class="d-inline-block text-right">*real</small>
-            </div>
-            <div class="panel-body flex-grow-1 text-md-right">
-              <kbd class="d-inline-block display-4" id="APYNow">?%</kbd>
-            </div>
+    <div id="page-fund">
+      <div class="container">
+        <div class="row">
+          <div class="col-12">
+            <h1 class="text-center">The Fund</h1>
+            <p class="text-center">Earn through a variety of trusted DeFi protocols, optimized for the highest returns. <a href="https://www.rari.capital/current.html">Learn more here.</a></p>
           </div>
         </div>
-      </div>-->
-      
-      <div class="row">
-        <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3">
-          <div class="panel panel-default panel-horizontal">
-            <div class="panel-heading">
-              <h3 class="panel-title" style="white-space: nowrap; font-size: 2.5rem;">APY Today</h3>
-              <!--<small class="d-inline-block text-right">*theoretical</small>-->
+        
+        <div class="row">
+          <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-3">
+            <div class="panel panel-default panel-horizontal" style="margin-bottom: 20px;">
+              <div class="panel-heading">
+                <h3 class="panel-title" style="white-space: nowrap; font-size: 2rem;">Current APY</h3>
+                <!--<small class="d-inline-block text-right">*real</small>-->
+              </div>
+              <div class="panel-body flex-grow-1 text-sm-right">
+                <samp class="d-block" style="font-size: 3rem; line-height: 1em;" id="APYNow">?%</samp>
+              </div>
             </div>
-            <div class="panel-body flex-grow-1 text-md-right">
-              <kbd class="d-inline-block display-4" id="APYToday">?%</kbd>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="row">
-        <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
-          <div class="panel panel-default panel-horizontal">
-            <div class="panel-heading">
-              <h3 class="panel-title" style="white-space: nowrap;">Fund Stablecoin Balance</h3>
-            </div>
-            <div class="panel-body flex-grow-1 text-md-right">
-              <kbd class="d-inline-block">$<span id="USDBalance">?</span> USD <small>(DAI + USDC + USDT)</small></kbd>
+            <!--<div class="panel panel-default panel-horizontal" style="margin-bottom: 20px;">
+              <div class="panel-heading">
+                <h3 class="panel-title" style="white-space: nowrap; font-size: 2rem;">APY Today</h3>
+                <small class="d-inline-block text-right">*theoretical</small>
+              </div>
+              <div class="panel-body flex-grow-1 text-sm-right">
+                <samp class="d-block" style="font-size: 3rem; line-height: 1em;" id="APYToday">?%</samp>
+              </div>
+            </div>-->
+            <div class="panel panel-default panel-horizontal">
+              <div class="panel-heading">
+                <h3 class="panel-title" style="white-space: nowrap;">Total Supply</h3>
+              </div>
+              <div class="panel-body flex-grow-1 text-sm-right">
+                <samp class="d-block" style="font-size: 1.5rem; line-height: 1em;">$<span id="USDBalance">?</span> USD</samp>
+              </div>
             </div>
           </div>
         </div>
       </div>
       
-      <div class="row">
-        <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h3 class="panel-title">Fund APY Comparison Chart</h3>
-            </div>
-            <div class="panel-body">
-              <canvas id="chart-aprs"></canvas>
-              <small class="d-block text-center mt-2">*Data before our launch in June 2020 based on theoretical returns + doesn't account for new strategies.</small>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="row">
-        <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h3 class="panel-title">Fund Return Comparison Chart</h3>
-            </div>
-            <div class="panel-body">
-              <small class="d-block text-center mb-2">The following chart tracks the theoretical growth of $10,000 USD over the past year in Rari compared to other protocols.</small>
-              <canvas id="chart-return"></canvas>
-              <small class="d-block text-center mt-2">*Data before our launch in June 2020 based on theoretical returns.</small>
+      <div class="container container-90-xl">
+        <div class="row">
+          <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-0">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Fund APY Comparison Chart</h3>
+              </div>
+              <div class="panel-body" style="padding: 15px;">
+                <canvas id="chart-aprs"></canvas>
+                <small class="d-block text-center mt-2">*Data before our launch in June 2020 based on theoretical returns + doesn't account for new strategies.</small>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="col-12">
-          <p class="text-center m-0"><a style="color: #aaa;" href="#" data-toggle="modal" data-target="#modal-how-it-works">Read more about how Rari works under the hood by clicking here.</a></p>
+          <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-0">
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h3 class="panel-title">Fund Return Comparison Chart</h3>
+              </div>
+              <div class="panel-body" style="padding: 15px;">
+                <small class="d-block text-center mb-2">The following chart tracks the theoretical growth of $10,000 USD over the past year in Rari compared to other protocols.</small>
+                <canvas id="chart-return"></canvas>
+                <small class="d-block text-center mt-2">*Data before our launch in June 2020 based on theoretical returns.</small>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="container" id="container-account" style="display: none;">
+    <div class="container" id="page-account" style="display: none;">
       <div class="row">
         <div class="col-12">
           <h1 class="text-center">My Account</h1>
@@ -131,13 +116,18 @@
       
       <div class="row">
         <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+          <button class="btn btn-primary btn-lg btn-block btn-connect" type="button">Connect Wallet</button>
+        </div>
+      </div>
+      
+      <div class="row show-account" style="display: none;">
+        <div class="col-xl-10 offset-lg-1" id="selected-account-wrapper">
           <div class="panel panel-default panel-horizontal">
             <div class="panel-heading">
               <h3 class="panel-title" style="white-space: nowrap;">My Account</h3>
             </div>
-            <div class="panel-body">
-              <button class="btn btn-primary btn-block btn-connect" type="button">Connect Wallet</button>
-              <select class="custom-select" id="selected-account" style="display: none;">
+            <div class="panel-body p-0">
+              <select class="custom-select" id="selected-account" style="height: 50px; padding-top: .5rem; padding-bottom: .5rem; padding-left: 1rem;">
                 <option disabled selected>Please connect your wallet...</option>
               </select>
             </div>
@@ -145,32 +135,46 @@
         </div>
       </div>
       
-      <div class="row">
-        <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
-          <div class="panel panel-default panel-horizontal">
+      <div class="row show-account" style="display: none;">
+        <div class="col-md-6 col-xl-5 offset-xl-1">
+          <div class="panel panel-default">
             <div class="panel-heading">
-              <h3 class="panel-title" style="white-space: nowrap;">My Interest Accrued</h3>
+              <h3 class="panel-title">My Balance <small>(supplied to Rari)</small></h3>
             </div>
-            <div class="panel-body flex-grow-1 text-md-right">
-              <kbd class="d-inline-block">$<span id="MyInterestAccrued">?</span> USD</kbd>
+            <div class="panel-body">
+              <samp class="d-block" id="MyUSDBalanceWrapper">$<span id="MyUSDBalance">?</span> USD</samp>
+            </div>
+          </div>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">My Interest Accrued</h3>
+            </div>
+            <div class="panel-body">
+              <samp class="d-block">$<span id="MyInterestAccrued">?</span> USD</samp>
+            </div>
+            <div class="panel-footer">
+              <small class="d-block">All COMP earned by the fund is liquidated into additional interest for RFT holders every 3 days.</small>
+            </div>
+          </div>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">My RFT <small>(Rari Fund Token)</small> Balance</h3>
+            </div>
+            <div class="panel-body">
+              <samp class="d-block"><span id="RFTBalance">?</span> RFT</samp>
+            </div>
+            <div class="panel-footer">
+              <small class="d-block">Your RFT balance above is an internal representation of your equivalent USD balance.</small>
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="row">
-        <div class="col-sm-6 col-md-5 offset-md-1 col-lg-4 offset-lg-2">
+        <div class="col-md-6 col-xl-5">
           <div class="panel panel-default">
             <div class="panel-heading">
-              <h3 class="panel-title">My Rari Wallet <small>(earns interest)</small></h3>
+              <h3 class="panel-title">Deposit Funds</h3>
             </div>
-            <div class="panel-body">
-              <h4 style="margin-top: 0;">Balance <small>(supplied to Rari)</small></h4>
-              <kbd class="d-inline-block mb-2">$<span id="MyUSDBalance">?</span> USD <small>(DAI + USDC + USDT)</small></kbd><br />
-              <small class="d-inline-block">Gas is covered for first-time deposits of at least <strong>250 DAI</strong>. Please note the temporary <strong>$350 USD balance limit</strong> (does not apply to interest--only depositing). Your USD balance above is represented internally by an equivalent RFT balance.</small>
-              <br /><br />
-              <h4>Deposit</h4>
-              <div class="form-group input-group">
+            <div class="panel-body p-0">
+              <div class="input-group input-group-lg">
                 <input type="text" class="form-control" id="DepositAmount" placeholder="Amount" />
                 <select class="custom-select" id="DepositToken">
                   <option selected value="DAI">DAI</option>
@@ -178,11 +182,20 @@
                   <option value="USDT">USDT</option>
                   <option>ETH</option>
                 </select>
+                <button class="btn btn-success btn-lg" id="depositButton" type="button" disabled>Deposit</button>
               </div>
-              <div class="form-group" id="DepositSlippage" style="display: none;">Slippage: <kbd class="text-red">0%</kbd></div>
-              <button class="btn btn-success" id="depositButton" type="button" disabled>Deposit</button><br /><br />
-              <h4>Withdraw</h4>
-              <div class="form-group input-group">
+            </div>
+            <div class="panel-footer">
+              <small class="d-block">Gas is covered for first-time deposits of at least <strong>250 DAI</strong>.</small>
+              <small class="d-block">Please note the temporary <strong>$350 USD account deposit limit</strong>.</small>
+            </div>
+          </div>
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Withdraw Funds</h3>
+            </div>
+            <div class="panel-body p-0">
+              <div class="input-group input-group-lg">
                 <input type="text" class="form-control" id="WithdrawAmount" placeholder="Amount" />
                 <select class="custom-select" id="WithdrawToken">
                   <option selected value="DAI">DAI</option>
@@ -190,35 +203,72 @@
                   <option value="USDT">USDT</option>
                   <option>ETH</option>
                 </select>
+                <button class="btn btn-danger btn-lg" id="withdrawButton" type="button" disabled>Withdraw</button><br />
               </div>
-              <div class="form-group" id="WithdrawSlippage" style="display: none;">Slippage: <kbd class="text-red">0%</kbd></div>
-              <button class="btn btn-danger mb-2" id="withdrawButton" type="button" disabled>Withdraw</button><br />
-              <small class="d-inline-block">All COMP earned by the fund is liquidated into additional interest for RFT holders every 3 days.</small>
             </div>
           </div>
-        </div>
-        <div class="col-sm-6 col-md-5 col-lg-4">
-          <div class="panel panel-default mb-2">
+          <div class="panel panel-default">
             <div class="panel-heading">
-              <h3 class="panel-title">My RFT <small>(Rari Fund Token)</small> Wallet</h3>
+              <h3 class="panel-title">Transfer Holdings</h3>
             </div>
-            <div class="panel-body">
-              <h4 style="margin-top: 0;">Balance</h4>
-              <kbd class="d-inline-block mb-2"><span id="RFTBalance">?</span> RFT</kbd><br />
-              <small class="d-inline-block">This balance is convertible at any time to any supported currency (without exchange slippage for select stablecoins) using the withdraw function.</small>
-              <br /><br />
-              <h4>Transfer</h4>
-              <div class="form-group"><input type="text" class="form-control" id="RFTTransferAddress" placeholder="Address" /></div>
-              <div class="form-group"><input type="text" class="form-control" id="RFTTransferAmount" placeholder="Amount" /></div>
-              <button class="btn btn-info" id="transferButton" type="button" disabled>Transfer</button>
+            <div class="panel-body p-0">
+              <input type="text" class="form-control form-control-lg" id="TransferAddress" placeholder="Address" />
+              <div class="input-group input-group-lg" style="border-top: 1px solid white;">
+                <input type="text" class="form-control" id="TransferAmount" placeholder="Amount" />
+                <select class="custom-select" id="TransferCurrency">
+                  <option selected>USD</option>
+                  <option>RFT</option>
+                </select>
+                <button class="btn btn-info btn-lg" id="transferButton" type="button" disabled>Transfer</button><br />
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="row">
-        <div class="col-12">
-          <p class="text-center m-0"><a style="color: #aaa;" href="#" data-toggle="modal" data-target="#modal-how-it-works">Read more about how Rari works under the hood by clicking here.</a></p>
+    <div class="modal" tabindex="-1" role="dialog" id="modal-confirm-deposit">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title text-dark">Confirm Deposit</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-dark">
+            <p class="text-dark">You are depositing a currency that is not currently desired by the fund, so the fund must exchange it for you.</p>
+            <div class="mb-2" id="DepositSlippage"><strong>Slippage:</strong> <kbd>?%</kbd></div>
+            <div class="mb-3" id="DepositExchangeFee"><strong>Exchange Fee:</strong> <kbd>0 ETH</kbd></div>
+            <small class="d-block">Please do not increase the preset gas price without increasing the transaction value (as 0x exchange protocol fees are proportional to gas price).</small>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success" id="confirmDepositButton">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="modal-confirm-withdrawal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title text-dark">Confirm Withdrawal</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-dark">
+            <p class="text-dark">You are withdrawing a currency that the fund does not have enough of to directly process your withdrawal; instead, the fund must make exchange(s) first.</p>
+            <div class="mb-2" id="WithdrawSlippage"><strong>Slippage:</strong> <kbd>?%</kbd></div>
+            <div class="mb-3" id="WithdrawExchangeFee"><strong>Exchange Fee:</strong> <kbd>0 ETH</kbd></div>
+            <small class="d-block">Please do not increase the preset gas price without increasing the transaction value (as 0x exchange protocol fees are proportional to gas price).</small>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-success" id="confirmWithdrawalButton">Confirm</button>
+          </div>
         </div>
       </div>
     </div>
@@ -255,7 +305,7 @@
           </div>
         </div>
       </div>
-    </div>    
+    </div>
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
@@ -275,12 +325,13 @@
 
     <!-- big.js -->
     <script type="text/javascript" src="https://unpkg.com/big.js@5.2.2/big.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/toformat@2.0.0/toFormat.js"></script>
 
     <!-- Web3Modal -->
     <!--<script src="https://unpkg.com/web3@latest/dist/web3.min.js"></script>-->
-    <script src="https://unpkg.com/web3modal@1.7.0/dist/index.js"></script>
+    <script src="https://unpkg.com/web3modal@1.9.0/dist/index.js"></script>
     <script type="text/javascript" src="https://unpkg.com/evm-chains/lib/index.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.0.13/dist/umd/index.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@walletconnect/web3-provider@1.1.0/dist/umd/index.min.js"></script>
     <script type="text/javascript" src="https://unpkg.com/fortmatic@2.0.6/dist/fortmatic.js"></script>
     <script type="text/javascript" src="https://unpkg.com/@toruslabs/torus-embed"></script>
     <script type="text/javascript" src="https://unpkg.com/@portis/web3"></script>
@@ -289,7 +340,10 @@
     <!-- GSN -->
     <script type="text/javascript" src="js/openzeppelin-gsn-provider.js"></script>
 
+    <!-- Analytics -->
+    <script src="js/analytics.js"></script>
+
     <!-- Rari Fund Web App -->
-    <script src="js/app-compiled.js?v=1595276962"></script>
+    <script src="js/app-compiled.js?v=1595961245"></script>
   </body>
 </html>
