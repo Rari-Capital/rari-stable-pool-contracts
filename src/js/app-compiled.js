@@ -50,8 +50,9 @@ App = {
     }
   },
   erc20Abi: null,
-  compApyPrices: {},
-  compApyPricesLastUpdated: 0,
+  zeroExPrices: {},
+  usdPrices: {},
+  usdPricesLastUpdated: 0,
   checkAccountBalanceLimit: true,
   init: function init() {
     if (location.hash === "#account") {
@@ -354,7 +355,7 @@ App = {
                 for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
                   cToken = _step2.value;
                   currencyCodes.push(cToken.underlying_symbol);
-                  if (!App.compApyPrices[cToken.underlying_symbol]) priceMissing = true;
+                  if (!App.usdPrices[cToken.underlying_symbol]) priceMissing = true;
                 }
               } catch (err) {
                 _iterator2.e(err);
@@ -364,7 +365,7 @@ App = {
 
               now = new Date().getTime() / 1000;
 
-              if (!(now > App.compApyPricesLastUpdated + 900 || priceMissing)) {
+              if (!(now > App.usdPricesLastUpdated + 900 || priceMissing)) {
                 _context4.next = 10;
                 break;
               }
@@ -373,9 +374,9 @@ App = {
               return App.getCurrencyUsdRates(currencyCodes);
 
             case 8:
-              App.compApyPrices = _context4.sent;
+              App.usdPrices = _context4.sent;
               // TODO: Get real USD prices, not DAI prices
-              App.compApyPricesLastUpdated = now;
+              App.usdPricesLastUpdated = now;
 
             case 10:
               // Get currency APY and total yearly interest
@@ -388,7 +389,7 @@ App = {
                 for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
                   _cToken = _step3.value;
                   underlyingBorrow = _cToken.total_borrows.value * _cToken.exchange_rate.value;
-                  borrowUsd = underlyingBorrow * App.compApyPrices[_cToken.underlying_symbol];
+                  borrowUsd = underlyingBorrow * App.usdPrices[_cToken.underlying_symbol];
 
                   if (_cToken.underlying_symbol === currencyCode) {
                     currencyUnderlyingSupply = _cToken.total_supply.value * _cToken.exchange_rate.value;
@@ -409,7 +410,7 @@ App = {
               marketSupplierCompPerBlock = marketCompPerBlock / 2;
               marketSupplierCompPerBlockPerUsd = marketSupplierCompPerBlock / currencyUnderlyingSupply; // Assumes that the value of currencyCode is $1
 
-              marketSupplierUsdFromCompPerBlockPerUsd = marketSupplierCompPerBlockPerUsd * App.compApyPrices["COMP"];
+              marketSupplierUsdFromCompPerBlockPerUsd = marketSupplierCompPerBlockPerUsd * App.usdPrices["COMP"];
               return _context4.abrupt("return", marketSupplierUsdFromCompPerBlockPerUsd * 2102400);
 
             case 21:
@@ -1201,17 +1202,18 @@ App = {
     $(document).on('click', '#withdrawButton, #confirmWithdrawalButton', App.handleWithdraw);
     $(document).on('click', '#transferButton', App.handleTransfer);
   },
-  get0xPrice: function get0xPrice(inputTokenSymbol, outputTokenSymbol) {
+  get0xPrices: function get0xPrices(inputTokenSymbol) {
     return new Promise(function (resolve, reject) {
       $.getJSON('https://api.0x.org/swap/v0/prices?sellToken=' + inputTokenSymbol, function (decoded) {
         if (!decoded) return reject("Failed to decode prices from 0x swap API");
         if (!decoded.records) return reject("No prices found on 0x swap API");
+        var prices = {};
 
         for (var i = 0; i < decoded.records.length; i++) {
-          if (decoded.records[i].symbol === outputTokenSymbol) resolve(decoded.records[i].price);
+          prices[decoded.records[i].symbol] = decoded.records[i].price;
         }
 
-        reject("Price not found on 0x swap API");
+        resolve(prices);
       }).fail(function (err) {
         reject("Error requesting prices from 0x swap API: " + err.message);
       });
@@ -1350,7 +1352,7 @@ App = {
               $('#depositButton, #confirmDepositButton').prop("disabled", true).html('<div class="loading-icon"><div></div><div></div><div></div></div>');
               _context11.next = 18;
               return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee10() {
-                var accepted, myFundBalanceBN, depositContract, allowanceBN, receipt, acceptedCurrency, _yield$App$get0xSwapO, _yield$App$get0xSwapO2, orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, gasPrice, amountOutputted, slippage, slippageAbsPercentageString, signatures, j;
+                var accepted, myFundBalanceBN, depositContract, allowanceBN, receipt, acceptedCurrency, _yield$App$get0xSwapO, _yield$App$get0xSwapO2, orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, gasPrice, amountOutputted, epochNow, slippage, slippageAbsPercentageString, signatures, j;
 
                 return regeneratorRuntime.wrap(function _callee10$(_context10) {
                   while (1) {
@@ -1454,7 +1456,7 @@ App = {
                           currencyCode: token,
                           amount: amount
                         });
-                        _context10.next = 148;
+                        _context10.next = 157;
                         break;
 
                       case 46:
@@ -1592,80 +1594,107 @@ App = {
                         return _context10.abrupt("return", toastr["warning"]("Unable to find enough liquidity to exchange " + token + " before depositing.", "Deposit canceled"));
 
                       case 102:
-                        _context10.t13 = amountOutputted / amount;
-                        _context10.next = 105;
-                        return App.get0xPrice(token === "ETH" ? "WETH" : token, acceptedCurrency);
+                        // Warn user of slippage
+                        epochNow = new Date().getTime();
 
-                      case 105:
-                        _context10.t14 = _context10.sent;
-                        _context10.t15 = _context10.t13 * _context10.t14;
-                        slippage = 1 - _context10.t15;
-                        slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
-
-                        if ($('#modal-confirm-deposit').is(':visible')) {
-                          _context10.next = 113;
+                        if (!(!App.zeroExPrices[token === "ETH" ? "WETH" : token] || epochNow > App.zeroExPrices[token === "ETH" ? "WETH" : token]._lastUpdated + 60 * 1000)) {
+                          _context10.next = 114;
                           break;
                         }
 
-                        $('#DepositExchangeFee kbd').text(protocolFee / 1e18 + " ETH");
+                        _context10.prev = 104;
+                        _context10.next = 107;
+                        return App.get0xPrices(token === "ETH" ? "WETH" : token);
+
+                      case 107:
+                        App.zeroExPrices[token === "ETH" ? "WETH" : token] = _context10.sent;
+                        _context10.next = 113;
+                        break;
+
+                      case 110:
+                        _context10.prev = 110;
+                        _context10.t13 = _context10["catch"](104);
+                        return _context10.abrupt("return", toastr["error"]("Failed to get prices from 0x swap API: " + _context10.t13, "Deposit failed"));
+
+                      case 113:
+                        App.zeroExPrices[token === "ETH" ? "WETH" : token]._lastUpdated = epochNow;
+
+                      case 114:
+                        if (App.zeroExPrices[token === "ETH" ? "WETH" : token][acceptedCurrency]) {
+                          _context10.next = 116;
+                          break;
+                        }
+
+                        return _context10.abrupt("return", toastr["error"]("Price not found on 0x swap API", "Deposit failed"));
+
+                      case 116:
+                        slippage = 1 - amountOutputted / amount * App.zeroExPrices[token === "ETH" ? "WETH" : token][acceptedCurrency];
+                        slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
+
+                        if ($('#modal-confirm-deposit').is(':visible')) {
+                          _context10.next = 122;
+                          break;
+                        }
+
+                        $('#DepositExchangeFee kbd').html(protocolFee / 1e18 + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
                         $('#DepositSlippage').html(slippage >= 0 ? '<strong>Slippage:</strong> <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "warning") + '">' + slippageAbsPercentageString + '%</kbd>' : '<strong>Bonus:</strong> <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>');
                         return _context10.abrupt("return", $('#modal-confirm-deposit').modal('show'));
 
-                      case 113:
+                      case 122:
                         if (!($('#DepositSlippage kbd').text() !== slippageAbsPercentageString + "%")) {
-                          _context10.next = 116;
+                          _context10.next = 125;
                           break;
                         }
 
                         $('#DepositSlippage').html(slippage >= 0 ? '<strong>Slippage:</strong> <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "warning") + '">' + slippageAbsPercentageString + '%</kbd>' : '<strong>Bonus:</strong> <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>');
                         return _context10.abrupt("return", toastr["warning"]("Exchange slippage changed. If you are satisfied with the new slippage, please click the \"Confirm\" button again to process your deposit.", "Please try again"));
 
-                      case 116:
-                        if (!($('#DepositExchangeFee kbd').text() !== protocolFee / 1e18 + " ETH")) {
-                          _context10.next = 119;
+                      case 125:
+                        if (!($('#DepositExchangeFee kbd').html().substring(0, $('#DepositExchangeFee kbd').html().indexOf("<") - 1) !== protocolFee / 1e18 + " ETH")) {
+                          _context10.next = 128;
                           break;
                         }
 
-                        $('#DepositExchangeFee kbd').text(protocolFee / 1e18 + " ETH");
+                        $('#DepositExchangeFee kbd').html(protocolFee / 1e18 + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
                         return _context10.abrupt("return", toastr["warning"]("Exchange fee changed. If you are satisfied with the new fee, please click the \"Confirm\" button again to process your deposit.", "Please try again"));
 
-                      case 119:
+                      case 128:
                         console.log('Exchange ' + amount + ' ' + token + ' to deposit ' + amountOutputted + ' ' + acceptedCurrency); // Approve tokens to RariFundProxy if token is not ETH
 
                         if (!(token !== "ETH")) {
-                          _context10.next = 135;
+                          _context10.next = 144;
                           break;
                         }
 
-                        _context10.prev = 121;
-                        _context10.t16 = Web3.utils;
-                        _context10.next = 125;
+                        _context10.prev = 130;
+                        _context10.t14 = Web3.utils;
+                        _context10.next = 134;
                         return App.tokens[token].contract.methods.allowance(App.selectedAccount, App.contracts.RariFundProxy.options.address).call();
 
-                      case 125:
-                        _context10.t17 = _context10.sent;
-                        allowanceBN = _context10.t16.toBN.call(_context10.t16, _context10.t17);
+                      case 134:
+                        _context10.t15 = _context10.sent;
+                        allowanceBN = _context10.t14.toBN.call(_context10.t14, _context10.t15);
 
                         if (!allowanceBN.lt(amountBN)) {
-                          _context10.next = 130;
+                          _context10.next = 139;
                           break;
                         }
 
-                        _context10.next = 130;
+                        _context10.next = 139;
                         return App.tokens[token].contract.methods.approve(App.contracts.RariFundProxy.options.address, amountBN).send({
                           from: App.selectedAccount
                         });
 
-                      case 130:
-                        _context10.next = 135;
+                      case 139:
+                        _context10.next = 144;
                         break;
 
-                      case 132:
-                        _context10.prev = 132;
-                        _context10.t18 = _context10["catch"](121);
-                        return _context10.abrupt("return", toastr["error"]("Failed to approve tokens to RariFundProxy: " + (_context10.t18.message ? _context10.t18.message : _context10.t18), "Deposit failed"));
+                      case 141:
+                        _context10.prev = 141;
+                        _context10.t16 = _context10["catch"](130);
+                        return _context10.abrupt("return", toastr["error"]("Failed to approve tokens to RariFundProxy: " + (_context10.t16.message ? _context10.t16.message : _context10.t16), "Deposit failed"));
 
-                      case 135:
+                      case 144:
                         // Build array of orders and signatures
                         signatures = [];
 
@@ -1690,25 +1719,25 @@ App = {
                         } // Exchange and deposit tokens via RariFundProxy
 
 
-                        _context10.prev = 137;
-                        _context10.next = 140;
+                        _context10.prev = 146;
+                        _context10.next = 149;
                         return App.contracts.RariFundProxy.methods.exchangeAndDeposit(token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.tokens[token].address, amountBN, acceptedCurrency, orders, signatures, takerAssetFilledAmountBN).send({
                           from: App.selectedAccount,
                           value: token === "ETH" ? Web3.utils.toBN(protocolFee).add(amountBN).toString() : protocolFee,
                           gasPrice: gasPrice
                         });
 
-                      case 140:
+                      case 149:
                         receipt = _context10.sent;
-                        _context10.next = 146;
+                        _context10.next = 155;
                         break;
 
-                      case 143:
-                        _context10.prev = 143;
-                        _context10.t19 = _context10["catch"](137);
-                        return _context10.abrupt("return", toastr["error"]("RariFundProxy.exchangeAndDeposit failed: " + (_context10.t19.message ? _context10.t19.message : _context10.t19), "Deposit failed"));
+                      case 152:
+                        _context10.prev = 152;
+                        _context10.t17 = _context10["catch"](146);
+                        return _context10.abrupt("return", toastr["error"]("RariFundProxy.exchangeAndDeposit failed: " + (_context10.t17.message ? _context10.t17.message : _context10.t17), "Deposit failed"));
 
-                      case 146:
+                      case 155:
                         // Mixpanel
                         if (typeof mixpanel !== 'undefined') mixpanel.track("Exchange and deposit", {
                           transactionHash: receipt.transactionHash,
@@ -1720,7 +1749,7 @@ App = {
 
                         $('#modal-confirm-deposit').modal('hide');
 
-                      case 148:
+                      case 157:
                         // Alert success and refresh balances
                         toastr["success"]("Deposit of " + amount + " " + token + " confirmed!", "Deposit successful");
                         $('#USDBalance').text("?");
@@ -1731,12 +1760,12 @@ App = {
                         App.getTokenBalance();
                         App.getDirectlyWithdrawableCurrencies();
 
-                      case 156:
+                      case 165:
                       case "end":
                         return _context10.stop();
                     }
                   }
-                }, _callee10, null, [[20, 31], [34, 40], [74, 87], [121, 132], [137, 143]]);
+                }, _callee10, null, [[20, 31], [34, 40], [74, 87], [104, 110], [130, 141], [146, 152]]);
               }))();
 
             case 18:
@@ -1794,7 +1823,7 @@ App = {
               $('#withdrawButton, #confirmWithdrawalButton').prop("disabled", true).html('<div class="loading-icon"><div></div><div></div><div></div></div>');
               _context13.next = 11;
               return _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee12() {
-                var allowanceBN, tokenRawFundBalanceBN, receipt, inputCurrencyCodes, inputAmountBNs, allOrders, allSignatures, makerAssetFillAmountBNs, protocolFeeBNs, amountInputtedUsdBN, amountWithdrawnBN, totalProtocolFeeBN, inputCandidates, _i10, _arr4, inputToken, rawFundBalanceBN, i, _yield$App$get0xSwapO3, _yield$App$get0xSwapO4, orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, gasPrice, signatures, j, thisOutputAmountBN, thisInputAmountBN, tries, amountOutputtedUsd, slippage, slippageAbsPercentageString, inputAmountStrings, makerAssetFillAmountStrings, protocolFeeStrings, inputs;
+                var allowanceBN, tokenRawFundBalanceBN, receipt, inputCurrencyCodes, inputAmountBNs, allOrders, allSignatures, makerAssetFillAmountBNs, protocolFeeBNs, amountInputtedUsdBN, amountWithdrawnBN, totalProtocolFeeBN, inputCandidates, _i10, _arr4, inputToken, rawFundBalanceBN, i, _yield$App$get0xSwapO3, _yield$App$get0xSwapO4, orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, gasPrice, signatures, j, thisOutputAmountBN, thisInputAmountBN, tries, epochNow, amountOutputtedUsd, slippage, slippageAbsPercentageString, inputAmountStrings, makerAssetFillAmountStrings, protocolFeeStrings, inputs;
 
                 return regeneratorRuntime.wrap(function _callee12$(_context12) {
                   while (1) {
@@ -1887,7 +1916,7 @@ App = {
                           currencyCode: token,
                           amount: amount
                         });
-                        _context12.next = 174;
+                        _context12.next = 184;
                         break;
 
                       case 43:
@@ -2107,48 +2136,76 @@ App = {
                         return _context12.abrupt("return", toastr["warning"]("Unable to find enough liquidity to exchange withdrawn tokens to " + token + ".", "Withdrawal canceled"));
 
                       case 129:
-                        _context12.t10 = amount;
-                        _context12.next = 132;
-                        return App.get0xPrice("DAI", token === "ETH" ? "WETH" : token);
+                        // Warn user of slippage
+                        epochNow = new Date().getTime();
 
-                      case 132:
-                        _context12.t11 = _context12.sent;
-                        amountOutputtedUsd = _context12.t10 * _context12.t11;
-                        // TODO: Use actual input currencies instead of using DAI for USD price
+                        if (!(!App.zeroExPrices["DAI"] || epochNow > App.zeroExPrices["DAI"]._lastUpdated + 60 * 1000)) {
+                          _context12.next = 141;
+                          break;
+                        }
+
+                        _context12.prev = 131;
+                        _context12.next = 134;
+                        return App.get0xPrices("DAI");
+
+                      case 134:
+                        App.zeroExPrices["DAI"] = _context12.sent;
+                        _context12.next = 140;
+                        break;
+
+                      case 137:
+                        _context12.prev = 137;
+                        _context12.t10 = _context12["catch"](131);
+                        return _context12.abrupt("return", toastr["error"]("Failed to get prices from 0x swap API: " + _context12.t10, "Deposit failed"));
+
+                      case 140:
+                        App.zeroExPrices["DAI"]._lastUpdated = epochNow;
+
+                      case 141:
+                        if (App.zeroExPrices["DAI"][token === "ETH" ? "WETH" : token]) {
+                          _context12.next = 143;
+                          break;
+                        }
+
+                        return _context12.abrupt("return", toastr["error"]("Price not found on 0x swap API", "Deposit failed"));
+
+                      case 143:
+                        amountOutputtedUsd = amount * App.zeroExPrices["DAI"][token === "ETH" ? "WETH" : token]; // TODO: Use actual input currencies instead of using DAI for USD price
+
                         slippage = 1 - amountOutputtedUsd / (amountInputtedUsdBN.toString() / 1e18);
                         slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
                         if ($('#modal-confirm-withdrawal').is(':visible')) {
-                          _context12.next = 140;
+                          _context12.next = 150;
                           break;
                         }
 
-                        $('#WithdrawExchangeFee kbd').text(protocolFee / 1e18 + " ETH");
+                        $('#WithdrawExchangeFee kbd').text(protocolFee / 1e18 + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
                         $('#WithdrawSlippage').html(slippage >= 0 ? '<strong>Slippage:</strong> <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "warning") + '">' + slippageAbsPercentageString + '%</kbd>' : '<strong>Bonus:</strong> <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>');
                         return _context12.abrupt("return", $('#modal-confirm-withdrawal').modal('show'));
 
-                      case 140:
+                      case 150:
                         if (!($('#WithdrawSlippage kbd').text() !== slippageAbsPercentageString + "%")) {
-                          _context12.next = 143;
+                          _context12.next = 153;
                           break;
                         }
 
                         $('#WithdrawSlippage').html(slippage >= 0 ? '<strong>Slippage:</strong> <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "warning") + '">' + slippageAbsPercentageString + '%</kbd>' : '<strong>Bonus:</strong> <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>');
                         return _context12.abrupt("return", toastr["warning"]("Exchange slippage changed. If you are satisfied with the new slippage, please click the \"Confirm\" button again to make your withdrawal.", "Please try again"));
 
-                      case 143:
-                        if (!($('#WithdrawExchangeFee kbd').text() !== protocolFee / 1e18 + " ETH")) {
-                          _context12.next = 146;
+                      case 153:
+                        if (!($('#WithdrawExchangeFee kbd').html().substring(0, $('#WithdrawExchangeFee kbd').html().indexOf("<") - 1) !== protocolFee / 1e18 + " ETH")) {
+                          _context12.next = 156;
                           break;
                         }
 
-                        $('#WithdrawExchangeFee kbd').text(protocolFee / 1e18 + " ETH");
+                        $('#WithdrawExchangeFee kbd').text(protocolFee / 1e18 + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
                         return _context12.abrupt("return", toastr["warning"]("Exchange fee changed. If you are satisfied with the new fee, please click the \"Confirm\" button again to make your withdrawal.", "Please try again"));
 
-                      case 146:
+                      case 156:
                         console.log('Withdraw and exchange to ' + amountWithdrawnBN.toString() / Math.pow(10, token == "ETH" ? 18 : App.tokens[token].decimals) + ' ' + token); // Withdraw and exchange tokens via RariFundProxy
 
-                        _context12.prev = 147;
+                        _context12.prev = 157;
                         inputAmountStrings = [];
 
                         for (i = 0; i < inputAmountBNs.length; i++) {
@@ -2167,35 +2224,35 @@ App = {
                           protocolFeeStrings[i] = protocolFeeBNs[i].toString();
                         }
 
-                        _context12.t12 = App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.tokens[token].address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings);
-                        _context12.t13 = App.selectedAccount;
-                        _context12.t14 = totalProtocolFeeBN;
-                        _context12.t15 = gasPrice;
-                        _context12.next = 160;
+                        _context12.t11 = App.contracts.RariFundProxy.methods.withdrawAndExchange(inputCurrencyCodes, inputAmountStrings, token === "ETH" ? "0x0000000000000000000000000000000000000000" : App.tokens[token].address, allOrders, allSignatures, makerAssetFillAmountStrings, protocolFeeStrings);
+                        _context12.t12 = App.selectedAccount;
+                        _context12.t13 = totalProtocolFeeBN;
+                        _context12.t14 = gasPrice;
+                        _context12.next = 170;
                         return App.web3.eth.getTransactionCount(App.selectedAccount);
 
-                      case 160:
-                        _context12.t16 = _context12.sent;
-                        _context12.t17 = {
-                          from: _context12.t13,
-                          value: _context12.t14,
-                          gasPrice: _context12.t15,
-                          nonce: _context12.t16
+                      case 170:
+                        _context12.t15 = _context12.sent;
+                        _context12.t16 = {
+                          from: _context12.t12,
+                          value: _context12.t13,
+                          gasPrice: _context12.t14,
+                          nonce: _context12.t15
                         };
-                        _context12.next = 164;
-                        return _context12.t12.send.call(_context12.t12, _context12.t17);
+                        _context12.next = 174;
+                        return _context12.t11.send.call(_context12.t11, _context12.t16);
 
-                      case 164:
+                      case 174:
                         receipt = _context12.sent;
-                        _context12.next = 170;
+                        _context12.next = 180;
                         break;
 
-                      case 167:
-                        _context12.prev = 167;
-                        _context12.t18 = _context12["catch"](147);
-                        return _context12.abrupt("return", toastr["error"]("RariFundProxy.withdrawAndExchange failed: " + (_context12.t18.message ? _context12.t18.message : _context12.t18), "Withdrawal failed"));
+                      case 177:
+                        _context12.prev = 177;
+                        _context12.t17 = _context12["catch"](157);
+                        return _context12.abrupt("return", toastr["error"]("RariFundProxy.withdrawAndExchange failed: " + (_context12.t17.message ? _context12.t17.message : _context12.t17), "Withdrawal failed"));
 
-                      case 170:
+                      case 180:
                         // Mixpanel
                         inputs = [];
 
@@ -2215,7 +2272,7 @@ App = {
 
                         $('#modal-confirm-withdrawal').modal('hide');
 
-                      case 174:
+                      case 184:
                         // Alert success and refresh balances
                         toastr["success"]("Withdrawal of " + amount + " " + token + " confirmed!", "Withdrawal successful");
                         $('#USDBalance').text("?");
@@ -2226,12 +2283,12 @@ App = {
                         App.getTokenBalance();
                         App.getDirectlyWithdrawableCurrencies();
 
-                      case 182:
+                      case 192:
                       case "end":
                         return _context12.stop();
                     }
                   }
-                }, _callee12, null, [[1, 12], [17, 25], [31, 37], [69, 82], [147, 167]]);
+                }, _callee12, null, [[1, 12], [17, 25], [31, 37], [69, 82], [131, 137], [157, 177]]);
               }))();
 
             case 11:

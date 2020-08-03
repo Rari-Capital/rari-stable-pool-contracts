@@ -25,8 +25,9 @@ App = {
     "USDT": { decimals: 6, address: "0xdAC17F958D2ee523a2206206994597C13D831ec7" }
   },
   erc20Abi: null,
-  compApyPrices: {},
-  compApyPricesLastUpdated: 0,
+  zeroExPrices: {},
+  usdPrices: {},
+  usdPricesLastUpdated: 0,
   checkAccountBalanceLimit: true,
 
   init: function() {
@@ -175,14 +176,14 @@ App = {
 
     for (const cToken of cTokens) {
       currencyCodes.push(cToken.underlying_symbol);
-      if (!App.compApyPrices[cToken.underlying_symbol]) priceMissing = true;
+      if (!App.usdPrices[cToken.underlying_symbol]) priceMissing = true;
     }
 
     var now = (new Date()).getTime() / 1000;
 
-    if (now > App.compApyPricesLastUpdated + 900 || priceMissing) {
-      App.compApyPrices = await App.getCurrencyUsdRates(currencyCodes); // TODO: Get real USD prices, not DAI prices
-      App.compApyPricesLastUpdated = now;
+    if (now > App.usdPricesLastUpdated + 900 || priceMissing) {
+      App.usdPrices = await App.getCurrencyUsdRates(currencyCodes); // TODO: Get real USD prices, not DAI prices
+      App.usdPricesLastUpdated = now;
     }
     
     // Get currency APY and total yearly interest
@@ -192,7 +193,7 @@ App = {
     
     for (const cToken of cTokens) {
       var underlyingBorrow = cToken.total_borrows.value * cToken.exchange_rate.value;
-      var borrowUsd = underlyingBorrow * App.compApyPrices[cToken.underlying_symbol];
+      var borrowUsd = underlyingBorrow * App.usdPrices[cToken.underlying_symbol];
 
       if (cToken.underlying_symbol === currencyCode) {
         currencyUnderlyingSupply = cToken.total_supply.value * cToken.exchange_rate.value;
@@ -207,7 +208,7 @@ App = {
     var marketCompPerBlock = compPerBlock * (currencyBorrowUsd / totalBorrowUsd);
     var marketSupplierCompPerBlock = marketCompPerBlock / 2;
     var marketSupplierCompPerBlockPerUsd = marketSupplierCompPerBlock / currencyUnderlyingSupply; // Assumes that the value of currencyCode is $1
-    var marketSupplierUsdFromCompPerBlockPerUsd = marketSupplierCompPerBlockPerUsd * App.compApyPrices["COMP"];
+    var marketSupplierUsdFromCompPerBlockPerUsd = marketSupplierCompPerBlockPerUsd * App.usdPrices["COMP"];
     return marketSupplierUsdFromCompPerBlockPerUsd * 2102400;
   },
 
@@ -759,7 +760,7 @@ App = {
     $(document).on('change', '#selected-account', function() {
       // Set selected account
       App.selectedAccount = $(this).val();
-      
+
       // Mixpanel
       if (typeof mixpanel !== 'undefined') {
         mixpanel.identify(App.selectedAccount);
@@ -787,15 +788,14 @@ App = {
     $(document).on('click', '#transferButton', App.handleTransfer);
   },
 
-  get0xPrice: function(inputTokenSymbol, outputTokenSymbol) {
+  get0xPrices: function(inputTokenSymbol) {
     return new Promise((resolve, reject) => {
       $.getJSON('https://api.0x.org/swap/v0/prices?sellToken=' + inputTokenSymbol, function(decoded) {
         if (!decoded) return reject("Failed to decode prices from 0x swap API");
         if (!decoded.records) return reject("No prices found on 0x swap API");
-        for (var i = 0; i < decoded.records.length; i++)
-          if (decoded.records[i].symbol === outputTokenSymbol)
-            resolve(decoded.records[i].price);
-        reject("Price not found on 0x swap API");
+        var prices = {};
+        for (var i = 0; i < decoded.records.length; i++) prices[decoded.records[i].symbol] = decoded.records[i].price;
+        resolve(prices);
       }).fail(function(err) {
         reject("Error requesting prices from 0x swap API: " + err.message);
       });
@@ -960,11 +960,24 @@ App = {
         }
 
         // Warn user of slippage
-        var slippage = 1 - (amountOutputted / amount * (await App.get0xPrice(token === "ETH" ? "WETH" : token, acceptedCurrency)));
+        var epochNow = (new Date()).getTime();
+
+        if (!App.zeroExPrices[token === "ETH" ? "WETH" : token] || epochNow > App.zeroExPrices[token === "ETH" ? "WETH" : token]._lastUpdated + (60 * 1000)) {
+          try {
+            App.zeroExPrices[token === "ETH" ? "WETH" : token] = await App.get0xPrices(token === "ETH" ? "WETH" : token);
+          } catch (err) {
+            return toastr["error"]("Failed to get prices from 0x swap API: " + err, "Deposit failed");
+          }
+
+          App.zeroExPrices[token === "ETH" ? "WETH" : token]._lastUpdated = epochNow;
+        }
+
+        if (!App.zeroExPrices[token === "ETH" ? "WETH" : token][acceptedCurrency]) return toastr["error"]("Price not found on 0x swap API", "Deposit failed");
+        var slippage = 1 - (amountOutputted / amount * App.zeroExPrices[token === "ETH" ? "WETH" : token][acceptedCurrency]);
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
         if (!$('#modal-confirm-deposit').is(':visible')) {
-          $('#DepositExchangeFee kbd').text((protocolFee / 1e18) + " ETH");
+          $('#DepositExchangeFee kbd').html((protocolFee / 1e18) + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
           $('#DepositSlippage').html(slippage >= 0 ? '<strong>Slippage:</strong> <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "warning") + '">' + slippageAbsPercentageString + '%</kbd>' : '<strong>Bonus:</strong> <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>');
           return $('#modal-confirm-deposit').modal('show');
         }
@@ -974,8 +987,8 @@ App = {
           return toastr["warning"]("Exchange slippage changed. If you are satisfied with the new slippage, please click the \"Confirm\" button again to process your deposit.", "Please try again");
         }
 
-        if ($('#DepositExchangeFee kbd').text() !== (protocolFee / 1e18) + " ETH") {
-          $('#DepositExchangeFee kbd').text((protocolFee / 1e18) + " ETH");
+        if ($('#DepositExchangeFee kbd').html().substring(0, $('#DepositExchangeFee kbd').html().indexOf("<") - 1) !== (protocolFee / 1e18) + " ETH") {
+          $('#DepositExchangeFee kbd').html((protocolFee / 1e18) + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
           return toastr["warning"]("Exchange fee changed. If you are satisfied with the new fee, please click the \"Confirm\" button again to process your deposit.", "Please try again");
         }
 
@@ -1225,12 +1238,25 @@ App = {
         }
 
         // Warn user of slippage
-        var amountOutputtedUsd = amount * (await App.get0xPrice("DAI", token === "ETH" ? "WETH" : token)); // TODO: Use actual input currencies instead of using DAI for USD price
+        var epochNow = (new Date()).getTime();
+
+        if (!App.zeroExPrices["DAI"] || epochNow > App.zeroExPrices["DAI"]._lastUpdated + (60 * 1000)) {
+          try {
+            App.zeroExPrices["DAI"] = await App.get0xPrices("DAI");
+          } catch (err) {
+            return toastr["error"]("Failed to get prices from 0x swap API: " + err, "Deposit failed");
+          }
+
+          App.zeroExPrices["DAI"]._lastUpdated = epochNow;
+        }
+
+        if (!App.zeroExPrices["DAI"][token === "ETH" ? "WETH" : token]) return toastr["error"]("Price not found on 0x swap API", "Deposit failed");
+        var amountOutputtedUsd = amount * App.zeroExPrices["DAI"][token === "ETH" ? "WETH" : token]; // TODO: Use actual input currencies instead of using DAI for USD price
         var slippage = 1 - (amountOutputtedUsd / (amountInputtedUsdBN.toString() / 1e18));
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
         if (!$('#modal-confirm-withdrawal').is(':visible')) {
-          $('#WithdrawExchangeFee kbd').text((protocolFee / 1e18) + " ETH");
+          $('#WithdrawExchangeFee kbd').text((protocolFee / 1e18) + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
           $('#WithdrawSlippage').html(slippage >= 0 ? '<strong>Slippage:</strong> <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "warning") + '">' + slippageAbsPercentageString + '%</kbd>' : '<strong>Bonus:</strong> <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>');
           return $('#modal-confirm-withdrawal').modal('show');
         }
@@ -1240,8 +1266,8 @@ App = {
           return toastr["warning"]("Exchange slippage changed. If you are satisfied with the new slippage, please click the \"Confirm\" button again to make your withdrawal.", "Please try again");
         }
 
-        if ($('#WithdrawExchangeFee kbd').text() !== (protocolFee / 1e18) + " ETH") {
-          $('#WithdrawExchangeFee kbd').text((protocolFee / 1e18) + " ETH");
+        if ($('#WithdrawExchangeFee kbd').html().substring(0, $('#WithdrawExchangeFee kbd').html().indexOf("<") - 1) !== (protocolFee / 1e18) + " ETH") {
+          $('#WithdrawExchangeFee kbd').text((protocolFee / 1e18) + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
           return toastr["warning"]("Exchange fee changed. If you are satisfied with the new fee, please click the \"Confirm\" button again to make your withdrawal.", "Please try again");
         }
 
