@@ -25,5 +25,7 @@ contract RariGovernanceToken is ERC20, ERC20Detailed {
     /**
      * @dev Constructor for RariGovernanceToken.
      */
-    constructor () public ERC20Detailed("Rari Governance Token", "RGT", 18) { }
+    constructor () public ERC20Detailed("Rari Governance Token", "RGT", 18) {
+        _mint(msg.sender, 20e6 * (10 ** uint256(decimals())));
+    }
 }
