@@ -133,7 +133,7 @@ contract RariFundController is Ownable {
      * @dev Sets or upgrades RariFundController by withdrawing all tokens from all pools and forwarding them from the old to the new.
      * @param newContract The address of the new RariFundController contract.
      */
-    function upgradeFundController(address payable newContract) external onlyOwner returns (bool) {
+    function upgradeFundController(address payable newContract) external onlyOwner {
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
 
@@ -312,16 +312,14 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token to be approved.
      * @param amount The amount of tokens to be approved.
-     * @return Boolean indicating success.
      */
-    function approveToPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer returns (bool) {
+    function approveToPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == 0) require(DydxPoolController.approve(erc20Contract, amount), "Approval of tokens to dYdX failed.");
-        else if (pool == 1) require(CompoundPoolController.approve(erc20Contract, amount), "Approval of tokens to Compound failed.");
-        else if (pool == 2) require(AavePoolController.approve(erc20Contract, amount), "Approval of tokens to Aave failed.");
+        if (pool == 0) DydxPoolController.approve(erc20Contract, amount);
+        else if (pool == 1) CompoundPoolController.approve(erc20Contract, amount);
+        else if (pool == 2) AavePoolController.approve(erc20Contract, amount);
         else revert("Invalid pool index.");
-        return true;
     }
 
     /**
@@ -356,17 +354,15 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
-     * @return Boolean indicating success.
      */
-    function depositToPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer returns (bool) {
+    function depositToPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == 0) require(DydxPoolController.deposit(erc20Contract, amount), "Deposit to dYdX failed.");
-        else if (pool == 1) require(CompoundPoolController.deposit(erc20Contract, amount), "Deposit to Compound failed.");
-        else if (pool == 2) require(AavePoolController.deposit(erc20Contract, amount, _aaveReferralCode), "Deposit to Aave failed.");
+        if (pool == 0) DydxPoolController.deposit(erc20Contract, amount);
+        else if (pool == 1) CompoundPoolController.deposit(erc20Contract, amount);
+        else if (pool == 2) AavePoolController.deposit(erc20Contract, amount, _aaveReferralCode);
         else revert("Invalid pool index.");
         _poolsWithFunds[currencyCode][pool] = true;
-        return true;
     }
 
     /**
@@ -378,9 +374,9 @@ contract RariFundController is Ownable {
     function _withdrawFromPool(uint8 pool, string memory currencyCode, uint256 amount) internal {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == 0) require(DydxPoolController.withdraw(erc20Contract, amount), "Withdrawal from dYdX failed.");
-        else if (pool == 1) require(CompoundPoolController.withdraw(erc20Contract, amount), "Withdrawal from Compound failed.");
-        else if (pool == 2) require(AavePoolController.withdraw(erc20Contract, amount), "Withdrawal from Aave failed.");
+        if (pool == 0) DydxPoolController.withdraw(erc20Contract, amount);
+        else if (pool == 1) CompoundPoolController.withdraw(erc20Contract, amount);
+        else if (pool == 2) AavePoolController.withdraw(erc20Contract, amount);
         else revert("Invalid pool index.");
     }
 
@@ -389,12 +385,10 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
-     * @return Boolean indicating success.
      */
-    function withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer returns (bool) {
+    function withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
         _withdrawFromPool(pool, currencyCode, amount);
         _poolsWithFunds[currencyCode][pool] = _getPoolBalance(pool, currencyCode) > 0;
-        return true;
     }
 
     /**
@@ -403,26 +397,23 @@ contract RariFundController is Ownable {
      * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
      * @param initialBalance The fund's balance of the specified currency in the specified pool before the withdrawal.
-     * @return Boolean indicating success.
      */
-    function withdrawFromPoolKnowingBalance(uint8 pool, string calldata currencyCode, uint256 amount, uint256 initialBalance) external fundEnabled onlyManager returns (bool) {
+    function withdrawFromPoolKnowingBalance(uint8 pool, string calldata currencyCode, uint256 amount, uint256 initialBalance) external fundEnabled onlyManager {
         _withdrawFromPool(pool, currencyCode, amount);
         if (amount == initialBalance) _poolsWithFunds[currencyCode][pool] = false;
-        return true;
     }
 
     /**
      * @dev Internal function to withdraw all funds from the specified pool.
      * @param pool The index of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
-     * @return Boolean indicating success.
      */
     function _withdrawAllFromPool(uint8 pool, string memory currencyCode) internal {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == 0) require(DydxPoolController.withdrawAll(erc20Contract), "Withdrawal from dYdX failed.");
-        else if (pool == 1) require(CompoundPoolController.withdrawAll(erc20Contract), "Withdrawal from Compound failed.");
-        else if (pool == 2) require(AavePoolController.withdrawAll(erc20Contract), "Withdrawal from Aave failed.");
+        if (pool == 0) DydxPoolController.withdrawAll(erc20Contract);
+        else if (pool == 1) require(CompoundPoolController.withdrawAll(erc20Contract), "No Compound balance to withdraw from.");
+        else if (pool == 2) require(AavePoolController.withdrawAll(erc20Contract), "No Aave balance to withdraw from.");
         else revert("Invalid pool index.");
         _poolsWithFunds[currencyCode][pool] = false;
     }
@@ -431,22 +422,18 @@ contract RariFundController is Ownable {
      * @dev Withdraws all funds from the specified pool.
      * @param pool The index of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
-     * @return Boolean indicating success.
-     */
-    function withdrawAllFromPool(uint8 pool, string calldata currencyCode) external fundEnabled onlyRebalancer returns (bool) {
+    */
+    function withdrawAllFromPool(uint8 pool, string calldata currencyCode) external fundEnabled onlyRebalancer {
         _withdrawAllFromPool(pool, currencyCode);
-        return true;
     }
 
     /**
      * @dev Withdraws all funds from the specified pool (without requiring the fund to be enabled).
      * @param pool The index of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
-     * @return Boolean indicating success.
      */
-    function withdrawAllFromPoolOnUpgrade(uint8 pool, string calldata currencyCode) external onlyOwner returns (bool) {
+    function withdrawAllFromPoolOnUpgrade(uint8 pool, string calldata currencyCode) external onlyOwner {
         _withdrawAllFromPool(pool, currencyCode);
-        return true;
     }
 
     /**
@@ -455,9 +442,8 @@ contract RariFundController is Ownable {
      * @param amount The amount of tokens to be approved.
      * @return Boolean indicating success.
      */
-    function approveTo0x(address erc20Contract, uint256 amount) external fundEnabled onlyRebalancer returns (bool) {
-        require(ZeroExExchangeController.approve(erc20Contract, amount), "Approval of tokens to 0x failed.");
-        return true;
+    function approveTo0x(address erc20Contract, uint256 amount) external fundEnabled onlyRebalancer {
+        ZeroExExchangeController.approve(erc20Contract, amount);
     }
 
     /**
@@ -499,9 +485,8 @@ contract RariFundController is Ownable {
      * @param orders The limit orders to be filled in ascending order of price.
      * @param signatures The signatures for the orders.
      * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
-     * @return Boolean indicating success.
      */
-    function marketSell0xOrdersFillOrKill(string memory inputCurrencyCode, string memory outputCurrencyCode, LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public payable fundEnabled onlyRebalancer returns (bool) {
+    function marketSell0xOrdersFillOrKill(string memory inputCurrencyCode, string memory outputCurrencyCode, LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public payable fundEnabled onlyRebalancer {
         // Check if input is a supported stablecoin and make sure output is a supported stablecoin
         address inputErc20Contract = _erc20Contracts[inputCurrencyCode];
         address outputErc20Contract = _erc20Contracts[outputCurrencyCode];
@@ -537,9 +522,6 @@ contract RariFundController is Ownable {
         // Refund unused ETH
         uint256 ethBalance = address(this).balance;
         if (ethBalance > 0) msg.sender.transfer(ethBalance);
-
-        // Return true
-        return true;
     }
 
     /**

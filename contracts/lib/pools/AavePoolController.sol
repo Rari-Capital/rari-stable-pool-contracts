@@ -72,15 +72,14 @@ library AavePoolController {
      * @dev Approves tokens to Aave without spending gas on every deposit.
      * @param erc20Contract The ERC20 contract address of the token.
      * @param amount Amount of the specified token to approve to dYdX.
-     * @return Boolean indicating success.
      */
-    function approve(address erc20Contract, uint256 amount) external returns (bool) {
+    function approve(address erc20Contract, uint256 amount) external {
         IERC20 token = IERC20(erc20Contract);
         uint256 allowance = token.allowance(address(this), LENDING_POOL_CORE_CONTRACT);
-        if (allowance == amount) return true;
+        if (allowance == amount) return;
         if (amount > 0 && allowance > 0) token.safeApprove(LENDING_POOL_CORE_CONTRACT, 0);
         token.safeApprove(LENDING_POOL_CORE_CONTRACT, amount);
-        return true;
+        return;
     }
 
     /**
@@ -88,25 +87,21 @@ library AavePoolController {
      * @param erc20Contract The ERC20 contract address of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
      * @param referralCode Referral code.
-     * @return Boolean indicating success.
      */
-    function deposit(address erc20Contract, uint256 amount, uint16 referralCode) external returns (bool) {
+    function deposit(address erc20Contract, uint256 amount, uint16 referralCode) external {
         require(amount > 0, "Amount must be greater than 0.");
         _lendingPool.deposit(erc20Contract, amount, referralCode);
-        return true;
     }
 
     /**
      * @dev Withdraws funds from the Aave pool.
      * @param erc20Contract The ERC20 contract address of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
-     * @return Boolean indicating success.
      */
-    function withdraw(address erc20Contract, uint256 amount) external returns (bool) {
+    function withdraw(address erc20Contract, uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0.");
         AToken aToken = AToken(getATokenContract(erc20Contract));
         aToken.redeem(amount);
-        return true;
     }
 
     /**

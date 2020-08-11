@@ -79,24 +79,22 @@ library DydxPoolController {
      * @dev Approves tokens to dYdX without spending gas on every deposit.
      * @param erc20Contract The ERC20 contract address of the token.
      * @param amount Amount of the specified token to approve to dYdX.
-     * @return Boolean indicating success.
      */
-    function approve(address erc20Contract, uint256 amount) external returns (bool) {
+    function approve(address erc20Contract, uint256 amount) external {
         IERC20 token = IERC20(erc20Contract);
         uint256 allowance = token.allowance(address(this), SOLO_MARGIN_CONTRACT);
-        if (allowance == amount) return true;
+        if (allowance == amount) return;
         if (amount > 0 && allowance > 0) token.safeApprove(SOLO_MARGIN_CONTRACT, 0);
         token.safeApprove(SOLO_MARGIN_CONTRACT, amount);
-        return true;
+        return;
     }
 
     /**
      * @dev Deposits funds to the dYdX pool. Assumes that you have already approved >= the amount to dYdX.
      * @param erc20Contract The ERC20 contract address of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
-     * @return Boolean indicating success.
      */
-    function deposit(address erc20Contract, uint256 amount) external returns (bool) {
+    function deposit(address erc20Contract, uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0.");
         uint256 marketId = getMarketId(erc20Contract);
 
@@ -122,17 +120,14 @@ library DydxPoolController {
         actions[0] = action;
 
         _soloMargin.operate(accounts, actions);
-
-        return true;
     }
 
     /**
      * @dev Withdraws funds from the dYdX pool.
      * @param erc20Contract The ERC20 contract address of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
-     * @return Boolean indicating success.
      */
-    function withdraw(address erc20Contract, uint256 amount) external returns (bool) {
+    function withdraw(address erc20Contract, uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0.");
         uint256 marketId = getMarketId(erc20Contract);
 
@@ -158,16 +153,13 @@ library DydxPoolController {
         actions[0] = action;
 
         _soloMargin.operate(accounts, actions);
-
-        return true;
     }
 
     /**
      * @dev Withdraws all funds from the dYdX pool.
      * @param erc20Contract The ERC20 contract address of the token to be withdrawn.
-     * @return Boolean indicating success.
      */
-    function withdrawAll(address erc20Contract) external returns (bool) {
+    function withdrawAll(address erc20Contract) external {
         uint256 marketId = getMarketId(erc20Contract);
 
         Account.Info memory account = Account.Info(address(this), 0);
@@ -192,7 +184,5 @@ library DydxPoolController {
         actions[0] = action;
 
         _soloMargin.operate(accounts, actions);
-
-        return true;
     }
 }

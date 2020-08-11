@@ -71,15 +71,14 @@ library ZeroExExchangeController {
      * @dev Approves tokens to 0x without spending gas on every deposit.
      * @param erc20Contract The ERC20 contract address of the token.
      * @param amount Amount of the specified token to approve to dYdX.
-     * @return Boolean indicating success.
      */
-    function approve(address erc20Contract, uint256 amount) external returns (bool) {
+    function approve(address erc20Contract, uint256 amount) external {
         IERC20 token = IERC20(erc20Contract);
         uint256 _allowance = token.allowance(address(this), ERC20_PROXY_CONTRACT);
-        if (_allowance == amount) return true;
+        if (_allowance == amount) return;
         if (amount > 0 && _allowance > 0) token.safeApprove(ERC20_PROXY_CONTRACT, 0);
         token.safeApprove(ERC20_PROXY_CONTRACT, amount);
-        return true;
+        return;
     }
 
     /**

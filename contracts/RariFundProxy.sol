@@ -71,7 +71,7 @@ contract RariFundProxy is Ownable, GSNRecipient {
     function addSupportedCurrency(string memory currencyCode, address erc20Contract) internal {
         _supportedCurrencies.push(currencyCode);
         _erc20Contracts[currencyCode] = erc20Contract;
-        require(ZeroExExchangeController.approve(erc20Contract, uint256(-1)), "Approval of tokens to 0x failed.");
+        ZeroExExchangeController.approve(erc20Contract, uint256(-1));
     }
 
     /**
