@@ -125,8 +125,8 @@ contract("RariFundController, RariFundManager", accounts => {
 
     // Test fund rebalancer functions from the second account via RariFundManager and RariFundController
     // TODO: Ideally, we actually test the fund rebalancer itself
-    await fundManagerInstance.setAcceptedCurrency("DAI", false, { from: process.env.DEVELOPMENT_ADDRESS_SECONDARY });
-    await fundManagerInstance.setAcceptedCurrency("DAI", true, { from: process.env.DEVELOPMENT_ADDRESS_SECONDARY });
+    await fundManagerInstance.setAcceptedCurrencies(["DAI"], [false], { from: process.env.DEVELOPMENT_ADDRESS_SECONDARY });
+    await fundManagerInstance.setAcceptedCurrencies(["DAI"], [true], { from: process.env.DEVELOPMENT_ADDRESS_SECONDARY });
     await fundControllerInstance.approveToPool(0, "DAI", web3.utils.toBN(10 ** (currencies["DAI"].decimals - 1)), { from: process.env.DEVELOPMENT_ADDRESS_SECONDARY });
 
     // Reset fund rebalancer addresses

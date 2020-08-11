@@ -55,7 +55,7 @@ contract("RariFundManager", accounts => {
     var amountUsdBN = 18 >= currencies[currencyCode].decimals ? amountBN.mul(web3.utils.toBN(10 ** (18 - currencies[currencyCode].decimals))) : amountBN.div(web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 18)));
 
     // Set DAI as unaccepted currency
-    await fundManagerInstance.setAcceptedCurrency(currencyCode, false, { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
+    await fundManagerInstance.setAcceptedCurrencies([currencyCode], [false], { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
 
     // Check to make sure DAI is now not accepted
     let daiAcceptedInitial = await fundManagerInstance.isCurrencyAccepted.call(currencyCode);
@@ -73,7 +73,7 @@ contract("RariFundManager", accounts => {
     }
 
     // Set DAI as accepted currency
-    await fundManagerInstance.setAcceptedCurrency(currencyCode, true, { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
+    await fundManagerInstance.setAcceptedCurrencies([currencyCode], [true], { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
 
     // Check to make sure DAI is now accepted
     let daiAcceptedNow = await fundManagerInstance.isCurrencyAccepted.call(currencyCode);
