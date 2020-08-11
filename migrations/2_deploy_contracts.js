@@ -187,17 +187,7 @@ module.exports = function(deployer, network, accounts) {
         });
       } else {
         // Development network: set all currencies to accepted
-        return rariFundManager.setAcceptedCurrency("DAI", true).then(function() {
-          return rariFundManager.setAcceptedCurrency("USDC", true);
-        }).then(function() {
-          return rariFundManager.setAcceptedCurrency("USDT", true);
-        }).then(function() {
-          return rariFundManager.setAcceptedCurrency("TUSD", true);
-        }).then(function() {
-          return rariFundManager.setAcceptedCurrency("BUSD", true);
-        }).then(function() {
-          return rariFundManager.setAcceptedCurrency("sUSD", true);
-        });
+        return rariFundManager.setAcceptedCurrencies(["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"], [true, true, true, true, true, true]);
       }
     });
   } else {
@@ -282,17 +272,7 @@ module.exports = function(deployer, network, accounts) {
         });
       } else {
         // Development network: set all currencies to accepted
-        return rariFundManager.setAcceptedCurrency("DAI", true).then(function() {
-          return rariFundManager.setAcceptedCurrency("USDC", true);
-        }).then(function() {
-          return rariFundManager.setAcceptedCurrency("USDT", true);
-        }).then(function() {
-          return rariFundManager.setAcceptedCurrency("TUSD", true);
-        }).then(function() {
-          return rariFundManager.setAcceptedCurrency("BUSD", true);
-        }).then(function() {
-          return rariFundManager.setAcceptedCurrency("sUSD", true);
-        });
+        return rariFundManager.setAcceptedCurrencies(["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"], [true, true, true, true, true, true]);
       }
     });
   }
