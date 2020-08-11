@@ -596,12 +596,13 @@ contract RariFundManager is Ownable {
     }
 
     /**
-     * @dev Marks `currencyCode` as accepted or not accepted.
-     * @param currencyCode The currency code to mark as accepted or not accepted.
-     * @param accepted A boolean indicating if the `currencyCode` is to be accepted.
+     * @dev Marks `currencyCodes` as accepted or not accepted.
+     * @param currencyCodes The currency codes to mark as accepted or not accepted.
+     * @param accepted An array of booleans indicating if each of `currencyCodes` is to be accepted.
      */
-    function setAcceptedCurrency(string calldata currencyCode, bool accepted) external onlyRebalancer {
-        _acceptedCurrencies[currencyCode] = accepted;
+    function setAcceptedCurrencies(string[] calldata currencyCodes, bool[] calldata accepted) external onlyRebalancer {
+        require (currencyCodes.length > 0 && currencyCodes.length == accepted.length, "Lengths of arrays must be equal and both greater than 0.");
+        for (uint256 i = 0; i < currencyCodes.length; i++) _acceptedCurrencies[currencyCodes[i]] = accepted[i];
     }
 
     /**
