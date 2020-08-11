@@ -6,21 +6,17 @@ module.exports = {
   // for more about customizing your Truffle configuration!
   networks: {
     development: {
-      provider: function() {
-        var keys = [process.env.DEVELOPMENT_PRIVATE_KEY];
-        if (process.env.DEVELOPMENT_PRIVATE_KEY_SECONDARY) keys.push(process.env.DEVELOPMENT_PRIVATE_KEY_SECONDARY);
-        if (process.env.UPGRADE_FUND_OWNER_PRIVATE_KEY) keys.push(process.env.UPGRADE_FUND_OWNER_PRIVATE_KEY);
-        return new HDWalletProvider(keys, "http://localhost:8546"); // Fork mainnet geth instance with compound-finance/ganache-core (Compound's fork fixes a false reentrancy error)
-      },
-      network_id: 1,
-      gasPrice: 1e8,
+      host: "127.0.0.1",
+      port: "8546",
+      network_id: "*",
+      gasPrice: 1e6,
       from: process.env.DEVELOPMENT_ADDRESS
     },
     live: {
       provider: function() {
         var keys = [process.env.LIVE_DEPLOYER_PRIVATE_KEY];
         if (process.env.UPGRADE_FUND_OWNER_PRIVATE_KEY) keys.push(process.env.UPGRADE_FUND_OWNER_PRIVATE_KEY);
-        return new HDWalletProvider(keys, "https://mainnet.infura.io/v3/" + process.env.LIVE_INFURA_PROJECT_ID);
+        return new HDWalletProvider(keys, LIVE_WEB3_PROVIDER_URL);
       },
       network_id: 1,
       gasPrice: parseInt(process.env.LIVE_GAS_PRICE),

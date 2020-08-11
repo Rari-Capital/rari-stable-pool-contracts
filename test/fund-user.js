@@ -22,7 +22,7 @@ async function forceAccrueCompound(currencyCode, account) {
   }
 }
 
-// These tests expect the owner and the fund rebalancer of RariFundManager to be set to accounts[0]
+// These tests expect the owner and the fund rebalancer of RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundManager, RariFundController", accounts => {
   it("should make a deposit, deposit to pools, accrue interest, and make a withdrawal", async () => {
     let fundControllerInstance = await RariFundController.deployed();
@@ -35,54 +35,54 @@ contract("RariFundManager, RariFundController", accounts => {
       var amountUsdBN = 18 >= currencies[currencyCode].decimals ? amountBN.mul(web3.utils.toBN(10 ** (18 - currencies[currencyCode].decimals))) : amountBN.div(web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 18)));
       
       // Check balances
-      let initialAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+      let initialAccountBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       let initialFundBalance = await fundManagerInstance.getFundBalance.call();
-      let initialRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
+      let initialRftBalance = await fundTokenInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       
       // Approve tokens to RariFundManager
       var erc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
-      await erc20Contract.methods.approve(RariFundManager.address, amountBN.toString()).send({ from: accounts[0] });
+      await erc20Contract.methods.approve(RariFundManager.address, amountBN.toString()).send({ from: process.env.DEVELOPMENT_ADDRESS });
 
       // RariFundManager.deposit
-      await fundManagerInstance.deposit(currencyCode, amountBN, { from: accounts[0] });
+      await fundManagerInstance.deposit(currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Check balances and interest
-      let postDepositAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+      let postDepositAccountBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       assert(postDepositAccountBalance.gte(initialAccountBalance.add(amountUsdBN).mul(web3.utils.toBN(999999)).div(web3.utils.toBN(1000000))));
       let postDepositFundBalance = await fundManagerInstance.getFundBalance.call();
       assert(postDepositFundBalance.gte(initialFundBalance.add(amountUsdBN).mul(web3.utils.toBN(999999)).div(web3.utils.toBN(1000000))));
-      let postDepositRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
+      let postDepositRftBalance = await fundTokenInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       assert(postDepositRftBalance.gt(initialRftBalance));
       let postDepositInterestAccrued = await fundManagerInstance.getInterestAccrued.call();
 
       // Deposit to pool (using Compound as an example)
       // TODO: Ideally, deposit to pool via rari-fund-rebalancer
-      await fundControllerInstance.approveToPool(1, currencyCode, amountBN, { from: accounts[0] });
-      await fundControllerInstance.depositToPool(1, currencyCode, amountBN, { from: accounts[0] });
+      await fundControllerInstance.approveToPool(1, currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.depositToPool(1, currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Force accrue interest
-      await forceAccrueCompound(currencyCode, accounts[0]);
+      await forceAccrueCompound(currencyCode, process.env.DEVELOPMENT_ADDRESS);
 
       // Check balances and interest after waiting for interest
-      let preWithdrawalAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+      let preWithdrawalAccountBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       assert(preWithdrawalAccountBalance.gt(postDepositAccountBalance));
       let preWithdrawalFundBalance = await fundManagerInstance.getFundBalance.call();
       assert(preWithdrawalFundBalance.gt(postDepositFundBalance));
-      let preWithdrawalRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
+      let preWithdrawalRftBalance = await fundTokenInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       assert(preWithdrawalRftBalance.eq(postDepositRftBalance));
       let preWithdrawalInterestAccrued = await fundManagerInstance.getInterestAccrued.call();
       assert(preWithdrawalInterestAccrued.gt(postDepositInterestAccrued));
 
       // RariFundManager.withdraw
-      await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
-      await fundManagerInstance.withdraw(currencyCode, amountBN, { from: accounts[0], nonce: await web3.eth.getTransactionCount(accounts[0]) });
+      await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
+      await fundManagerInstance.withdraw(currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
 
       // TODO: Check balances and assert with post-interest balances
-      let finalAccountBalance = await fundManagerInstance.balanceOf.call(accounts[0]);
+      let finalAccountBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       assert(finalAccountBalance.lt(preWithdrawalAccountBalance));
       let finalFundBalance = await fundManagerInstance.getFundBalance.call();
       assert(finalFundBalance.lt(preWithdrawalFundBalance));
-      let finalRftBalance = await fundTokenInstance.balanceOf.call(accounts[0]);
+      let finalRftBalance = await fundTokenInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       assert(finalRftBalance.lt(preWithdrawalRftBalance));
     }
   });

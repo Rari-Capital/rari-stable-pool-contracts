@@ -15,7 +15,6 @@ import "@openzeppelin/contracts/drafts/SignedSafeMath.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/GSN/GSNRecipient.sol";
 import "@openzeppelin/contracts/cryptography/ECDSA.sol";
 
@@ -39,7 +38,7 @@ contract RariFundProxy is Ownable, GSNRecipient {
     /**
      * @notice Package version of `rari-contracts` when this contract was deployed.
      */
-    string public constant VERSION = "1.2.0";
+    string public constant VERSION = "2.0.0";
 
     /**
      * @dev Array of currencies supported by the fund.
@@ -59,12 +58,15 @@ contract RariFundProxy is Ownable, GSNRecipient {
         addSupportedCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F);
         addSupportedCurrency("USDC", 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
         addSupportedCurrency("USDT", 0xdAC17F958D2ee523a2206206994597C13D831ec7);
+        addSupportedCurrency("TUSD", 0x0000000000085d4780B73119b644AE5ecd22b376);
+        addSupportedCurrency("BUSD", 0x4Fabb145d64652a948d72533023f6E7A623C7C53);
+        addSupportedCurrency("sUSD", 0x57Ab1ec28D129707052df4dF418D58a2D46d5f51);
     }
 
     /**
      * @dev Marks a token as supported by the fund, stores its ERC20 contract address, and approves the maximum amount to 0x.
      * @param currencyCode The currency code of the token.
-     * @param erc20Contract The ERC20 contract of the token.
+     * @param erc20Contract The ERC20 contract address of the token.
      */
     function addSupportedCurrency(string memory currencyCode, address erc20Contract) internal {
         _supportedCurrencies.push(currencyCode);
@@ -317,5 +319,19 @@ contract RariFundProxy is Ownable, GSNRecipient {
      */
     function _postRelayedCall(bytes memory, bool, uint256, bytes32) internal {
         // solhint-disable-previous-line no-empty-blocks
+    }
+
+    /**
+     * @dev Forwards tokens lost in the fund proxy (in case of accidental transfer of funds to this contract).
+     * @param erc20Contract The ERC20 contract address of the token to forward.
+     * @param to The destination address to which the funds will be forwarded.
+     * @return Boolean indicating success.
+     */
+    function forwardLostFunds(address erc20Contract, address to) external onlyOwner returns (bool) {
+        IERC20 token = IERC20(erc20Contract);
+        uint256 balance = token.balanceOf(address(this));
+        if (balance <= 0) return false;
+        token.safeTransfer(to, balance);
+        return true;
     }
 }

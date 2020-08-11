@@ -1,6 +1,6 @@
 {
   "name": "rari-contracts",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Solidity contracts and web client for the Rari Capital stablecoin fund.",
   "main": "truffle-config.js",
   "directories": {
@@ -8,9 +8,11 @@
   },
   "scripts": {
     "compile": "truffle compile --all",
+    "ganache": "node ganache.js",
     "test": "truffle test --network development",
-    "build": "babel src/js/app.js --out-file src/js/app-compiled.js",
-    "dev": "lite-server"
+    "dev-gsn": "sh test-gsn.sh",
+    "build-dapp": "babel src/js/app.js --out-file src/js/app-compiled.js",
+    "dev-dapp": "lite-server"
   },
   "author": {
     "name": "David Lucid",
@@ -22,13 +24,16 @@
     "@babel/cli": "^7.10.3",
     "@babel/core": "^7.10.3",
     "@babel/preset-env": "^7.10.3",
+    "ganache-core": "github:compound-finance/ganache-core#jflatow/unbreak-fork",
     "lite-server": "^2.5.4"
   },
   "dependencies": {
     "@0x/contracts-exchange": "^3.2.5",
     "@0x/contracts-exchange-libs": "^4.3.5",
+    "@0x/contracts-utils": "^4.5.1",
     "@openzeppelin/contracts": "^2.5.0",
     "@truffle/hdwallet-provider": "^1.0.36",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "truffle": "^5.1.37"
   }
 }

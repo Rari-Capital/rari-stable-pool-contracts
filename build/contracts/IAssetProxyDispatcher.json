@@ -68,14 +68,14 @@
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/IAssetProxyDispatcher.sol",
     "exportedSymbols": {
       "IAssetProxyDispatcher": [
-        7445
+        8454
       ]
     },
-    "id": 7446,
+    "id": 8455,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7426,
+        "id": 8435,
         "literals": [
           "solidity",
           "^",
@@ -83,7 +83,7 @@
           ".9"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:23:25"
+        "src": "580:23:28"
       },
       {
         "baseContracts": [],
@@ -91,9 +91,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7445,
+        "id": 8454,
         "linearizedBaseContracts": [
-          7445
+          8454
         ],
         "name": "IAssetProxyDispatcher",
         "nodeType": "ContractDefinition",
@@ -101,21 +101,21 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 7432,
+            "id": 8441,
             "name": "AssetProxyRegistered",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 7431,
+              "id": 8440,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7428,
+                  "id": 8437,
                   "indexed": false,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7432,
-                  "src": "724:9:25",
+                  "scope": 8441,
+                  "src": "724:9:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -123,10 +123,10 @@
                     "typeString": "bytes4"
                   },
                   "typeName": {
-                    "id": 7427,
+                    "id": 8436,
                     "name": "bytes4",
                     "nodeType": "ElementaryTypeName",
-                    "src": "724:6:25",
+                    "src": "724:6:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes4",
                       "typeString": "bytes4"
@@ -137,12 +137,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 7430,
+                  "id": 8439,
                   "indexed": false,
                   "name": "assetProxy",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7432,
-                  "src": "792:18:25",
+                  "scope": 8441,
+                  "src": "792:18:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -150,10 +150,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7429,
+                    "id": 8438,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "792:7:25",
+                    "src": "792:7:28",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -164,30 +164,30 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "714:148:25"
+              "src": "714:148:28"
             },
-            "src": "688:175:25"
+            "src": "688:175:28"
           },
           {
             "body": null,
             "documentation": "@dev Registers an asset proxy to its asset proxy id.\n      Once an asset proxy is registered, it cannot be unregistered.\n @param assetProxy Address of new asset proxy to register.",
-            "id": 7437,
+            "id": 8446,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "registerAssetProxy",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7435,
+              "id": 8444,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7434,
+                  "id": 8443,
                   "name": "assetProxy",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7437,
-                  "src": "1099:18:25",
+                  "scope": 8446,
+                  "src": "1099:18:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -195,10 +195,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7433,
+                    "id": 8442,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1099:7:25",
+                    "src": "1099:7:28",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -209,16 +209,16 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1098:20:25"
+              "src": "1098:20:28"
             },
             "returnParameters": {
-              "id": 7436,
+              "id": 8445,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1135:0:25"
+              "src": "1135:0:28"
             },
-            "scope": 7445,
-            "src": "1071:65:25",
+            "scope": 8454,
+            "src": "1071:65:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -226,23 +226,23 @@
           {
             "body": null,
             "documentation": "@dev Gets an asset proxy.\n @param assetProxyId Id of the asset proxy.\n @return The asset proxy registered to assetProxyId. Returns 0x0 if no proxy is registered.",
-            "id": 7444,
+            "id": 8453,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getAssetProxy",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7440,
+              "id": 8449,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7439,
+                  "id": 8448,
                   "name": "assetProxyId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7444,
-                  "src": "1349:19:25",
+                  "scope": 8453,
+                  "src": "1349:19:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -250,10 +250,10 @@
                     "typeString": "bytes4"
                   },
                   "typeName": {
-                    "id": 7438,
+                    "id": 8447,
                     "name": "bytes4",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1349:6:25",
+                    "src": "1349:6:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes4",
                       "typeString": "bytes4"
@@ -263,19 +263,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1348:21:25"
+              "src": "1348:21:28"
             },
             "returnParameters": {
-              "id": 7443,
+              "id": 8452,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7442,
+                  "id": 8451,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7444,
-                  "src": "1417:7:25",
+                  "scope": 8453,
+                  "src": "1417:7:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -283,10 +283,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7441,
+                    "id": 8450,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1417:7:25",
+                    "src": "1417:7:28",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -297,33 +297,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1416:9:25"
+              "src": "1416:9:28"
             },
-            "scope": 7445,
-            "src": "1326:100:25",
+            "scope": 8454,
+            "src": "1326:100:28",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 7446,
-        "src": "606:822:25"
+        "scope": 8455,
+        "src": "606:822:28"
       }
     ],
-    "src": "580:849:25"
+    "src": "580:849:28"
   },
   "legacyAST": {
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/IAssetProxyDispatcher.sol",
     "exportedSymbols": {
       "IAssetProxyDispatcher": [
-        7445
+        8454
       ]
     },
-    "id": 7446,
+    "id": 8455,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 7426,
+        "id": 8435,
         "literals": [
           "solidity",
           "^",
@@ -331,7 +331,7 @@
           ".9"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:23:25"
+        "src": "580:23:28"
       },
       {
         "baseContracts": [],
@@ -339,9 +339,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 7445,
+        "id": 8454,
         "linearizedBaseContracts": [
-          7445
+          8454
         ],
         "name": "IAssetProxyDispatcher",
         "nodeType": "ContractDefinition",
@@ -349,21 +349,21 @@
           {
             "anonymous": false,
             "documentation": null,
-            "id": 7432,
+            "id": 8441,
             "name": "AssetProxyRegistered",
             "nodeType": "EventDefinition",
             "parameters": {
-              "id": 7431,
+              "id": 8440,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7428,
+                  "id": 8437,
                   "indexed": false,
                   "name": "id",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7432,
-                  "src": "724:9:25",
+                  "scope": 8441,
+                  "src": "724:9:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -371,10 +371,10 @@
                     "typeString": "bytes4"
                   },
                   "typeName": {
-                    "id": 7427,
+                    "id": 8436,
                     "name": "bytes4",
                     "nodeType": "ElementaryTypeName",
-                    "src": "724:6:25",
+                    "src": "724:6:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes4",
                       "typeString": "bytes4"
@@ -385,12 +385,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 7430,
+                  "id": 8439,
                   "indexed": false,
                   "name": "assetProxy",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7432,
-                  "src": "792:18:25",
+                  "scope": 8441,
+                  "src": "792:18:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -398,10 +398,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7429,
+                    "id": 8438,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "792:7:25",
+                    "src": "792:7:28",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -412,30 +412,30 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "714:148:25"
+              "src": "714:148:28"
             },
-            "src": "688:175:25"
+            "src": "688:175:28"
           },
           {
             "body": null,
             "documentation": "@dev Registers an asset proxy to its asset proxy id.\n      Once an asset proxy is registered, it cannot be unregistered.\n @param assetProxy Address of new asset proxy to register.",
-            "id": 7437,
+            "id": 8446,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "registerAssetProxy",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7435,
+              "id": 8444,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7434,
+                  "id": 8443,
                   "name": "assetProxy",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7437,
-                  "src": "1099:18:25",
+                  "scope": 8446,
+                  "src": "1099:18:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -443,10 +443,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7433,
+                    "id": 8442,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1099:7:25",
+                    "src": "1099:7:28",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -457,16 +457,16 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1098:20:25"
+              "src": "1098:20:28"
             },
             "returnParameters": {
-              "id": 7436,
+              "id": 8445,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1135:0:25"
+              "src": "1135:0:28"
             },
-            "scope": 7445,
-            "src": "1071:65:25",
+            "scope": 8454,
+            "src": "1071:65:28",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
@@ -474,23 +474,23 @@
           {
             "body": null,
             "documentation": "@dev Gets an asset proxy.\n @param assetProxyId Id of the asset proxy.\n @return The asset proxy registered to assetProxyId. Returns 0x0 if no proxy is registered.",
-            "id": 7444,
+            "id": 8453,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "getAssetProxy",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 7440,
+              "id": 8449,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7439,
+                  "id": 8448,
                   "name": "assetProxyId",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7444,
-                  "src": "1349:19:25",
+                  "scope": 8453,
+                  "src": "1349:19:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -498,10 +498,10 @@
                     "typeString": "bytes4"
                   },
                   "typeName": {
-                    "id": 7438,
+                    "id": 8447,
                     "name": "bytes4",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1349:6:25",
+                    "src": "1349:6:28",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bytes4",
                       "typeString": "bytes4"
@@ -511,19 +511,19 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1348:21:25"
+              "src": "1348:21:28"
             },
             "returnParameters": {
-              "id": 7443,
+              "id": 8452,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 7442,
+                  "id": 8451,
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 7444,
-                  "src": "1417:7:25",
+                  "scope": 8453,
+                  "src": "1417:7:28",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -531,10 +531,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 7441,
+                    "id": 8450,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1417:7:25",
+                    "src": "1417:7:28",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -545,28 +545,28 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1416:9:25"
+              "src": "1416:9:28"
             },
-            "scope": 7445,
-            "src": "1326:100:25",
+            "scope": 8454,
+            "src": "1326:100:28",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 7446,
-        "src": "606:822:25"
+        "scope": 8455,
+        "src": "606:822:28"
       }
     ],
-    "src": "580:849:25"
+    "src": "580:849:28"
   },
   "compiler": {
     "name": "solc",
     "version": "0.5.17+commit.d19bba13.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.2.2",
-  "updatedAt": "2020-07-20T17:13:58.402Z",
+  "schemaVersion": "3.2.3",
+  "updatedAt": "2020-08-11T13:51:04.243Z",
   "devdoc": {
     "methods": {
       "getAssetProxy(bytes4)": {

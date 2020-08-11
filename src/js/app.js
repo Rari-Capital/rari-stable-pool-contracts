@@ -22,13 +22,17 @@ App = {
   tokens: {
     "DAI": { decimals: 18, address: "0x6B175474E89094C44Da98b954EedeAC495271d0F" },
     "USDC": { decimals: 6, address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" },
-    "USDT": { decimals: 6, address: "0xdAC17F958D2ee523a2206206994597C13D831ec7" }
+    "USDT": { decimals: 6, address: "0xdAC17F958D2ee523a2206206994597C13D831ec7" },
+    "TUSD": { decimals: 18, address: "0x0000000000085d4780B73119b644AE5ecd22b376" },
+    "BUSD": { decimals: 18, address: "0x4Fabb145d64652a948d72533023f6E7A623C7C53" },
+    "sUSD": { decimals: 18, address: "0x57Ab1ec28D129707052df4dF418D58a2D46d5f51" }
   },
   erc20Abi: null,
   zeroExPrices: {},
   usdPrices: {},
   usdPricesLastUpdated: 0,
   checkAccountBalanceLimit: true,
+  acceptedCurrencies: [],
 
   init: function() {
     if (location.hash === "#account") {
@@ -88,26 +92,35 @@ App = {
     var totalBalanceUsdBN = Web3.utils.toBN(0);
     var dydxApyBNs = await App.getDydxApyBNs();
     var compoundApyBNs = await App.getCompoundApyBNs();
+    var aaveApyBNs = await App.getAaveApyBNs();
+    App.allocationsByPool = { 0: Web3.utils.toBN(0), 1: Web3.utils.toBN(0), 2: Web3.utils.toBN(0) };
+    App.allocationsByCurrency = { "DAI": Web3.utils.toBN(0), "USDC": Web3.utils.toBN(0), "USDT": Web3.utils.toBN(0), "TUSD": Web3.utils.toBN(0), "BUSD": Web3.utils.toBN(0), "sUSD": Web3.utils.toBN(0) };
+    var allBalances = await App.contracts.RariFundController.methods.getAllBalances().call();
 
-    for (const currencyCode of ["DAI", "USDC", "USDT"]) {
-        var contractBalanceBN = Web3.utils.toBN(await App.tokens[currencyCode].contract.methods.balanceOf(App.contracts.RariFundController.options.address).call());
-        var contractBalanceUsdBN = contractBalanceBN.mul(Web3.utils.toBN(10 ** App.tokens[currencyCode].decimals)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
-        factors.push([contractBalanceUsdBN, Web3.utils.toBN(0)]);
-        totalBalanceUsdBN = totalBalanceUsdBN.add(contractBalanceUsdBN);
+    for (var i = 0; i < allBalances["0"].length; i++) {
+      var currencyCode = allBalances["0"][i];
+      var contractBalanceBN = Web3.utils.toBN(allBalances["1"][i]);
+      var contractBalanceUsdBN = contractBalanceBN.mul(Web3.utils.toBN(10 ** (18 - App.tokens[currencyCode].decimals))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+      factors.push([contractBalanceUsdBN, Web3.utils.toBN(0)]);
+      totalBalanceUsdBN = totalBalanceUsdBN.add(contractBalanceUsdBN);
+      App.allocationsByCurrency[currencyCode] = contractBalanceUsdBN;
+      var pools = allBalances["2"][i];
+      var poolBalances = allBalances["3"][i];
 
-        var poolBalances = await App.contracts.RariFundController.methods.getPoolBalances(currencyCode).call();
-
-        for (var i = 0; i < poolBalances["0"].length; i++) {
-            var poolBalanceBN = Web3.utils.toBN(poolBalances["1"][i]);
-            var poolBalanceUsdBN = poolBalanceBN.mul(Web3.utils.toBN(10 ** App.tokens[currencyCode].decimals)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
-            var apyBN = poolBalances["0"][i] == 1 ? compoundApyBNs[currencyCode][0].add(compoundApyBNs[currencyCode][1]) : dydxApyBNs[currencyCode];
-            factors.push([poolBalanceUsdBN, apyBN]);
-            totalBalanceUsdBN = totalBalanceUsdBN.add(poolBalanceUsdBN);
-        }
+      for (var j = 0; j < pools.length; j++) {
+        var pool = pools[j];
+        var poolBalanceBN = Web3.utils.toBN(poolBalances[j]);
+        var poolBalanceUsdBN = poolBalanceBN.mul(Web3.utils.toBN(10 ** (18 - App.tokens[currencyCode].decimals))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+        var apyBN = pool == 2 ? aaveApyBNs[currencyCode] : (pool == 1 ? compoundApyBNs[currencyCode][0].add(compoundApyBNs[currencyCode][1]) : dydxApyBNs[currencyCode]);
+        factors.push([poolBalanceUsdBN, apyBN]);
+        totalBalanceUsdBN = totalBalanceUsdBN.add(poolBalanceUsdBN);
+        App.allocationsByCurrency[currencyCode].iadd(poolBalanceUsdBN);
+        App.allocationsByPool[pool].iadd(poolBalanceUsdBN);
+      }
     }
 
     if (totalBalanceUsdBN.isZero()) {
-      var maxApyBN = 0;
+      var maxApyBN = Web3.utils.toBN(0);
       for (var i = 0; i < factors.length; i++) if (factors[i][1].gt(maxApyBN)) maxApyBN = factors[i][1];
       return $('#APYNow').text((parseFloat(maxApyBN.toString()) / 1e16).toFixed(2) + "%");
     }
@@ -115,6 +128,119 @@ App = {
     var apyBN = Web3.utils.toBN(0);
     for (var i = 0; i < factors.length; i++) apyBN.iadd(factors[i][0].mul(factors[i][1]).div(totalBalanceUsdBN));
     $('#APYNow').text((parseFloat(apyBN.toString()) / 1e16).toFixed(2) + "%");
+
+    App.initCurrencyAllocationChart();
+    App.initPoolAllocationChart();
+  },
+
+  initCurrencyAllocationChart: function() {
+    var ctx = document.getElementById('chart-currencies').getContext('2d');
+    var color = Chart.helpers.color;
+
+    var cfg = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: [
+            App.allocationsByCurrency["DAI"].toString() / 1e18,
+            App.allocationsByCurrency["USDC"].toString() / 1e18,
+            App.allocationsByCurrency["USDT"].toString() / 1e18,
+            App.allocationsByCurrency["TUSD"].toString() / 1e18,
+            App.allocationsByCurrency["BUSD"].toString() / 1e18,
+            App.allocationsByCurrency["sUSD"].toString() / 1e18
+          ],
+          backgroundColor: [
+            color(window.chartColors.red).alpha(0.5).rgbString(),
+            color(window.chartColors.orange).alpha(0.5).rgbString(),
+            color(window.chartColors.yellow).alpha(0.5).rgbString(),
+            color(window.chartColors.green).alpha(0.5).rgbString(),
+            color(window.chartColors.blue).alpha(0.5).rgbString(),
+            color(window.chartColors.purple).alpha(0.5).rgbString()
+          ],
+          borderColor: [
+            window.chartColors.red,
+            window.chartColors.orange,
+            window.chartColors.yellow,
+            window.chartColors.green,
+            window.chartColors.blue,
+            window.chartColors.purple
+          ]
+        }],
+        labels: [
+          'DAI',
+          'USDC',
+          'USDT',
+          'TUSD',
+          'BUSD',
+          'sUSD'
+        ]
+      },
+      options: {
+        tooltips: {
+          callbacks: {
+            label: function(tooltipItem, myData) {
+              var label = myData.labels[tooltipItem.index] || '';
+              if (label) {
+                label += ': ';
+              }
+              label += "$" + new Big(myData.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]).toFixed(2);
+              return label;
+            }
+          }
+        }
+      }
+    };
+
+    var chart = new Chart(ctx, cfg);
+  },
+
+  initPoolAllocationChart: function() {
+    var ctx = document.getElementById('chart-pools').getContext('2d');
+    var color = Chart.helpers.color;
+
+    var cfg = {
+      type: 'pie',
+      data: {
+        datasets: [{
+          data: [
+            App.allocationsByPool[0].toString() / 1e18,
+            App.allocationsByPool[1].toString() / 1e18,
+            App.allocationsByPool[2].toString() / 1e18
+          ],
+          backgroundColor: [
+            color(window.chartColors.blue).alpha(0.5).rgbString(),
+            color(window.chartColors.red).alpha(0.5).rgbString(),
+            color(window.chartColors.yellow).alpha(0.5).rgbString()
+          ],
+          borderColor: [
+            window.chartColors.blue,
+            window.chartColors.red,
+            window.chartColors.yellow
+          ]
+        }],
+        labels: [
+          'dYdX',
+          'Compound',
+          'Aave'
+        ]
+      },
+      options: {
+        tooltips: {
+          callbacks: {
+            label: function(tooltipItem, myData) {
+              var label = myData.labels[tooltipItem.index] || '';
+              if (label) {
+                label += ': ';
+              }
+              label += "$" + new Big(myData.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]).toFormat(2);
+              return label;
+            }
+          }
+        }
+      }
+    };
+
+    var chart = new Chart(ctx, cfg);
   },
 
   getDydxApyBNs: async function() {
@@ -143,6 +269,24 @@ App = {
     return apyBNs;
   },
 
+  getAaveApyBNs: async function() {
+    const data = await $.ajax("https://api.thegraph.com/subgraphs/name/aave/protocol-multy-raw", { data: JSON.stringify({ query: `{
+      reserves(where: {
+        symbol_in: ["DAI", "USDC", "USDT", "TUSD", "BUSD", "SUSD"]
+      }) {
+        symbol
+        liquidityRate
+      }
+    }` }), contentType: 'application/json', type: 'POST' });
+
+    var apyBNs = {};
+
+    for (var i = 0; i < data.data.reserves.length; i++)
+      apyBNs[data.data.reserves[i].symbol == "SUSD" ? "sUSD" : data.data.reserves[i].symbol] = Web3.utils.toBN(data.data.reserves[i].liquidityRate).div(Web3.utils.toBN(1e9));
+
+    return apyBNs;
+  },
+
   getCurrencyUsdRates: function(currencyCodes) {
     return new Promise((resolve, reject) => {
       $.getJSON('https://api.coingecko.com/api/v3/coins/list', function(decoded) {
@@ -150,9 +294,9 @@ App = {
         var currencyCodesByCoinGeckoIds = {};
 
         for (const currencyCode of currencyCodes) {
-            if (currencyCode === "COMP") currencyCodesByCoinGeckoIds["compound-governance-token"] = "COMP";
-            else if (currencyCode === "REP") currencyCodesByCoinGeckoIds["augur"] = "REP";
-            else currencyCodesByCoinGeckoIds[decoded.find(coin => coin.symbol.toLowerCase() === currencyCode.toLowerCase()).id] = currencyCode;
+          if (currencyCode === "COMP") currencyCodesByCoinGeckoIds["compound-governance-token"] = "COMP";
+          else if (currencyCode === "REP") currencyCodesByCoinGeckoIds["augur"] = "REP";
+          else currencyCodesByCoinGeckoIds[decoded.find(coin => coin.symbol.toLowerCase() === currencyCode.toLowerCase()).id] = currencyCode;
         }
 
         $.getJSON('https://api.coingecko.com/api/v3/simple/price?vs_currencies=usd&ids=' + Object.keys(currencyCodesByCoinGeckoIds).join('%2C'), function(decoded) {
@@ -213,9 +357,11 @@ App = {
   },
 
   initAprChart: function() {
+    var epochToday = Math.floor((new Date()).getTime() / 1000 / 86400) * 86400;
     Promise.all([
-      $.getJSON("dydx-aprs.json?v=1595961244"),
-      $.getJSON("compound-aprs.json?v=1595961244")
+      $.getJSON("dydx-aprs.json?v=" + epochToday),
+      $.getJSON("compound-aprs.json?v=" + epochToday),
+      $.getJSON("aave-aprs.json?v=" + epochToday)
     ]).then(function(values) {
       var ourData = {};
 
@@ -261,6 +407,26 @@ App = {
         if (ourData[flooredEpoch] === undefined || maxWithComp > ourData[flooredEpoch]) ourData[flooredEpoch] = maxWithComp;
       }
 
+      var aaveAvgs = [];
+      var epochs = Object.keys(values[2]).sort();
+
+      for (var i = 0; i < epochs.length; i++) {
+        // Calculate average for dYdX graph and max for our graph
+        var sum = 0;
+        var max = 0;
+
+        for (const currencyCode of Object.keys(values[2][epochs[i]])) {
+          sum += values[2][epochs[i]][currencyCode];
+          if (values[2][epochs[i]][currencyCode] > max) max = values[2][epochs[i]][currencyCode];
+        }
+
+        aaveAvgs.push({ t: new Date(parseInt(epochs[i])), y: sum / Object.keys(values[2][epochs[i]]).length * 100 });
+
+        // Add data for Rari graph
+        var flooredEpoch = Math.floor(epochs[i] / 86400 / 1000) * 86400 * 1000;
+        if (ourData[flooredEpoch] === undefined || max > ourData[flooredEpoch]) ourData[flooredEpoch] = max;
+      }
+
       // Turn Rari data into object for graph
       var ourAvgs = [];
       var epochs = Object.keys(ourData).sort();
@@ -272,10 +438,8 @@ App = {
 
       // Init chart
       var ctx = document.getElementById('chart-aprs').getContext('2d');
-      ctx.canvas.width = 1000;
-      ctx.canvas.height = 300;
-
       var color = Chart.helpers.color;
+
       var cfg = {
         data: {
           datasets: [{
@@ -308,12 +472,20 @@ App = {
             fill: false,
             lineTension: 0,
             borderWidth: 2
+          }, {
+            label: 'Aave',
+            backgroundColor: color(window.chartColors.yellow).alpha(0.5).rgbString(),
+            borderColor: window.chartColors.yellow,
+            data: aaveAvgs,
+            type: 'line',
+            pointRadius: 0,
+            fill: false,
+            lineTension: 0,
+            borderWidth: 2
           }]
         },
         options: {
-          animation: {
-            duration: 0
-          },
+          aspectRatio: 3,
           scales: {
             xAxes: [{
               type: 'time',
@@ -369,16 +541,17 @@ App = {
       var compoundReturns = [];
       currentReturn = 10000;
       for (var i = 0; i < compoundAvgs.length; i++) compoundReturns.push({ t: compoundAvgs[i].t, y: currentReturn *= (1 + (compoundAvgs[i].y / 100) / 365) });
+      var aaveReturns = [];
+      currentReturn = 10000;
+      for (var i = 0; i < aaveAvgs.length; i++) aaveReturns.push({ t: aaveAvgs[i].t, y: currentReturn *= (1 + (aaveAvgs[i].y / 100) / 365) });
       var ourReturns = [];
       currentReturn = 10000;
       for (var i = 0; i < ourAvgs.length; i++) ourReturns.push({ t: ourAvgs[i].t, y: currentReturn *= (1 + (ourAvgs[i].y / 100) / 365) });
 
       // Init chart
       var ctx = document.getElementById('chart-return').getContext('2d');
-      ctx.canvas.width = 1000;
-      ctx.canvas.height = 300;
-
       var color = Chart.helpers.color;
+
       var cfg = {
         data: {
           datasets: [{
@@ -411,12 +584,20 @@ App = {
             fill: false,
             lineTension: 0,
             borderWidth: 2
+          }, {
+            label: 'Aave',
+            backgroundColor: color(window.chartColors.yellow).alpha(0.5).rgbString(),
+            borderColor: window.chartColors.yellow,
+            data: aaveReturns,
+            type: 'line',
+            pointRadius: 0,
+            fill: false,
+            lineTension: 0,
+            borderWidth: 2
           }]
         },
         options: {
-          animation: {
-            duration: 0
-          },
+          aspectRatio: 3,
           scales: {
             xAxes: [{
               type: 'time',
@@ -455,7 +636,7 @@ App = {
                 if (label) {
                   label += ': ';
                 }
-                label += "$" + parseFloat(tooltipItem.value).toFixed(2);
+                label += "$" + new Big(tooltipItem.value).toFormat(2);
                 return label;
               }
             }
@@ -686,14 +867,14 @@ App = {
    * Initialize FundManager and FundToken contracts.
    */
   initContracts: function() {
-    $.getJSON('abi/RariFundController.json?v=1595276956', function(data) {
-      App.contracts.RariFundController = new App.web3.eth.Contract(data, "0x15c4ae284fbb3a6ceb41fa8eb5f3408ac485fabb");
+    $.getJSON('abi/RariFundController.json?v=1596931555', function(data) {
+      App.contracts.RariFundController = new App.web3.eth.Contract(data, "0xa875859c1A1206BA589133E5f8784514bF7C0B60");
       App.getCurrentApy();
       setInterval(App.getCurrentApy, 5 * 60 * 1000);
     });
 
-    $.getJSON('abi/RariFundManager.json?v=1595276956', function(data) {
-      App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0x6bdaf490c5b6bb58564b3e79c8d18e8dfd270464");
+    $.getJSON('abi/RariFundManager.json?v=1596931555', function(data) {
+      App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0xf2a892374E26BE1C0B2563bA5ece03B9bFe46686");
       App.getFundBalance();
       setInterval(App.getFundBalance, 5 * 60 * 1000);
       if (App.selectedAccount) {
@@ -718,8 +899,8 @@ App = {
       }
     });
 
-    $.getJSON('abi/RariFundProxy.json?v=1595276956', function(data) {
-      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0xb6b79d857858004bf475e4a57d4a446da4884866");
+    $.getJSON('abi/RariFundProxy.json?v=1596931555', function(data) {
+      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0x2022CEcEa1A304B9a7A50551BfF4213120b0F0Fe");
     });
 
     $.getJSON('abi/ERC20.json', function(data) {
@@ -738,16 +919,17 @@ App = {
     });
   },
 
-  getDirectlyDepositableCurrencies: function() {
-    for (const currencyCode of ["DAI", "USDC", "USDT"]) App.contracts.RariFundManager.methods.isCurrencyAccepted(currencyCode).call().then(function(accepted) {
-      $('#DepositToken > option[value="' + currencyCode + '"]').text(currencyCode + (accepted ? " (no slippage)" : ""));
-    });
+  getDirectlyDepositableCurrencies: async function() {
+    App.acceptedCurrencies = await App.contracts.RariFundManager.methods.getAcceptedCurrencies().call();
+    for (const currencyCode of ["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"])
+      $('#DepositToken > option[value="' + currencyCode + '"]').text(currencyCode + (App.acceptedCurrencies.indexOf(currencyCode) >= 0 ? " (no slippage)" : ""));
   },
 
-  getDirectlyWithdrawableCurrencies: function() {
-    for (const currencyCode of ["DAI", "USDC", "USDT"]) App.contracts.RariFundManager.methods["getRawFundBalance(string)"](currencyCode).call().then(function (rawFundBalance) {
+  getDirectlyWithdrawableCurrencies: async function() {
+    for (const currencyCode of ["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"]) {
+      var rawFundBalance = await App.contracts.RariFundManager.methods["getRawFundBalance(string)"](currencyCode).call();
       $('#WithdrawToken > option[value="' + currencyCode + '"]').text(currencyCode + (parseFloat(rawFundBalance) > 0 ? " (no slippage up to " + (parseFloat(rawFundBalance) / (10 ** App.tokens[currencyCode].decimals) >= 10 ? (parseFloat(rawFundBalance) / (10 ** App.tokens[currencyCode].decimals)).toFixed(2) : (parseFloat(rawFundBalance) / (10 ** App.tokens[currencyCode].decimals)).toPrecision(4)) + ")" : ""));
-    });
+    }
   },
   
   /**
@@ -901,11 +1083,9 @@ App = {
     $('#depositButton, #confirmDepositButton').prop("disabled", true).html('<div class="loading-icon"><div></div><div></div><div></div></div>');
 
     await (async function() {
-      App.getDirectlyDepositableCurrencies();
+      await App.getDirectlyDepositableCurrencies();
 
-      var accepted = ["DAI", "USDC", "USDT"].indexOf(token) >= 0 ? await App.contracts.RariFundManager.methods.isCurrencyAccepted(token).call() : false;
-
-      if (accepted) {
+      if (App.acceptedCurrencies.indexOf(token) >= 0) {
         if ($('#modal-confirm-deposit').is(':visible')) $('#modal-confirm-deposit').modal('hide');
 
         var myFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call());
@@ -932,11 +1112,8 @@ App = {
         if (typeof mixpanel !== 'undefined') mixpanel.track("Direct deposit", { transactionHash: receipt.transactionHash, currencyCode: token, amount });
       } else {
         // Get accepted currency
-        var acceptedCurrency = null;
-        if (token !== "DAI" && await App.contracts.RariFundManager.methods.isCurrencyAccepted("DAI").call()) acceptedCurrency = "DAI";
-        else if (token !== "USDC" && await App.contracts.RariFundManager.methods.isCurrencyAccepted("USDC").call()) acceptedCurrency = "USDC";
-        else if (token !== "USDT" && await App.contracts.RariFundManager.methods.isCurrencyAccepted("USDT").call()) acceptedCurrency = "USDT";
-        if (acceptedCurrency === null) return toastr["error"]("No accepted currencies found.", "Deposit failed");
+        if (!App.acceptedCurrencies) return toastr["error"]("No accepted currencies found.", "Deposit failed");
+        var acceptedCurrency = App.acceptedCurrencies[0];
 
         // Get orders from 0x swap API
         try {
@@ -965,15 +1142,16 @@ App = {
         if (!App.zeroExPrices[token === "ETH" ? "WETH" : token] || epochNow > App.zeroExPrices[token === "ETH" ? "WETH" : token]._lastUpdated + (60 * 1000)) {
           try {
             App.zeroExPrices[token === "ETH" ? "WETH" : token] = await App.get0xPrices(token === "ETH" ? "WETH" : token);
+            App.zeroExPrices[token === "ETH" ? "WETH" : token]._lastUpdated = epochNow;
           } catch (err) {
-            return toastr["error"]("Failed to get prices from 0x swap API: " + err, "Deposit failed");
+            if (["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"].indexOf(token) < 0) return toastr["error"]("Failed to get prices from 0x swap API: " + err, "Deposit failed");
           }
-
-          App.zeroExPrices[token === "ETH" ? "WETH" : token]._lastUpdated = epochNow;
         }
 
-        if (!App.zeroExPrices[token === "ETH" ? "WETH" : token][acceptedCurrency]) return toastr["error"]("Price not found on 0x swap API", "Deposit failed");
-        var slippage = 1 - (amountOutputted / amount * App.zeroExPrices[token === "ETH" ? "WETH" : token][acceptedCurrency]);
+        if (App.zeroExPrices[token === "ETH" ? "WETH" : token] && App.zeroExPrices[token === "ETH" ? "WETH" : token][acceptedCurrency]) var slippage = 1 - (amountOutputted / amount * App.zeroExPrices[token === "ETH" ? "WETH" : token][acceptedCurrency]);
+        else if (["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"].indexOf(token) >= 0) var slippage = 1 - (amountOutputted / amount);
+        else return toastr["error"]("Price not found on 0x swap API", "Deposit failed");
+
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
         if (!$('#modal-confirm-deposit').is(':visible')) {
@@ -1084,7 +1262,7 @@ App = {
       // See how much we can withdraw directly if token is not ETH
       var tokenRawFundBalanceBN = Web3.utils.toBN(0);
 
-      if (["DAI", "USDC", "USDT"].indexOf(token) >= 0) {
+      if (["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"].indexOf(token) >= 0) {
         try {
           tokenRawFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods["getRawFundBalance(string)"](token).call());
         } catch (error) {
@@ -1134,7 +1312,7 @@ App = {
         // Get input candidates
         var inputCandidates = [];
 
-        for (const inputToken of ["DAI", "USDC", "USDT"]) if (inputToken !== token) {
+        for (const inputToken of ["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"]) if (inputToken !== token) {
           var rawFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods["getRawFundBalance(string)"](inputToken).call());
           if (rawFundBalanceBN.gt(Web3.utils.toBN(0))) inputCandidates.push({ currencyCode: inputToken, rawFundBalanceBN });
         }
@@ -1243,20 +1421,21 @@ App = {
         if (!App.zeroExPrices["DAI"] || epochNow > App.zeroExPrices["DAI"]._lastUpdated + (60 * 1000)) {
           try {
             App.zeroExPrices["DAI"] = await App.get0xPrices("DAI");
+            App.zeroExPrices["DAI"]._lastUpdated = epochNow;
           } catch (err) {
-            return toastr["error"]("Failed to get prices from 0x swap API: " + err, "Deposit failed");
+            return toastr["error"]("Failed to get prices from 0x swap API: " + err, "Withdrawal failed");
           }
-
-          App.zeroExPrices["DAI"]._lastUpdated = epochNow;
         }
 
-        if (!App.zeroExPrices["DAI"][token === "ETH" ? "WETH" : token]) return toastr["error"]("Price not found on 0x swap API", "Deposit failed");
-        var amountOutputtedUsd = amount * App.zeroExPrices["DAI"][token === "ETH" ? "WETH" : token]; // TODO: Use actual input currencies instead of using DAI for USD price
+        if (App.zeroExPrices["DAI"][token === "ETH" ? "WETH" : token]) var amountOutputtedUsd = amount * App.zeroExPrices["DAI"][token === "ETH" ? "WETH" : token]; // TODO: Use actual input currencies instead of using DAI for USD price
+        else if (["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"].indexOf(token) >= 0) var amountOutputtedUsd = amount;
+        else return toastr["error"]("Price not found on 0x swap API", "Withdrawal failed");
+
         var slippage = 1 - (amountOutputtedUsd / (amountInputtedUsdBN.toString() / 1e18));
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
         if (!$('#modal-confirm-withdrawal').is(':visible')) {
-          $('#WithdrawExchangeFee kbd').text((protocolFee / 1e18) + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
+          $('#WithdrawExchangeFee kbd').html((protocolFee / 1e18) + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
           $('#WithdrawSlippage').html(slippage >= 0 ? '<strong>Slippage:</strong> <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "warning") + '">' + slippageAbsPercentageString + '%</kbd>' : '<strong>Bonus:</strong> <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>');
           return $('#modal-confirm-withdrawal').modal('show');
         }
@@ -1267,7 +1446,7 @@ App = {
         }
 
         if ($('#WithdrawExchangeFee kbd').html().substring(0, $('#WithdrawExchangeFee kbd').html().indexOf("<") - 1) !== (protocolFee / 1e18) + " ETH") {
-          $('#WithdrawExchangeFee kbd').text((protocolFee / 1e18) + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
+          $('#WithdrawExchangeFee kbd').html((protocolFee / 1e18) + ' ETH <small>($' + (protocolFee / 1e18 * App.usdPrices["ETH"]).toFixed(2) + ' USD)</small>');
           return toastr["warning"]("Exchange fee changed. If you are satisfied with the new fee, please click the \"Confirm\" button again to make your withdrawal.", "Please try again");
         }
 
@@ -1371,7 +1550,12 @@ App = {
 
     await (async function() {
       console.log('Transfer ' + amount + ' ' + currency + ' to ' + toAddress);
-      var amountBN = Web3.utils.toBN((new Big(amount)).mul((new Big(10)).pow(18)).toFixed());
+
+      if (currency === "USD") {
+        var fundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.getFundBalance().call());
+        var rftTotalSupplyBN = Web3.utils.toBN(await App.contracts.RariFundToken.methods.totalSupply().call());
+        var rftAmountBN = amountBN.mul(rftTotalSupplyBN).div(fundBalanceBN);
+      } else var rftAmountBN = amountBN;
 
       try {
         var receipt = await App.contracts.RariFundToken.methods.transfer(toAddress, rftAmountBN).send({ from: App.selectedAccount });

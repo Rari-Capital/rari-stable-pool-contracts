@@ -16,6 +16,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol";
 import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
 import "@0x/contracts-exchange/contracts/src/interfaces/IExchange.sol";
+import "@0x/contracts-utils/contracts/src/LibBytes.sol";
 
 /**
  * @title ZeroExExchangeController
@@ -25,16 +26,44 @@ import "@0x/contracts-exchange/contracts/src/interfaces/IExchange.sol";
 library ZeroExExchangeController {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
+    using LibBytes for bytes;
 
+    /**
+     * @notice Package version of `rari-contracts` when this contract was deployed.
+     */
+    string public constant VERSION = "2.0.0";
+
+    /**
+     * @dev 0x v3 Exchange contract address.
+     */
     address constant private EXCHANGE_CONTRACT = 0x61935CbDd02287B511119DDb11Aeb42F1593b7Ef;
+
+    /**
+     * @dev 0x v3 Exchange contract object.
+     */
     IExchange constant private _exchange = IExchange(EXCHANGE_CONTRACT);
+
+    /**
+     * @dev 0x v3 ERC20Proxy contract address.
+     */
     address constant private ERC20_PROXY_CONTRACT = 0x95E6F48254609A6ee006F7D493c8e5fB97094ceF;
+
+    /**
+     * @dev Decodes ERC20 or ERC20Bridge asset data.
+     * @param assetData The ERC20 or ERC20Bridge asset data.
+     * @return The asset token address.
+     */
+    function decodeTokenAddress(bytes calldata assetData) external pure returns (address) {
+        bytes4 assetProxyId = assetData.readBytes4(0);
+        if (assetProxyId == 0xf47261b0 || assetProxyId == 0xdc1600f3) return assetData.readAddress(16);
+        revert("Invalid asset proxy ID.");
+    }
 
     /**
      * @dev Gets allowance of the specified token to 0x.
      * @param erc20Contract The ERC20 contract address of the token.
      */
-    function allowance(address erc20Contract) internal view returns (uint256) {
+    function allowance(address erc20Contract) external view returns (uint256) {
         return IERC20(erc20Contract).allowance(address(this), ERC20_PROXY_CONTRACT);
     }
 
@@ -44,7 +73,7 @@ library ZeroExExchangeController {
      * @param amount Amount of the specified token to approve to dYdX.
      * @return Boolean indicating success.
      */
-    function approve(address erc20Contract, uint256 amount) internal returns (bool) {
+    function approve(address erc20Contract, uint256 amount) external returns (bool) {
         IERC20 token = IERC20(erc20Contract);
         uint256 _allowance = token.allowance(address(this), ERC20_PROXY_CONTRACT);
         if (_allowance == amount) return true;
@@ -61,7 +90,7 @@ library ZeroExExchangeController {
      * @param protocolFee The protocol fee in ETH to pay to 0x.
      * @return Array containing the taker asset filled amount (sold) and maker asset filled amount (bought).
      */
-    function marketSellOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount, uint256 protocolFee) internal returns (uint256[2] memory) {
+    function marketSellOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount, uint256 protocolFee) public returns (uint256[2] memory) {
         require(orders.length > 0, "At least one order and matching signature is required.");
         require(orders.length == signatures.length, "Mismatch between number of orders and signatures.");
         require(takerAssetFillAmount > 0, "Taker asset fill amount must be greater than 0.");
@@ -77,7 +106,7 @@ library ZeroExExchangeController {
      * @param protocolFee The protocol fee in ETH to pay to 0x.
      * @return Array containing the taker asset filled amount (sold) and maker asset filled amount (bought).
      */
-    function marketBuyOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 makerAssetFillAmount, uint256 protocolFee) internal returns (uint256[2] memory) {
+    function marketBuyOrdersFillOrKill(LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 makerAssetFillAmount, uint256 protocolFee) public returns (uint256[2] memory) {
         require(orders.length > 0, "At least one order and matching signature is required.");
         require(orders.length == signatures.length, "Mismatch between number of orders and signatures.");
         require(makerAssetFillAmount > 0, "Maker asset fill amount must be greater than 0.");
