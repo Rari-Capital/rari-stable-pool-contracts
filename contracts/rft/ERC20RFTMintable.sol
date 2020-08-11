@@ -9,28 +9,25 @@
 
 pragma solidity ^0.5.7;
 
-import "@openzeppelin/contracts/GSN/Context.sol";
-import "./ERC20.sol";
+import "./ERC20RFT.sol";
+import "@openzeppelin/contracts/access/roles/MinterRole.sol";
 
 /**
- * @dev Extension of {ERC20} that allows token holders to destroy both their own
- * tokens and those that they have an allowance for, in a way that can be
- * recognized off-chain (via event analysis).
+ * @dev Extension of {ERC20} that adds a set of accounts with the {MinterRole},
+ * which have permission to mint (create) new tokens as they see fit.
+ *
+ * At construction, the deployer of the contract is the only minter.
  */
-contract ERC20Burnable is Context, ERC20 {
+contract ERC20RFTMintable is ERC20RFT, MinterRole {
     /**
-     * @dev Destroys `amount` tokens from the caller.
+     * @dev See {ERC20-_mint}.
      *
-     * See {ERC20-_burn}.
+     * Requirements:
+     *
+     * - the caller must have the {MinterRole}.
      */
-    function burn(uint256 amount) public {
-        _burn(_msgSender(), amount);
-    }
-
-    /**
-     * @dev See {ERC20-_burnFrom}.
-     */
-    function burnFrom(address account, uint256 amount) public {
-        _burnFrom(account, amount);
+    function mint(address account, uint256 amount) public onlyMinter returns (bool) {
+        _mint(account, amount);
+        return true;
     }
 }

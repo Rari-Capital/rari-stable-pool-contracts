@@ -40,7 +40,7 @@ import "../RariFundManager.sol";
  * functions have been added to mitigate the well-known issues around setting
  * allowances. See {IERC20-approve}.
  */
-contract ERC20 is Context, IERC20, Ownable {
+contract ERC20RFT is Context, IERC20, Ownable {
     using SafeMath for uint256;
 
     mapping (address => uint256) private _balances;
@@ -152,7 +152,12 @@ contract ERC20 is Context, IERC20, Ownable {
     /**
      * @dev Address of the RariFundManager.
      */
-    address payable private _rariFundManagerContract;
+    address private _rariFundManagerContract;
+
+    /**
+     * @dev Contract of the RariFundManager.
+     */
+    RariFundManager private _rariFundManager;
 
     /**
      * @dev Emitted when the RariFundManager of the RariFundToken is set.
@@ -163,8 +168,9 @@ contract ERC20 is Context, IERC20, Ownable {
      * @dev Sets or upgrades the RariFundManager of the RariFundToken.
      * @param newContract The address of the new RariFundManager contract.
      */
-    function setFundManager(address payable newContract) external onlyOwner {
+    function setFundManager(address newContract) external onlyOwner {
         _rariFundManagerContract = newContract;
+        _rariFundManager = RariFundManager(_rariFundManagerContract);
         emit FundManagerSet(newContract);
     }
 
@@ -191,7 +197,7 @@ contract ERC20 is Context, IERC20, Ownable {
         emit Transfer(sender, recipient, amount);
 
         require(_rariFundManagerContract != address(0), "Fund manager contract not set. This may be due to an upgrade of this token contract.");
-        RariFundManager(_rariFundManagerContract).onFundTokenTransfer(sender, recipient, amount, _totalSupply);
+        _rariFundManager.onFundTokenTransfer(sender, recipient, amount, _totalSupply);
     }
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
