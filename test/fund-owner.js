@@ -102,7 +102,7 @@ contract("RariFundController, RariFundManager", accounts => {
     let myInitialBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
     await fundManagerInstance.deposit(currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
     let myPostDepositBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
-    assert(myPostDepositBalance.gte(myInitialBalance.add(amountUsdBN)));
+    assert(myPostDepositBalance.gte(myInitialBalance.add(amountUsdBN.mul(web3.utils.toBN(999999)).div(web3.utils.toBN(1000000)))));
     
     await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
     await fundManagerInstance.withdraw(currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
