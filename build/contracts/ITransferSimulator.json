@@ -43,14 +43,14 @@
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/ITransferSimulator.sol",
     "exportedSymbols": {
       "ITransferSimulator": [
-        8810
+        8782
       ]
     },
-    "id": 8811,
+    "id": 8783,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 8793,
+        "id": 8765,
         "literals": [
           "solidity",
           "^",
@@ -58,16 +58,16 @@
           ".9"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:23:35"
+        "src": "580:23:36"
       },
       {
-        "id": 8794,
+        "id": 8766,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "604:33:35"
+        "src": "604:33:36"
       },
       {
         "baseContracts": [],
@@ -75,9 +75,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 8810,
+        "id": 8782,
         "linearizedBaseContracts": [
-          8810
+          8782
         ],
         "name": "ITransferSimulator",
         "nodeType": "ContractDefinition",
@@ -85,23 +85,23 @@
           {
             "body": null,
             "documentation": "@dev This function may be used to simulate any amount of transfers\n As they would occur through the Exchange contract. Note that this function\n will always revert, even if all transfers are successful. However, it may\n be used with eth_call or with a try/catch pattern in order to simulate\n the results of the transfers.\n @param assetData Array of asset details, each encoded per the AssetProxy contract specification.\n @param fromAddresses Array containing the `from` addresses that correspond with each transfer.\n @param toAddresses Array containing the `to` addresses that correspond with each transfer.\n @param amounts Array containing the amounts that correspond to each transfer.\n @return This function does not return a value. However, it will always revert with\n `Error(\"TRANSFERS_SUCCESSFUL\")` if all of the transfers were successful.",
-            "id": 8809,
+            "id": 8781,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "simulateDispatchTransferFromCalls",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8807,
+              "id": 8779,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8797,
+                  "id": 8769,
                   "name": "assetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8809,
-                  "src": "1649:24:35",
+                  "scope": 8781,
+                  "src": "1649:24:36",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -110,19 +110,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8795,
+                      "id": 8767,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1649:5:35",
+                      "src": "1649:5:36",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 8796,
+                    "id": 8768,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1649:7:35",
+                    "src": "1649:7:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -133,11 +133,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 8800,
+                  "id": 8772,
                   "name": "fromAddresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8809,
-                  "src": "1683:30:35",
+                  "scope": 8781,
+                  "src": "1683:30:36",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -146,20 +146,20 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8798,
+                      "id": 8770,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1683:7:35",
+                      "src": "1683:7:36",
                       "stateMutability": "nonpayable",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 8799,
+                    "id": 8771,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1683:9:35",
+                    "src": "1683:9:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -170,11 +170,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 8803,
+                  "id": 8775,
                   "name": "toAddresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8809,
-                  "src": "1723:28:35",
+                  "scope": 8781,
+                  "src": "1723:28:36",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -183,20 +183,20 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8801,
+                      "id": 8773,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1723:7:35",
+                      "src": "1723:7:36",
                       "stateMutability": "nonpayable",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 8802,
+                    "id": 8774,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1723:9:35",
+                    "src": "1723:9:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -207,11 +207,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 8806,
+                  "id": 8778,
                   "name": "amounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8809,
-                  "src": "1761:24:35",
+                  "scope": 8781,
+                  "src": "1761:24:36",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -220,19 +220,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8804,
+                      "id": 8776,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1761:7:35",
+                      "src": "1761:7:36",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 8805,
+                    "id": 8777,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1761:9:35",
+                    "src": "1761:9:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -242,39 +242,39 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1639:152:35"
+              "src": "1639:152:36"
             },
             "returnParameters": {
-              "id": 8808,
+              "id": 8780,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1806:0:35"
+              "src": "1806:0:36"
             },
-            "scope": 8810,
-            "src": "1597:210:35",
+            "scope": 8782,
+            "src": "1597:210:36",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 8811,
-        "src": "640:1169:35"
+        "scope": 8783,
+        "src": "640:1169:36"
       }
     ],
-    "src": "580:1230:35"
+    "src": "580:1230:36"
   },
   "legacyAST": {
     "absolutePath": "@0x/contracts-exchange/contracts/src/interfaces/ITransferSimulator.sol",
     "exportedSymbols": {
       "ITransferSimulator": [
-        8810
+        8782
       ]
     },
-    "id": 8811,
+    "id": 8783,
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 8793,
+        "id": 8765,
         "literals": [
           "solidity",
           "^",
@@ -282,16 +282,16 @@
           ".9"
         ],
         "nodeType": "PragmaDirective",
-        "src": "580:23:35"
+        "src": "580:23:36"
       },
       {
-        "id": 8794,
+        "id": 8766,
         "literals": [
           "experimental",
           "ABIEncoderV2"
         ],
         "nodeType": "PragmaDirective",
-        "src": "604:33:35"
+        "src": "604:33:36"
       },
       {
         "baseContracts": [],
@@ -299,9 +299,9 @@
         "contractKind": "contract",
         "documentation": null,
         "fullyImplemented": false,
-        "id": 8810,
+        "id": 8782,
         "linearizedBaseContracts": [
-          8810
+          8782
         ],
         "name": "ITransferSimulator",
         "nodeType": "ContractDefinition",
@@ -309,23 +309,23 @@
           {
             "body": null,
             "documentation": "@dev This function may be used to simulate any amount of transfers\n As they would occur through the Exchange contract. Note that this function\n will always revert, even if all transfers are successful. However, it may\n be used with eth_call or with a try/catch pattern in order to simulate\n the results of the transfers.\n @param assetData Array of asset details, each encoded per the AssetProxy contract specification.\n @param fromAddresses Array containing the `from` addresses that correspond with each transfer.\n @param toAddresses Array containing the `to` addresses that correspond with each transfer.\n @param amounts Array containing the amounts that correspond to each transfer.\n @return This function does not return a value. However, it will always revert with\n `Error(\"TRANSFERS_SUCCESSFUL\")` if all of the transfers were successful.",
-            "id": 8809,
+            "id": 8781,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "simulateDispatchTransferFromCalls",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 8807,
+              "id": 8779,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 8797,
+                  "id": 8769,
                   "name": "assetData",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8809,
-                  "src": "1649:24:35",
+                  "scope": 8781,
+                  "src": "1649:24:36",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -334,19 +334,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8795,
+                      "id": 8767,
                       "name": "bytes",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1649:5:35",
+                      "src": "1649:5:36",
                       "typeDescriptions": {
                         "typeIdentifier": "t_bytes_storage_ptr",
                         "typeString": "bytes"
                       }
                     },
-                    "id": 8796,
+                    "id": 8768,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1649:7:35",
+                    "src": "1649:7:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_bytes_storage_$dyn_storage_ptr",
                       "typeString": "bytes[]"
@@ -357,11 +357,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 8800,
+                  "id": 8772,
                   "name": "fromAddresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8809,
-                  "src": "1683:30:35",
+                  "scope": 8781,
+                  "src": "1683:30:36",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -370,20 +370,20 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8798,
+                      "id": 8770,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1683:7:35",
+                      "src": "1683:7:36",
                       "stateMutability": "nonpayable",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 8799,
+                    "id": 8771,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1683:9:35",
+                    "src": "1683:9:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -394,11 +394,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 8803,
+                  "id": 8775,
                   "name": "toAddresses",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8809,
-                  "src": "1723:28:35",
+                  "scope": 8781,
+                  "src": "1723:28:36",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -407,20 +407,20 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8801,
+                      "id": 8773,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1723:7:35",
+                      "src": "1723:7:36",
                       "stateMutability": "nonpayable",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 8802,
+                    "id": 8774,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1723:9:35",
+                    "src": "1723:9:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -431,11 +431,11 @@
                 },
                 {
                   "constant": false,
-                  "id": 8806,
+                  "id": 8778,
                   "name": "amounts",
                   "nodeType": "VariableDeclaration",
-                  "scope": 8809,
-                  "src": "1761:24:35",
+                  "scope": 8781,
+                  "src": "1761:24:36",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -444,19 +444,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 8804,
+                      "id": 8776,
                       "name": "uint256",
                       "nodeType": "ElementaryTypeName",
-                      "src": "1761:7:35",
+                      "src": "1761:7:36",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "id": 8805,
+                    "id": 8777,
                     "length": null,
                     "nodeType": "ArrayTypeName",
-                    "src": "1761:9:35",
+                    "src": "1761:9:36",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_uint256_$dyn_storage_ptr",
                       "typeString": "uint256[]"
@@ -466,26 +466,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "1639:152:35"
+              "src": "1639:152:36"
             },
             "returnParameters": {
-              "id": 8808,
+              "id": 8780,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1806:0:35"
+              "src": "1806:0:36"
             },
-            "scope": 8810,
-            "src": "1597:210:35",
+            "scope": 8782,
+            "src": "1597:210:36",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "public"
           }
         ],
-        "scope": 8811,
-        "src": "640:1169:35"
+        "scope": 8783,
+        "src": "640:1169:36"
       }
     ],
-    "src": "580:1230:35"
+    "src": "580:1230:36"
   },
   "compiler": {
     "name": "solc",
@@ -493,7 +493,7 @@
   },
   "networks": {},
   "schemaVersion": "3.2.3",
-  "updatedAt": "2020-08-11T13:51:04.249Z",
+  "updatedAt": "2020-08-11T17:25:25.953Z",
   "devdoc": {
     "methods": {
       "simulateDispatchTransferFromCalls(bytes[],address[],address[],uint256[])": {
