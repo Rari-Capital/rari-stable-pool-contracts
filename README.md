@@ -40,12 +40,11 @@ First, fork the Ethereum mainnet (tested on Node.js `v10.21.0`). To start the fo
 
 To deploy the contracts to your private mainnet fork: `truffle migrate --network development --skip-dry-run --reset`
 
-To run automated tests on the contracts on your private mainnet fork: `npm test`
+To run automated tests on the contracts on your private mainnet fork, run `npm test` (which runs `npm run ganache` in the background for you).
 
 If you'd like to test gasless deposits via `RariFundProxy.deposit` via the Gas Station Network:
 
-* Download `https://github.com/OpenZeppelin/openzeppelin-gsn-provider/blob/master/bin/gsn-relay` to `bin/gsn-relay`.
-* Run `chmod +x test-gsn.sh bin/gsn-relay`.
+* Download `https://github.com/OpenZeppelin/openzeppelin-gsn-provider/blob/master/bin/gsn-relay` to `bin/gsn-relay` and set permissions with `chmod +x bin/gsn-relay`.
 * Making sure `npx` is installed, run `npm dev-gsn`.
 * Fund `RariFundProxy` using `npx @openzeppelin/gsn-helpers fund-recipient --recipient $RARI_FUND_PROXY_ADDRESS -n http://localhost:8546 -f $FROM_ADDRESS` or [this tool](https://www.opengsn.org/recipients) (or manually send ETH to `RelayHub(0xD216153c06E857cD7f72665E0aF1d7D82172F494).depositFor(address target)`).
 * Run `rari-gsn-signer` with `pm2 start ecosystem.config.js` after configuring `ecosystem.config.js`.
