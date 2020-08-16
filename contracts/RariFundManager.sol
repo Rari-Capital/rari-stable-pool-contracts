@@ -732,8 +732,8 @@ contract RariFundManager is Ownable {
             _rariFundController.withdrawFromPoolKnowingBalance(pool, currencyCode, poolAmount, poolBalance);
 
             if (pool == 0) {
-                for (uint256 j = 0; j < _dydxBalancesCache.length; j++) if (_dydxTokenAddressesCache[j] == erc20Contract) _dydxBalancesCache[j] = poolBalance.sub(amount);
-            } else _poolBalanceCache[currencyCode][pool] = poolBalance.sub(amount);
+                for (uint256 j = 0; j < _dydxBalancesCache.length; j++) if (_dydxTokenAddressesCache[j] == erc20Contract) _dydxBalancesCache[j] = poolBalance.sub(poolAmount);
+            } else _poolBalanceCache[currencyCode][pool] = poolBalance.sub(poolAmount);
 
             contractBalance = contractBalance.add(poolAmount);
         }
