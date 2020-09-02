@@ -1,4 +1,4 @@
-# How The Rari Capital Stablecoin Fund Works
+# How the Rari Capital Stablecoin Fund Works
 
 This document explains how the fund and the software work under the hood. This content is also available [on our website](https://rari.capital/current.html).
 

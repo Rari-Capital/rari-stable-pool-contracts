@@ -1,24 +1,28 @@
-# Rari Capital Contracts & dApp
+# Rari Capital Smart Contracts & dApp
 
 Welcome to `rari-contracts`, the central repository for the Solidity source code behind Rari Capital's Ethereum-based smart contracts (with automated tests), our stablecoin fund's dApp (web client), and the documentation for it all.
 
-## Using the contracts
+## How the fund works
 
-API documentation for our smart contracts is available in `API.md`.
+Documentation on how the stablecoin fund works is available in `FUND.md`.
 
-## How it works
+## Contract usage
 
-Documentation on how the fund works is available in `FUND.md`.
+Documentation on common usage of the contracts is available in `USAGE.md`. Detailed API documentation for our smart contracts' public methods is available in `API.md`. Smart contract ABIs are available in the `abi` properties of the JSON files in the `build` folder.
 
-## Installation
+## dApp usage
 
-You'll want to run Truffle on Node.js `v10.21.0` (latest Dubnium LTS because latest Erbium LTS doesn't work) with the latest version of NPM.
+Anyone can use our dApp for our live stablecoin fund right now at [app.rari.capital](https://app.rari.capital). However, to be extra safe, you should download or clone this repository and use the web client (located in the `src` folder) locally simply by opening `src/index.html` in your web browser, but be mindful of updates!
+
+## Installation (for development and deployment)
+
+We had success using Truffle on Node.js `v10.21.0` with the latest version of NPM, but others had success with Node.js `v12.18.2`.
 
 To install the latest version of Truffle: `npm install -g truffle`
 
-*Though the latest version of Truffle should work, to compile, deploy, and test `v2.0.0`, we used Truffle `v5.1.37` (which should use `solc` version `0.5.17+commit.d19bba13.Emscripten.clang` and Web3.js `v1.2.1`).*
+*Though the latest version of Truffle should work, to compile, deploy, and test our contracts, we used Truffle `v5.1.37` (which should use `solc` version `0.5.17+commit.d19bba13.Emscripten.clang` and Web3.js `v1.2.1`).*
 
-To install our dependencies: `npm install`
+To install all our dependencies: `npm install`
 
 ## Compiling the contracts
 
@@ -36,7 +40,7 @@ If you are upgrading from `v1.2.0`, set `UPGRADE_FROM_LAST_VERSION=1` to enable 
     UPGRADE_FUND_TOKEN=0x9366B7C00894c3555c7590b0384e5F6a9D55659f
     UPGRADE_FUND_OWNER_ADDRESS=0xb568a7a185305e1cc027e13a27db7c5bf99e81d8
 
-First, fork the Ethereum mainnet (tested on Node.js `v10.21.0`). To start the fork, configure `DEVELOPMENT_WEB3_PROVIDER_URL_TO_BE_FORKED` in `.env` and run `npm run ganache`. *If you change the port or you're doing this on another machine, make sure to configure the `host` and `port` of the `development` network in `truffle-config.js`.* Note that you will likely have to regularly restart your fork, especially when forking from a node without archive data or when using live 0x API responses to make currency exchanges.
+First, fork the Ethereum mainnet (tested on Node.js `v10.21.0`). To start the fork, configure `DEVELOPMENT_WEB3_PROVIDER_URL_TO_BE_FORKED` (set to any mainnet Web3 HTTP provider JSON-RPC URL; we use a local `geth` instance, specifically a light client started with `geth --syncmode light --rpc --rpcapi eth,web3,debug,net`; Infura works too, but beware of latency and rate limiting) in `.env` and run `npm run ganache`. *If you would like to change the port, make sure to configure `scripts/ganache.js`, `scripts/test.sh`, and the `development` network in `truffle-config.js`.* Note that you will likely have to regularly restart your fork, especially when forking from a node without archive data or when using live 0x API responses to make currency exchanges.
 
 To deploy the contracts to your private mainnet fork: `truffle migrate --network development --skip-dry-run --reset`
 
@@ -86,4 +90,4 @@ See `LICENSE`.
 
 ## Credits
 
-Rari Capital's smart contracts are developed by [David Lucid](https://github.com/davidlucid) of David Lucid LLC.
+Rari Capital's smart contracts are developed by [David Lucid](https://github.com/davidlucid).

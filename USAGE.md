@@ -3,6 +3,7 @@
 * The following document contains instructions on common usage of the smart contracts' APIs.
 * See `API.md` for a more detailed API reference on `RariFundController`, `RariFundManager`, `RariFundToken`, and `RariFundProxy`.
 * See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RFT.
+* Smart contract ABIs are available in the `abi` properties of the JSON files in the `build` folder.
 
 ## Fund APY
 
