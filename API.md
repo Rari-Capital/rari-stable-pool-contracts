@@ -1,6 +1,10 @@
 # Rari Capital Smart Contract API Documentation
 
-Welcome to the API docs for `RariFundManager`, `RariFundToken`, and `RariFundProxy`, the smart contracts behind Rari Capital's stablecoin fund. You can find out more about Rari at [www.rari.capital](https://rari.capital).
+Welcome to the API docs for `RariFundManager`, `RariFundToken`, and `RariFundProxy`, the smart contracts behind Rari Capital's stablecoin fund.
+
+* See `USAGE.md` for instructions on common usage of the smart contracts' APIs.
+* See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RFT.
+* Smart contract ABIs are available in the `abi` properties of the JSON files in the `build` folder.
 
 ## **User Balances and Interest**
 
@@ -92,18 +96,10 @@ Exchanges and deposits funds to RariFund in exchange for RFT.
 
 ## **Withdrawals**
 
-### `bool RariFundToken.approve(address spender, uint256 amount)`
-
-Sets `amount` as the allowance of `spender` over the caller's tokens.
-
-* Parameters:
-    * `spender` (address) - The account to which we are setting an allowance.
-    * `amount` (uint256) - The amount of the allowance to be set.
-* Return value: Boolean indicating success.
-
 ### `bool RariFundManager.withdraw(string currencyCode, uint256 amount)`
 
 Withdraws funds from RariFund in exchange for RFT.
+
 * You may only withdraw currencies held by the fund (see `RariFundManager.getRawFundBalance(string currencyCode)`). However, `RariFundProxy.withdrawAndExchange` withdraws your funds and exchanges them via 0x in one transaction.
 * Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
 * Parameters:
@@ -128,6 +124,34 @@ Exchanges and deposits funds to RariFund in exchange for RFT.
 * Return value: Boolean indicating success.
 * Development notes:
     * *We should be able to make this function external and use calldata for all parameters, but [Solidity does not support calldata structs](https://github.com/ethereum/solidity/issues/5479).*
+
+## Rari Fund Token
+
+See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RFT.
+
+### `bool RariFundToken.transfer(address recipient, uint256 amount)`
+
+Transfers `amount` RFT to `recipient` (as with other ERC20 tokens like RFT).
+
+* Parameters:
+    * `recipient` (address): The recipient of the .
+    * `inputAmounts` (uint256[]): The amounts of tokens to be withdrawn and exchanged (including taker fees).
+* Return value: Boolean indicating success.
+
+### `bool RariFundToken.approve(address spender, uint256 amount)`
+
+Sets `amount` as the allowance of `spender` over the caller's tokens.
+
+* Parameters:
+    * `spender` (address) - The account to which we are setting an allowance.
+    * `amount` (uint256) - The amount of the allowance to be set.
+* Return value: Boolean indicating success.
+
+### `uint256 RariFundToken.totalSupply()`
+
+Returns the total supply of RFT (scaled by 1e18).
+
+* Divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RFT in USD (scaled by 1e18).
 
 ## **Fund Balances and Interest**
 
