@@ -25,7 +25,7 @@ contract DummyRariFundController {
 
     /**
      * @dev Returns the fund controller's balance of the specified currency in the specified pool.
-     * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
+     * @dev Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.
      */
@@ -35,7 +35,7 @@ contract DummyRariFundController {
 
     /**
      * @dev Returns the fund controller's balance of the specified currency in the specified pool.
-     * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
+     * @dev Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.
      */
