@@ -207,6 +207,7 @@
                   <option value="TUSD">TUSD</option>
                   <option value="BUSD">BUSD</option>
                   <option value="sUSD">sUSD</option>
+                  <option value="mUSD">mUSD</option>
                   <option>ETH</option>
                 </select>
                 <button class="btn btn-success btn-lg" id="depositButton" type="button" disabled>Deposit</button>
@@ -231,6 +232,7 @@
                   <option value="TUSD">TUSD</option>
                   <option value="BUSD">BUSD</option>
                   <option value="sUSD">sUSD</option>
+                  <option value="mUSD">mUSD</option>
                   <option>ETH</option>
                 </select>
                 <button class="btn btn-danger btn-lg" id="withdrawButton" type="button" disabled>Withdraw</button><br />
@@ -270,7 +272,7 @@
             <p class="text-dark">You are depositing a currency that is either not supported or not currently desired by the fund <small>(due to other currencies having higher potential yield)</small>, so the fund must exchange it for you.</p>
             <div class="mb-2" id="DepositSlippage"><strong>Slippage:</strong> <kbd>?%</kbd></div>
             <div class="mb-3" id="DepositExchangeFee"><strong>Exchange Fee:</strong> <kbd>0 ETH <small>(0 USD)</small></kbd></div>
-            <small class="d-block">Please do not increase the preset gas price without increasing the transaction value (as 0x exchange protocol fees are proportional to gas price).</small>
+            <small class="d-block" id="DepositZeroExGasPriceWarning">Please do not increase the preset gas price without increasing the transaction value (as 0x exchange protocol fees are proportional to gas price).</small>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -293,7 +295,7 @@
             <p class="text-dark">You are withdrawing a currency that the fund does not have enough of to directly process your withdrawal; instead, the fund must make exchange(s) first.</p>
             <div class="mb-2" id="WithdrawSlippage"><strong>Slippage:</strong> <kbd>?%</kbd></div>
             <div class="mb-3" id="WithdrawExchangeFee"><strong>Exchange Fee:</strong> <kbd>0 ETH <small>(0 USD)</small></kbd></div>
-            <small class="d-block">Please do not increase the preset gas price without increasing the transaction value (as 0x exchange protocol fees are proportional to gas price).</small>
+            <small class="d-block" id="WithdrawZeroExGasPriceWarning">Please do not increase the preset gas price without increasing the transaction value (as 0x exchange protocol fees are proportional to gas price).</small>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

@@ -4,12 +4,12 @@ const erc20Abi = require('./abi/ERC20.json');
 
 const currencies = require('./fixtures/currencies.json');
 
-// To compile DummyRariFundManager, run the following command using solc-js v0.5.17
+// To compile DummyRariFundManager, run the following command using solc-js v0.5.17 (install with `npm install -g solc@0.5.17`)
 // solcjs DummyRariFundManager.sol --abi --bin
 const dummyRariFundManagerAbi = JSON.parse(fs.readFileSync(__dirname + '/fixtures/DummyRariFundManager_sol_DummyRariFundManager.abi'));
 const dummyRariFundManagerBin = fs.readFileSync(__dirname + '/fixtures/DummyRariFundManager_sol_DummyRariFundManager.bin');
 
-// To compile DummyRariFundController, run the following command using solc-js v0.5.17
+// To compile DummyRariFundController, run the following command using solc-js v0.5.17 (install with `npm install -g solc@0.5.17`)
 // solcjs DummyRariFundController.sol --abi --bin
 const dummyRariFundControllerAbi = JSON.parse(fs.readFileSync(__dirname + '/fixtures/DummyRariFundController_sol_DummyRariFundController.abi'));
 const dummyRariFundControllerBin = fs.readFileSync(__dirname + '/fixtures/DummyRariFundController_sol_DummyRariFundController.bin');

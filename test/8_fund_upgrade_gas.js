@@ -28,8 +28,8 @@ contract("RariFundController", accounts => {
       await fundManagerInstance.deposit(currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Approve and deposit to pool
-      await fundControllerInstance.approveToPool(["dYdX", "Compound", "Aave"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-      await fundControllerInstance.depositToPool(["dYdX", "Compound", "Aave"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.approveToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.depositToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
     }
 
     // Disable original FundController and FundManager

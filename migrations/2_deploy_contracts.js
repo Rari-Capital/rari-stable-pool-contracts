@@ -12,7 +12,9 @@ require('dotenv').config();
 var DydxPoolController = artifacts.require("./lib/pools/DydxPoolController.sol");
 var CompoundPoolController = artifacts.require("./lib/pools/CompoundPoolController.sol");
 var AavePoolController = artifacts.require("./lib/pools/AavePoolController.sol");
+var MStablePoolController = artifacts.require("./lib/pools/MStablePoolController.sol");
 var ZeroExExchangeController = artifacts.require("./lib/pools/ZeroExExchangeController.sol");
+var MStableExchangeController = artifacts.require("./lib/pools/MStableExchangeController.sol");
 var RariFundController = artifacts.require("./RariFundController.sol");
 var RariFundManager = artifacts.require("./RariFundManager.sol");
 var RariFundToken = artifacts.require("./RariFundToken.sol");
@@ -61,7 +63,11 @@ module.exports = function(deployer, network, accounts) {
     }).then(function() {
       return deployer.deploy(AavePoolController);
     }).then(function() {
+      return deployer.deploy(MStablePoolController);
+    }).then(function() {
       return deployer.deploy(ZeroExExchangeController);
+    }).then(function() {
+      return deployer.deploy(MStableExchangeController);
     }).then(function() {
       return deployer.link(DydxPoolController, RariFundController);
     }).then(function() {
@@ -69,7 +75,11 @@ module.exports = function(deployer, network, accounts) {
     }).then(function() {
       return deployer.link(AavePoolController, RariFundController);
     }).then(function() {
+      return deployer.link(MStablePoolController, RariFundController);
+    }).then(function() {
       return deployer.link(ZeroExExchangeController, RariFundController);
+    }).then(function() {
+      return deployer.link(MStableExchangeController, RariFundController);
     }).then(function() {
       return deployer.deploy(RariFundController);
     }).then(function() {
@@ -156,6 +166,8 @@ module.exports = function(deployer, network, accounts) {
     }).then(function() {
       return deployer.link(ZeroExExchangeController, RariFundProxy);
     }).then(function() {
+      return deployer.link(MStableExchangeController, RariFundProxy);
+    }).then(function() {
       return deployer.deploy(RariFundProxy);
     }).then(function() {
       return rariFundManager.setFundProxy(RariFundProxy.address);
@@ -187,7 +199,7 @@ module.exports = function(deployer, network, accounts) {
         });
       } else {
         // Development network: set all currencies to accepted
-        return rariFundManager.setAcceptedCurrencies(["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"], [true, true, true, true, true, true]);
+        return rariFundManager.setAcceptedCurrencies(["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"], [true, true, true, true, true, true, true]);
       }
     });
   } else {
@@ -197,7 +209,11 @@ module.exports = function(deployer, network, accounts) {
     }).then(function() {
       return deployer.deploy(AavePoolController);
     }).then(function() {
+      return deployer.deploy(MStablePoolController);
+    }).then(function() {
       return deployer.deploy(ZeroExExchangeController);
+    }).then(function() {
+      return deployer.deploy(MStableExchangeController);
     }).then(function() {
       return deployer.link(DydxPoolController, RariFundController);
     }).then(function() {
@@ -205,7 +221,11 @@ module.exports = function(deployer, network, accounts) {
     }).then(function() {
       return deployer.link(AavePoolController, RariFundController);
     }).then(function() {
+      return deployer.link(MStablePoolController, RariFundController);
+    }).then(function() {
       return deployer.link(ZeroExExchangeController, RariFundController);
+    }).then(function() {
+      return deployer.link(MStableExchangeController, RariFundController);
     }).then(function() {
       return deployer.deploy(RariFundController);
     }).then(function() {
@@ -250,6 +270,8 @@ module.exports = function(deployer, network, accounts) {
     }).then(function() {
       return deployer.link(ZeroExExchangeController, RariFundProxy);
     }).then(function() {
+      return deployer.link(MStableExchangeController, RariFundProxy);
+    }).then(function() {
       return deployer.deploy(RariFundProxy);
     }).then(function() {
       return rariFundManager.setFundProxy(RariFundProxy.address);
@@ -272,7 +294,7 @@ module.exports = function(deployer, network, accounts) {
         });
       } else {
         // Development network: set all currencies to accepted
-        return rariFundManager.setAcceptedCurrencies(["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD"], [true, true, true, true, true, true]);
+        return rariFundManager.setAcceptedCurrencies(["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"], [true, true, true, true, true, true, true]);
       }
     });
   }

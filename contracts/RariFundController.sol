@@ -22,7 +22,9 @@ import "./RariFundManager.sol";
 import "./lib/pools/DydxPoolController.sol";
 import "./lib/pools/CompoundPoolController.sol";
 import "./lib/pools/AavePoolController.sol";
+import "./lib/pools/MStablePoolController.sol";
 import "./lib/exchanges/ZeroExExchangeController.sol";
+import "./lib/exchanges/MStableExchangeController.sol";
 
 /**
  * @title RariFundController
@@ -101,6 +103,8 @@ contract RariFundController is Ownable {
         addPoolToCurrency("BUSD", 2); // Aave
         addSupportedCurrency("sUSD", 0x57Ab1ec28D129707052df4dF418D58a2D46d5f51, 18);
         addPoolToCurrency("sUSD", 2); // Aave
+        addSupportedCurrency("mUSD", 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5, 18);
+        addPoolToCurrency("mUSD", 3); // mStable
     }
 
     /**
@@ -258,7 +262,7 @@ contract RariFundController is Ownable {
 
     /**
      * @dev Returns the fund controller's balance of the specified currency in the specified pool (without checking `_poolsWithFunds` first).
-     * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
+     * @dev Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.
      */
@@ -268,12 +272,13 @@ contract RariFundController is Ownable {
         if (pool == 0) return DydxPoolController.getBalance(erc20Contract);
         else if (pool == 1) return CompoundPoolController.getBalance(erc20Contract);
         else if (pool == 2) return AavePoolController.getBalance(erc20Contract);
+        else if (pool == 3 && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) return MStablePoolController.getBalance();
         else revert("Invalid pool index.");
     }
 
     /**
      * @dev Returns the fund controller's balance of the specified currency in the specified pool (checking `_poolsWithFunds` first to save gas).
-     * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
+     * @dev Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `CompoundPoolController.getBalance`) potentially modifies the state.
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.
      */
@@ -284,7 +289,7 @@ contract RariFundController is Ownable {
 
     /**
      * @notice Returns the fund controller's contract balance of each currency and balance of each pool of each currency (checking `_poolsWithFunds` first to save gas).
-     * @dev Ideally, we can add the view modifier, but Compound's `getUnderlyingBalance` function (called by `getPoolBalance`) potentially modifies the state.
+     * @dev Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getPoolBalance`) potentially modifies the state.
      * @return An array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, and an array of arrays of corresponding balances at each pool index for each currency code.
      */
     function getAllBalances() external returns (string[] memory, uint256[] memory, uint256[][] memory, uint256[][] memory) {
@@ -309,6 +314,7 @@ contract RariFundController is Ownable {
 
     /**
      * @dev Approves tokens to the specified pool without spending gas on every deposit.
+     * Note that this function is vulnerable to the allowance double-spend exploit, as with the `approve` functions of the ERC20 contracts themselves. If you are concerned and setting exact allowances, make sure to set allowance to 0 on the client side before setting an allowance greater than 0.
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token to be approved.
      * @param amount The amount of tokens to be approved.
@@ -319,6 +325,8 @@ contract RariFundController is Ownable {
         if (pool == 0) DydxPoolController.approve(erc20Contract, amount);
         else if (pool == 1) CompoundPoolController.approve(erc20Contract, amount);
         else if (pool == 2) AavePoolController.approve(erc20Contract, amount);
+        else if (pool == 2) AavePoolController.approve(erc20Contract, amount);
+        else if (pool == 3 && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) return MStablePoolController.approve(amount);
         else revert("Invalid pool index.");
     }
 
@@ -361,6 +369,7 @@ contract RariFundController is Ownable {
         if (pool == 0) DydxPoolController.deposit(erc20Contract, amount);
         else if (pool == 1) CompoundPoolController.deposit(erc20Contract, amount);
         else if (pool == 2) AavePoolController.deposit(erc20Contract, amount, _aaveReferralCode);
+        else if (pool == 3 && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStablePoolController.deposit(amount);
         else revert("Invalid pool index.");
         _poolsWithFunds[currencyCode][pool] = true;
     }
@@ -377,6 +386,7 @@ contract RariFundController is Ownable {
         if (pool == 0) DydxPoolController.withdraw(erc20Contract, amount);
         else if (pool == 1) CompoundPoolController.withdraw(erc20Contract, amount);
         else if (pool == 2) AavePoolController.withdraw(erc20Contract, amount);
+        else if (pool == 3 && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStablePoolController.withdraw(amount);
         else revert("Invalid pool index.");
     }
 
@@ -392,15 +402,18 @@ contract RariFundController is Ownable {
     }
 
     /**
-     * @dev Withdraws funds from the specified pool (caching the `initialBalance` parameter).
+     * @dev Withdraws funds from the specified pool (with optimizations based on the `all` parameter).
+     * If we already know all funds are being withdrawn, we won't have to check again here in this function. 
+     * If withdrawing all funds, we choose _withdrawFromPool or _withdrawAllFromPool based on estimated gas usage.
+     * The value of `all` is trusted because `msg.sender` is always RariFundManager.
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
-     * @param initialBalance The fund's balance of the specified currency in the specified pool before the withdrawal.
+     * @param all Boolean indicating if all funds are being withdrawn.
      */
-    function withdrawFromPoolKnowingBalance(uint8 pool, string calldata currencyCode, uint256 amount, uint256 initialBalance) external fundEnabled onlyManager {
-        _withdrawFromPool(pool, currencyCode, amount);
-        if (amount == initialBalance) _poolsWithFunds[currencyCode][pool] = false;
+    function withdrawFromPoolOptimized(uint8 pool, string calldata currencyCode, uint256 amount, bool all) external fundEnabled onlyManager {
+        all && (pool == 0 || pool == 3) ? _withdrawAllFromPool(pool, currencyCode) : _withdrawFromPool(pool, currencyCode, amount);
+        if (all) _poolsWithFunds[currencyCode][pool] = false;
     }
 
     /**
@@ -414,6 +427,7 @@ contract RariFundController is Ownable {
         if (pool == 0) DydxPoolController.withdrawAll(erc20Contract);
         else if (pool == 1) require(CompoundPoolController.withdrawAll(erc20Contract), "No Compound balance to withdraw from.");
         else if (pool == 2) require(AavePoolController.withdrawAll(erc20Contract), "No Aave balance to withdraw from.");
+        else if (pool == 3 && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) require(MStablePoolController.withdrawAll(), "No mStable balance to withdraw from.");
         else revert("Invalid pool index.");
         _poolsWithFunds[currencyCode][pool] = false;
     }
@@ -438,9 +452,9 @@ contract RariFundController is Ownable {
 
     /**
      * @dev Approves tokens to 0x without spending gas on every deposit.
+     * Note that this function is vulnerable to the allowance double-spend exploit, as with the `approve` functions of the ERC20 contracts themselves. If you are concerned and setting exact allowances, make sure to set allowance to 0 on the client side before setting an allowance greater than 0.
      * @param erc20Contract The ERC20 contract address of the token to be approved.
      * @param amount The amount of tokens to be approved.
-     * @return Boolean indicating success.
      */
     function approveTo0x(address erc20Contract, uint256 amount) external fundEnabled onlyRebalancer {
         ZeroExExchangeController.approve(erc20Contract, amount);
@@ -539,5 +553,43 @@ contract RariFundController is Ownable {
         }
 
         return lossRateLastDay.add(lossRate) <= int256(_dailyLossRateLimit);
+    }
+
+    /**
+     * @dev Approves tokens to the mUSD token contract without spending gas on every deposit.
+     * Note that this function is vulnerable to the allowance double-spend exploit, as with the `approve` functions of the ERC20 contracts themselves. If you are concerned and setting exact allowances, make sure to set allowance to 0 on the client side before setting an allowance greater than 0.
+     * @param erc20Contract The ERC20 contract address of the token.
+     * @param amount Amount of the specified token to approve to the mUSD token contract.
+     */
+    function approveToMUsd(address erc20Contract, uint256 amount) external fundEnabled onlyRebalancer {
+        MStableExchangeController.approve(erc20Contract, amount);
+    }
+
+    /**
+     * @dev Mints mUSD tokens in exchange for the specified amount of the specified token.
+     * @param erc20Contract The ERC20 contract address of the token to be exchanged for mUSD.
+     * @param inputAmount The amount of input tokens to be exchanged for mUSD.
+     */
+    function mintMUsd(address erc20Contract, uint256 inputAmount) external fundEnabled onlyRebalancer {
+        MStableExchangeController.mint(erc20Contract, inputAmount);
+    }
+
+    /**
+     * @dev Redeems mUSD tokens in exchange for the specified amount of the specified token.
+     * @param erc20Contract The ERC20 contract address of the token to be exchanged from mUSD.
+     * @param outputAmount The amount of output tokens to be exchanged from mUSD.
+     */
+    function redeemMUsd(address erc20Contract, uint256 outputAmount) external fundEnabled onlyRebalancer {
+        MStableExchangeController.redeem(erc20Contract, outputAmount);
+    }
+
+    /**
+     * @dev Swaps tokens via mStable mUSD.
+     * @param inputErc20Contract The ERC20 contract address of the token to be exchanged for mUSD.
+     * @param outputErc20Contract The ERC20 contract address of the token to be exchanged from mUSD.
+     * @param inputAmount The amount of input tokens to be exchanged for mUSD.
+     */
+    function swapMStable(address inputErc20Contract, address outputErc20Contract, uint256 inputAmount) external fundEnabled onlyRebalancer {
+        MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount);
     }
 }

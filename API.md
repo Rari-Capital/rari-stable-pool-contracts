@@ -38,6 +38,22 @@ Returns the total amount of interest accrued by `account` (excluding the fees pa
 
 ## **Deposits**
 
+### `uint256 RariFundManager.getDefaultAccountBalanceLimit()`
+
+Returns the default account balance limit in USD.
+
+* Note that this limit applies only to new deposits: there is no limit on the amount of interest an account can accrue.
+* Users are subject to the default limit unless they have sorted out a special agreement with Rari.
+
+### `uint256 RariFundManager.getAccountBalanceLimit()`
+
+Returns the balance limit in USD of `account`.
+
+* Note that this limit applies only to new deposits: there is no limit on the amount of interest an account can accrue.
+* Users are subject to the default limit unless they have sorted out a special agreement with Rari.
+* Parameters:
+    * `account` (address): The Ethereum address whose balance limit we are checking.
+
 ### `bool RariFundManager.isCurrencyAccepted(string currencyCode)`
 
 Returns a boolean indicating if deposits in `currencyCode` are currently accepted.
@@ -52,7 +68,7 @@ Returns an array of currency codes currently accepted for deposits.
 * Development notes:
     * *Ideally, we can add the `view` modifier to this function, but it potentially modifies the state (see comments on `_acceptedCurrenciesArray`).*
 
-### `bool RariFundProxy.deposit(string currencyCode, uint256 amount)`
+### `RariFundProxy.deposit(string currencyCode, uint256 amount)`
 
 ***For a limited time only, we are paying gas fees for first-time deposits of at least 250 DAI/USDC/USDT!***
 
@@ -63,9 +79,8 @@ Deposits funds to RariFund in exchange for RFT (with GSN support).
 * Parameters:
     * `currencyCode` (string): The currency code of the token to be deposited.
     * `amount` (uint256): The amount of tokens to be deposited.
-* Return value: Boolean indicating success.
 
-### `bool RariFundManager.deposit(string currencyCode, uint256 amount)`
+### `RariFundManager.deposit(string currencyCode, uint256 amount)`
 
 Deposits funds to RariFund in exchange for RFT.
 
@@ -74,11 +89,10 @@ Deposits funds to RariFund in exchange for RFT.
 * Parameters:
     * `currencyCode` (string): The currency code of the token to be deposited.
     * `amount` (uint256): The amount of tokens to be deposited.
-* Return value: Boolean indicating success.
 
-### `bool RariFundProxy.exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string outputCurrencyCode, LibOrder.Order[] orders, bytes[] signatures, uint256 takerAssetFillAmount)`
+### `RariFundProxy.exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string outputCurrencyCode, LibOrder.Order[] orders, bytes[] signatures, uint256 takerAssetFillAmount)`
 
-Exchanges and deposits funds to RariFund in exchange for RFT.
+Exchanges and deposits funds to RariFund in exchange for RFT (via 0x).
 
 * You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
 * Please note that you must approve RariFundProxy to transfer at least `inputAmount` unless you are inputting ETH.
@@ -90,13 +104,22 @@ Exchanges and deposits funds to RariFund in exchange for RFT.
     * `orders` (LibOrder.Order[]): The limit orders to be filled in ascending order of the price you pay.
     * `signatures` (bytes[]): The signatures for the orders.
     * `takerAssetFillAmount` (uint256): The amount of the taker asset to sell (excluding taker fees).
-* Return value: Boolean indicating success.
 * Development notes:
     * *We should be able to make this function external and use calldata for all parameters, but [Solidity does not support calldata structs](https://github.com/ethereum/solidity/issues/5479).*
 
+### `RariFundProxy.exchangeAndDeposit(string inputCurrencyCode, uint256 inputAmount, string outputCurrencyCode)`
+
+Exchanges and deposits funds to RariFund in exchange for RFT (no slippage and low fees via mStable, but only supports DAI, USDC, USDT, TUSD, and mUSD).
+
+* Please note that you must approve RariFundProxy to transfer at least `inputAmount`.
+* Parameters:
+    * `inputCurrencyCode` (string): The currency code of the token to be exchanged.
+    * `inputAmount` (uint256): The amount of tokens to be exchanged (including taker fees).
+    * `outputCurrencyCode` (string): The currency code of the token to be deposited after exchange.
+
 ## **Withdrawals**
 
-### `bool RariFundManager.withdraw(string currencyCode, uint256 amount)`
+### `RariFundManager.withdraw(string currencyCode, uint256 amount)`
 
 Withdraws funds from RariFund in exchange for RFT.
 
@@ -105,23 +128,27 @@ Withdraws funds from RariFund in exchange for RFT.
 * Parameters:
     * `currencyCode` (string): The currency code of the token to be withdrawn.
     * `amount` (uint256): The amount of tokens to be withdrawn.
-* Return value: Boolean indicating success.
 
-### `bool RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)`
+### `RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)`
 
-Exchanges and deposits funds to RariFund in exchange for RFT.
+Withdraws funds from RariFund in exchange for RFT and exchanges to them to the desired currency (if no 0x orders are supplied, exchanges DAI, USDC, USDT, TUSD, and mUSD via mStable).
 
 * You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
 * Please note that you must approve RariFundManager to burn of the necessary amount of RFT. You also must input at least enough ETH to cover the protocol fees.
 * Parameters:
     * `inputCurrencyCodes` (string[]): The currency codes of the tokens to be withdrawn and exchanged.
+        * To directly withdraw the output currency without exchange in the same transaction, simply include the output currency code in `inputCurrencyCodes`.
     * `inputAmounts` (uint256[]): The amounts of tokens to be withdrawn and exchanged (including taker fees).
+        * To directly withdraw as much of the output currency without exchange in the same transaction, set the corresponding `inputAmounts` item to the directly withdrawable raw fund balance of that currency.
     * `outputErc20Contract` (address): The ERC20 contract address of the token to be outputted by the exchange. Set to address(0) to output ETH.
-    * `orders` (LibOrder.Order[][]): The limit orders to be filled in ascending order of the price you pay.
-    * `signatures` (bytes[][]): The signatures for the orders.
+    * `orders` (LibOrder.Order[][]): The 0x limit orders to be filled in ascending order of the price you pay.
+        * To exchange one of `inputCurrencyCodes` via mStable or to directly withdraw the output currency in the same transaction, set the corresponding `orders` item to an empty array.
+    * `signatures` (bytes[][]): The signatures for the 0x orders.
+        * To exchange one of `inputCurrencyCodes` via mStable or to directly withdraw the output currency in the same transaction, set the corresponding `signatures` item to an empty array.
     * `makerAssetFillAmounts` (uint256[]): The amounts of the maker assets to buy.
+        * To exchange one of `inputCurrencyCodes` via mStable or to directly withdraw the output currency in the same transaction, set the corresponding `makerAssetFillAmounts` item to 0.
     * `protocolFees` (uint256[]): The protocol fees to pay to 0x in ETH for each order.
-* Return value: Boolean indicating success.
+        * To exchange one of `inputCurrencyCodes` via mStable instead of 0x or to directly withdraw the output currency in the same transaction, set the corresponding `protocolFees` item to 0.
 * Development notes:
     * *We should be able to make this function external and use calldata for all parameters, but [Solidity does not support calldata structs](https://github.com/ethereum/solidity/issues/5479).*
 

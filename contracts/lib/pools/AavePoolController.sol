@@ -8,7 +8,6 @@
  */
 
 pragma solidity ^0.5.7;
-pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
@@ -71,7 +70,7 @@ library AavePoolController {
     /**
      * @dev Approves tokens to Aave without spending gas on every deposit.
      * @param erc20Contract The ERC20 contract address of the token.
-     * @param amount Amount of the specified token to approve to dYdX.
+     * @param amount Amount of the specified token to approve to Aave.
      */
     function approve(address erc20Contract, uint256 amount) external {
         IERC20 token = IERC20(erc20Contract);

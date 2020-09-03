@@ -1,5 +1,4 @@
 const erc20Abi = require('./abi/ERC20.json');
-const cErc20DelegatorAbi = require('./abi/CErc20Delegator.json');
 
 const currencies = require('./fixtures/currencies.json');
 const pools = require('./fixtures/pools.json');
@@ -7,20 +6,6 @@ const pools = require('./fixtures/pools.json');
 const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
-
-async function forceAccrueCompound(currencyCode, account) {
-  var cErc20Contract = new web3.eth.Contract(cErc20DelegatorAbi, pools["Compound"].currencies[currencyCode].cTokenAddress);
-  
-  try {
-    await cErc20Contract.methods.accrueInterest().send({ from: account, nonce: await web3.eth.getTransactionCount(account) });
-  } catch (error) {
-    try {
-      await cErc20Contract.methods.accrueInterest().send({ from: account, nonce: await web3.eth.getTransactionCount(account) });
-    } catch (error) {
-      console.error("Both attempts to force accrue interest on Compound " + currencyCode + " failed. Not trying again!");
-    }
-  }
-}
 
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundManager", accounts => {
@@ -53,7 +38,8 @@ contract("RariFundManager", accounts => {
     let initialInterestFeesGenerated = await fundManagerInstance.getInterestFeesGenerated.call();
 
     // Force accrue interest
-    await forceAccrueCompound(currencyCode, process.env.DEVELOPMENT_ADDRESS);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await web3.eth.sendTransaction({ from: process.env.DEVELOPMENT_ADDRESS, to: process.env.DEVELOPMENT_ADDRESS, value: 0 });
     
     // Check raw interest accrued, interest accrued, and interest fees generated
     let nowRawInterestAccrued = await fundManagerInstance.getRawInterestAccrued.call();
@@ -90,7 +76,8 @@ contract("RariFundManager", accounts => {
     initialInterestFeesGenerated = await fundManagerInstance.getInterestFeesGenerated.call();
 
     // Force accrue interest
-    await forceAccrueCompound(currencyCode, process.env.DEVELOPMENT_ADDRESS);
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    await web3.eth.sendTransaction({ from: process.env.DEVELOPMENT_ADDRESS, to: process.env.DEVELOPMENT_ADDRESS, value: 0 });
 
     // Check raw interest accrued, interest accrued, and interest fees generated
     nowRawInterestAccrued = await fundManagerInstance.getRawInterestAccrued.call();

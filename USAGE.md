@@ -25,8 +25,14 @@ The following document contains instructions on common usage of the smart contra
 
 ## Deposit
 
+*Our SDK, soon to be released, will make programmatic deposits and withdrawals as easy as just one line of code.*
+
 1. User chooses to deposit one of our directly supported tokens (DAI, USDC, USDT, TUSD, BUSD, and sUSD), ETH, or one of the tokens listed by the 0x swap tokens API (see [documentation](https://0x.org/docs/api#get-swapv0tokens) and [endpoint](https://api.0x.org/swap/v0/tokens)) in an amount no greater than the balance of their Ethereum account.
-2. User ensures that their deposit will not cause their account balance to breach the limit (currently *$350 USD*, though this figure will be raised).
+2. User ensures that their deposit will not cause their account balance to breach the limit.
+    * To check an account's balance limit: `uint256 RariFundManager.getAccountBalanceLimit(address account)`
+    * To check the default account balance limit: `uint256 RariFundManager.getDefaultAccountBalanceLimit()`
+    * The default account balance limit is currently **$350 USD**, though this figure will be raised in the near future.
+    * Note that this limit applies only to new deposits: there is no limit on the amount of interest an account can accrue.
 3. User calls `string[] RariFundManager.getAcceptedCurrencies()` to get an array of currency codes currently accepted for direct deposit to the fund.
     * If desired deposit currency is accepted:
         * Generally, user simply approves tokens and deposits them:
@@ -37,18 +43,26 @@ The following document contains instructions on common usage of the smart contra
             2. To get the necessary approval data (a signature from our trusted signer allowing the user to use our ETH for gas), POST the JSON body `{ from, to, encodedFunctionCall, txFee, gasPrice, gas, nonce, relayerAddress, relayHubAddress }` to `https://app.rari.capital/checkSig.php`.
                 * Note that `checkSig.php` may go offline at some point in the future, in which case the user should deposit normally as described above.
             3. User calls `bool RariFundProxy.deposit(string currencyCode, uint256 amount)` via the Gas Station Network (GSN).
-    * If desired deposit currency is not accepted:
-        1. User retrieves data from 0x swap quote API (see [documentation](https://0x.org/docs/api#get-swapv0quote) and [endpoint](https://api.0x.org/swap/v0/quote?sellToken=DAI&buyToken=USDC&sellAmount=1000000000000000000)) where:
-            * `sellToken` is their input currency
-            * `buyToken` is a directly depositable currency to which the input currency will be exchanged
-            * `sellAmount` is the input amount to be sent by the user
-        2. User approves tokens to `RariFundProxy` by calling `approve(address spender, uint256 amount)` on the ERC20 contract of the desired input token where `spender` is `RariFundProxy` (to approve unlimited funds, set `amount` to `uint256(-1)`).
-        3. User calls `bool RariFundProxy.exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string outputCurrencyCode, LibOrder.Order[] orders, bytes[] signatures, uint256 takerAssetFillAmount)` where:
-            * `orders` is the orders array returned by the 0x API
-            * `signatures` in an array of signatures from the orders array returned by the 0x API
-            * `takerAssetFillAmount` is the input amount sent by the user
+    * If desired deposit currency is not accepted, get exchange data from mStable (preferably) and/or 0x:
+        * If desired deposit currency is DAI, USDC, USDT, TUSD, or mUSD, until you fulfill your entire deposit, exchange to any depositable currency among DAI, USDC, USDT, TUSD, or mUSD via mStable and deposit:
+            1. Get exchange data from mStable:
+                * If desired deposit currency is DAI, USDC, USDT, or TUSD, check `(bool, string, uint256, uint256) MassetValidationHelper(0xabcc93c3be238884cc3309c19afd128fafc16911).getMaxSwap(0xe2f2a5c287993345a840db3b0845fbc70f5935a5, address _input, address _output)`. If the first returned value is `true`, you can exchange a maximum input amount of the third returned value.
+                * If desired deposit currency is mUSD, check `(bool, string, uint256 output, uint256 bassetQuantityArg) MassetValidationHelper(0xabcc93c3be238884cc3309c19afd128fafc16911).getRedeemValidity(0xabcc93c3be238884cc3309c19afd128fafc16911, uint256 _mAssetQuantity, address _outputBasset)`. If the first returned value is `true`, you can exchange a maximum input amount of `bassetQuantityArg` (the fourth returned value).
+            2. User calls `bool RariFundProxy.exchangeAndDeposit(string inputCurrencyCode, uint256 inputAmount, string outputCurrencyCode)` to exchange and deposit.
+        * If exchange via mStable is not possible (or you want to exchange the rest of your deposit via 0x if mStable cannot exchange it all), retrieve order data from 0x:
+            1. User retrieves data from 0x swap quote API (see [documentation](https://0x.org/docs/api#get-swapv0quote) and [endpoint](https://api.0x.org/swap/v0/quote?sellToken=DAI&buyToken=USDC&sellAmount=1000000000000000000)) where:
+                * `sellToken` is their input currency
+                * `buyToken` is a directly depositable currency to which the desired deposit currency will be exchanged
+                * `sellAmount` is the input amount to be sent by the user
+            2. User approves tokens to `RariFundProxy` by calling `approve(address spender, uint256 amount)` on the ERC20 contract of the desired input token where `spender` is `RariFundProxy` (to approve unlimited funds, set `amount` to `uint256(-1)`).
+            3. User calls `bool RariFundProxy.exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string outputCurrencyCode, LibOrder.Order[] orders, bytes[] signatures, uint256 takerAssetFillAmount)` where:
+                * `orders` is the orders array returned by the 0x API
+                * `signatures` in an array of signatures from the orders array returned by the 0x API
+                * `takerAssetFillAmount` is the input amount sent by the user
 
 ## Withdraw
+
+*Our SDK, soon to be released, will make programmatic deposits and withdrawals as easy as just one line of code.*
 
 1. User ensures that their account possesses enough USD (represented internally by RFT) to make their withdrawal.
 2. User approves RFT to `RariFundManager` by calling `bool RariFundToken.approve(address spender, uint256 amount)` where `spender` is `RariFundManager` (to approve unlimited RFT, set `amount` to `uint256(-1)`).
@@ -57,29 +71,33 @@ The following document contains instructions on common usage of the smart contra
     * If returned balance < withdrawal amount:
         1. Until the whole withdrawal output amount (including the directly withdrawable balance returned above) is filled, get exchange data for each supported input currency (DAI, USDC, USDT, TUSD, BUSD, sUSD, and mUSD):
             1. User calls `uint256 RariFundManager.getRawFundBalance(string currencyCode)` to get the raw balance of this input currency in the fund (that can be directly withdrawn from the fund and exchanged to the desired output currency).
-            2. Retrieve order data from 0x:
-                * If the raw fund balance of this input currency is enough to cover the remaining withdrawal amount, user retrieves data from the 0x swap quote API (see [documentation](https://0x.org/docs/api#get-swapv0quote) and [endpoint](https://api.0x.org/swap/v0/quote?sellToken=DAI&buyToken=USDC&buyAmount=1000000)) where:
-                * `sellToken` is the input currency to be directly withdrawn from the fund
-                * `buyToken` is the output currency to be sent to the user
-                * `buyAmount` is the amount of output currency to be sent to the user in this exchange only
-                * If the raw fund balance of this input currency is not enough to cover the remaining withdrawal amount, user retrieves data from the 0x swap quote API (see [documentation](https://0x.org/docs/api#get-swapv0quote) and [endpoint](https://api.0x.org/swap/v0/quote?sellToken=DAI&buyToken=USDC&buyAmount=1000000)) where:
-                * `sellToken` is the input currency to be directly withdrawn from the fund
-                * `buyToken` is the output currency to be sent to the user
-                * `sellAmount` is the raw fund balance of this input currency
+            2. Get exchange data from mStable (preferably) and/or 0x:
+                * If output currency is DAI, USDC, USDT, TUSD, or mUSD, get exchange data via mStable:
+                    * If input currency is DAI, USDC, USDT, or TUSD, check `(bool, string, uint256, uint256) MassetValidationHelper(0xabcc93c3be238884cc3309c19afd128fafc16911).getMaxSwap(0xe2f2a5c287993345a840db3b0845fbc70f5935a5, address _input, address _output)`. If the first returned value is `true`, you can exchange a maximum input amount of the third returned value.
+                    * If input currency is mUSD, check `(bool, string, uint256 output, uint256 bassetQuantityArg) MassetValidationHelper(0xabcc93c3be238884cc3309c19afd128fafc16911).getRedeemValidity(0xabcc93c3be238884cc3309c19afd128fafc16911, uint256 _mAssetQuantity, address _outputBasset)`. If the first returned value is `true`, you can exchange a maximum input amount of `bassetQuantityArg` (the fourth returned value).
+                * If exchange via mStable is not possible (or you want to exchange the rest of the raw fund balance of the input currency via 0x if mStable cannot exchange it all), retrieve order data from 0x:
+                    * If the raw fund balance of this input currency is enough to cover the remaining withdrawal amount, user retrieves data from the 0x swap quote API (see [documentation](https://0x.org/docs/api#get-swapv0quote) and [endpoint](https://api.0x.org/swap/v0/quote?sellToken=DAI&buyToken=USDC&buyAmount=1000000)) where:
+                        * `sellToken` is the input currency to be directly withdrawn from the fund
+                        * `buyToken` is the output currency to be sent to the user
+                        * `buyAmount` is the amount of output currency to be sent to the user in this exchange only
+                    * If the raw fund balance of this input currency is not enough to cover the remaining withdrawal amount, user retrieves data from the 0x swap quote API (see [documentation](https://0x.org/docs/api#get-swapv0quote) and [endpoint](https://api.0x.org/swap/v0/quote?sellToken=DAI&buyToken=USDC&buyAmount=1000000)) where:
+                        * `sellToken` is the input currency to be directly withdrawn from the fund
+                        * `buyToken` is the output currency to be sent to the user
+                        * `sellAmount` is the raw fund balance of this input currency
         2. User calls `bool RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)` where:
             * `inputCurrencyCodes` is an array of input currency codes
-                * **To directly withdraw the output currency in the same transaction, set last array item to the output currency code.**
+                * To directly withdraw the output currency without exchange in the same transaction, simply include the output currency code in `inputCurrencyCodes`.
             * `inputAmounts` is an array of input currency amounts
-                * **To directly withdraw the output currency in the same transaction, set last array item to the directly withdrawable raw fund balance.**
+                * To directly withdraw as much of the output currency without exchange in the same transaction, set the corresponding `inputAmounts` item to the directly withdrawable raw fund balance of that currency.
             * `outputErc20Contract` is the ERC20 token contract address of the output currency to be sent to the user
             * `orders` is an array of orders arrays returned by the 0x API
-                * **To directly withdraw the output currency in the same transaction, set last array item to an empty array.**
+                * To exchange one of `inputCurrencyCodes` via mStable or to directly withdraw the output currency in the same transaction, set the corresponding `orders` item to an empty array.
             * `signatures` is an array of arrays of signatures from the orders array returned by the 0x API
-                * **To directly withdraw the output currency in the same transaction, set last array item to an empty array.**
+                * To exchange one of `inputCurrencyCodes` via mStable or to directly withdraw the output currency in the same transaction, set the corresponding `signatures` item to an empty array.
             * `makerAssetFillAmounts` is an array of output currency amounts to be sent to the user
-                * **To directly withdraw the output currency in the same transaction, set last array item to 0.**
+                * To exchange one of `inputCurrencyCodes` via mStable or to directly withdraw the output currency in the same transaction, set the corresponding `makerAssetFillAmounts` item to 0.
             * `protocolFees` is an array of protocol fee amounts in ETH wei to be sent to 0x
-                * **To directly withdraw the output currency in the same transaction, set last array item to 0.**
+                * To exchange one of `inputCurrencyCodes` via mStable instead of 0x or to directly withdraw the output currency in the same transaction, set the corresponding `protocolFees` item to 0.
 
 ## Rari Fund Token (RFT)
 

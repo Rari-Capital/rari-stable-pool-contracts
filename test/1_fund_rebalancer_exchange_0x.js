@@ -20,7 +20,7 @@ contract("RariFundController, RariFundManager", accounts => {
     // For each currency combination, calculate amount to deposit to the fund
     var deposits = {};
 
-    for (const currencyCombination of exchanges.currencyCombinations) {
+    for (const currencyCombination of exchanges.zeroExCurrencyCombinations) {
       var amountBN = web3.utils.toBN(10 ** (currencies[currencyCombination[0]].decimals - 1));
       deposits[currencyCombination[0]] ? deposits[currencyCombination[0]].iadd(amountBN) : deposits[currencyCombination[0]] = amountBN;
     }
@@ -34,7 +34,7 @@ contract("RariFundController, RariFundManager", accounts => {
       await fundManagerInstance.deposit(currencyCode, deposits[currencyCode], { from: process.env.DEVELOPMENT_ADDRESS });
     }
 
-    for (const currencyCombination of exchanges.currencyCombinations) {
+    for (const currencyCombination of exchanges.zeroExCurrencyCombinations) {
       // Check source and destination wallet balances
       var inputErc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCombination[0]].tokenAddress);
       var outputErc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCombination[1]].tokenAddress);
