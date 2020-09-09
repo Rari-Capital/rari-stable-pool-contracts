@@ -106,6 +106,8 @@ The following document contains instructions on common usage of the smart contra
     * Accruing interest increases your USD fund balance, meaning the USD value of your RFT increases. However, your RFT balance itself does not increase: instead, the exchange rate of RFT increases at the same rate as every user's balance as they accrue interest.
     * When you transfer your RFT, you transfer your holdings supplied to the fund (deposits + interest).
 * **Transfer RFT:** `bool RariFundToken.transfer(address recipient, uint256 amount)` transfers `amount` RFT to `recipient` (as with other ERC20 tokens like RFT).
+* **Approve RFT:** `bool RariFundToken.approve(address spender, uint256 amount)` approves `spender` to spend the specified `amount` of RFT on behalf of `msg.sender`.
+    * As with the `approve` functions of other ERC20 contracts, beware that changing an allowance with this method brings the risk that someone may use both the old and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
 * See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RFT.
 * **Get RFT exchange rate:** Divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RFT in USD (scaled by 1e18).
 

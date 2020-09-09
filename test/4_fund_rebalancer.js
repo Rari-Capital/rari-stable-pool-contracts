@@ -8,17 +8,20 @@ const exchanges = require('./fixtures/exchanges.json');
 const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
+const RariFundPriceConsumer = artifacts.require("RariFundPriceConsumer");
 
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundManager", accounts => {
   it("should set accepted currencies", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
-    
+    let fundPriceConsumerInstance = await RariFundPriceConsumer.deployed();
+
     // Use DAI as an example and set amount to deposit/withdraw
     var currencyCode = "DAI";
     var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
-    var amountUsdBN = 18 >= currencies[currencyCode].decimals ? amountBN.mul(web3.utils.toBN(10 ** (18 - currencies[currencyCode].decimals))) : amountBN.div(web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 18)));
+    var currencyPricesInUsd = await fundPriceConsumerInstance.getCurrencyPricesInUsd.call();
+    var amountUsdBN = amountBN.mul(currencyPricesInUsd[Object.keys(currencies).indexOf(currencyCode)]).div(web3.utils.toBN(10 ** currencies[currencyCode].decimals));
 
     // Set DAI as unaccepted currency
     await fundManagerInstance.setAcceptedCurrencies([currencyCode], [false], { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
@@ -150,8 +153,8 @@ contract("RariFundController, RariFundManager", accounts => {
       if (maxSwap && maxSwap["0"] && tokenAmountBN.lte(web3.utils.toBN(maxSwap["2"]))) {
         // RariFundController.approveToMUsd and RariFundController.mintMUsd
         // TODO: Ideally, we add actually call rari-fund-rebalancer
-        await fundControllerInstance.approveToMUsd(currencies[currencyCode].tokenAddress, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-        await fundControllerInstance.mintMUsd(currencies[currencyCode].tokenAddress, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+        await fundControllerInstance.approveToMUsd(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+        await fundControllerInstance.mintMUsd(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
       } else {
         // Deposit mUSD for redeeming if we didn't just mint
         await mUsdErc20Contract.methods.approve(RariFundManager.address, mUsdAmountBN.toString()).send({ from: process.env.DEVELOPMENT_ADDRESS });
@@ -170,7 +173,7 @@ contract("RariFundController, RariFundManager", accounts => {
       if (redeemValidity && redeemValidity["0"]) {
         // RariFundController.redeemMUsd
         // TODO: Ideally, we add actually call rari-fund-rebalancer
-        await fundControllerInstance.redeemMUsd(currencies[currencyCode].tokenAddress, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+        await fundControllerInstance.redeemMUsd(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
 
         // Check new mUSD and token balance
         var postRedeemMUsdBalanceBN = web3.utils.toBN(await mUsdErc20Contract.methods.balanceOf(RariFundController.address).call());

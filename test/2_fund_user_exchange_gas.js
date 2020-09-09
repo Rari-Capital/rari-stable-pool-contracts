@@ -165,7 +165,7 @@ contract("RariFundProxy", accounts => {
     await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1));
     
     // Fill 0x orders
-    var result = await fundProxyInstance.withdrawAndExchange(inputCurrencyCodes, inputAmountBNs, "0x0000000000000000000000000000000000000000", allOrders, allSignatures, makerAssetFillAmountBNs, protocolFeeBNs, { value: totalProtocolFeeBN });
+    var result = await fundProxyInstance.withdrawAndExchange(inputCurrencyCodes, inputAmountBNs, "0x0000000000000000000000000000000000000000", allOrders, allSignatures, makerAssetFillAmountBNs, protocolFeeBNs, { value: totalProtocolFeeBN, gas: 8e6 });
     console.log("Gas usage of RariFundProxy.withdrawAndExchange:", result.receipt.gasUsed);
     assert.isAtMost(result.receipt.gasUsed, 8000000); // Assert it uses no more than 8 million gas
   });

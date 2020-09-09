@@ -46,14 +46,7 @@ contract("RariFundController, RariFundManager", accounts => {
       
       // Calculate min marginal output amount to exchange funds
       // TODO: Ideally, we add actually call rari-fund-rebalancer
-      try {
-        var price = await zeroExExchange.getPrice(currencyCombination[0], currencyCombination[1]);
-      } catch (error) {
-        var price = 1;
-      }
-
-      var minMarginalOutputAmount = 1 / parseFloat(price) * 0.1; // Would set to 0.9 or something higher but we don't get always good prices for small amounts
-      var minMarginalOutputAmountBN = web3.utils.toBN(Math.trunc(minMarginalOutputAmount * (10 ** currencies[currencyCombination[1]].decimals)));
+      var minMarginalOutputAmountBN = web3.utils.toBN(10 ** (currencies[currencyCombination[1]].decimals - 1)); // At least 0.1 outputs per input; would set to 0.9 or something higher but we don't get always good prices for small amounts
 
       // Get estimated filled input amount from 0x swap API
       // TODO: Ideally, we add actually call rari-fund-rebalancer

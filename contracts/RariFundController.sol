@@ -7,7 +7,7 @@
  * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
  */
 
-pragma solidity ^0.5.7;
+pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -19,6 +19,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
 
 import "./RariFundManager.sol";
+import "./RariFundPriceConsumer.sol";
 import "./lib/pools/DydxPoolController.sol";
 import "./lib/pools/CompoundPoolController.sol";
 import "./lib/pools/AavePoolController.sol";
@@ -42,6 +43,11 @@ contract RariFundController is Ownable {
     string public constant VERSION = "2.0.0";
 
     /**
+     * @dev Boolean to be checked on `upgradeFundController`.
+     */
+    bool public constant IS_RARI_FUND_CONTROLLER = true;
+
+    /**
      * @dev Boolean that, if true, disables the primary functionality of this RariFundController.
      */
     bool private _fundDisabled;
@@ -62,24 +68,39 @@ contract RariFundController is Ownable {
     address private _rariFundRebalancerAddress;
 
     /**
+     * @dev Contract of the RariFundPriceConsumer.
+     */
+    RariFundPriceConsumer private _rariFundPriceConsumer;
+
+    /**
      * @dev Array of currencies supported by the fund.
      */
     string[] private _supportedCurrencies;
 
     /**
-     * @dev Maps decimal precisions (number of digits after the decimal point) to supported currency codes.
+     * @dev Maps `_supportedCurrencies` items to their indexes.
+     */
+    mapping(string => uint8) private _currencyIndexes;
+
+    /**
+     * @dev Maps supported currency codes to their decimal precisions (number of digits after the decimal point).
      */
     mapping(string => uint256) private _currencyDecimals;
 
     /**
-     * @dev Maps ERC20 token contract addresses to supported currency codes.
+     * @dev Maps supported currency codes to ERC20 token contract addresses.
      */
     mapping(string => address) private _erc20Contracts;
 
     /**
-     * @dev Maps arrays of supported pools to currency codes.
+     * @dev Enum for liqudity pools supported by Rari.
      */
-    mapping(string => uint8[]) private _poolsByCurrency;
+    enum LiquidityPool { dYdX, Compound, Aave, mStable }
+
+    /**
+     * @dev Maps currency codes to arrays of supported pools.
+     */
+    mapping(string => LiquidityPool[]) private _poolsByCurrency;
 
     /**
      * @dev Constructor that sets supported ERC20 token contract addresses and supported pools for each supported token.
@@ -87,24 +108,24 @@ contract RariFundController is Ownable {
     constructor () public {
         // Add supported currencies
         addSupportedCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F, 18);
-        addPoolToCurrency("DAI", 0); // dYdX
-        addPoolToCurrency("DAI", 1); // Compound
-        addPoolToCurrency("DAI", 2); // Aave
+        addPoolToCurrency("DAI", LiquidityPool.dYdX);
+        addPoolToCurrency("DAI", LiquidityPool.Compound);
+        addPoolToCurrency("DAI", LiquidityPool.Aave);
         addSupportedCurrency("USDC", 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 6);
-        addPoolToCurrency("USDC", 0); // dYdX
-        addPoolToCurrency("USDC", 1); // Compound
-        addPoolToCurrency("USDC", 2); // Aave
+        addPoolToCurrency("USDC", LiquidityPool.dYdX);
+        addPoolToCurrency("USDC", LiquidityPool.Compound);
+        addPoolToCurrency("USDC", LiquidityPool.Aave);
         addSupportedCurrency("USDT", 0xdAC17F958D2ee523a2206206994597C13D831ec7, 6);
-        addPoolToCurrency("USDT", 1); // Compound
-        addPoolToCurrency("USDT", 2); // Aave
+        addPoolToCurrency("USDT", LiquidityPool.Compound);
+        addPoolToCurrency("USDT", LiquidityPool.Aave);
         addSupportedCurrency("TUSD", 0x0000000000085d4780B73119b644AE5ecd22b376, 18);
-        addPoolToCurrency("TUSD", 2); // Aave
+        addPoolToCurrency("TUSD", LiquidityPool.Aave);
         addSupportedCurrency("BUSD", 0x4Fabb145d64652a948d72533023f6E7A623C7C53, 18);
-        addPoolToCurrency("BUSD", 2); // Aave
+        addPoolToCurrency("BUSD", LiquidityPool.Aave);
         addSupportedCurrency("sUSD", 0x57Ab1ec28D129707052df4dF418D58a2D46d5f51, 18);
-        addPoolToCurrency("sUSD", 2); // Aave
+        addPoolToCurrency("sUSD", LiquidityPool.Aave);
         addSupportedCurrency("mUSD", 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5, 18);
-        addPoolToCurrency("mUSD", 3); // mStable
+        addPoolToCurrency("mUSD", LiquidityPool.mStable);
     }
 
     /**
@@ -114,6 +135,7 @@ contract RariFundController is Ownable {
      * @param decimals The decimal precision (number of digits after the decimal point) of the token.
      */
     function addSupportedCurrency(string memory currencyCode, address erc20Contract, uint256 decimals) internal {
+        _currencyIndexes[currencyCode] = uint8(_supportedCurrencies.length);
         _supportedCurrencies.push(currencyCode);
         _erc20Contracts[currencyCode] = erc20Contract;
         _currencyDecimals[currencyCode] = decimals;
@@ -124,20 +146,24 @@ contract RariFundController is Ownable {
      * @param currencyCode The currency code of the token.
      * @param pool Pool ID to be supported.
      */
-    function addPoolToCurrency(string memory currencyCode, uint8 pool) internal {
+    function addPoolToCurrency(string memory currencyCode, LiquidityPool pool) internal {
         _poolsByCurrency[currencyCode].push(pool);
     }
 
     /**
-     * @dev Payable fallback function called by 0x exchange to refund unspent protocol fee.
+     * @dev Payable fallback function called by 0x Exchange v3 to refund unspent protocol fee.
      */
-    function () external payable { }
+    function () external payable {
+        require(msg.sender == 0x61935CbDd02287B511119DDb11Aeb42F1593b7Ef, "msg.sender is not 0x Exchange v3.");
+    }
 
     /**
      * @dev Sets or upgrades RariFundController by withdrawing all tokens from all pools and forwarding them from the old to the new.
      * @param newContract The address of the new RariFundController contract.
      */
     function upgradeFundController(address payable newContract) external onlyOwner {
+        require(RariFundController(newContract).IS_RARI_FUND_CONTROLLER(), "New contract does not have IS_RARI_FUND_CONTROLLER set to true.");
+
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
 
@@ -157,6 +183,7 @@ contract RariFundController is Ownable {
      * @param erc20Contract The ERC20 contract address of the token to forward.
      */
     function upgradeFundController(address payable newContract, address erc20Contract) external onlyOwner returns (bool) {
+        require(RariFundController(newContract).IS_RARI_FUND_CONTROLLER(), "New contract does not have IS_RARI_FUND_CONTROLLER set to true.");
         IERC20 token = IERC20(erc20Contract);
         uint256 balance = token.balanceOf(address(this));
         if (balance <= 0) return false;
@@ -217,6 +244,20 @@ contract RariFundController is Ownable {
     }
 
     /**
+     * @dev Emitted when the RariFundPriceConsumer of the RariFundManager is set.
+     */
+    event RariFundPriceConsumerSet(address newContract);
+
+    /**
+     * @dev Sets or upgrades the RariFundPriceConsumer of the RariFundManager.
+     * @param newContract The address of the new RariFundPriceConsumer contract.
+     */
+    function setFundPriceConsumer(address newContract) external onlyOwner {
+        _rariFundPriceConsumer = RariFundPriceConsumer(newContract);
+        emit RariFundPriceConsumerSet(newContract);
+    }
+
+    /**
      * @dev Emitted when the primary functionality of this RariFundController contract has been disabled.
      */
     event FundDisabled();
@@ -266,13 +307,13 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.
      */
-    function _getPoolBalance(uint8 pool, string memory currencyCode) public returns (uint256) {
+    function _getPoolBalance(LiquidityPool pool, string memory currencyCode) public returns (uint256) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == 0) return DydxPoolController.getBalance(erc20Contract);
-        else if (pool == 1) return CompoundPoolController.getBalance(erc20Contract);
-        else if (pool == 2) return AavePoolController.getBalance(erc20Contract);
-        else if (pool == 3 && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) return MStablePoolController.getBalance();
+        if (pool == LiquidityPool.dYdX) return DydxPoolController.getBalance(erc20Contract);
+        else if (pool == LiquidityPool.Compound) return CompoundPoolController.getBalance(erc20Contract);
+        else if (pool == LiquidityPool.Aave) return AavePoolController.getBalance(erc20Contract);
+        else if (pool == LiquidityPool.mStable && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) return MStablePoolController.getBalance();
         else revert("Invalid pool index.");
     }
 
@@ -282,25 +323,25 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.
      */
-    function getPoolBalance(uint8 pool, string memory currencyCode) public returns (uint256) {
-        if (!_poolsWithFunds[currencyCode][pool]) return 0;
+    function getPoolBalance(LiquidityPool pool, string memory currencyCode) public returns (uint256) {
+        if (!_poolsWithFunds[currencyCode][uint8(pool)]) return 0;
         return _getPoolBalance(pool, currencyCode);
     }
 
     /**
-     * @notice Returns the fund controller's contract balance of each currency and balance of each pool of each currency (checking `_poolsWithFunds` first to save gas).
+     * @notice Returns the fund controller's contract balance of each currency, balance of each pool of each currency (checking `_poolsWithFunds` first to save gas), and price of each currency.
      * @dev Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getPoolBalance`) potentially modifies the state.
-     * @return An array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, and an array of arrays of corresponding balances at each pool index for each currency code.
+     * @return An array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, an array of arrays of corresponding balances at each pool index for each currency code, and an array of prices in USD (scaled by 1e18) for each currency code.
      */
-    function getAllBalances() external returns (string[] memory, uint256[] memory, uint256[][] memory, uint256[][] memory) {
+    function getAllBalances() external returns (string[] memory, uint256[] memory, LiquidityPool[][] memory, uint256[][] memory, uint256[] memory) {
         uint256[] memory contractBalances = new uint256[](_supportedCurrencies.length);
-        uint256[][] memory pools = new uint256[][](_supportedCurrencies.length);
+        LiquidityPool[][] memory pools = new LiquidityPool[][](_supportedCurrencies.length);
         uint256[][] memory poolBalances = new uint256[][](_supportedCurrencies.length);
 
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
             contractBalances[i] = IERC20(_erc20Contracts[currencyCode]).balanceOf(address(this));
-            pools[i] = new uint256[](_poolsByCurrency[currencyCode].length);
+            pools[i] = new LiquidityPool[](_poolsByCurrency[currencyCode].length);
             poolBalances[i] = new uint256[](_poolsByCurrency[currencyCode].length);
 
             for (uint256 j = 0; j < _poolsByCurrency[currencyCode].length; j++) {
@@ -309,7 +350,7 @@ contract RariFundController is Ownable {
             }
         }
 
-        return (_supportedCurrencies, contractBalances, pools, poolBalances);
+        return (_supportedCurrencies, contractBalances, pools, poolBalances, _rariFundPriceConsumer.getCurrencyPricesInUsd());
     }
 
     /**
@@ -319,14 +360,13 @@ contract RariFundController is Ownable {
      * @param currencyCode The currency code of the token to be approved.
      * @param amount The amount of tokens to be approved.
      */
-    function approveToPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
+    function approveToPool(LiquidityPool pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == 0) DydxPoolController.approve(erc20Contract, amount);
-        else if (pool == 1) CompoundPoolController.approve(erc20Contract, amount);
-        else if (pool == 2) AavePoolController.approve(erc20Contract, amount);
-        else if (pool == 2) AavePoolController.approve(erc20Contract, amount);
-        else if (pool == 3 && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) return MStablePoolController.approve(amount);
+        if (pool == LiquidityPool.dYdX) DydxPoolController.approve(erc20Contract, amount);
+        else if (pool == LiquidityPool.Compound) CompoundPoolController.approve(erc20Contract, amount);
+        else if (pool == LiquidityPool.Aave) AavePoolController.approve(erc20Contract, amount);
+        else if (pool == LiquidityPool.mStable && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) return MStablePoolController.approve(amount);
         else revert("Invalid pool index.");
     }
 
@@ -340,8 +380,8 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool to check.
      * @param currencyCode The currency code of the token to check.
      */
-    function hasCurrencyInPool(uint8 pool, string memory currencyCode) public view returns (bool) {
-        return _poolsWithFunds[currencyCode][pool];
+    function hasCurrencyInPool(LiquidityPool pool, string memory currencyCode) public view returns (bool) {
+        return _poolsWithFunds[currencyCode][uint8(pool)];
     }
 
     /**
@@ -358,20 +398,32 @@ contract RariFundController is Ownable {
     }
 
     /**
+     * @dev Enum for pool allocation action types supported by Rari.
+     */
+    enum PoolAllocationAction { Deposit, Withdraw, WithdrawAll }
+
+    /**
+     * @dev Emitted when a deposit or withdrawal is made.
+     * Note that `amount` is not set for `WithdrawAll` actions.
+     */
+    event PoolAllocation(PoolAllocationAction indexed action, LiquidityPool indexed pool, string indexed currencyCode, uint256 amount);
+
+    /**
      * @dev Deposits funds to the specified pool.
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
      */
-    function depositToPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
+    function depositToPool(LiquidityPool pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == 0) DydxPoolController.deposit(erc20Contract, amount);
-        else if (pool == 1) CompoundPoolController.deposit(erc20Contract, amount);
-        else if (pool == 2) AavePoolController.deposit(erc20Contract, amount, _aaveReferralCode);
-        else if (pool == 3 && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStablePoolController.deposit(amount);
+        if (pool == LiquidityPool.dYdX) DydxPoolController.deposit(erc20Contract, amount);
+        else if (pool == LiquidityPool.Compound) CompoundPoolController.deposit(erc20Contract, amount);
+        else if (pool == LiquidityPool.Aave) AavePoolController.deposit(erc20Contract, amount, _aaveReferralCode);
+        else if (pool == LiquidityPool.mStable && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStablePoolController.deposit(amount);
         else revert("Invalid pool index.");
-        _poolsWithFunds[currencyCode][pool] = true;
+        _poolsWithFunds[currencyCode][uint8(pool)] = true;
+        emit PoolAllocation(PoolAllocationAction.Deposit, pool, currencyCode, amount);
     }
 
     /**
@@ -380,14 +432,15 @@ contract RariFundController is Ownable {
      * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
      */
-    function _withdrawFromPool(uint8 pool, string memory currencyCode, uint256 amount) internal {
+    function _withdrawFromPool(LiquidityPool pool, string memory currencyCode, uint256 amount) internal {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == 0) DydxPoolController.withdraw(erc20Contract, amount);
-        else if (pool == 1) CompoundPoolController.withdraw(erc20Contract, amount);
-        else if (pool == 2) AavePoolController.withdraw(erc20Contract, amount);
-        else if (pool == 3 && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStablePoolController.withdraw(amount);
+        if (pool == LiquidityPool.dYdX) DydxPoolController.withdraw(erc20Contract, amount);
+        else if (pool == LiquidityPool.Compound) CompoundPoolController.withdraw(erc20Contract, amount);
+        else if (pool == LiquidityPool.Aave) AavePoolController.withdraw(erc20Contract, amount);
+        else if (pool == LiquidityPool.mStable && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStablePoolController.withdraw(amount);
         else revert("Invalid pool index.");
+        emit PoolAllocation(PoolAllocationAction.Withdraw, pool, currencyCode, amount);
     }
 
     /**
@@ -396,9 +449,9 @@ contract RariFundController is Ownable {
      * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
      */
-    function withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
+    function withdrawFromPool(LiquidityPool pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
         _withdrawFromPool(pool, currencyCode, amount);
-        _poolsWithFunds[currencyCode][pool] = _getPoolBalance(pool, currencyCode) > 0;
+        _poolsWithFunds[currencyCode][uint8(pool)] = _getPoolBalance(pool, currencyCode) > 0;
     }
 
     /**
@@ -411,9 +464,9 @@ contract RariFundController is Ownable {
      * @param amount The amount of tokens to be withdrawn.
      * @param all Boolean indicating if all funds are being withdrawn.
      */
-    function withdrawFromPoolOptimized(uint8 pool, string calldata currencyCode, uint256 amount, bool all) external fundEnabled onlyManager {
-        all && (pool == 0 || pool == 3) ? _withdrawAllFromPool(pool, currencyCode) : _withdrawFromPool(pool, currencyCode, amount);
-        if (all) _poolsWithFunds[currencyCode][pool] = false;
+    function withdrawFromPoolOptimized(LiquidityPool pool, string calldata currencyCode, uint256 amount, bool all) external fundEnabled onlyManager {
+        all && (pool == LiquidityPool.dYdX || pool == LiquidityPool.mStable) ? _withdrawAllFromPool(pool, currencyCode) : _withdrawFromPool(pool, currencyCode, amount);
+        if (all) _poolsWithFunds[currencyCode][uint8(pool)] = false;
     }
 
     /**
@@ -421,15 +474,16 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
      */
-    function _withdrawAllFromPool(uint8 pool, string memory currencyCode) internal {
+    function _withdrawAllFromPool(LiquidityPool pool, string memory currencyCode) internal {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == 0) DydxPoolController.withdrawAll(erc20Contract);
-        else if (pool == 1) require(CompoundPoolController.withdrawAll(erc20Contract), "No Compound balance to withdraw from.");
-        else if (pool == 2) require(AavePoolController.withdrawAll(erc20Contract), "No Aave balance to withdraw from.");
-        else if (pool == 3 && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) require(MStablePoolController.withdrawAll(), "No mStable balance to withdraw from.");
+        if (pool == LiquidityPool.dYdX) DydxPoolController.withdrawAll(erc20Contract);
+        else if (pool == LiquidityPool.Compound) require(CompoundPoolController.withdrawAll(erc20Contract), "No Compound balance to withdraw from.");
+        else if (pool == LiquidityPool.Aave) require(AavePoolController.withdrawAll(erc20Contract), "No Aave balance to withdraw from.");
+        else if (pool == LiquidityPool.mStable && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) require(MStablePoolController.withdrawAll(), "No mStable balance to withdraw from.");
         else revert("Invalid pool index.");
-        _poolsWithFunds[currencyCode][pool] = false;
+        _poolsWithFunds[currencyCode][uint8(pool)] = false;
+        emit PoolAllocation(PoolAllocationAction.WithdrawAll, pool, currencyCode, 0);
     }
 
     /**
@@ -437,7 +491,7 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
     */
-    function withdrawAllFromPool(uint8 pool, string calldata currencyCode) external fundEnabled onlyRebalancer {
+    function withdrawAllFromPool(LiquidityPool pool, string calldata currencyCode) external fundEnabled onlyRebalancer {
         _withdrawAllFromPool(pool, currencyCode);
     }
 
@@ -446,7 +500,7 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
      */
-    function withdrawAllFromPoolOnUpgrade(uint8 pool, string calldata currencyCode) external onlyOwner {
+    function withdrawAllFromPoolOnUpgrade(LiquidityPool pool, string calldata currencyCode) external onlyOwner {
         _withdrawAllFromPool(pool, currencyCode);
     }
 
@@ -461,9 +515,15 @@ contract RariFundController is Ownable {
     }
 
     /**
-     * @dev Emitted when currencies are exchanged via 0x.
+     * @dev Enum for currency exchanges supported by Rari.
      */
-    event CurrencyExchange(string inputCurrencyCode, string outputCurrencyCode);
+    enum CurrencyExchange { ZeroEx, mStable }
+
+    /**
+     * @dev Emitted when currencies are exchanged via 0x or mStable.
+     * Note that `inputAmountUsd` and `outputAmountUsd` are not present when the input currency is not a supported stablecoin (i.e., when exchanging COMP via 0x).
+     */
+    event CurrencyTrade(string indexed inputCurrencyCode, string indexed outputCurrencyCode, uint256 inputAmount, uint256 inputAmountUsd, uint256 outputAmount, uint256 outputAmountUsd, CurrencyExchange indexed exchange);
 
     /**
      * @dev Daily limit on 0x exchange order slippage (scaled by 1e18).
@@ -515,36 +575,63 @@ contract RariFundController is Ownable {
             if (orders[i].takerFee > 0) require(orders[i].takerFeeAssetData.length == 0, "Taker fees are not supported."); // TODO: Support orders with taker fees (need to include taker fees in loss calculation)
         }
 
+        // Get prices and raw fund balance before exchange
+        uint256[] memory pricesInUsd;
+        uint256 rawFundBalanceBeforeExchange;
+
+        if (inputErc20Contract != address(0)) {
+            pricesInUsd = _rariFundPriceConsumer.getCurrencyPricesInUsd();
+            rawFundBalanceBeforeExchange = _rariFundManager.getRawFundBalance(pricesInUsd);
+        }
+
         // Market sell
         uint256[2] memory filledAmounts = ZeroExExchangeController.marketSellOrdersFillOrKill(orders, signatures, takerAssetFillAmount, msg.value);
 
         // Check 24-hour loss rate limit (if inputting a supported stablecoin)
+        uint256 inputFilledAmountUsd = 0;
+        uint256 outputFilledAmountUsd = 0;
+
         if (inputErc20Contract != address(0)) {
-            uint256 inputDecimals = _currencyDecimals[inputCurrencyCode];
-            uint256 inputFilledAmountUsd = 18 >= inputDecimals ? filledAmounts[0].mul(10 ** (uint256(18).sub(inputDecimals))) : filledAmounts[0].div(10 ** (inputDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
-            uint256 outputDecimals = _currencyDecimals[outputCurrencyCode];
-            uint256 outputFilledAmountUsd = 18 >= outputDecimals ? filledAmounts[1].mul(10 ** (uint256(18).sub(outputDecimals))) : filledAmounts[1].div(10 ** (outputDecimals.sub(18))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
-            int256 lossUsd = int256(inputFilledAmountUsd).sub(int256(outputFilledAmountUsd));
-            int256 lossRate = lossUsd.mul(1e18).div(int256(_rariFundManager.getRawFundBalance()));
-            require(checkLossRateLimit(lossRate), "This exchange would violate the 24-hour loss rate limit.");
-            _lossRateHistory.push(CurrencyExchangeLoss(block.timestamp, lossRate));
+            inputFilledAmountUsd = toUsd(inputCurrencyCode, filledAmounts[0], pricesInUsd);
+            outputFilledAmountUsd = toUsd(inputCurrencyCode, filledAmounts[1], pricesInUsd);
+            handleExchangeLoss(inputFilledAmountUsd, outputFilledAmountUsd, rawFundBalanceBeforeExchange);
         }
 
         // Emit event
-        emit CurrencyExchange(inputCurrencyCode, outputCurrencyCode);
+        emit CurrencyTrade(inputCurrencyCode, outputCurrencyCode, filledAmounts[0], inputFilledAmountUsd, filledAmounts[1], outputFilledAmountUsd, CurrencyExchange.ZeroEx);
 
         // Refund unused ETH
         uint256 ethBalance = address(this).balance;
-        if (ethBalance > 0) msg.sender.transfer(ethBalance);
+        
+        if (ethBalance > 0) {
+            (bool success, ) = msg.sender.call.value(ethBalance)("");
+            require(success, "Failed to transfer ETH to msg.sender after exchange.");
+        }
     }
 
     /**
-     * @dev Checks the 24-hour loss rate limit.
-     * This function was separated from the `marketSell0xOrdersFillOrKill` function to avoid the stack getting too deep.
-     * @param lossRate The loss rate of the next hypothetical currency exchange (scaled by 1e18).
-     * @return Boolean indicating success.
+     * @dev Converts an amount to USD (scaled by 1e18).
+     * @param currencyCode The currency code to convert.
+     * @param amount The amount to convert.
+     * @param pricesInUsd An array of prices in USD for all supported currencies (in order).
+     * @return The equivalent USD amount (scaled by 1e18).
      */
-    function checkLossRateLimit(int256 lossRate) internal view returns (bool) {
+    function toUsd(string memory currencyCode, uint256 amount, uint256[] memory pricesInUsd) internal view returns (uint256) {
+        return amount.mul(pricesInUsd[_currencyIndexes[currencyCode]]).div(10 ** _currencyDecimals[currencyCode]);
+    }
+
+    /**
+     * @dev Checks the validity of a trade given the 24-hour exchange loss rate limit; if breached, reverts; otherwise, logs the loss rate of the trade.
+     * Note that while miners may be able to manipulate `block.timestamp` by up to 900 seconds, this small margin of error is acceptable.
+     * @param inputAmountUsd The amount sold in USD (scaled by 1e18).
+     * @param outputAmountUsd The amount bought in USD (scaled by 1e18).
+     */
+    function handleExchangeLoss(uint256 inputAmountUsd, uint256 outputAmountUsd, uint256 rawFundBalanceBeforeExchange) internal {
+        // Calculate loss rate
+        int256 lossUsd = int256(inputAmountUsd).sub(int256(outputAmountUsd));
+        int256 lossRate = lossUsd.mul(1e18).div(int256(rawFundBalanceBeforeExchange));
+
+        // Check if sum of loss rates over the last 24 hours + this trade's loss rate > the limit
         int256 lossRateLastDay = 0;
 
         for (uint256 i = _lossRateHistory.length; i > 0; i--) {
@@ -552,44 +639,109 @@ contract RariFundController is Ownable {
             lossRateLastDay = lossRateLastDay.add(_lossRateHistory[i - 1].lossRate);
         }
 
-        return lossRateLastDay.add(lossRate) <= int256(_dailyLossRateLimit);
+        require(lossRateLastDay.add(lossRate) <= int256(_dailyLossRateLimit), "This exchange would violate the 24-hour loss rate limit.");
+
+        // Log loss rate in history
+        _lossRateHistory.push(CurrencyExchangeLoss(block.timestamp, lossRate));
     }
 
     /**
      * @dev Approves tokens to the mUSD token contract without spending gas on every deposit.
      * Note that this function is vulnerable to the allowance double-spend exploit, as with the `approve` functions of the ERC20 contracts themselves. If you are concerned and setting exact allowances, make sure to set allowance to 0 on the client side before setting an allowance greater than 0.
-     * @param erc20Contract The ERC20 contract address of the token.
+     * @param currencyCode The currency code of the token to be approved.
      * @param amount Amount of the specified token to approve to the mUSD token contract.
      */
-    function approveToMUsd(address erc20Contract, uint256 amount) external fundEnabled onlyRebalancer {
+    function approveToMUsd(string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
+        address erc20Contract = _erc20Contracts[currencyCode];
+        require(erc20Contract != address(0), "Invalid currency code.");
         MStableExchangeController.approve(erc20Contract, amount);
     }
 
     /**
      * @dev Mints mUSD tokens in exchange for the specified amount of the specified token.
-     * @param erc20Contract The ERC20 contract address of the token to be exchanged for mUSD.
+     * @param inputCurrencyCode The currency code of the token to be exchanged for mUSD.
      * @param inputAmount The amount of input tokens to be exchanged for mUSD.
      */
-    function mintMUsd(address erc20Contract, uint256 inputAmount) external fundEnabled onlyRebalancer {
-        MStableExchangeController.mint(erc20Contract, inputAmount);
+    function mintMUsd(string calldata inputCurrencyCode, uint256 inputAmount) external fundEnabled onlyRebalancer {
+        // Input validation
+        address erc20Contract = _erc20Contracts[inputCurrencyCode];
+        require(erc20Contract != address(0), "Invalid input currency code.");
+
+        // Get prices and raw fund balance before exchange
+        uint256[] memory pricesInUsd;
+        uint256 rawFundBalanceBeforeExchange;
+        pricesInUsd = _rariFundPriceConsumer.getCurrencyPricesInUsd();
+        rawFundBalanceBeforeExchange = _rariFundManager.getRawFundBalance(pricesInUsd);
+
+        // Mint mUSD from input currency
+        uint256 mUsdMinted = MStableExchangeController.mint(erc20Contract, inputAmount);
+
+        // Check 24-hour loss rate limit
+        uint256 inputFilledAmountUsd = toUsd(inputCurrencyCode, inputAmount, pricesInUsd);
+        uint256 outputFilledAmountUsd = toUsd("mUSD", mUsdMinted, pricesInUsd);
+        handleExchangeLoss(inputFilledAmountUsd, outputFilledAmountUsd, rawFundBalanceBeforeExchange);
+
+        // Emit event
+        emit CurrencyTrade(inputCurrencyCode, "mUSD", inputAmount, inputFilledAmountUsd, mUsdMinted, outputFilledAmountUsd, CurrencyExchange.mStable);
     }
 
     /**
      * @dev Redeems mUSD tokens in exchange for the specified amount of the specified token.
-     * @param erc20Contract The ERC20 contract address of the token to be exchanged from mUSD.
+     * @param outputCurrencyCode The currency code of the token to be exchanged from mUSD.
      * @param outputAmount The amount of output tokens to be exchanged from mUSD.
      */
-    function redeemMUsd(address erc20Contract, uint256 outputAmount) external fundEnabled onlyRebalancer {
-        MStableExchangeController.redeem(erc20Contract, outputAmount);
+    function redeemMUsd(string calldata outputCurrencyCode, uint256 outputAmount) external fundEnabled onlyRebalancer {
+        // Input validation
+        address erc20Contract = _erc20Contracts[outputCurrencyCode];
+        require(erc20Contract != address(0), "Invalid output currency code.");
+
+        // Get prices and raw fund balance before exchange
+        uint256[] memory pricesInUsd;
+        uint256 rawFundBalanceBeforeExchange;
+        pricesInUsd = _rariFundPriceConsumer.getCurrencyPricesInUsd();
+        rawFundBalanceBeforeExchange = _rariFundManager.getRawFundBalance(pricesInUsd);
+
+        // Redeem mUSD for output currency
+        uint256 mUsdRedeemed = MStableExchangeController.redeem(erc20Contract, outputAmount);
+        uint256 realOutputAmount = outputAmount.sub(outputAmount.mul(MStableExchangeController.getSwapFee()).div(1e18));
+
+        // Check 24-hour loss rate limit
+        uint256 inputFilledAmountUsd = toUsd("mUSD", mUsdRedeemed, pricesInUsd);
+        uint256 outputFilledAmountUsd = toUsd(outputCurrencyCode, realOutputAmount, pricesInUsd);
+        handleExchangeLoss(inputFilledAmountUsd, outputFilledAmountUsd, rawFundBalanceBeforeExchange);
+
+        // Emit event
+        emit CurrencyTrade("mUSD", outputCurrencyCode, mUsdRedeemed, inputFilledAmountUsd, realOutputAmount, outputFilledAmountUsd, CurrencyExchange.mStable);
     }
 
     /**
      * @dev Swaps tokens via mStable mUSD.
-     * @param inputErc20Contract The ERC20 contract address of the token to be exchanged for mUSD.
-     * @param outputErc20Contract The ERC20 contract address of the token to be exchanged from mUSD.
+     * @param inputCurrencyCode The currency code of the token to be exchanged for mUSD.
+     * @param outputCurrencyCode The currency code of the token to be exchanged from mUSD.
      * @param inputAmount The amount of input tokens to be exchanged for mUSD.
      */
-    function swapMStable(address inputErc20Contract, address outputErc20Contract, uint256 inputAmount) external fundEnabled onlyRebalancer {
-        MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount);
+    function swapMStable(string calldata inputCurrencyCode, string calldata outputCurrencyCode, uint256 inputAmount) external fundEnabled onlyRebalancer {
+        // Input validation
+        address inputErc20Contract = _erc20Contracts[inputCurrencyCode];
+        address outputErc20Contract = _erc20Contracts[outputCurrencyCode];
+        require(outputErc20Contract != address(0), "Invalid input currency code.");
+        require(inputErc20Contract != address(0), "Invalid output currency code.");
+
+        // Get prices and raw fund balance before exchange
+        uint256[] memory pricesInUsd;
+        uint256 rawFundBalanceBeforeExchange;
+        pricesInUsd = _rariFundPriceConsumer.getCurrencyPricesInUsd();
+        rawFundBalanceBeforeExchange = _rariFundManager.getRawFundBalance(pricesInUsd);
+
+        // Swap stablecoins via mUSD
+        uint256 outputAmount = MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount);
+
+        // Check 24-hour loss rate limit
+        uint256 inputFilledAmountUsd = toUsd(inputCurrencyCode, inputAmount, pricesInUsd);
+        uint256 outputFilledAmountUsd = toUsd(outputCurrencyCode, outputAmount, pricesInUsd);
+        handleExchangeLoss(inputFilledAmountUsd, outputFilledAmountUsd, rawFundBalanceBeforeExchange);
+
+        // Emit event
+        emit CurrencyTrade(inputCurrencyCode, outputCurrencyCode, inputAmount, inputFilledAmountUsd, outputAmount, outputFilledAmountUsd, CurrencyExchange.mStable);
     }
 }

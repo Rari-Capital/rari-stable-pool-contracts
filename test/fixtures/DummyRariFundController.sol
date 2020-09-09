@@ -7,7 +7,7 @@
  * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
  */
 
-pragma solidity ^0.5.7;
+pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
 /**
@@ -16,6 +16,11 @@ pragma experimental ABIEncoderV2;
  * @dev This contract is a dummy upgrade of RariFundController for testing.
  */
 contract DummyRariFundController {
+    /**
+     * @dev Boolean to be checked on `upgradeFundController`.
+     */
+    bool public constant IS_RARI_FUND_CONTROLLER = true;
+
     /**
      * @dev Returns the balances of all currencies supported dYdX.
      */

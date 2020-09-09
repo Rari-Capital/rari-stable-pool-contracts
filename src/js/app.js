@@ -34,6 +34,8 @@ App = {
   usdPricesLastUpdated: 0,
   checkAccountBalanceLimit: true,
   acceptedCurrencies: [],
+  supportedCurrencies: ["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"],
+  chainlinkPricesInUsd: {},
 
   init: function() {
     if (location.hash === "#account") {
@@ -100,8 +102,10 @@ App = {
 
     for (var i = 0; i < allBalances["0"].length; i++) {
       var currencyCode = allBalances["0"][i];
+      var priceInUsdBN = Web3.utils.toBN(allBalances["4"][i]);
+      App.chainlinkPricesInUsd[currencyCode] = priceInUsdBN;
       var contractBalanceBN = Web3.utils.toBN(allBalances["1"][i]);
-      var contractBalanceUsdBN = contractBalanceBN.mul(Web3.utils.toBN(10 ** (18 - App.tokens[currencyCode].decimals))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+      var contractBalanceUsdBN = contractBalanceBN.mul(priceInUsdBN).div(Web3.utils.toBN(10 ** App.tokens[currencyCode].decimals)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
       factors.push([contractBalanceUsdBN, Web3.utils.toBN(0)]);
       totalBalanceUsdBN = totalBalanceUsdBN.add(contractBalanceUsdBN);
       App.allocationsByCurrency[currencyCode] = contractBalanceUsdBN;
@@ -111,7 +115,7 @@ App = {
       for (var j = 0; j < pools.length; j++) {
         var pool = pools[j];
         var poolBalanceBN = Web3.utils.toBN(poolBalances[j]);
-        var poolBalanceUsdBN = poolBalanceBN.mul(Web3.utils.toBN(10 ** (18 - App.tokens[currencyCode].decimals))); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+        var poolBalanceUsdBN = poolBalanceBN.mul(priceInUsdBN).div(Web3.utils.toBN(10 ** App.tokens[currencyCode].decimals)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
         var apyBN = pool == 3 ? mstableApyBNs[currencyCode] : (
           pool == 2 ? aaveApyBNs[currencyCode] : (
             pool == 1 ? compoundApyBNs[currencyCode][0].add(compoundApyBNs[currencyCode][1]) : dydxApyBNs[currencyCode]
@@ -981,13 +985,13 @@ App = {
    * Initialize FundManager and FundToken contracts.
    */
   initContracts: function() {
-    $.getJSON('abi/RariFundController.json?v=1597907607', function(data) {
+    $.getJSON('abi/RariFundController.json?v=1599624605', function(data) {
       App.contracts.RariFundController = new App.web3.eth.Contract(data, "0x2440929628eB33f29656Ed386805C2353b43EaB6");
       App.getCurrentApy();
       setInterval(App.getCurrentApy, 5 * 60 * 1000);
     });
 
-    $.getJSON('abi/RariFundManager.json?v=1597907607', function(data) {
+    $.getJSON('abi/RariFundManager.json?v=1599624605', function(data) {
       App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0x93F1A63007f37596C72c4CC90DE29706454ab033");
       App.getFundBalance();
       setInterval(App.getFundBalance, 5 * 60 * 1000);
@@ -1013,8 +1017,8 @@ App = {
       }
     });
 
-    $.getJSON('abi/RariFundProxy.json?v=1597907607', function(data) {
-      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0x1751C2B26133fdC2f7886b47e660F9F27C005a00");
+    $.getJSON('abi/RariFundProxy.json?v=1599624605', function(data) {
+      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0xeB185c51d5640Cf5555972EC8DdD9B1b901F5730");
     });
 
     $.getJSON('abi/ERC20.json', function(data) {
@@ -1211,13 +1215,15 @@ App = {
     $('#depositButton, #confirmDepositButton').prop("disabled", true).html('<div class="loading-icon"><div></div><div></div><div></div></div>');
 
     await (async function() {
+      // Check if currency is directly depositable
       await App.getDirectlyDepositableCurrencies();
+      if (!App.acceptedCurrencies) return toastr["error"]("No accepted currencies found.", "Deposit failed");
 
       if (App.acceptedCurrencies.indexOf(token) >= 0) {
         if ($('#modal-confirm-deposit').is(':visible')) $('#modal-confirm-deposit').modal('hide');
 
         var myFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call());
-        if (App.checkAccountBalanceLimit && myFundBalanceBN.add(amountBN.mul(Web3.utils.toBN(10).pow(Web3.utils.toBN(18 - App.tokens[token].decimals)))).gt(Web3.utils.toBN(350e18))) return toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $350 USD.", "Deposit failed");
+        if (App.checkAccountBalanceLimit && myFundBalanceBN.add(amountBN.mul(App.chainlinkPricesInUsd[token]).div(Web3.utils.toBN(10).pow(Web3.utils.toBN(App.tokens[token].decimals)))).gt(Web3.utils.toBN(350e18))) return toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $350 USD.", "Deposit failed");
         console.log('Deposit ' + amount + ' ' + token + ' directly');
         var depositContract = amount >= 250 && myFundBalanceBN.isZero() ? App.contractsGsn.RariFundProxy : App.contracts.RariFundManager;
 
@@ -1239,11 +1245,9 @@ App = {
         // Mixpanel
         if (typeof mixpanel !== 'undefined') mixpanel.track("Direct deposit", { transactionHash: receipt.transactionHash, currencyCode: token, amount });
       } else {
-        // Get accepted currency
-        if (!App.acceptedCurrencies) return toastr["error"]("No accepted currencies found.", "Deposit failed");
-
         // Get mStable output currency if possible
         var mStableOutputCurrency = null;
+        var mStableOutputAmountAfterFeeBN = null;
 
         if (["DAI", "USDC", "USDT", "TUSD", "mUSD"].indexOf(token) >= 0) {
           for (var acceptedCurrency of App.acceptedCurrencies) if (["DAI", "USDC", "USDT", "TUSD", "mUSD"].indexOf(acceptedCurrency) >= 0) {
@@ -1256,6 +1260,7 @@ App = {
               }
 
               if (!redeemValidity || !redeemValidity["0"]) continue;
+              mStableOutputAmountAfterFeeBN = Web3.utils.toBN(redeemValidity["2"]);
             } else {
               try {
                 var maxSwap = await App.contracts.MassetValidationHelper.methods.getMaxSwap("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", App.tokens[token].address, App.tokens[acceptedCurrency].address).call();
@@ -1265,6 +1270,7 @@ App = {
               }
 
               if (!maxSwap || !maxSwap["0"] || amountBN.gt(Web3.utils.toBN(maxSwap["2"]))) continue;
+              mStableOutputAmountAfterFeeBN = Web3.utils.toBN(maxSwap["3"]);
             }
 
             mStableOutputCurrency = acceptedCurrency;
@@ -1274,16 +1280,42 @@ App = {
 
         // Ideally mStable, but 0x works too
         if (mStableOutputCurrency !== null) {
-          // Get mUSD redemption fee if necessary
-          if (mStableOutputCurrency !== "mUSD") {
-            var swapFee = parseFloat((await App.getMStableSwapFeeBN()).toString()) / 1e18;
+          // Check account balance limit
+          if (App.checkAccountBalanceLimit) {
+            var myFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call());
+            var outputAmountUsdBN = mStableOutputAmountAfterFeeBN.mul(App.chainlinkPricesInUsd[mStableOutputCurrency]).div(Web3.utils.toBN(10).pow(Web3.utils.toBN(App.tokens[mStableOutputCurrency].decimals)));
+            if (myFundBalanceBN.add(outputAmountUsdBN).gt(Web3.utils.toBN(350e18))) return toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $350 USD.", "Deposit failed");
+          }
 
-            if (!$('#modal-confirm-deposit').is(':visible')) {
-              $('#DepositZeroExGasPriceWarning').attr("style", "display: none !important;");
-              $('#DepositExchangeFee').hide();
-              $('#DepositSlippage').html('<strong>Slippage:</strong> <kbd class="text-' + (swapFee == 0 ? "info" : "warning") + '">' + Math.abs(swapFee * 100).toFixed(3) + '%</kbd>');
-              return $('#modal-confirm-deposit').modal('show');
+          // Warn user of slippage
+          var epochNow = (new Date()).getTime();
+
+          if (!App.zeroExPrices[token] || epochNow > App.zeroExPrices[token]._lastUpdated + (60 * 1000)) {
+            try {
+              App.zeroExPrices[token] = await App.get0xPrices(token);
+              App.zeroExPrices[token]._lastUpdated = epochNow;
+            } catch (err) {
+              if (["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"].indexOf(token) < 0) return toastr["error"]("Failed to get prices from 0x swap API: " + err, "Deposit failed");
             }
+          }
+
+          var amountOutputted = parseFloat(mStableOutputAmountAfterFeeBN.toString()) / 10 ** App.tokens[mStableOutputCurrency].decimals;
+          if (App.zeroExPrices[token] && App.zeroExPrices[token][mStableOutputCurrency]) var slippage = 1 - (amountOutputted / amount * App.zeroExPrices[token][mStableOutputCurrency]);
+          else if (["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"].indexOf(token) >= 0) var slippage = 1 - (amountOutputted / amount);
+          else return toastr["error"]("Price not found on 0x swap API", "Deposit failed");
+
+          var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
+
+          if (!$('#modal-confirm-deposit').is(':visible')) {
+            $('#DepositZeroExGasPriceWarning').attr("style", "display: none !important;");
+            $('#DepositExchangeFee').hide();
+            $('#DepositSlippage').html(slippage >= 0 ? '<strong>Slippage:</strong> <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "warning") + '">' + slippageAbsPercentageString + '%</kbd>' : '<strong>Bonus:</strong> <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>');
+            return $('#modal-confirm-deposit').modal('show');
+          }
+
+          if ($('#DepositSlippage kbd').text() !== slippageAbsPercentageString + "%") {
+            $('#DepositSlippage').html(slippage >= 0 ? '<strong>Slippage:</strong> <kbd class="text-' + (slippageAbsPercentageString === "0.000" ? "info" : "warning") + '">' + slippageAbsPercentageString + '%</kbd>' : '<strong>Bonus:</strong> <kbd class="text-success">' + slippageAbsPercentageString + '%</kbd>');
+            return toastr["warning"]("Exchange slippage changed. If you are satisfied with the new slippage, please click the \"Confirm\" button again to process your deposit.", "Please try again");
           }
 
           // Approve tokens to RariFundProxy
@@ -1315,7 +1347,8 @@ App = {
           // Check account balance limit
           if (App.checkAccountBalanceLimit) {
             var myFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call());
-            if (myFundBalanceBN.add(makerAssetFilledAmountBN.mul(Web3.utils.toBN(10).pow(Web3.utils.toBN(18 - App.tokens[acceptedCurrency].decimals)))).gt(Web3.utils.toBN(350e18))) return toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $350 USD.", "Deposit failed");
+            var makerAssetFilledAmountUsdBN = makerAssetFilledAmountBN.mul(App.chainlinkPricesInUsd[acceptedCurrency]).div(Web3.utils.toBN(10).pow(Web3.utils.toBN(App.tokens[acceptedCurrency].decimals)));
+            if (myFundBalanceBN.add(makerAssetFilledAmountUsdBN).gt(Web3.utils.toBN(350e18))) return toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $350 USD.", "Deposit failed");
           }
 
           var amountOutputted = makerAssetFilledAmountBN.toString() / (10 ** App.tokens[acceptedCurrency].decimals);
@@ -1520,25 +1553,25 @@ App = {
         if (["DAI", "USDC", "USDT", "TUSD", "mUSD"].indexOf(token) >= 0) for (var i = 0; i < inputCandidates.length; i++) {
           if (["DAI", "USDC", "USDT", "TUSD", "mUSD"].indexOf(inputCandidates[i].currencyCode) < 0) continue;
 
-          // Get redemption fee and calculate input amount needed to fill output amount
-          if (mStableSwapFeeBN === null) mStableSwapFeeBN = await App.getMStableSwapFeeBN();
+          // Get swap fee and calculate input amount needed to fill output amount
+          if (token !== "mUSD" && mStableSwapFeeBN === null) mStableSwapFeeBN = await App.getMStableSwapFeeBN();
           var inputAmountBN = amountBN.sub(amountWithdrawnBN).mul(Web3.utils.toBN(1e18)).div(Web3.utils.toBN(1e18).sub(mStableSwapFeeBN)).mul(Web3.utils.toBN(10 ** App.tokens[inputCandidates[i].currencyCode].decimals)).div(Web3.utils.toBN(10 ** App.tokens[token].decimals));
           var outputAmountBeforeFeesBN = inputAmountBN.mul(Web3.utils.toBN(10 ** App.tokens[token].decimals)).div(Web3.utils.toBN(10 ** App.tokens[inputCandidates[i].currencyCode].decimals));
-          var outputAmountBN = outputAmountBeforeFeesBN.sub(outputAmountBeforeFeesBN.mul(mStableSwapFeeBN).div(Web3.utils.toBN(1e18)));
+          var outputAmountBN = token === "mUSD" ? outputAmountBeforeFeesBN : outputAmountBeforeFeesBN.sub(outputAmountBeforeFeesBN.mul(mStableSwapFeeBN).div(Web3.utils.toBN(1e18)));
           
           var tries = 0;
           while (outputAmountBN.lt(amountBN.sub(amountWithdrawnBN))) {
             if (tries >= 1000) return toastr["error"]("Failed to get increment order input amount to achieve desired output amount", "Withdrawal failed");
             inputAmountBN.iadd(Web3.utils.toBN(1)); // Make sure we have enough input amount to receive amountBN.sub(amountWithdrawnBN)
             outputAmountBeforeFeesBN = inputAmountBN.mul(Web3.utils.toBN(10 ** App.tokens[token].decimals)).div(Web3.utils.toBN(10 ** App.tokens[inputCandidates[i].currencyCode].decimals));
-            outputAmountBN = outputAmountBeforeFeesBN.sub(outputAmountBeforeFeesBN.mul(mStableSwapFeeBN).div(Web3.utils.toBN(1e18)));
+            outputAmountBN = token === "mUSD" ? outputAmountBeforeFeesBN : outputAmountBeforeFeesBN.sub(outputAmountBeforeFeesBN.mul(mStableSwapFeeBN).div(Web3.utils.toBN(1e18)));
             tries++;
           }
 
           if (inputAmountBN.gt(inputCandidates[i].rawFundBalanceBN)) {
             inputAmountBN = inputCandidates[i].rawFundBalanceBN;
             outputAmountBeforeFeesBN = inputAmountBN.mul(Web3.utils.toBN(10 ** App.tokens[token].decimals)).div(Web3.utils.toBN(10 ** App.tokens[inputCandidates[i].currencyCode].decimals));
-            outputAmountBN = outputAmountBeforeFeesBN.sub(outputAmountBeforeFeesBN.mul(mStableSwapFeeBN).div(Web3.utils.toBN(1e18)));
+            outputAmountBN = token === "mUSD" ? outputAmountBeforeFeesBN : outputAmountBeforeFeesBN.sub(outputAmountBeforeFeesBN.mul(mStableSwapFeeBN).div(Web3.utils.toBN(1e18)));
           }
 
           // Check max mint/redeem/swap

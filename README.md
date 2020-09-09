@@ -16,7 +16,7 @@ Anyone can use our dApp for our live stablecoin fund right now at [app.rari.capi
 
 ## Installation (for development and deployment)
 
-We had success using Truffle on Node.js `v10.21.0` with the latest version of NPM, but others had success with Node.js `v12.18.2`.
+We, as well as others, had success using Truffle on Node.js `v12.18.2` with the latest version of NPM.
 
 To install the latest version of Truffle: `npm install -g truffle`
 

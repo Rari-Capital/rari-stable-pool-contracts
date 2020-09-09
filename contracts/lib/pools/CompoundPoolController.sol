@@ -7,7 +7,7 @@
  * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
  */
 
-pragma solidity ^0.5.7;
+pragma solidity 0.5.17;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -46,9 +46,7 @@ library CompoundPoolController {
      * @param erc20Contract The ERC20 contract address of the token.
      */
     function getBalance(address erc20Contract) external returns (uint256) {
-        CErc20 cErc20 = CErc20(getCErc20Contract(erc20Contract));
-        cErc20.accrueInterest();
-        return cErc20.balanceOf(address(this)).mul(cErc20.exchangeRateStored()).div(1e18);
+        return CErc20(getCErc20Contract(erc20Contract)).balanceOfUnderlying(address(this));
     }
 
     /**

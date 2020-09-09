@@ -5,7 +5,7 @@
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details
  */
 
-pragma solidity ^0.5.7;
+pragma solidity 0.5.17;
 
 /**
  * @title Aave ERC20 AToken

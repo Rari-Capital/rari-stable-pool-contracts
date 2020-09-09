@@ -7,7 +7,7 @@
  * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
  */
 
-pragma solidity ^0.5.7;
+pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -47,17 +47,17 @@ contract RariFundProxy is Ownable, GSNRecipient {
     string[] private _supportedCurrencies;
 
     /**
-     * @dev Maps ERC20 token contract addresses to supported currency codes.
+     * @dev Maps supported currency codes to ERC20 token contract addresses.
      */
     mapping(string => address) private _erc20Contracts;
 
     /**
-     * @dev Maps decimal precisions (number of digits after the decimal point) to ERC20 token contract addresses.
+     * @dev Maps ERC20 token contract addresses to decimal precisions (number of digits after the decimal point).
      */
     mapping(address => uint256) private _erc20Decimals;
 
     /**
-     * @dev Maps booleans indicating support for mStable mUSD minting and redeeming to ERC20 token contract addresses.
+     * @dev Maps ERC20 token contract addresses to booleans indicating support for mStable mUSD minting and redeeming.
      */
     mapping(address => bool) private _mStableExchangeErc20Contracts;
 
@@ -156,9 +156,11 @@ contract RariFundProxy is Ownable, GSNRecipient {
     }
 
     /**
-     * @dev Payable fallback function called by 0x exchange to refund unspent protocol fee.
+     * @dev Payable fallback function called by 0x Exchange v3 to refund unspent protocol fee or by WETH to withdraw ETH.
      */
-    function () external payable { }
+    function () external payable {
+        require(msg.sender == 0x61935CbDd02287B511119DDb11Aeb42F1593b7Ef || msg.sender == WETH_CONTRACT, "msg.sender is not 0x Exchange v3 or WETH.");
+    }
 
     /**
      * @dev Emitted when funds have been exchanged before being deposited via RariFundManager.
@@ -227,7 +229,11 @@ contract RariFundProxy is Ownable, GSNRecipient {
 
         // Refund unused ETH
         uint256 ethBalance = address(this).balance;
-        if (ethBalance > 0) msg.sender.transfer(ethBalance);
+        
+        if (ethBalance > 0) {
+            (bool success, ) = msg.sender.call.value(ethBalance)("");
+            require(success, "Failed to transfer ETH to msg.sender after exchange.");
+        }
     }
 
     /**
@@ -288,20 +294,21 @@ contract RariFundProxy is Ownable, GSNRecipient {
         require(_rariFundManagerContract != address(0), "Fund manager contract not set. This may be due to an upgrade of this proxy contract.");
         require(inputCurrencyCodes.length == inputAmounts.length && inputCurrencyCodes.length == orders.length && inputCurrencyCodes.length == signatures.length && inputCurrencyCodes.length == makerAssetFillAmounts.length && inputCurrencyCodes.length == protocolFees.length, "Array parameters are not all the same length.");
 
+        // Withdraw input tokens
+        _rariFundManager.withdrawFrom(msg.sender, inputCurrencyCodes, inputAmounts);
+
         // For each input currency
         for (uint256 i = 0; i < inputCurrencyCodes.length; i++) {
+            // Input validation
             address inputErc20Contract = _erc20Contracts[inputCurrencyCodes[i]];
             require(inputErc20Contract != address(0), "One or more input currency codes are invalid.");
             require(inputAmounts[i] > 0, "All input amounts must be greater than 0.");
-
-            // Withdraw input tokens
-            _rariFundManager.withdrawFrom(msg.sender, inputCurrencyCodes[i], inputAmounts[i]);
 
             if (inputErc20Contract != outputErc20Contract) {
                 // Exchange input tokens for output tokens
                 if (orders[i].length > 0 && signatures[i].length > 0 && makerAssetFillAmounts[i] > 0) {
                     // Input validation
-                    require(orders.length == signatures.length, "Length of all orders and signatures arrays must be equal.");
+                    require(orders.length == signatures.length, "Lengths of all orders and signatures arrays must be equal.");
 
                     // Exchange tokens and emit event
                     uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], protocolFees[i]);
@@ -341,7 +348,11 @@ contract RariFundProxy is Ownable, GSNRecipient {
 
         // Forward all ETH
         uint256 ethBalance = address(this).balance;
-        if (ethBalance > 0) msg.sender.transfer(ethBalance);
+        
+        if (ethBalance > 0) {
+            (bool success, ) = msg.sender.call.value(ethBalance)("");
+            require(success, "Failed to transfer ETH to msg.sender after exchange.");
+        }
     }
 
     /**

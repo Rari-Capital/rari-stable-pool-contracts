@@ -6,6 +6,7 @@ const pools = require('./fixtures/pools.json');
 const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
+const RariFundPriceConsumer = artifacts.require("RariFundPriceConsumer");
 
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundManager", accounts => {
@@ -13,7 +14,8 @@ contract("RariFundManager", accounts => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
     let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
-    
+    let fundPriceConsumerInstance = await RariFundPriceConsumer.deployed();
+
     // Approve and deposit tokens to the fund (using DAI as an example)
     var currencyCode = "DAI";
     var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
@@ -98,7 +100,8 @@ contract("RariFundManager", accounts => {
     // Check that we claimed fees
     let myNewBalanceBN = web3.utils.toBN(await erc20Contract.methods.balanceOf(process.env.DEVELOPMENT_ADDRESS_SECONDARY).call());
     var expectedGainUsdBN = nowInterestFeesGenerated.sub(initialInterestFeesGenerated);
-    var expectedGainBN = 18 >= currencies[currencyCode].decimals ? expectedGainUsdBN.div(web3.utils.toBN(10 ** (18 - currencies[currencyCode].decimals))) : expectedGainUsdBN.mul(web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 18)));
+    var currencyPricesInUsd = await fundPriceConsumerInstance.getCurrencyPricesInUsd.call();
+    var expectedGainBN = expectedGainUsdBN.mul(web3.utils.toBN(10 ** currencies[currencyCode].decimals)).div(currencyPricesInUsd[Object.keys(currencies).indexOf(currencyCode)]);
     assert(myNewBalanceBN.gte(myOldBalanceBN.add(expectedGainBN)));
 
     // Reset master beneficiary of interest fees

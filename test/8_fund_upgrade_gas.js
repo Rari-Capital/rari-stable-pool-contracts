@@ -12,22 +12,27 @@ contract("RariFundController", accounts => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
 
-    // Check balance before deposits
-    let oldRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
-
-    // Tally up USD deposited
-    var totalUsdBN = web3.utils.toBN(0);
+    // Tally up fund deposits by currency so we deposit 0.1 tokens of each currency to each pool
+    var depositsByCurrency = {};
     
-    // For each currency of each pool, deposit to fund and deposit to pool
     for (const poolName of Object.keys(pools)) for (const currencyCode of Object.keys(pools[poolName].currencies)) {
-      // Approve and deposit tokens to the fund
       var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
-      totalUsdBN.iadd(web3.utils.toBN(1e17));
-      var erc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
-      await erc20Contract.methods.approve(RariFundManager.address, amountBN.toString()).send({ from: process.env.DEVELOPMENT_ADDRESS });
-      await fundManagerInstance.deposit(currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      depositsByCurrency[currencyCode] ? depositsByCurrency[currencyCode].iadd(amountBN) : depositsByCurrency[currencyCode] = amountBN;
+    }
 
-      // Approve and deposit to pool
+    // For each currency, check initial raw currency balance and approve and deposit to fund
+    var rawFundBalancesByCurrency = {};
+
+    for (const currencyCode of Object.keys(depositsByCurrency)) {
+      rawFundBalancesByCurrency[currencyCode] = await fundManagerInstance.methods["getRawFundBalance(string)"].call(currencyCode);
+      var erc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
+      await erc20Contract.methods.approve(RariFundManager.address, depositsByCurrency[currencyCode].toString()).send({ from: process.env.DEVELOPMENT_ADDRESS });
+      await fundManagerInstance.deposit(currencyCode, depositsByCurrency[currencyCode], { from: process.env.DEVELOPMENT_ADDRESS });
+    }
+
+    // Approve and deposit 0.1 tokens of each currency to each pool
+    for (const poolName of Object.keys(pools)) for (const currencyCode of Object.keys(pools[poolName].currencies)) {
+      var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
       await fundControllerInstance.approveToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
       await fundControllerInstance.depositToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
     }
@@ -44,10 +49,17 @@ contract("RariFundController", accounts => {
     var result = await fundControllerInstance.upgradeFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
     console.log("Gas usage of RariFundController.upgradeFundController:", result.receipt.gasUsed);
     assert.isAtMost(result.receipt.gasUsed, 5000000); // Assert it uses no more than 5 million gas
-    var result = await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
-    // Check balance of FundManager
-    let newRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
-    assert(newRawFundBalance.gte(oldRawFundBalance.add(totalUsdBN.mul(web3.utils.toBN(9999)).div(web3.utils.toBN(10000)))));
+    // Set FundController of FundManager to the new FundController
+    await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
+
+    // Check token balances of new FundController
+    for (const currencyCode of Object.keys(depositsByCurrency)) {
+      var erc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
+      let newRawFundBalance = await fundManagerInstance.methods["getRawFundBalance(string)"].call(currencyCode);
+      assert(newRawFundBalance.gte(rawFundBalancesByCurrency[currencyCode].add(depositsByCurrency[currencyCode].mul(web3.utils.toBN(9999)).div(web3.utils.toBN(10000)))));
+      let newFundControllerContractBalance = web3.utils.toBN(await erc20Contract.methods.balanceOf(newFundControllerInstance.address).call());
+      assert(newFundControllerContractBalance.gte(rawFundBalancesByCurrency[currencyCode].add(depositsByCurrency[currencyCode].mul(web3.utils.toBN(9999)).div(web3.utils.toBN(10000)))));
+    }
   });
 });

@@ -18,6 +18,7 @@ var MStableExchangeController = artifacts.require("./lib/pools/MStableExchangeCo
 var RariFundController = artifacts.require("./RariFundController.sol");
 var RariFundManager = artifacts.require("./RariFundManager.sol");
 var RariFundToken = artifacts.require("./RariFundToken.sol");
+var RariFundPriceConsumer = artifacts.require("./RariFundPriceConsumer.sol");
 var RariFundProxy = artifacts.require("./RariFundProxy.sol");
 var deployedRariFundTokenAbi = require("./abi/RariFundToken_v1.0.0.json");
 var oldRariFundControllerAbi = require("./abi/RariFundController_v1.1.0.json");
@@ -152,6 +153,15 @@ module.exports = function(deployer, network, accounts) {
       }
       return deployedRariFundToken.methods.setFundManager(RariFundManager.address).send(options);
     }).then(function() {
+      return deployer.deploy(RariFundPriceConsumer);
+    }).then(function() {
+      return RariFundPriceConsumer.deployed();
+    }).then(function(_rariFundPriceConsumer) {
+      rariFundPriceConsumer = _rariFundPriceConsumer;
+      return rariFundController.setFundPriceConsumer(RariFundPriceConsumer.address);
+    }).then(function() {
+      return rariFundManager.setFundPriceConsumer(RariFundPriceConsumer.address);
+    }).then(function() {
       return rariFundController.setDailyLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(0.02e18) : web3.utils.toBN(0.9e18));
     }).then(function() {
       return rariFundManager.setDefaultAccountBalanceLimit(web3.utils.toBN(350e18));
@@ -253,6 +263,15 @@ module.exports = function(deployer, network, accounts) {
       return rariFundManager.setFundToken(RariFundToken.address);
     }).then(function() {
       return rariFundToken.setFundManager(RariFundManager.address);
+    }).then(function() {
+      return deployer.deploy(RariFundPriceConsumer);
+    }).then(function() {
+      return RariFundPriceConsumer.deployed();
+    }).then(function(_rariFundPriceConsumer) {
+      rariFundPriceConsumer = _rariFundPriceConsumer;
+      return rariFundController.setFundPriceConsumer(RariFundPriceConsumer.address);
+    }).then(function() {
+      return rariFundManager.setFundPriceConsumer(RariFundPriceConsumer.address);
     }).then(function() {
       return rariFundController.setDailyLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(0.02e18) : web3.utils.toBN(0.9e18));
     }).then(function() {

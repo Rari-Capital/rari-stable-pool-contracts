@@ -17,6 +17,7 @@ const dummyRariFundControllerBin = fs.readFileSync(__dirname + '/fixtures/DummyR
 const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
+const RariFundPriceConsumer = artifacts.require("RariFundPriceConsumer");
 
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundController, RariFundManager", accounts => {
@@ -52,6 +53,7 @@ contract("RariFundController, RariFundManager", accounts => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
     let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+    let fundPriceConsumerInstance = await RariFundPriceConsumer.deployed();
 
     // Disable the fund (via RariFundController and RariFundManager)
     await fundControllerInstance.disableFund({ from: process.env.DEVELOPMENT_ADDRESS });
@@ -62,7 +64,8 @@ contract("RariFundController, RariFundManager", accounts => {
     // Use DAI as an example and set amount to deposit/withdraw
     var currencyCode = "DAI";
     var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
-    var amountUsdBN = 18 >= currencies[currencyCode].decimals ? amountBN.mul(web3.utils.toBN(10 ** (18 - currencies[currencyCode].decimals))) : amountBN.div(web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 18)));
+    var currencyPricesInUsd = await fundPriceConsumerInstance.getCurrencyPricesInUsd.call();
+    var amountUsdBN = amountBN.mul(currencyPricesInUsd[Object.keys(currencies).indexOf(currencyCode)]).div(web3.utils.toBN(10 ** currencies[currencyCode].decimals));
     
     // Test disabled RariFundManager: make sure we can't deposit or withdraw now (using DAI as an example)
     var erc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
@@ -165,6 +168,7 @@ contract("RariFundManager", accounts => {
     var newFundManagerInstance = await RariFundManager.new({ from: process.env.DEVELOPMENT_ADDRESS });
     await newFundManagerInstance.setFundController(RariFundController.address, { from: process.env.DEVELOPMENT_ADDRESS });
     await newFundManagerInstance.setFundToken(parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? process.env.UPGRADE_FUND_TOKEN : RariFundToken.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    await newFundManagerInstance.setFundPriceConsumer(RariFundPriceConsumer.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Upgrade!
     await newFundManagerInstance.authorizeFundManagerDataSource(fundManagerInstance.address);

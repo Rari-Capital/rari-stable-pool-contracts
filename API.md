@@ -36,6 +36,15 @@ Returns the total amount of interest accrued by `account` (excluding the fees pa
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
+## **Stablecoin Pricing**
+
+### `uint256[] RariFundPriceConsumer.getCurrencyPricesInUsd()`
+
+Returns the prices of all supported stablecoins to which funds can be allocated.
+
+* Use these prices to calculate the value added to a user's USD balance due to a direct deposit and the value subtracted from a user's USD balance due to a direct withdrawal.
+* Return values: An array of prices in USD (scaled by 1e18) corresponding to the following list of currencies: DAI, USDC, USDT, TUSD, BUSD, sUSD, and mUSD.
+
 ## **Deposits**
 
 ### `uint256 RariFundManager.getDefaultAccountBalanceLimit()`
@@ -154,11 +163,11 @@ Withdraws funds from RariFund in exchange for RFT and exchanges to them to the d
 
 ## Rari Fund Token
 
-See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RFT.
+See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RFT. Here are a few of the most common ones:
 
 ### `bool RariFundToken.transfer(address recipient, uint256 amount)`
 
-Transfers `amount` RFT to `recipient` (as with other ERC20 tokens like RFT).
+Transfers the specified `amount` of RFT to `recipient`.
 
 * Parameters:
     * `recipient` (address): The recipient of the .
@@ -167,8 +176,9 @@ Transfers `amount` RFT to `recipient` (as with other ERC20 tokens like RFT).
 
 ### `bool RariFundToken.approve(address spender, uint256 amount)`
 
-Sets `amount` as the allowance of `spender` over the caller's tokens.
+Approve `sender` to spend the specified `amount` of RFT on behalf of `msg.sender`.
 
+* As with the `approve` functions of other ERC20 contracts, beware that changing an allowance with this method brings the risk that someone may use both the old and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
 * Parameters:
     * `spender` (address) - The account to which we are setting an allowance.
     * `amount` (uint256) - The amount of the allowance to be set.
@@ -234,10 +244,10 @@ Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fee
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `RariFundController.getPoolBalance`) potentially modifies the state.*
 
-### `(string[] memory, uint256[] memory, uint256[][] memory, uint256[][] memory) RariFundController.getAllBalances()`
+### `(string[], uint256[], uint256[][], uint256[][], uint256[]) RariFundController.getAllBalances()`
 
-Returns the fund controller's contract balance of each currency and balance of each pool of each currency (checking `_poolsWithFunds` first to save gas).
+Returns the fund controller's contract balance of each currency, balance of each pool of each currency (checking `_poolsWithFunds` first to save gas), and price of each currency.
 
-* Return values: An array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, and an array of arrays of corresponding balances at each pool index for each currency code.
+* Return values: An array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, an array of arrays of corresponding balances at each pool index for each currency code, and an array of prices in USD (scaled by 1e18) for each currency code.
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getPoolBalance`) potentially modifies the state.*

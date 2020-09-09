@@ -1,5 +1,8 @@
-pragma solidity ^0.5.7;
+pragma solidity 0.5.17;
 
+/**
+ * @title ISavingsContract
+ */
 contract ISavingsContract {
     uint256 public exchangeRate;
     mapping(address => uint256) public creditBalances;
