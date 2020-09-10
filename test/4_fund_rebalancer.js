@@ -23,7 +23,7 @@ const RariFundPriceConsumer = artifacts.require("RariFundPriceConsumer");
 contract("RariFundManager", accounts => {
   it("should set accepted currencies", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+    let fundTokenInstance = await RariFundToken.deployed();
     let fundPriceConsumerInstance = await RariFundPriceConsumer.deployed();
 
     // Use DAI as an example and set amount to deposit/withdraw

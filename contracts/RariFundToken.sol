@@ -10,18 +10,17 @@
 pragma solidity 0.5.17;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-
-import "./rft/ERC20RFT.sol";
-import "./rft/ERC20RFTMintable.sol";
-import "./rft/ERC20RFTBurnable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
 
 /**
  * @title RariFundToken
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice RariFundToken is the ERC20 token contract accounting for the ownership of RariFund's funds.
  */
-contract RariFundToken is ERC20RFT, ERC20Detailed, ERC20RFTMintable, ERC20RFTBurnable {
+contract RariFundToken is ERC20, ERC20Detailed, ERC20Mintable, ERC20Burnable {
     using SafeMath for uint256;
 
     /**

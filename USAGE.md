@@ -21,7 +21,7 @@ The following document contains instructions on common usage of the smart contra
 
 * **Get my USD balance supplied to fund:** `uint256 RariFundManager.balanceOf(address account)` returns the total balance in USD (scaled by 1e18) of `account`.
 * **Get my RFT balance (internal representation of my USD balance supplied to fund):** `uint256 RariFundToken.balanceOf(address account)` returns the amount of RFT owned by `account`.
-* **Get my interest accrued:** `int256 RariFundManager.interestAccruedBy(address account)` returns the total amount of interest accrued by `account` (excluding the fees paid on interest) in USD (scaled by 1e18).
+* **Get my interest accrued:** Subtract total deposits and transfers in (in USD) and add total withdrawals and transfers out (in USD) from `uint256 RariFundManager.balanceOf(address account)`.
 
 ## Deposit
 

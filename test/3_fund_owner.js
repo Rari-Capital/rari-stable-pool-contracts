@@ -61,7 +61,7 @@ contract("RariFundController, RariFundManager", accounts => {
   it("should disable and re-enable the fund", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+    let fundTokenInstance = await RariFundToken.deployed();
     let fundPriceConsumerInstance = await RariFundPriceConsumer.deployed();
 
     // Disable the fund (via RariFundController and RariFundManager)
@@ -176,7 +176,7 @@ contract("RariFundManager", accounts => {
     // Create new FundManager
     var newFundManagerInstance = await RariFundManager.new({ from: process.env.DEVELOPMENT_ADDRESS });
     await newFundManagerInstance.setFundController(RariFundController.address, { from: process.env.DEVELOPMENT_ADDRESS });
-    await newFundManagerInstance.setFundToken(parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? process.env.UPGRADE_FUND_TOKEN : RariFundToken.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    await newFundManagerInstance.setFundToken(RariFundToken.address, { from: process.env.DEVELOPMENT_ADDRESS });
     await newFundManagerInstance.setFundPriceConsumer(RariFundPriceConsumer.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Upgrade!
@@ -318,7 +318,7 @@ contract("RariFundToken", accounts => {
   // Disabled for now as we do not yet have an upgrade function on the token because it will only be necessary on a future upgrade
   /* it("should put upgrade the FundToken", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+    let fundTokenInstance = await RariFundToken.deployed();
 
     // Create new FundToken
     // TODO: Test that we can make changes to the code of the new fund token before deploying it and upgrading to it

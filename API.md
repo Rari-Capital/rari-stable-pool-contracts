@@ -27,15 +27,6 @@ Returns the amount of RFT owned by `account`.
 * Parameters:
     * `account` (address) - The account whose balance we are retrieving.
 
-### `int256 RariFundManager.interestAccruedBy(address account)`
-
-Returns the total amount of interest accrued by `account` (excluding the fees paid on interest) in USD (scaled by 1e18).
-
-* Parameters:
-    * `account` (address) - The account whose interest we are calculating.
-* Development notes:
-    * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
-
 ## **Stablecoin Pricing**
 
 ### `uint256[] RariFundPriceConsumer.getCurrencyPricesInUsd()`

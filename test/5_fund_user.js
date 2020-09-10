@@ -22,7 +22,7 @@ contract("RariFundManager, RariFundController", accounts => {
   it("should deposit to the fund, approve and deposit to pools, accrue interest, and withdraw from the fund", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+    let fundTokenInstance = await RariFundToken.deployed();
     let fundPriceConsumerInstance = await RariFundPriceConsumer.deployed();
 
     // Get currency prices in USD used by contracts

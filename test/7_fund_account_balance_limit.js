@@ -19,7 +19,7 @@ const RariFundPriceConsumer = artifacts.require("RariFundPriceConsumer");
 contract("RariFundManager", accounts => {
   it("should make deposits until the default (global) account balance limit is hit", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+    let fundTokenInstance = await RariFundToken.deployed();
     let fundPriceConsumerInstance = await RariFundPriceConsumer.deployed();
 
     // Get RFT balance and transfer all of it out before we start
@@ -60,7 +60,7 @@ contract("RariFundManager", accounts => {
 contract("RariFundManager", accounts => {
   it("should make deposits until the individual account balance limit is hit", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+    let fundTokenInstance = await RariFundToken.deployed();
     let fundPriceConsumerInstance = await RariFundPriceConsumer.deployed();
 
     // Get RFT balance and transfer all of it out before we start
@@ -105,7 +105,7 @@ contract("RariFundManager", accounts => {
 contract("RariFundManager", accounts => {
   it("should make no deposits due to an individual account balance limit of 0", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+    let fundTokenInstance = await RariFundToken.deployed();
 
     // Get RFT balance and transfer all of it out before we start
     let rftBalance = await fundTokenInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS_SECONDARY);

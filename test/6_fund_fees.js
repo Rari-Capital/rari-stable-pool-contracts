@@ -22,7 +22,7 @@ contract("RariFundManager", accounts => {
   it("should deposit to pools, set the interest fee rate, wait for interest, set the master beneficiary of interest fees, deposit fees, wait for interest again, and withdraw fees", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN) : RariFundToken.deployed());
+    let fundTokenInstance = await RariFundToken.deployed();
     let fundPriceConsumerInstance = await RariFundPriceConsumer.deployed();
 
     // Approve and deposit tokens to the fund (using DAI as an example)

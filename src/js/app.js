@@ -857,8 +857,8 @@ App = {
     if (App.contracts.RariFundManager) {
       App.getMyFundBalance();
       if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
-      App.getMyInterestAccrued();
-      if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000);
+      /* App.getMyInterestAccrued();
+      if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000); */
     }
     if (App.contracts.RariFundToken) {
       App.getTokenBalance();
@@ -998,8 +998,8 @@ App = {
       if (App.selectedAccount) {
         App.getMyFundBalance();
         if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
-        App.getMyInterestAccrued();
-        if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000);
+        /* App.getMyInterestAccrued();
+        if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000); */
       }
       App.getDirectlyDepositableCurrencies();
       App.getDirectlyWithdrawableCurrencies();
@@ -1078,8 +1078,8 @@ App = {
       if (App.contracts.RariFundManager) {
         App.getMyFundBalance();
         if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
-        App.getMyInterestAccrued();
-        if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000);
+        /* App.getMyInterestAccrued();
+        if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000); */
       }
       if (App.contracts.RariFundToken) {
         App.getTokenBalance();
@@ -1831,7 +1831,7 @@ App = {
   /**
    * Get the user's interest accrued in the stablecoin fund in USD.
    */
-  getMyInterestAccrued: function() {
+  /* getMyInterestAccrued: function() {
     console.log('Getting my interest accrued...');
 
     App.contracts.RariFundManager.methods.interestAccruedBy(App.selectedAccount).call().then(function(result) {
@@ -1839,7 +1839,7 @@ App = {
     }).catch(function(err) {
       console.error(err);
     });
-  },
+  }, */
 
   /**
    * Transfer RariFundToken.
