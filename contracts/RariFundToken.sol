@@ -26,5 +26,5 @@ contract RariFundToken is ERC20, ERC20Detailed, ERC20Mintable, ERC20Burnable {
     /**
      * @dev Constructor for RariFundToken.
      */
-    constructor () public ERC20Detailed("Rari Fund Token", "RFT", 18) { }
+    constructor () public ERC20Detailed("Rari Stable Fund Token", "RSFT", 18) { }
 }

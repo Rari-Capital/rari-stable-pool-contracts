@@ -1264,7 +1264,7 @@ App = {
               // If any current data is displayed when
               // the user is switching acounts in the wallet
               // immediate hide this data
-              $("#MyDAIBalance, #MyUSDCBalance, #MyUSDTBalance, #RFTBalance").text("?"); // Disable button while UI is loading.
+              $("#MyDAIBalance, #MyUSDCBalance, #MyUSDTBalance, #RSFTBalance").text("?"); // Disable button while UI is loading.
               // fetchAccountData() will take a while as it communicates
               // with Ethereum node via JSON-RPC and loads chain data
               // over an API call.
@@ -1393,7 +1393,7 @@ App = {
               $("#btn-disconnect").hide();
               $(".btn-connect").show();
               $('#MyUSDBalance').text("?");
-              $('#RFTBalance').text("?");
+              $('#RSFTBalance').text("?");
               $('#MyInterestAccrued').text("?");
 
             case 13:
@@ -2409,7 +2409,7 @@ App = {
                         App.getFundBalance();
                         $('#MyUSDBalance').text("?");
                         App.getMyFundBalance();
-                        $('#RFTBalance').text("?");
+                        $('#RSFTBalance').text("?");
                         App.getTokenBalance();
                         App.getDirectlyWithdrawableCurrencies();
 
@@ -2510,7 +2510,7 @@ App = {
                       case 12:
                         _context18.prev = 12;
                         _context18.t2 = _context18["catch"](1);
-                        return _context18.abrupt("return", toastr["error"]("Failed to approve RFT to RariFundManager: " + (_context18.t2.message ? _context18.t2.message : _context18.t2), "Withdrawal failed"));
+                        return _context18.abrupt("return", toastr["error"]("Failed to approve RSFT to RariFundManager: " + (_context18.t2.message ? _context18.t2.message : _context18.t2), "Withdrawal failed"));
 
                       case 15:
                         // See how much we can withdraw directly if token is not ETH
@@ -3129,7 +3129,7 @@ App = {
                         App.getFundBalance();
                         $('#MyUSDBalance').text("?");
                         App.getMyFundBalance();
-                        $('#RFTBalance').text("?");
+                        $('#RSFTBalance').text("?");
                         App.getTokenBalance();
                         App.getDirectlyWithdrawableCurrencies();
 
@@ -3211,7 +3211,7 @@ App = {
               event.preventDefault();
               currency = $('#TransferCurrency').val();
 
-              if (!(["USD", "RFT"].indexOf(currency) < 0)) {
+              if (!(["USD", "RSFT"].indexOf(currency) < 0)) {
                 _context21.next = 4;
                 break;
               }
@@ -3295,13 +3295,13 @@ App = {
                         return _context20.abrupt("return", toastr["error"](_context20.t4, "Transfer failed"));
 
                       case 25:
-                        if (typeof mixpanel !== 'undefined') mixpanel.track("RFT transfer", {
+                        if (typeof mixpanel !== 'undefined') mixpanel.track("RSFT transfer", {
                           transactionHash: receipt.transactionHash,
                           currencyCode: currency,
                           amount: amount
                         });
                         toastr["success"]("Transfer of " + (currency === "USD" ? "$" : "") + amount + " " + currency + " confirmed!", "Transfer successful");
-                        $('#RFTBalance').text("?");
+                        $('#RSFTBalance').text("?");
                         App.getTokenBalance();
                         $('#MyUSDBalance').text("?");
                         App.getMyFundBalance();
@@ -3339,7 +3339,7 @@ App = {
   getTokenBalance: function getTokenBalance() {
     console.log('Getting token balance...');
     App.contracts.RariFundToken.methods.balanceOf(App.selectedAccount).call().then(function (result) {
-      $('#RFTBalance').text(new Big(result).div(new Big(10).pow(18)).toFormat());
+      $('#RSFTBalance').text(new Big(result).div(new Big(10).pow(18)).toFormat());
     }).catch(function (err) {
       console.error(err);
     });

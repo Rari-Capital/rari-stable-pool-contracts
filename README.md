@@ -1,6 +1,6 @@
-# Rari Capital Smart Contracts & dApp
+# Rari Stable Fund: Smart Contracts & dApp
 
-Welcome to `rari-contracts`, the central repository for the Solidity source code behind Rari Capital's Ethereum-based smart contracts (with automated tests), our stablecoin fund's dApp (web client), and the documentation for it all. You can find out more about Rari at [www.rari.capital](https://rari.capital).
+Welcome to `rari-contracts`, the central repository for the Solidity source code behind the Rari Stable Fund's Ethereum-based smart contracts (with automated tests), our stablecoin fund's dApp (web client), and the documentation for it all. You can find out more about Rari at [www.rari.capital](https://rari.capital).
 
 ## How the fund works
 
@@ -40,7 +40,7 @@ If you are upgrading from `v1.2.0`, set `UPGRADE_FROM_LAST_VERSION=1` to enable 
     UPGRADE_OLD_FUND_TOKEN=0x9366B7C00894c3555c7590b0384e5F6a9D55659f
     UPGRADE_FUND_OWNER_ADDRESS=0xb568a7a185305e1cc027e13a27db7c5bf99e81d8
 
-Also, set `DEVELOPMENT_UPGRADE_RFT_HOLDERS` to a comma-separated list of all current RFT holders (because `getPastEvents` does not work with Ganache).
+Also, set `DEVELOPMENT_UPGRADE_FUND_TOKEN_HOLDERS` to a comma-separated list of all current RSFT holders (because `getPastEvents` does not work with Ganache).
 
 First, fork the Ethereum mainnet (tested on Node.js `v10.21.0`). To start the fork, configure `DEVELOPMENT_WEB3_PROVIDER_URL_TO_BE_FORKED` (set to any mainnet Web3 HTTP provider JSON-RPC URL; we use a local `geth` instance, specifically a light client started with `geth --syncmode light --rpc --rpcapi eth,web3,debug,net`; Infura works too, but beware of latency and rate limiting) in `.env` and run `npm run ganache`. *If you would like to change the port, make sure to configure `scripts/ganache.js`, `scripts/test.sh`, and the `development` network in `truffle-config.js`.* Note that you will likely have to regularly restart your fork, especially when forking from a node without archive data or when using live 0x API responses to make currency exchanges.
 

@@ -1,9 +1,9 @@
-# Rari Capital Smart Contract API Documentation
+# Rari Stable Fund: Smart Contract API
 
 Welcome to the API docs for `RariFundManager`, `RariFundToken`, and `RariFundProxy`, the smart contracts behind Rari Capital's stablecoin fund.
 
 * See `USAGE.md` for instructions on common usage of the smart contracts' APIs.
-* See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RFT.
+* See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSFT.
 * Smart contract ABIs are available in the `abi` properties of the JSON files in the `build` folder.
 
 ## **User Balances and Interest**
@@ -19,11 +19,11 @@ Returns the total balance in USD (scaled by 1e18) of `account`.
 
 ### `uint256 RariFundToken.balanceOf(address account)`
 
-Returns the amount of RFT owned by `account`.
+Returns the amount of RSFT owned by `account`.
 
-* A user's RFT balance is an internal representation of their USD balance.
-    * While a user's USD balance is constantly increasing as the fund accrues interest, a user's RFT balance does not change except on deposit, withdrawal, and transfer.
-    * The price of RFT is equivalent to the current value of 1 USD deposited at the fund's inception.
+* A user's RSFT balance is an internal representation of their USD balance.
+    * While a user's USD balance is constantly increasing as the fund accrues interest, a user's RSFT balance does not change except on deposit, withdrawal, and transfer.
+    * The price of RSFT is equivalent to the current value of 1 USD deposited at the fund's inception.
 * Parameters:
     * `account` (address) - The account whose balance we are retrieving.
 
@@ -72,7 +72,7 @@ Returns an array of currency codes currently accepted for deposits.
 
 ***For a limited time only, we are paying gas fees for first-time deposits of at least 250 DAI/USDC/USDT!***
 
-Deposits funds to RariFund in exchange for RFT (with GSN support).
+Deposits funds to RariFund in exchange for RSFT (with GSN support).
 
 * You may only deposit currencies accepted by the fund (see `RariFundManager.isCurrencyAccepted(string currencyCode)`).
 * Please note that you must approve RariFundProxy to transfer at least `amount`.
@@ -82,7 +82,7 @@ Deposits funds to RariFund in exchange for RFT (with GSN support).
 
 ### `RariFundManager.deposit(string currencyCode, uint256 amount)`
 
-Deposits funds to RariFund in exchange for RFT.
+Deposits funds to RariFund in exchange for RSFT.
 
 * You may only deposit currencies accepted by the fund (see `RariFundManager.isCurrencyAccepted(string currencyCode)`). However, `RariFundProxy.exchangeAndDeposit` exchanges your funds via 0x and deposits them in one transaction.
 * Please note that you must approve RariFundManager to transfer at least `amount`.
@@ -92,7 +92,7 @@ Deposits funds to RariFund in exchange for RFT.
 
 ### `RariFundProxy.exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string outputCurrencyCode, LibOrder.Order[] orders, bytes[] signatures, uint256 takerAssetFillAmount)`
 
-Exchanges and deposits funds to RariFund in exchange for RFT (via 0x).
+Exchanges and deposits funds to RariFund in exchange for RSFT (via 0x).
 
 * You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
 * Please note that you must approve RariFundProxy to transfer at least `inputAmount` unless you are inputting ETH.
@@ -109,7 +109,7 @@ Exchanges and deposits funds to RariFund in exchange for RFT (via 0x).
 
 ### `RariFundProxy.exchangeAndDeposit(string inputCurrencyCode, uint256 inputAmount, string outputCurrencyCode)`
 
-Exchanges and deposits funds to RariFund in exchange for RFT (no slippage and low fees via mStable, but only supports DAI, USDC, USDT, TUSD, and mUSD).
+Exchanges and deposits funds to RariFund in exchange for RSFT (no slippage and low fees via mStable, but only supports DAI, USDC, USDT, TUSD, and mUSD).
 
 * Please note that you must approve RariFundProxy to transfer at least `inputAmount`.
 * Parameters:
@@ -121,20 +121,20 @@ Exchanges and deposits funds to RariFund in exchange for RFT (no slippage and lo
 
 ### `RariFundManager.withdraw(string currencyCode, uint256 amount)`
 
-Withdraws funds from RariFund in exchange for RFT.
+Withdraws funds from RariFund in exchange for RSFT.
 
 * You may only withdraw currencies held by the fund (see `RariFundManager.getRawFundBalance(string currencyCode)`). However, `RariFundProxy.withdrawAndExchange` withdraws your funds and exchanges them via 0x in one transaction.
-* Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
+* Please note that you must approve RariFundManager to burn of the necessary amount of RSFT.
 * Parameters:
     * `currencyCode` (string): The currency code of the token to be withdrawn.
     * `amount` (uint256): The amount of tokens to be withdrawn.
 
 ### `RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)`
 
-Withdraws funds from RariFund in exchange for RFT and exchanges to them to the desired currency (if no 0x orders are supplied, exchanges DAI, USDC, USDT, TUSD, and mUSD via mStable).
+Withdraws funds from RariFund in exchange for RSFT and exchanges to them to the desired currency (if no 0x orders are supplied, exchanges DAI, USDC, USDT, TUSD, and mUSD via mStable).
 
 * You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
-* Please note that you must approve RariFundManager to burn of the necessary amount of RFT. You also must input at least enough ETH to cover the protocol fees.
+* Please note that you must approve RariFundManager to burn of the necessary amount of RSFT. You also must input at least enough ETH to cover the protocol fees.
 * Parameters:
     * `inputCurrencyCodes` (string[]): The currency codes of the tokens to be withdrawn and exchanged.
         * To directly withdraw the output currency without exchange in the same transaction, simply include the output currency code in `inputCurrencyCodes`.
@@ -152,13 +152,13 @@ Withdraws funds from RariFund in exchange for RFT and exchanges to them to the d
 * Development notes:
     * *We should be able to make this function external and use calldata for all parameters, but [Solidity does not support calldata structs](https://github.com/ethereum/solidity/issues/5479).*
 
-## Rari Fund Token
+## Rari Stable Fund Token
 
-See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RFT. Here are a few of the most common ones:
+See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSFT. Here are a few of the most common ones:
 
 ### `bool RariFundToken.transfer(address recipient, uint256 amount)`
 
-Transfers the specified `amount` of RFT to `recipient`.
+Transfers the specified `amount` of RSFT to `recipient`.
 
 * Parameters:
     * `recipient` (address): The recipient of the .
@@ -167,7 +167,7 @@ Transfers the specified `amount` of RFT to `recipient`.
 
 ### `bool RariFundToken.approve(address spender, uint256 amount)`
 
-Approve `sender` to spend the specified `amount` of RFT on behalf of `msg.sender`.
+Approve `sender` to spend the specified `amount` of RSFT on behalf of `msg.sender`.
 
 * As with the `approve` functions of other ERC20 contracts, beware that changing an allowance with this method brings the risk that someone may use both the old and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
 * Parameters:
@@ -177,22 +177,22 @@ Approve `sender` to spend the specified `amount` of RFT on behalf of `msg.sender
 
 ### `uint256 RariFundToken.totalSupply()`
 
-Returns the total supply of RFT (scaled by 1e18).
+Returns the total supply of RSFT (scaled by 1e18).
 
-* Divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RFT in USD (scaled by 1e18).
+* Divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RSFT in USD (scaled by 1e18).
 
 ## **Fund Balances and Interest**
 
 ### `uint256 RariFundManager.getFundBalance()`
 
-Returns the fund's total investor balance (all RFT holders' funds but not unclaimed fees) of all currencies in USD (scaled by 1e18).
+Returns the fund's total investor balance (all RSFT holders' funds but not unclaimed fees) of all currencies in USD (scaled by 1e18).
 
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
 ### `int256 RariFundManager.getInterestAccrued()`
 
-Returns the total amount of interest accrued by past and current RFT holders (excluding the fees paid on interest) in USD (scaled by 1e18).
+Returns the total amount of interest accrued by past and current RSFT holders (excluding the fees paid on interest) in USD (scaled by 1e18).
 
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
@@ -221,14 +221,14 @@ Returns the raw total amount of interest accrued by the fund as a whole (includi
 
 ### `uint256 RariFundManager.getRawFundBalance()`
 
-Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees) of all currencies in USD (scaled by 1e18).
+Returns the fund's raw total balance (all RSFT holders' funds + all unclaimed fees) of all currencies in USD (scaled by 1e18).
 
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
 ### `uint256 RariFundManager.getRawFundBalance(string currencyCode)`
 
-Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees) of the specified currency.
+Returns the fund's raw total balance (all RSFT holders' funds + all unclaimed fees) of the specified currency.
 
 * Parameters:
     * `currencyCode` (string): The currency code of the balance to be calculated.

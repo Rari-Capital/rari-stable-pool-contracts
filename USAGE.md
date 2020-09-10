@@ -1,9 +1,9 @@
-# How to Use the Smart Contracts
+# Rari Stable Fund: How to Use the Smart Contracts
 
 The following document contains instructions on common usage of the smart contracts' APIs.
 
 * See `API.md` for a more detailed API reference on `RariFundController`, `RariFundManager`, `RariFundToken`, and `RariFundProxy`.
-* See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RFT.
+* See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSFT.
 * Smart contract ABIs are available in the `abi` properties of the JSON files in the `build` folder.
 
 ## Fund APY
@@ -14,13 +14,13 @@ The following document contains instructions on common usage of the smart contra
     3. Divide the sum of these products by the sum of all fund controller contract balances and pool balances of each currency (converted to USD) to get the current fund APY.
 * **Get current fund APY (after fees):** subtract the product of the current raw fund APY and `uint256 RariFundManager.getInterestFeeRate()` divided by 1e18 from the current raw fund APY.
 * **Get fund APY over time range (after fees):**
-    1. Get RFT exchange rates at start and end of time range: divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RFT in USD (scaled by 1e18).
+    1. Get RSFT exchange rates at start and end of time range: divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RSFT in USD (scaled by 1e18).
     2. Divide the ending exchange rate by the starting exchange rate, raise this quotient to the power of 1 year divided by the length of the time range, and subtract one to get the fund APY over this time range.
 
 ## My Balances and Interest
 
 * **Get my USD balance supplied to fund:** `uint256 RariFundManager.balanceOf(address account)` returns the total balance in USD (scaled by 1e18) of `account`.
-* **Get my RFT balance (internal representation of my USD balance supplied to fund):** `uint256 RariFundToken.balanceOf(address account)` returns the amount of RFT owned by `account`.
+* **Get my RSFT balance (internal representation of my USD balance supplied to fund):** `uint256 RariFundToken.balanceOf(address account)` returns the amount of RSFT owned by `account`.
 * **Get my interest accrued:** Subtract total deposits and transfers in (in USD) and add total withdrawals and transfers out (in USD) from `uint256 RariFundManager.balanceOf(address account)`.
 
 ## Deposit
@@ -64,8 +64,8 @@ The following document contains instructions on common usage of the smart contra
 
 *Our SDK, soon to be released, will make programmatic deposits and withdrawals as easy as just one line of code.*
 
-1. User ensures that their account possesses enough USD (represented internally by RFT) to make their withdrawal.
-2. User approves RFT to `RariFundManager` by calling `bool RariFundToken.approve(address spender, uint256 amount)` where `spender` is `RariFundManager` (to approve unlimited RFT, set `amount` to `uint256(-1)`).
+1. User ensures that their account possesses enough USD (represented internally by RSFT) to make their withdrawal.
+2. User approves RSFT to `RariFundManager` by calling `bool RariFundToken.approve(address spender, uint256 amount)` where `spender` is `RariFundManager` (to approve unlimited RSFT, set `amount` to `uint256(-1)`).
 3. User calls `uint256 RariFundManager.getRawFundBalance(string currencyCode)` (where `currencyCode` is the one they want to withdraw) to get the raw fund balance available for direct withdrawal.
     * If the returned balance >= withdrawal amount, user calls `bool RariFundManager.withdraw(string currencyCode, uint256 amount)`
     * If returned balance < withdrawal amount:
@@ -99,22 +99,22 @@ The following document contains instructions on common usage of the smart contra
             * `protocolFees` is an array of protocol fee amounts in ETH wei to be sent to 0x
                 * To exchange one of `inputCurrencyCodes` via mStable instead of 0x or to directly withdraw the output currency in the same transaction, set the corresponding `protocolFees` item to 0.
 
-## Rari Fund Token (RFT)
+## Rari Stable Fund Token (RSFT)
 
-* Your Rari Fund Token balance is a *token-based representation of your fund balance.*
-    * RFT is minted to you when you deposit to the fund and redeemed (i.e., burned) when you withdraw from the fund.
-    * Accruing interest increases your USD fund balance, meaning the USD value of your RFT increases. However, your RFT balance itself does not increase: instead, the exchange rate of RFT increases at the same rate as every user's balance as they accrue interest.
-    * When you transfer your RFT, you transfer your holdings supplied to the fund (deposits + interest).
-* **Transfer RFT:** `bool RariFundToken.transfer(address recipient, uint256 amount)` transfers `amount` RFT to `recipient` (as with other ERC20 tokens like RFT).
-* **Approve RFT:** `bool RariFundToken.approve(address spender, uint256 amount)` approves `spender` to spend the specified `amount` of RFT on behalf of `msg.sender`.
+* Your Rari Stable Fund Token balance is a *token-based representation of your fund balance.*
+    * RSFT is minted to you when you deposit to the fund and redeemed (i.e., burned) when you withdraw from the fund.
+    * Accruing interest increases your USD fund balance, meaning the USD value of your RSFT increases. However, your RSFT balance itself does not increase: instead, the exchange rate of RSFT increases at the same rate as every user's balance as they accrue interest.
+    * When you transfer your RSFT, you transfer your holdings supplied to the fund (deposits + interest).
+* **Transfer RSFT:** `bool RariFundToken.transfer(address recipient, uint256 amount)` transfers `amount` RSFT to `recipient` (as with other ERC20 tokens like RSFT).
+* **Approve RSFT:** `bool RariFundToken.approve(address spender, uint256 amount)` approves `spender` to spend the specified `amount` of RSFT on behalf of `msg.sender`.
     * As with the `approve` functions of other ERC20 contracts, beware that changing an allowance with this method brings the risk that someone may use both the old and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards: https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-* See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RFT.
-* **Get RFT exchange rate:** Divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RFT in USD (scaled by 1e18).
+* See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSFT.
+* **Get RSFT exchange rate:** Divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RSFT in USD (scaled by 1e18).
 
 ## Fund Balances and Interest
 
-* **Get total USD supplied (by all users):** `uint256 RariFundManager.getFundBalance()` returns the fund's total investor balance (all RFT holders' funds but not unclaimed fees) of all currencies in USD (scaled by 1e18).
-* **Get total interest accrued (by all users):** `int256 RariFundManager.getInterestAccrued()` returns the total amount of interest accrued by past and current RFT holders (excluding the fees paid on interest) in USD (scaled by 1e18).
+* **Get total USD supplied (by all users):** `uint256 RariFundManager.getFundBalance()` returns the fund's total investor balance (all RSFT holders' funds but not unclaimed fees) of all currencies in USD (scaled by 1e18).
+* **Get total interest accrued (by all users):** `int256 RariFundManager.getInterestAccrued()` returns the total amount of interest accrued by past and current RSFT holders (excluding the fees paid on interest) in USD (scaled by 1e18).
 * **Get all raw fund balances and allocations (including unclaimed fees on interest):** `(string[] memory, uint256[] memory, uint256[][] memory, uint256[][] memory) RariFundController.getAllBalances()` returns an array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, and an array of arrays of corresponding allocations at each pool index for each currency code.
 
 ## Fees on Interest

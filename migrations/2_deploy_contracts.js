@@ -156,7 +156,7 @@ module.exports = function(deployer, network, accounts) {
           currentRftHolders.push(event.returnValues.to);
         }
       } else {
-        currentRftHolders = process.env.DEVELOPMENT_UPGRADE_RFT_HOLDERS.split(",");
+        currentRftHolders = process.env.DEVELOPMENT_UPGRADE_FUND_TOKEN_HOLDERS.split(",");
       }
 
       // Upgrade all accounts

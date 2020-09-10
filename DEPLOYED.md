@@ -1,4 +1,4 @@
-# Rari Capital Deployed Ethereum Smart Contract Addresses
+# Rari Stable Fund: Deployed Smart Contracts
 
 As follows are all deployments of our smart contracts on the Ethereum mainnet. See `API.md` for more information on these contracts' public methods and `USAGE.md` for detailed instructions on how to use them.
 
@@ -18,7 +18,7 @@ As follows are all deployments of our smart contracts on the Ethereum mainnet. S
 
 ### `RariFundToken`
 
-The Rari Fund Token (RFT) is an ERC20 token used to internally account for the ownership of the fund's assets under management (AUM).
+The Rari Stable Fund Token (RSFT) is an ERC20 token used to internally account for the ownership of the fund's assets under management (AUM).
 
 **v1.0.0**: `0x9366B7C00894c3555c7590b0384e5F6a9D55659f`
 

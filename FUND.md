@@ -1,10 +1,10 @@
-# How the Rari Capital Stablecoin Fund Works
+# Rari Stable Fund: How it Works
 
 This document explains how the fund and the software work under the hood. This content is also available [on our website](https://rari.capital/current.html).
 
-## RFT (Rari Fund Token)
+## RSFT (Rari Stable Fund Token)
 
-Each user's share of the fund is determined by their RFT balance. When you deposit funds to Rari, an equivalent amount of RFT (Rari Fund Token) is minted to your account. When you withdraw funds to Rari, the equivalent amount of RFT is burned from your account. As soon as you deposit, you start earning yield. Essentially, fund holdings and yield are split up proportionally across RFT holders by their USD balances.
+Each user's share of the fund is determined by their RSFT balance. When you deposit funds to Rari, an equivalent amount of RSFT (Rari Stable Fund Token) is minted to your account. When you withdraw funds to Rari, the equivalent amount of RSFT is burned from your account. As soon as you deposit, you start earning yield. Essentially, fund holdings and yield are split up proportionally across RSFT holders by their USD balances.
 
 ## Generating Yield
 
@@ -28,7 +28,7 @@ Only certain stablecoins are accepted for direct deposits (direct meaning withou
 
 ## Withdrawals
 
-Just like only certain stablecoins are accepted for direct deposits, only stablecoins held by the fund are availble for direct withdrawals. When withdrawing one of these stablecoins, the Rari web client approves RFT to `RariFundManager` and calls `RariFundManager.withdraw(string currencyCode, uint256 amount)`. When you withdraw another currency, the Rari web client approves RFT to `RariFundProxy` and calls `RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)` to withdraw your tokens and then exchange them via [0x](https://0x.org/) and/or [mStable](https://mstable.org) (please be aware that exchanges via 0x are subject to slippage due to price spread, 0x charges an ETH protocol fee, and mStable charges a small denominational percentage fee, but can avoid slippage and even get you a bonus). See `USAGE.md` for more information on how to deposit via the smart contracts and `API.md` for a detailed reference on our public smart contract methods.
+Just like only certain stablecoins are accepted for direct deposits, only stablecoins held by the fund are availble for direct withdrawals. When withdrawing one of these stablecoins, the Rari web client approves RSFT to `RariFundManager` and calls `RariFundManager.withdraw(string currencyCode, uint256 amount)`. When you withdraw another currency, the Rari web client approves RSFT to `RariFundProxy` and calls `RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)` to withdraw your tokens and then exchange them via [0x](https://0x.org/) and/or [mStable](https://mstable.org) (please be aware that exchanges via 0x are subject to slippage due to price spread, 0x charges an ETH protocol fee, and mStable charges a small denominational percentage fee, but can avoid slippage and even get you a bonus). See `USAGE.md` for more information on how to deposit via the smart contracts and `API.md` for a detailed reference on our public smart contract methods.
 
 ## Structure
 
@@ -36,7 +36,7 @@ We have 4 user-facing **smart contracts** in total (see `DEPLOYED.md` for deploy
 
 * `RariFundManager` is the fund's main contract: it handles direct deposits and withdrawals, USD balances, interest, fees, etc.
 * `RariFundController` holds all assets and is used by the rebalancer to deposit and withdraw from pools and make exchanges.
-* `RariFundToken` is the contract powering the Rari Fund Token (RFT), an ERC20 token used to internally account for the ownership of the fund's assets under management (AUM).
+* `RariFundToken` is the contract powering the Rari Stable Fund Token (RSFT), an ERC20 token used to internally account for the ownership of the fund's assets under management (AUM).
 * `RariFundProxy` includes wrapper functions built on top of RariFundManager: exchange and deposit, withdraw and exchange, and deposit without paying gas via the Gas Station Network (GSN).
 
 A **centralized rebalancer** controls which pools hold which currencies at any given time but only has permission to move funds between pools and exchange currencies, not withdraw funds elsewhere.
@@ -57,8 +57,8 @@ We have covered security above, but see [our website](https://rari.capital/risks
 
 ## Performance Fee
 
-A 20% performance fee is deducted from all interest earned by RFT holders. This fee is liable to change in the future, but fees on past interest cannot be changed.
+A 20% performance fee is deducted from all interest earned by RSFT holders. This fee is liable to change in the future, but fees on past interest cannot be changed.
 
 ## COMP
 
-All [COMP (Compound's governance token)](https://compound.finance/governance/comp) earned by the fund is liquidated into additional interest for RFT holders every 3 days.
+All [COMP (Compound's governance token)](https://compound.finance/governance/comp) earned by the fund is liquidated into additional interest for RSFT holders every 3 days.
