@@ -23,7 +23,6 @@ var RariFundProxy = artifacts.require("./RariFundProxy.sol");
 var deployedRariFundTokenAbi = require("./abi/RariFundToken_v1.0.0.json");
 var oldRariFundControllerAbi = require("./abi/RariFundController_v1.1.0.json");
 var oldRariFundManagerAbi = require("./abi/RariFundManager_v1.1.0.json");
-var oldRariFundProxyAbi = require("./abi/RariFundProxy_v1.2.0.json");
 
 module.exports = function(deployer, network, accounts) {
   if (["live", "live-fork"].indexOf(network) >= 0) {
@@ -57,7 +56,6 @@ module.exports = function(deployer, network, accounts) {
     // Upgrade from rari-contracts v1.2.0 (RariFundManager v1.1.0, RariFundManager v1.1.0, and RariFundProxy v1.2.0)
     var oldRariFundController = new web3.eth.Contract(oldRariFundControllerAbi, process.env.UPGRADE_OLD_FUND_CONTROLLER);
     var oldRariFundManager = new web3.eth.Contract(oldRariFundManagerAbi, process.env.UPGRADE_OLD_FUND_MANAGER);
-    var oldRariFundProxy = new web3.eth.Contract(oldRariFundProxyAbi, process.env.UPGRADE_OLD_FUND_PROXY);
 
     deployer.deploy(DydxPoolController).then(function() {
       return deployer.deploy(CompoundPoolController);
