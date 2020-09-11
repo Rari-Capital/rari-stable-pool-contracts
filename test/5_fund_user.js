@@ -67,7 +67,7 @@ contract("RariFundManager, RariFundController", accounts => {
       // Check balances and interest after waiting for interest
       var requireInterestAccrual = ["DAI", "TUSD"].indexOf(currencyCode) >= 0;
       var acceptMarginOfError = (poolName == "dYdX" && currencyCode != "DAI") || poolName == "mStable";
-      if (acceptMarginOfError) var usdMarginOfErrorBN = web3.utils.toBN(1e12);
+      if (acceptMarginOfError) var usdMarginOfErrorBN = web3.utils.toBN(1e13);
       let preWithdrawalAccountBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       assert(preWithdrawalAccountBalance[requireInterestAccrual ? "gt" : "gte"](acceptMarginOfError ? postDepositAccountBalance.sub(usdMarginOfErrorBN) : postDepositAccountBalance));
       let preWithdrawalFundBalance = await fundManagerInstance.getFundBalance.call();
