@@ -160,10 +160,10 @@ contract("RariFundController, RariFundManager", accounts => {
       var maxSwap = await mAssetValidationHelper.methods.getMaxSwap("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", currencies[currencyCode].tokenAddress, "0xe2f2a5c287993345a840db3b0845fbc70f5935a5").call();
 
       if (maxSwap && maxSwap["0"] && tokenAmountBN.lte(web3.utils.toBN(maxSwap["2"]))) {
-        // RariFundController.approveToMUsd and RariFundController.mintMUsd
+        // RariFundController.approveToMUsd and RariFundController.swapMStable
         // TODO: Ideally, we add actually call rari-fund-rebalancer
         await fundControllerInstance.approveToMUsd(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-        await fundControllerInstance.mintMUsd(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+        await fundControllerInstance.swapMStable(currencyCode, "mUSD", tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
       } else {
         // Deposit mUSD for redeeming if we didn't just mint
         await mUsdErc20Contract.methods.approve(RariFundManager.address, mUsdAmountBN.toString()).send({ from: process.env.DEVELOPMENT_ADDRESS });
@@ -180,9 +180,9 @@ contract("RariFundController, RariFundManager", accounts => {
       var redeemValidity = await mAssetValidationHelper.methods.getRedeemValidity("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", mUsdAmountBN.toString(), currencies[currencyCode].tokenAddress).call();
 
       if (redeemValidity && redeemValidity["0"]) {
-        // RariFundController.redeemMUsd
+        // RariFundController.swapMStable
         // TODO: Ideally, we add actually call rari-fund-rebalancer
-        await fundControllerInstance.redeemMUsd(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+        await fundControllerInstance.swapMStable("mUSD", currencyCode, mUsdAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
 
         // Check new mUSD and token balance
         var postRedeemMUsdBalanceBN = web3.utils.toBN(await mUsdErc20Contract.methods.balanceOf(RariFundController.address).call());

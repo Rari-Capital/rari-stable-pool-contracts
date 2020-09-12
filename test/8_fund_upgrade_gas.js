@@ -7,6 +7,8 @@
  * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
  */
 
+const { deployProxy } = require('@openzeppelin/truffle-upgrades');
+
 const erc20Abi = require('./abi/ERC20.json');
 
 const currencies = require('./fixtures/currencies.json');
@@ -17,7 +19,7 @@ const RariFundManager = artifacts.require("RariFundManager");
 
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundController", accounts => {
-  it("should put upgrade the FundController with funds in all pools in all currencies without using too much gas", async () => {
+  it("should upgrade the proxy and implementation of FundController with funds in all pools in all currencies without using too much gas", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
 
@@ -51,7 +53,7 @@ contract("RariFundController", accounts => {
     await fundManagerInstance.disableFund({ from: process.env.DEVELOPMENT_ADDRESS });
 
     // Create new FundController and set its FundManager
-    var newFundControllerInstance = await RariFundController.new({ from: process.env.DEVELOPMENT_ADDRESS });
+    var newFundControllerInstance = await deployProxy(RariFundController, [], { unsafeAllowCustomTypes: true });
     await newFundControllerInstance.setFundManager(RariFundManager.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Upgrade!

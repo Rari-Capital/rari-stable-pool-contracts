@@ -1,15 +1,16 @@
 pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 
 import "@chainlink/contracts/src/v0.5/interfaces/AggregatorV3Interface.sol";
 
 import "./external/mstable/IBasketManager.sol";
 import "./external/mstable/MassetStructs.sol";
 
-contract RariFundPriceConsumer {
+contract RariFundPriceConsumer is Initializable {
     using SafeMath for uint256;
 
     /**
@@ -38,9 +39,9 @@ contract RariFundPriceConsumer {
     IERC20 constant private _mUsd = IERC20(0xe2f2a5C287993345a840Db3B0845fbC70f5935a5);
 
     /**
-     * @dev Constructor that sets supported ERC20 contract addresses and price feeds for each supported token.
+     * @dev Initializer that sets supported ERC20 contract addresses and price feeds for each supported token.
      */
-    constructor() public {
+    function initialize() public initializer {
         _daiUsdPriceFeed = AggregatorV3Interface(0xAed0c38402a5d19df6E4c03F4E2DceD6e29c1ee9);
         _ethUsdPriceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
         _ethBasedPriceFeeds["USDC"] = AggregatorV3Interface(0x986b5E1e1755e3C2440e960477f25201B0a8bbD4);

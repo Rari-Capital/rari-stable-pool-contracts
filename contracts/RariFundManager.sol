@@ -10,11 +10,12 @@
 pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/drafts/SignedSafeMath.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/drafts/SignedSafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
 
 import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
 
@@ -29,7 +30,7 @@ import "./RariFundPriceConsumer.sol";
  * Anyone can deposit to the fund with deposit(string currencyCode, uint256 amount).
  * Anyone can withdraw their funds (with interest) from the fund with withdraw(string currencyCode, uint256 amount).
  */
-contract RariFundManager is Ownable {
+contract RariFundManager is Initializable, Ownable {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
     using SafeERC20 for IERC20;
@@ -52,7 +53,7 @@ contract RariFundManager is Ownable {
     /**
      * @dev Contract of the RariFundController.
      */
-    RariFundController private _rariFundController;
+    RariFundController public rariFundController;
 
     /**
      * @dev Address of the RariFundToken.
@@ -67,7 +68,7 @@ contract RariFundManager is Ownable {
     /**
      * @dev Contract of the RariFundPriceConsumer.
      */
-    RariFundPriceConsumer private _rariFundPriceConsumer;
+    RariFundPriceConsumer public rariFundPriceConsumer;
 
     /**
      * @dev Address of the RariFundProxy.
@@ -105,9 +106,12 @@ contract RariFundManager is Ownable {
     mapping(string => RariFundController.LiquidityPool[]) private _poolsByCurrency;
 
     /**
-     * @dev Constructor that sets supported ERC20 contract addresses and supported pools for each supported token.
+     * @dev Initializer that sets supported ERC20 contract addresses and supported pools for each supported token.
      */
-    constructor () public {
+    function initialize() public initializer {
+        // Initialize base contracts
+        Ownable.initialize(msg.sender);
+        
         // Add supported currencies
         addSupportedCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F, 18);
         addPoolToCurrency("DAI", RariFundController.LiquidityPool.dYdX);
@@ -128,6 +132,9 @@ contract RariFundManager is Ownable {
         addPoolToCurrency("sUSD", RariFundController.LiquidityPool.Aave);
         addSupportedCurrency("mUSD", 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5, 18);
         addPoolToCurrency("mUSD", RariFundController.LiquidityPool.mStable);
+
+        // Initialize raw fund balance cache (can't set initial values in field declarations with proxy storage)
+        _rawFundBalanceCache = -1;
     }
 
     /**
@@ -159,7 +166,7 @@ contract RariFundManager is Ownable {
 
     /**
      * @dev Upgrades RariFundManager.
-     * Sends data to the new contract, sets the new RariFundToken minter, and forwards tokens from the old to the new.
+     * Sends data to the new contract and sets the new RariFundToken minter.
      * @param newContract The address of the new RariFundManager contract.
      */
     function upgradeFundManager(address newContract) external onlyOwner {
@@ -233,7 +240,7 @@ contract RariFundManager is Ownable {
      */
     function setFundController(address payable newContract) external onlyOwner {
         _rariFundControllerContract = newContract;
-        _rariFundController = RariFundController(_rariFundControllerContract);
+        rariFundController = RariFundController(_rariFundControllerContract);
         emit FundControllerSet(newContract);
     }
 
@@ -320,7 +327,7 @@ contract RariFundManager is Ownable {
      * @param newContract The address of the new RariFundPriceConsumer contract.
      */
     function setFundPriceConsumer(address newContract) external onlyOwner {
-        _rariFundPriceConsumer = RariFundPriceConsumer(newContract);
+        rariFundPriceConsumer = RariFundPriceConsumer(newContract);
         emit RariFundPriceConsumerSet(newContract);
     }
 
@@ -363,12 +370,12 @@ contract RariFundManager is Ownable {
     /**
      * @dev Boolean indicating if return values of `getPoolBalance` are to be cached.
      */
-    bool _cachePoolBalances = false;
+    bool _cachePoolBalances;
 
     /**
      * @dev Boolean indicating if dYdX balances returned by `getPoolBalance` are to be cached.
      */
-    bool _cacheDydxBalances = false;
+    bool _cacheDydxBalances;
 
     /**
      * @dev Maps to currency codes to cached pool balances to pool indexes.
@@ -392,23 +399,23 @@ contract RariFundManager is Ownable {
      * @param currencyCode The currency code of the token.
      */
     function getPoolBalance(RariFundController.LiquidityPool pool, string memory currencyCode) internal returns (uint256) {
-        if (!_rariFundController.hasCurrencyInPool(pool, currencyCode)) return 0;
+        if (!rariFundController.hasCurrencyInPool(pool, currencyCode)) return 0;
 
         if (_cachePoolBalances || _cacheDydxBalances) {
             if (pool == RariFundController.LiquidityPool.dYdX) {
                 address erc20Contract = _erc20Contracts[currencyCode];
                 require(erc20Contract != address(0), "Invalid currency code.");
-                if (_dydxBalancesCache.length == 0) (_dydxTokenAddressesCache, _dydxBalancesCache) = _rariFundController.getDydxBalances();
+                if (_dydxBalancesCache.length == 0) (_dydxTokenAddressesCache, _dydxBalancesCache) = rariFundController.getDydxBalances();
                 for (uint256 i = 0; i < _dydxBalancesCache.length; i++) if (_dydxTokenAddressesCache[i] == erc20Contract) return _dydxBalancesCache[i];
                 revert("Failed to get dYdX balance of this currency code.");
             } else if (_cachePoolBalances) {
                 uint8 poolAsUint8 = uint8(pool);
-                if (_poolBalanceCache[currencyCode][poolAsUint8] == 0) _poolBalanceCache[currencyCode][poolAsUint8] = _rariFundController._getPoolBalance(pool, currencyCode);
+                if (_poolBalanceCache[currencyCode][poolAsUint8] == 0) _poolBalanceCache[currencyCode][poolAsUint8] = rariFundController._getPoolBalance(pool, currencyCode);
                 return _poolBalanceCache[currencyCode][poolAsUint8];
             }
         }
 
-        return _rariFundController._getPoolBalance(pool, currencyCode);
+        return rariFundController._getPoolBalance(pool, currencyCode);
     }
 
     /**
@@ -464,7 +471,7 @@ contract RariFundManager is Ownable {
     /**
      * @dev Caches the fund's raw total balance (all RFT holders' funds + all unclaimed fees) of all currencies in USD (scaled by 1e18).
      */
-    int256 private _rawFundBalanceCache = -1;
+    int256 private _rawFundBalanceCache;
 
     /**
      * @notice Returns the fund's raw total balance (all RFT holders' funds + all unclaimed fees) of all currencies in USD (scaled by 1e18).
@@ -473,7 +480,7 @@ contract RariFundManager is Ownable {
      */
     function getRawFundBalance() public returns (uint256) {
         if (_rawFundBalanceCache >= 0) return uint256(_rawFundBalanceCache);
-        uint256[] memory pricesInUsd = _rariFundPriceConsumer.getCurrencyPricesInUsd();
+        uint256[] memory pricesInUsd = rariFundPriceConsumer.getCurrencyPricesInUsd();
         return getRawFundBalance(pricesInUsd);
     }
 
@@ -636,7 +643,7 @@ contract RariFundManager is Ownable {
         require(amount > 0, "Deposit amount must be greater than 0.");
 
         // Get currency prices
-        uint256[] memory pricesInUsd = _rariFundPriceConsumer.getCurrencyPricesInUsd();
+        uint256[] memory pricesInUsd = rariFundPriceConsumer.getCurrencyPricesInUsd();
 
         // Manually cache raw fund balance
         bool cacheSetPreviously = _rawFundBalanceCache >= 0;
@@ -738,7 +745,7 @@ contract RariFundManager is Ownable {
             uint256 amountLeft = amount.sub(contractBalance);
             bool withdrawAll = amountLeft >= poolBalance;
             uint256 poolAmount = withdrawAll ? poolBalance : amountLeft;
-            _rariFundController.withdrawFromPoolOptimized(pool, currencyCode, poolAmount, withdrawAll);
+            rariFundController.withdrawFromPoolOptimized(pool, currencyCode, poolAmount, withdrawAll);
 
             if (pool == RariFundController.LiquidityPool.dYdX) {
                 for (uint256 j = 0; j < _dydxBalancesCache.length; j++) if (_dydxTokenAddressesCache[j] == erc20Contract) _dydxBalancesCache[j] = poolBalance.sub(poolAmount);
@@ -778,7 +785,7 @@ contract RariFundManager is Ownable {
      * @param amount The amount of tokens to be withdrawn.
      */
     function withdraw(string calldata currencyCode, uint256 amount) external {
-        _withdrawFrom(msg.sender, currencyCode, amount, _rariFundPriceConsumer.getCurrencyPricesInUsd());
+        _withdrawFrom(msg.sender, currencyCode, amount, rariFundPriceConsumer.getCurrencyPricesInUsd());
     }
 
     /**
@@ -793,7 +800,7 @@ contract RariFundManager is Ownable {
     function withdrawFrom(address from, string[] calldata currencyCodes, uint256[] calldata amounts) external onlyProxy cachePoolBalances {
         // Input validation
         require(currencyCodes.length > 0 && currencyCodes.length == amounts.length, "Lengths of currency code and amount arrays must be greater than 0 and equal.");
-        uint256[] memory pricesInUsd = _rariFundPriceConsumer.getCurrencyPricesInUsd();
+        uint256[] memory pricesInUsd = rariFundPriceConsumer.getCurrencyPricesInUsd();
 
         // Manually cache raw fund balance (no need to check if set previously because the function is external)
         _rawFundBalanceCache = toInt256(getRawFundBalance(pricesInUsd));
@@ -964,7 +971,7 @@ contract RariFundManager is Ownable {
         require(erc20Contract != address(0), "Invalid currency code.");
 
         // Get currency prices
-        uint256[] memory pricesInUsd = _rariFundPriceConsumer.getCurrencyPricesInUsd();
+        uint256[] memory pricesInUsd = rariFundPriceConsumer.getCurrencyPricesInUsd();
 
         // Manually cache raw fund balance (no need to check if set previously because the function is external)
         _rawFundBalanceCache = toInt256(getRawFundBalance(pricesInUsd));

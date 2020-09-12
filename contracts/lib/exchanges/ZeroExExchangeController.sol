@@ -10,8 +10,8 @@
 pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
 
 import "@0x/contracts-exchange-libs/contracts/src/LibFillResults.sol";
 import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";

@@ -9,8 +9,8 @@
 
 pragma solidity 0.5.17;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
 
 import "../../external/aave/LendingPool.sol";
 import "../../external/aave/AToken.sol";

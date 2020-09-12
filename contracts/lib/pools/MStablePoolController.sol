@@ -9,9 +9,9 @@
 
 pragma solidity 0.5.17;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
 
 import "../../external/mstable/ISavingsContract.sol";
 
@@ -80,7 +80,7 @@ library MStablePoolController {
      * @param amount The amount of mUSD tokens to be withdrawn.
      */
     function withdraw(uint256 amount) external {
-        require(amount > 0, "Amount must be greater than to 0.");
+        require(amount > 0, "Amount must be greater than 0.");
         uint256 exchangeRate = _savingsContract.exchangeRate();
         uint256 credits = amount.mul(1e18).div(exchangeRate);
         if (credits.mul(exchangeRate).div(1e18) < amount) credits++; // Round up if necessary (i.e., if the division above left a remainder)

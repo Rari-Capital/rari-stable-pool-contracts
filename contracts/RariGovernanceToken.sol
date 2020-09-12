@@ -9,22 +9,21 @@
 
 pragma solidity 0.5.17;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Detailed.sol";
 
 /**
  * @title RariGovernanceToken
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice RariGovernanceToken is the ERC20 token contract accounting for the ownership of RariFund.
  */
-contract RariGovernanceToken is ERC20, ERC20Detailed {
-    using SafeMath for uint256;
-
+contract RariGovernanceToken is Initializable, ERC20, ERC20Detailed {
     /**
-     * @dev Constructor for RariGovernanceToken.
+     * @dev Initializer that mints 20 million RGT to msg.sender.
      */
-    constructor () public ERC20Detailed("Rari Governance Token", "RGT", 18) {
+    function initialize() public initializer {
+        ERC20Detailed.initialize("Rari Governance Token", "RGT", 18);
         _mint(msg.sender, 10e6 * (10 ** uint256(decimals())));
     }
 }

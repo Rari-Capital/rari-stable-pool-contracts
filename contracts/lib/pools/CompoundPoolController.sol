@@ -9,9 +9,9 @@
 
 pragma solidity 0.5.17;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
 
 import "../../external/compound/CErc20.sol";
 
@@ -42,7 +42,6 @@ library CompoundPoolController {
 
     /**
      * @dev Returns the fund's balance of the specified currency in the Compound pool.
-     * We would simply be using balanceOfUnderlying, but exchangeRateCurrent is nonReentrant, which causes us issues.
      * @param erc20Contract The ERC20 contract address of the token.
      */
     function getBalance(address erc20Contract) external returns (uint256) {
@@ -82,7 +81,7 @@ library CompoundPoolController {
      * @param amount The amount of tokens to be withdrawn.
      */
     function withdraw(address erc20Contract, uint256 amount) external {
-        require(amount > 0, "Amount must be greater than to 0.");
+        require(amount > 0, "Amount must be greater than 0.");
         CErc20 cErc20 = CErc20(getCErc20Contract(erc20Contract));
         uint256 redeemResult = cErc20.redeemUnderlying(amount);
         require(redeemResult == 0, "Error calling redeemUnderlying on Compound cToken: error code not equal to 0.");

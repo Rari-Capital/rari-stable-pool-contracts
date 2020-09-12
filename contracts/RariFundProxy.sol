@@ -10,19 +10,21 @@
 pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/drafts/SignedSafeMath.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/GSN/GSNRecipient.sol";
-import "@openzeppelin/contracts/cryptography/ECDSA.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/drafts/SignedSafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.sol";
 
 import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
 import "@0x/contracts-erc20/contracts/src/interfaces/IEtherToken.sol";
 
 import "./lib/exchanges/ZeroExExchangeController.sol";
 import "./lib/exchanges/MStableExchangeController.sol";
+import "./RariFundController.sol";
 import "./RariFundManager.sol";
 
 /**
@@ -30,7 +32,7 @@ import "./RariFundManager.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice This contract faciliates deposits to RariFundManager from exchanges and withdrawals from RariFundManager for exchanges.
  */
-contract RariFundProxy is Ownable, GSNRecipient {
+contract RariFundProxy is Initializable, Ownable, GSNRecipient {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
     using ECDSA for bytes32;
@@ -62,9 +64,13 @@ contract RariFundProxy is Ownable, GSNRecipient {
     mapping(address => bool) private _mStableExchangeErc20Contracts;
 
     /**
-     * @dev Constructor that sets supported ERC20 token contract addresses.
+     * @dev Initializer that sets supported ERC20 token contract addresses.
      */
-    constructor () public {
+    function initialize() public initializer {
+        // Initialize base contracts
+        Ownable.initialize(msg.sender);
+        GSNRecipient.initialize();
+        
         // Add supported currencies
         addSupportedCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F, 18);
         addSupportedCurrency("USDC", 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 6);
@@ -425,5 +431,29 @@ contract RariFundProxy is Ownable, GSNRecipient {
         if (balance <= 0) return false;
         token.safeTransfer(to, balance);
         return true;
+    }
+
+    /**
+     * @notice Returns the fund controller's contract balance of each currency, balance of each pool of each currency (checking `_poolsWithFunds` first to save gas), and price of each currency.
+     * @dev Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getPoolBalance`) potentially modifies the state.
+     * @return An array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, an array of arrays of corresponding balances at each pool index for each currency code, and an array of prices in USD (scaled by 1e18) for each currency code.
+     */
+    function getRawFundBalancesAndPrices() external returns (string[] memory, uint256[] memory, RariFundController.LiquidityPool[][] memory, uint256[][] memory, uint256[] memory) {
+        RariFundController rariFundController = _rariFundManager.rariFundController();
+        address rariFundControllerContract = address(rariFundController);
+        uint256[] memory contractBalances = new uint256[](_supportedCurrencies.length);
+        RariFundController.LiquidityPool[][] memory pools = new RariFundController.LiquidityPool[][](_supportedCurrencies.length);
+        uint256[][] memory poolBalances = new uint256[][](_supportedCurrencies.length);
+
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
+            string memory currencyCode = _supportedCurrencies[i];
+            contractBalances[i] = IERC20(_erc20Contracts[currencyCode]).balanceOf(rariFundControllerContract);
+            RariFundController.LiquidityPool[] memory currencyPools = rariFundController.getPoolsByCurrency(currencyCode);
+            pools[i] = currencyPools;
+            poolBalances[i] = new uint256[](currencyPools.length);
+            for (uint256 j = 0; j < currencyPools.length; j++) poolBalances[i][j] = rariFundController.getPoolBalance(currencyPools[j], currencyCode);
+        }
+
+        return (_supportedCurrencies, contractBalances, pools, poolBalances, _rariFundManager.rariFundPriceConsumer().getCurrencyPricesInUsd());
     }
 }

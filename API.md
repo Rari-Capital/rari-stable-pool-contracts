@@ -27,15 +27,6 @@ Returns the amount of RSFT owned by `account`.
 * Parameters:
     * `account` (address) - The account whose balance we are retrieving.
 
-## **Stablecoin Pricing**
-
-### `uint256[] RariFundPriceConsumer.getCurrencyPricesInUsd()`
-
-Returns the prices of all supported stablecoins to which funds can be allocated.
-
-* Use these prices to calculate the value added to a user's USD balance due to a direct deposit and the value subtracted from a user's USD balance due to a direct withdrawal.
-* Return values: An array of prices in USD (scaled by 1e18) corresponding to the following list of currencies: DAI, USDC, USDT, TUSD, BUSD, sUSD, and mUSD.
-
 ## **Deposits**
 
 ### `uint256 RariFundManager.getDefaultAccountBalanceLimit()`
@@ -152,7 +143,7 @@ Withdraws funds from RariFund in exchange for RSFT and exchanges to them to the 
 * Development notes:
     * *We should be able to make this function external and use calldata for all parameters, but [Solidity does not support calldata structs](https://github.com/ethereum/solidity/issues/5479).*
 
-## Rari Stable Fund Token
+## **Rari Stable Fund Token**
 
 See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSFT. Here are a few of the most common ones:
 
@@ -210,14 +201,7 @@ Returns the amount of interest fees accrued by beneficiaries in USD (scaled by 1
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
-## **Raw Fund Balances and Interest**
-
-### `int256 RariFundManager.getRawInterestAccrued()`
-
-Returns the raw total amount of interest accrued by the fund as a whole (including the fees paid on interest) in USD (scaled by 1e18).
-
-* Development notes:
-    * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
+## **Raw Fund Balances, Allocations, and Interest**
 
 ### `uint256 RariFundManager.getRawFundBalance()`
 
@@ -235,10 +219,26 @@ Returns the fund's raw total balance (all RSFT holders' funds + all unclaimed fe
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `RariFundController.getPoolBalance`) potentially modifies the state.*
 
-### `(string[], uint256[], uint256[][], uint256[][], uint256[]) RariFundController.getAllBalances()`
+### `(string[], uint256[], RariFundController.LiquidityPool[][], uint256[][], uint256[]) RariFundProxy.getRawFundBalancesAndPrices()`
 
 Returns the fund controller's contract balance of each currency, balance of each pool of each currency (checking `_poolsWithFunds` first to save gas), and price of each currency.
 
 * Return values: An array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, an array of arrays of corresponding balances at each pool index for each currency code, and an array of prices in USD (scaled by 1e18) for each currency code.
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getPoolBalance`) potentially modifies the state.*
+
+### `int256 RariFundManager.getRawInterestAccrued()`
+
+Returns the raw total amount of interest accrued by the fund as a whole (including the fees paid on interest) in USD (scaled by 1e18).
+
+* Development notes:
+    * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
+
+## **Stablecoin Pricing**
+
+### `uint256[] RariFundPriceConsumer.getCurrencyPricesInUsd()`
+
+Returns the prices of all supported stablecoins to which funds can be allocated.
+
+* Use these prices to calculate the value added to a user's USD balance due to a direct deposit and the value subtracted from a user's USD balance due to a direct withdrawal.
+* Return value: An array of prices in USD (scaled by 1e18) corresponding to the following list of currencies in the following order: DAI, USDC, USDT, TUSD, BUSD, sUSD, and mUSD.

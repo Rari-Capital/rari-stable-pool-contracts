@@ -9,22 +9,23 @@
 
 pragma solidity 0.5.17;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
+import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Detailed.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Mintable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Burnable.sol";
 
 /**
  * @title RariFundToken
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice RariFundToken is the ERC20 token contract accounting for the ownership of RariFund's funds.
  */
-contract RariFundToken is ERC20, ERC20Detailed, ERC20Mintable, ERC20Burnable {
-    using SafeMath for uint256;
-
+contract RariFundToken is Initializable, ERC20, ERC20Detailed, ERC20Mintable, ERC20Burnable {
     /**
-     * @dev Constructor for RariFundToken.
+     * @dev Initializer for RariFundToken.
      */
-    constructor () public ERC20Detailed("Rari Stable Fund Token", "RSFT", 18) { }
+    function initialize() public initializer {
+        ERC20Detailed.initialize("Rari Stable Fund Token", "RSFT", 18);
+        ERC20Mintable.initialize(msg.sender);
+    }
 }

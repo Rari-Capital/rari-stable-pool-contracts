@@ -9,7 +9,7 @@ The following document contains instructions on common usage of the smart contra
 ## Fund APY
 
 * **Get current raw fund APY (before fees):**
-    1. Get all raw fund balances (including unclaimed fees on interest): `(string[] memory, uint256[] memory, uint256[][] memory, uint256[][] memory) RariFundController.getAllBalances()` returns an array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, and an array of arrays of corresponding balances at each pool index for each currency code.
+    1. Get all raw fund balances (including unclaimed fees on interest): `(string[], uint256[], RariFundController.LiquidityPool[][], uint256[][], uint256[]) RariFundProxy.getRawFundBalancesAndPrices()` returns an array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, an array of arrays of corresponding balances at each pool index for each currency code, and an array of prices in USD (scaled by 1e18) for each currency code.
     2. Multiply the APY of each pool of each currency by its fund controller balance (converted to USD).
     3. Divide the sum of these products by the sum of all fund controller contract balances and pool balances of each currency (converted to USD) to get the current fund APY.
 * **Get current fund APY (after fees):** subtract the product of the current raw fund APY and `uint256 RariFundManager.getInterestFeeRate()` divided by 1e18 from the current raw fund APY.
@@ -28,7 +28,7 @@ The following document contains instructions on common usage of the smart contra
 *Our SDK, soon to be released, will make programmatic deposits and withdrawals as easy as just one line of code.*
 
 1. User chooses to deposit one of our directly supported tokens (DAI, USDC, USDT, TUSD, BUSD, and sUSD), ETH, or one of the tokens listed by the 0x swap tokens API (see [documentation](https://0x.org/docs/api#get-swapv0tokens) and [endpoint](https://api.0x.org/swap/v0/tokens)) in an amount no greater than the balance of their Ethereum account.
-2. User ensures that their deposit will not cause their account balance to breach the limit.
+2. User ensures that their deposit will not cause their account balance to breach the USD-based limit.
     * To check an account's balance limit: `uint256 RariFundManager.getAccountBalanceLimit(address account)`
     * To check the default account balance limit: `uint256 RariFundManager.getDefaultAccountBalanceLimit()`
     * The default account balance limit is currently **$350 USD**, though this figure will be raised in the near future.
@@ -111,14 +111,22 @@ The following document contains instructions on common usage of the smart contra
 * See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSFT.
 * **Get RSFT exchange rate:** Divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RSFT in USD (scaled by 1e18).
 
-## Fund Balances and Interest
+## Fund Balance and Interest
 
 * **Get total USD supplied (by all users):** `uint256 RariFundManager.getFundBalance()` returns the fund's total investor balance (all RSFT holders' funds but not unclaimed fees) of all currencies in USD (scaled by 1e18).
 * **Get total interest accrued (by all users):** `int256 RariFundManager.getInterestAccrued()` returns the total amount of interest accrued by past and current RSFT holders (excluding the fees paid on interest) in USD (scaled by 1e18).
-* **Get all raw fund balances and allocations (including unclaimed fees on interest):** `(string[] memory, uint256[] memory, uint256[][] memory, uint256[][] memory) RariFundController.getAllBalances()` returns an array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, and an array of arrays of corresponding allocations at each pool index for each currency code.
 
 ## Fees on Interest
 
 * Rari Capital currently takes a *20% performance fee* on all interest accrued by the fund.
 * This fee is liable to change in the future, but the following method returns its current value at any time.
 * **Get interest fee rate:** `uint256 RariFundManager.getInterestFeeRate()` returns the fee rate on interest (proportion of raw interest accrued scaled by 1e18).
+
+## Raw Fund Allocations
+
+* **Get all raw fund allocations (including unclaimed fees on interest) and prices:** `(string[], uint256[], RariFundController.LiquidityPool[][], uint256[][], uint256[]) RariFundProxy.getRawFundBalancesAndPrices()` returns an array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, an array of arrays of corresponding balances at each pool index for each currency code, and an array of prices in USD (scaled by 1e18) for each currency code.
+
+## Internal Stablecoin Pricing
+
+* **Get stablecoin prices (used internally by contracts):** `uint256[] RariFundPriceConsumer.getCurrencyPricesInUsd()` returns an array of prices in USD (scaled by 1e18) for all supported stablecoins to which funds can be allocated (DAI, USDC, USDT, TUSD, BUSD, sUSD, and mUSD, in that order).
+    * Use these prices to calculate the value added to a user's USD balance due to a direct deposit and the value subtracted from a user's USD balance due to a direct withdrawal.

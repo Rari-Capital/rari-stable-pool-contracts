@@ -9,9 +9,9 @@
 
 pragma solidity 0.5.17;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
 
 import "../../external/mstable/IMasset.sol";
 
@@ -68,7 +68,7 @@ library MStableExchangeController {
      * @return The amount of mUSD tokens redeemed.
      */
     function redeem(address erc20Contract, uint256 outputAmount) external returns (uint256) {
-        require(outputAmount > 0, "Output amount must be greater than to 0.");
+        require(outputAmount > 0, "Output amount must be greater than 0.");
         uint256 mAssetRedeemed = _mUsdToken.redeem(erc20Contract, outputAmount);
         require(mAssetRedeemed > 0, "Error calling redeem on mStable mUSD token: no mUSD redeemed.");
         return mAssetRedeemed;
@@ -82,7 +82,7 @@ library MStableExchangeController {
      * @return The amount of output tokens.
      */
     function swap(address inputErc20Contract, address outputErc20Contract, uint256 inputAmount) external returns (uint256) {
-        require(inputAmount > 0, "Input amount must be greater than to 0.");
+        require(inputAmount > 0, "Input amount must be greater than 0.");
         uint256 outputAmount = _mUsdToken.swap(inputErc20Contract, outputErc20Contract, inputAmount, address(this));
         require(outputAmount > 0, "Error calling redeem on mStable mUSD token: output amount not greater than 0.");
         return outputAmount;
