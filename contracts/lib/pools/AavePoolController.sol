@@ -25,11 +25,6 @@ library AavePoolController {
     using SafeERC20 for IERC20;
 
     /**
-     * @notice Package version of `rari-contracts` when this contract was deployed.
-     */
-    string public constant VERSION = "2.0.0";
-
-    /**
      * @dev Aave LendingPool contract address.
      */
     address constant private LENDING_POOL_CONTRACT = 0x398eC7346DcD622eDc5ae82352F02bE94C62d119;

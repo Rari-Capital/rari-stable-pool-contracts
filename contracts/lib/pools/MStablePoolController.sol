@@ -25,11 +25,6 @@ library MStablePoolController {
     using SafeERC20 for IERC20;
 
     /**
-     * @notice Package version of `rari-contracts` when this contract was deployed.
-     */
-    string public constant VERSION = "2.0.0";
-
-    /**
      * @dev mStable mUSD ERC20 token contract address.
      */
     address constant private MUSD_TOKEN_CONTRACT = 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5;

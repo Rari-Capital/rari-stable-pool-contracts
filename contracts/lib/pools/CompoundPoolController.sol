@@ -25,11 +25,6 @@ library CompoundPoolController {
     using SafeERC20 for IERC20;
 
     /**
-     * @notice Package version of `rari-contracts` when this contract was deployed.
-     */
-    string public constant VERSION = "2.0.0";
-
-    /**
      * @dev Returns a token's cToken contract address given its ERC20 contract address.
      * @param erc20Contract The ERC20 contract address of the token.
      */

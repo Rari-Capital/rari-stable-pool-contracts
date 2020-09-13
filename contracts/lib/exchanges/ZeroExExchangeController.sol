@@ -29,11 +29,6 @@ library ZeroExExchangeController {
     using LibBytes for bytes;
 
     /**
-     * @notice Package version of `rari-contracts` when this contract was deployed.
-     */
-    string public constant VERSION = "2.0.0";
-
-    /**
      * @dev 0x v3 Exchange contract address.
      */
     address constant private EXCHANGE_CONTRACT = 0x61935CbDd02287B511119DDb11Aeb42F1593b7Ef;

@@ -28,11 +28,6 @@ library DydxPoolController {
     using SafeERC20 for IERC20;
 
     /**
-     * @notice Package version of `rari-contracts` when this contract was deployed.
-     */
-    string public constant VERSION = "2.0.0";
-
-    /**
      * @dev dYdX SoloMargin contract address.
      */
     address constant private SOLO_MARGIN_CONTRACT = 0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e;

@@ -39,11 +39,6 @@ contract RariFundProxy is Initializable, Ownable, GSNRecipient {
     using SafeERC20 for IERC20;
 
     /**
-     * @notice Package version of `rari-contracts` when this contract was deployed.
-     */
-    string public constant VERSION = "2.0.0";
-
-    /**
      * @dev Array of currencies supported by the fund.
      */
     string[] private _supportedCurrencies;

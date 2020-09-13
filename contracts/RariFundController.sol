@@ -38,11 +38,6 @@ contract RariFundController is Initializable, Ownable {
     using SafeERC20 for IERC20;
 
     /**
-     * @notice Package version of `rari-contracts` when this contract was deployed.
-     */
-    string public constant VERSION = "2.0.0";
-
-    /**
      * @dev Boolean to be checked on `upgradeFundController`.
      */
     bool public constant IS_RARI_FUND_CONTROLLER = true;
