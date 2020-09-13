@@ -57,19 +57,19 @@ contract("RariFundController", accounts => {
     await newFundControllerInstance.setFundManager(RariFundManager.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Upgrade!
-    var result = await fundControllerInstance.upgradeFundController(RariFundController.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    var result = await fundControllerInstance.upgradeFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
     console.log("Gas usage of RariFundController.upgradeFundController:", result.receipt.gasUsed);
     assert.isAtMost(result.receipt.gasUsed, 5000000); // Assert it uses no more than 5 million gas
 
     // Set FundController of FundManager to the new FundController
-    await fundManagerInstance.setFundController(RariFundController.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Check token balances of new FundController
     for (const currencyCode of Object.keys(depositsByCurrency)) {
       var erc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
       let newRawFundBalance = await fundManagerInstance.methods["getRawFundBalance(string)"].call(currencyCode);
       assert(newRawFundBalance.gte(rawFundBalancesByCurrency[currencyCode].add(depositsByCurrency[currencyCode].mul(web3.utils.toBN(9999)).div(web3.utils.toBN(10000)))));
-      let newFundControllerContractBalance = web3.utils.toBN(await erc20Contract.methods.balanceOf(RariFundController.address).call());
+      let newFundControllerContractBalance = web3.utils.toBN(await erc20Contract.methods.balanceOf(newFundControllerInstance.address).call());
       assert(newFundControllerContractBalance.gte(rawFundBalancesByCurrency[currencyCode].add(depositsByCurrency[currencyCode].mul(web3.utils.toBN(9999)).div(web3.utils.toBN(10000)))));
     }
   });
