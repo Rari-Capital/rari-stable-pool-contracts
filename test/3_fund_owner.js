@@ -141,7 +141,7 @@ contract("RariFundController, RariFundManager", accounts => {
 });
 
 contract("RariFundManager", accounts => {
-  it("should upgrade the FundManager to a copy of its code by disabling the FundController and old FundManager and passing data to the new FundManager", async () => {
+  it("should upgrade the FundManager implementation to a copy of its code", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
     
@@ -180,7 +180,7 @@ contract("RariFundManager", accounts => {
 });
 
 contract("RariFundManager", accounts => {
-  it("should upgrade the proxy and implementation of FundManager to new code (by disabling the FundController and old FundManager and passing data to the new FundManager)", async () => {
+  it("should upgrade the proxy and implementation of FundManager to new code", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
     
@@ -211,7 +211,7 @@ contract("RariFundManager", accounts => {
 });
 
 contract("RariFundController", accounts => {
-  it("should upgrade the implementation of FundController to a copy of its code", async () => {
+  it("should upgrade the FundController to a copy of its code", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
     
@@ -236,8 +236,13 @@ contract("RariFundController", accounts => {
 
     // TODO: Check _fundDisabled (no way to do this as of now)
 
-    // Upgrade FundController
-    await upgradeProxy(RariFundController.address, RariFundController, { unsafeAllowCustomTypes: true });
+    // Create new FundController
+    var newFundControllerInstance = await RariFundController.new({ from: process.env.DEVELOPMENT_ADDRESS });
+    await newFundControllerInstance.setFundManager(RariFundManager.address, { from: process.env.DEVELOPMENT_ADDRESS });
+
+    // Upgrade!
+    await fundControllerInstance.upgradeFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Check balance of new FundController
     let newRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
@@ -250,7 +255,7 @@ contract("RariFundController", accounts => {
 });
 
 contract("RariFundController", accounts => {
-  it("should upgrade the proxy and implementation of FundController to new code (by disabling the old FundController and the FundManager, withdrawing all tokens from all pools, and transferring them to the new FundController)", async () => {
+  it("should upgrade the FundController to new code", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await RariFundManager.deployed();
     
@@ -276,7 +281,7 @@ contract("RariFundController", accounts => {
     // TODO: Check _fundDisabled (no way to do this as of now)
 
     // Create new FundController
-    var newFundControllerInstance = await deployProxy(DummyRariFundController, []);
+    var newFundControllerInstance = await DummyRariFundController.new({ from: process.env.DEVELOPMENT_ADDRESS });
 
     // Upgrade!
     await fundControllerInstance.upgradeFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });

@@ -72,7 +72,7 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.link(MStableExchangeController, RariFundController);
 
     // Deploy new RariFundController and RariFundManager
-    var rariFundController = await deployProxy(RariFundController, [], { deployer, unsafeAllowCustomTypes: true });
+    var rariFundController = await deployer.deploy(RariFundController);
     var rariFundManager = await deployProxy(RariFundManager, [], { deployer, unsafeAllowCustomTypes: true });
 
     // Disable the fund on the old RariFundController and RariFundManager
@@ -186,7 +186,7 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.link(MStableExchangeController, RariFundProxy);
 
     // Deploy RariFundProxy
-    var rariFundProxy = await deployProxy(RariFundProxy, [], { deployer });
+    var rariFundProxy = await deployer.deploy(RariFundProxy);
 
     // Connect RariFundManager and RariFundProxy
     await rariFundManager.setFundProxy(RariFundProxy.address);
@@ -225,7 +225,7 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.link(MStableExchangeController, RariFundController);
 
     // Deploy RariFundController and RariFundManager
-    var rariFundController = await deployProxy(RariFundController, [], { deployer, unsafeAllowCustomTypes: true });
+    var rariFundController = await deployer.deploy(RariFundController);
     var rariFundManager = await deployProxy(RariFundManager, [], { deployer, unsafeAllowCustomTypes: true });
 
     // Connect RariFundController and RariFundManager
@@ -275,7 +275,7 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.link(MStableExchangeController, RariFundProxy);
 
     // Deploy RariFundProxy
-    var rariFundProxy = await deployProxy(RariFundProxy, [], { deployer });
+    var rariFundProxy = await deployer.deploy(RariFundProxy);
 
     // Connect RariFundManager and RariFundProxy
     await rariFundManager.setFundProxy(RariFundProxy.address);

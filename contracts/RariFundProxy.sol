@@ -10,7 +10,6 @@
 pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/drafts/SignedSafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
@@ -32,7 +31,7 @@ import "./RariFundManager.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice This contract faciliates deposits to RariFundManager from exchanges and withdrawals from RariFundManager for exchanges.
  */
-contract RariFundProxy is Initializable, Ownable, GSNRecipient {
+contract RariFundProxy is Ownable, GSNRecipient {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
     using ECDSA for bytes32;
@@ -59,9 +58,9 @@ contract RariFundProxy is Initializable, Ownable, GSNRecipient {
     mapping(address => bool) private _mStableExchangeErc20Contracts;
 
     /**
-     * @dev Initializer that sets supported ERC20 token contract addresses.
+     * @dev Constructor that sets supported ERC20 token contract addresses.
      */
-    function initialize() public initializer {
+    constructor() public {
         // Initialize base contracts
         Ownable.initialize(msg.sender);
         GSNRecipient.initialize();

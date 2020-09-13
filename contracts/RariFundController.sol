@@ -10,7 +10,6 @@
 pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/upgrades/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/drafts/SignedSafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
@@ -32,7 +31,7 @@ import "./lib/exchanges/MStableExchangeController.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice This contract handles deposits to and withdrawals from the liquidity pools that power RariFund as well as currency exchanges via 0x.
  */
-contract RariFundController is Initializable, Ownable {
+contract RariFundController is Ownable {
     using SafeMath for uint256;
     using SignedSafeMath for int256;
     using SafeERC20 for IERC20;
@@ -93,9 +92,9 @@ contract RariFundController is Initializable, Ownable {
     mapping(string => LiquidityPool[]) private _poolsByCurrency;
 
     /**
-     * @dev Initializer that sets supported ERC20 contract addresses and supported pools for each supported token.
+     * @dev Constructor that sets supported ERC20 contract addresses and supported pools for each supported token.
      */
-    function initialize() public initializer {
+    constructor () public {
         // Initialize base contracts
         Ownable.initialize(msg.sender);
         
