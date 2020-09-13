@@ -279,8 +279,8 @@ contract("RariFundController", accounts => {
     var newFundControllerInstance = await deployProxy(DummyRariFundController, []);
 
     // Upgrade!
-    await fundControllerInstance.upgradeFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
-    await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    await fundControllerInstance.upgradeFundController(DummyRariFundController.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    await fundManagerInstance.setFundController(DummyRariFundController.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Check balance of new FundController
     let newRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
