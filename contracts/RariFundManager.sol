@@ -63,7 +63,7 @@ contract RariFundManager is Initializable, Ownable {
     /**
      * @dev Contract of the RariFundToken.
      */
-    RariFundToken private _rariFundToken;
+    RariFundToken public rariFundToken;
 
     /**
      * @dev Contract of the RariFundPriceConsumer.
@@ -184,8 +184,8 @@ contract RariFundManager is Initializable, Ownable {
 
         // Update RariFundToken minter
         if (_rariFundTokenContract != address(0)) {
-            _rariFundToken.addMinter(newContract);
-            _rariFundToken.renounceMinter();
+            rariFundToken.addMinter(newContract);
+            rariFundToken.renounceMinter();
         }
 
         emit FundManagerUpgraded(newContract);
@@ -269,7 +269,7 @@ contract RariFundManager is Initializable, Ownable {
      */
     function setFundToken(address newContract) external onlyOwner {
         _rariFundTokenContract = newContract;
-        _rariFundToken = RariFundToken(_rariFundTokenContract);
+        rariFundToken = RariFundToken(_rariFundTokenContract);
         emit FundTokenSet(newContract);
     }
 
@@ -526,9 +526,9 @@ contract RariFundManager is Initializable, Ownable {
      * @param account The account whose balance we are calculating.
      */
     function balanceOf(address account) external returns (uint256) {
-        uint256 rftTotalSupply = _rariFundToken.totalSupply();
+        uint256 rftTotalSupply = rariFundToken.totalSupply();
         if (rftTotalSupply == 0) return 0;
-        uint256 rftBalance = _rariFundToken.balanceOf(account);
+        uint256 rftBalance = rariFundToken.balanceOf(account);
         uint256 fundBalanceUsd = getFundBalance();
         uint256 accountBalanceUsd = rftBalance.mul(fundBalanceUsd).div(rftTotalSupply);
         return accountBalanceUsd;
@@ -653,7 +653,7 @@ contract RariFundManager is Initializable, Ownable {
         uint256 amountUsd = amount.mul(pricesInUsd[_currencyIndexes[currencyCode]]).div(10 ** _currencyDecimals[currencyCode]);
 
         // Calculate RFT to mint
-        uint256 rftTotalSupply = _rariFundToken.totalSupply();
+        uint256 rftTotalSupply = rariFundToken.totalSupply();
         uint256 fundBalanceUsd = rftTotalSupply > 0 ? getFundBalance() : 0; // Only set if used
         uint256 rftAmount = 0;
         if (rftTotalSupply > 0 && fundBalanceUsd > 0) rftAmount = amountUsd.mul(rftTotalSupply).div(fundBalanceUsd);
@@ -666,7 +666,7 @@ contract RariFundManager is Initializable, Ownable {
         // Update net deposits, transfer funds from msg.sender, mint RFT, and emit event
         _netDeposits = _netDeposits.add(int256(amountUsd));
         IERC20(erc20Contract).safeTransferFrom(msg.sender, _rariFundControllerContract, amount); // The user must approve the transfer of tokens beforehand
-        require(_rariFundToken.mint(to, rftAmount), "Failed to mint output tokens.");
+        require(rariFundToken.mint(to, rftAmount), "Failed to mint output tokens.");
         emit Deposit(currencyCode, msg.sender, to, amount, amountUsd, rftAmount);
 
         // Reset _rawFundBalanceCache if necessary
@@ -685,7 +685,7 @@ contract RariFundManager is Initializable, Ownable {
     function checkAccountBalanceLimit(address to, uint256 amountUsd, uint256 rftTotalSupply, uint256 fundBalanceUsd) internal view returns (bool) {
         if (to != owner() && to != _interestFeeMasterBeneficiary) {
             if (_accountBalanceLimits[to] < 0) return false;
-            uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? _rariFundToken.balanceOf(to).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
+            uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? rariFundToken.balanceOf(to).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
             uint256 accountBalanceLimitUsd = _accountBalanceLimits[to] > 0 ? uint256(_accountBalanceLimits[to]) : _accountBalanceLimitDefault;
             if (initialBalanceUsd.add(amountUsd) > accountBalanceLimitUsd) return false;
         }
@@ -710,11 +710,11 @@ contract RariFundManager is Initializable, Ownable {
      * @param amountUsd The amount of the withdrawal in USD
      */
     function getRftBurnAmount(address from, uint256 amountUsd) internal returns (uint256) {
-        uint256 rftTotalSupply = _rariFundToken.totalSupply();
+        uint256 rftTotalSupply = rariFundToken.totalSupply();
         uint256 fundBalanceUsd = getFundBalance();
         require(fundBalanceUsd > 0, "Fund balance is zero.");
         uint256 rftAmount = amountUsd.mul(rftTotalSupply).div(fundBalanceUsd);
-        require(rftAmount <= _rariFundToken.balanceOf(from), "Your RFT balance is too low for a withdrawal of this amount.");
+        require(rftAmount <= rariFundToken.balanceOf(from), "Your RFT balance is too low for a withdrawal of this amount.");
         require(rftAmount > 0, "Withdrawal amount is so small that no RFT would be burned.");
         return rftAmount;
     }
@@ -767,7 +767,7 @@ contract RariFundManager is Initializable, Ownable {
         uint256 rftAmount = getRftBurnAmount(from, amountUsd);
 
         // Burn RFT, transfer funds to msg.sender, update net deposits, and emit event
-        _rariFundToken.burnFrom(from, rftAmount); // The user must approve the burning of tokens beforehand
+        rariFundToken.burnFrom(from, rftAmount); // The user must approve the burning of tokens beforehand
         token.safeTransferFrom(_rariFundControllerContract, msg.sender, amount);
         _netDeposits = _netDeposits.sub(int256(amountUsd));
         emit Withdrawal(currencyCode, from, msg.sender, amount, amountUsd, rftAmount);
@@ -931,7 +931,7 @@ contract RariFundManager is Initializable, Ownable {
         if (amountUsd <= 0) return 1;
 
         // Calculate RFT amount to mint and validate
-        uint256 rftTotalSupply = _rariFundToken.totalSupply();
+        uint256 rftTotalSupply = rariFundToken.totalSupply();
         uint256 rftAmount = 0;
 
         if (rftTotalSupply > 0) {
@@ -945,7 +945,7 @@ contract RariFundManager is Initializable, Ownable {
         // Update claimed interest fees and net deposits, mint RFT, emit events, and return no error
         _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
         _netDeposits = _netDeposits.add(int256(amountUsd));
-        require(_rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
+        require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
         emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
         emit InterestFeeDeposit(_interestFeeMasterBeneficiary, amountUsd);
         return 0;

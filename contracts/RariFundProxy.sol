@@ -115,7 +115,7 @@ contract RariFundProxy is Initializable, Ownable, GSNRecipient {
     /**
      * @dev Contract of the RariFundManager.
      */
-    RariFundManager private _rariFundManager;
+    RariFundManager public rariFundManager;
 
     /**
      * @dev Address of the trusted GSN signer.
@@ -140,7 +140,7 @@ contract RariFundProxy is Initializable, Ownable, GSNRecipient {
         }
 
         _rariFundManagerContract = newContract;
-        _rariFundManager = RariFundManager(_rariFundManagerContract);
+        rariFundManager = RariFundManager(_rariFundManagerContract);
         emit FundManagerSet(newContract);
     }
 
@@ -231,7 +231,7 @@ contract RariFundProxy is Initializable, Ownable, GSNRecipient {
         emit PreDepositExchange(inputErc20Contract, outputCurrencyCode, msg.sender, filledAmounts[0], filledAmounts[1]);
 
         // Deposit output tokens
-        _rariFundManager.depositTo(msg.sender, outputCurrencyCode, filledAmounts[1]);
+        rariFundManager.depositTo(msg.sender, outputCurrencyCode, filledAmounts[1]);
 
         // Refund unused ETH
         uint256 ethBalance = address(this).balance;
@@ -278,7 +278,7 @@ contract RariFundProxy is Initializable, Ownable, GSNRecipient {
         emit PreDepositExchange(inputErc20Contract, outputCurrencyCode, msg.sender, inputAmount, realOutputAmount);
 
         // Deposit output tokens
-        _rariFundManager.depositTo(msg.sender, outputCurrencyCode, realOutputAmount);
+        rariFundManager.depositTo(msg.sender, outputCurrencyCode, realOutputAmount);
     }
 
     /**
@@ -301,7 +301,7 @@ contract RariFundProxy is Initializable, Ownable, GSNRecipient {
         require(inputCurrencyCodes.length == inputAmounts.length && inputCurrencyCodes.length == orders.length && inputCurrencyCodes.length == signatures.length && inputCurrencyCodes.length == makerAssetFillAmounts.length && inputCurrencyCodes.length == protocolFees.length, "Array parameters are not all the same length.");
 
         // Withdraw input tokens
-        _rariFundManager.withdrawFrom(msg.sender, inputCurrencyCodes, inputAmounts);
+        rariFundManager.withdrawFrom(msg.sender, inputCurrencyCodes, inputAmounts);
 
         // For each input currency
         for (uint256 i = 0; i < inputCurrencyCodes.length; i++) {
@@ -372,7 +372,7 @@ contract RariFundProxy is Initializable, Ownable, GSNRecipient {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         IERC20(erc20Contract).safeTransferFrom(_msgSender(), address(this), amount); // The user must approve the transfer of tokens beforehand
-        _rariFundManager.depositTo(_msgSender(), currencyCode, amount);
+        rariFundManager.depositTo(_msgSender(), currencyCode, amount);
     }
 
     /**
@@ -439,7 +439,7 @@ contract RariFundProxy is Initializable, Ownable, GSNRecipient {
      * @return An array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, an array of arrays of corresponding balances at each pool index for each currency code, and an array of prices in USD (scaled by 1e18) for each currency code.
      */
     function getRawFundBalancesAndPrices() external returns (string[] memory, uint256[] memory, RariFundController.LiquidityPool[][] memory, uint256[][] memory, uint256[] memory) {
-        RariFundController rariFundController = _rariFundManager.rariFundController();
+        RariFundController rariFundController = rariFundManager.rariFundController();
         address rariFundControllerContract = address(rariFundController);
         uint256[] memory contractBalances = new uint256[](_supportedCurrencies.length);
         RariFundController.LiquidityPool[][] memory pools = new RariFundController.LiquidityPool[][](_supportedCurrencies.length);
@@ -454,6 +454,6 @@ contract RariFundProxy is Initializable, Ownable, GSNRecipient {
             for (uint256 j = 0; j < currencyPools.length; j++) poolBalances[i][j] = rariFundController.getPoolBalance(currencyPools[j], currencyCode);
         }
 
-        return (_supportedCurrencies, contractBalances, pools, poolBalances, _rariFundManager.rariFundPriceConsumer().getCurrencyPricesInUsd());
+        return (_supportedCurrencies, contractBalances, pools, poolBalances, rariFundManager.rariFundPriceConsumer().getCurrencyPricesInUsd());
     }
 }

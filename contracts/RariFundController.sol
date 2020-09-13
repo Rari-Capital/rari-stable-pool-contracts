@@ -60,7 +60,7 @@ contract RariFundController is Initializable, Ownable {
     /**
      * @dev Contract of the RariFundManager.
      */
-    RariFundManager private _rariFundManager;
+    RariFundManager public rariFundManager;
 
     /**
      * @dev Address of the rebalancer.
@@ -207,7 +207,7 @@ contract RariFundController is Initializable, Ownable {
         }
 
         _rariFundManagerContract = newContract;
-        _rariFundManager = RariFundManager(_rariFundManagerContract);
+        rariFundManager = RariFundManager(_rariFundManagerContract);
         emit FundManagerSet(newContract);
     }
 
@@ -546,8 +546,8 @@ contract RariFundController is Initializable, Ownable {
         uint256 rawFundBalanceBeforeExchange;
 
         if (inputErc20Contract != address(0)) {
-            pricesInUsd = _rariFundManager.rariFundPriceConsumer().getCurrencyPricesInUsd();
-            rawFundBalanceBeforeExchange = _rariFundManager.getRawFundBalance(pricesInUsd);
+            pricesInUsd = rariFundManager.rariFundPriceConsumer().getCurrencyPricesInUsd();
+            rawFundBalanceBeforeExchange = rariFundManager.getRawFundBalance(pricesInUsd);
         }
 
         // Market sell
@@ -639,8 +639,8 @@ contract RariFundController is Initializable, Ownable {
         // Get prices and raw fund balance before exchange
         uint256[] memory pricesInUsd;
         uint256 rawFundBalanceBeforeExchange;
-        pricesInUsd = _rariFundManager.rariFundPriceConsumer().getCurrencyPricesInUsd();
-        rawFundBalanceBeforeExchange = _rariFundManager.getRawFundBalance(pricesInUsd);
+        pricesInUsd = rariFundManager.rariFundPriceConsumer().getCurrencyPricesInUsd();
+        rawFundBalanceBeforeExchange = rariFundManager.getRawFundBalance(pricesInUsd);
 
         // Swap stablecoins via mUSD
         uint256 outputAmount;
