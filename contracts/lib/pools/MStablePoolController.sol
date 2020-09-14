@@ -88,7 +88,7 @@ library MStablePoolController {
      */
     function withdrawAll() external returns (bool) {
         uint256 creditBalance = _savingsContract.creditBalances(address(this));
-        if (creditBalance <= 0) return false; // TODO: Or revert("No funds available to withdraw from the mStable savings contract.")
+        if (creditBalance <= 0) return false;
         uint256 mAssetReturned = _savingsContract.redeem(creditBalance);
         require(mAssetReturned > 0, "Error calling redeem on mStable savings contract: no mUSD returned.");
         return true;

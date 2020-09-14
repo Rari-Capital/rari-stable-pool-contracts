@@ -90,7 +90,7 @@ library CompoundPoolController {
     function withdrawAll(address erc20Contract) external returns (bool) {
         CErc20 cErc20 = CErc20(getCErc20Contract(erc20Contract));
         uint256 balance = cErc20.balanceOf(address(this));
-        if (balance <= 0) return false; // TODO: Or revert("No funds available to redeem from Compound cToken.")
+        if (balance <= 0) return false;
         uint256 redeemResult = cErc20.redeem(balance);
         require(redeemResult == 0, "Error calling redeem on Compound cToken: error code not equal to 0.");
         return true;
