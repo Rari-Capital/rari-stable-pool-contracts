@@ -69,7 +69,7 @@ App = {
   zeroExPrices: {},
   usdPrices: {},
   usdPricesLastUpdated: 0,
-  checkAccountBalanceLimit: true,
+  accountBalanceLimitUsdBN: null,
   acceptedCurrencies: [],
   supportedCurrencies: ["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"],
   chainlinkPricesInUsd: {},
@@ -92,17 +92,6 @@ App = {
       $('#page-account').show();
       $('#tab-fund').css('text-decoration', '');
       $('#tab-account').css('text-decoration', 'underline');
-    }); // Bypass account balance limit checking (client-side only)
-
-    var zKeyDown = false;
-    var mKeyDown = false;
-    document.addEventListener('keydown', function (e) {
-      if (e.keyCode == 90) zKeyDown = true;
-      if (mKeyDown) App.checkAccountBalanceLimit = false;
-    });
-    document.addEventListener('keydown', function (e) {
-      if (e.keyCode == 77) mKeyDown = true;
-      if (zKeyDown) App.checkAccountBalanceLimit = false;
     });
     App.initChartColors();
     App.initWeb3();
@@ -1209,7 +1198,7 @@ App = {
               for (_i6 = 0, _Object$keys6 = Object.keys(App.tokens); _i6 < _Object$keys6.length; _i6++) {
                 _symbol = _Object$keys6[_i6];
                 if (App.tokens[_symbol].contract) App.tokens[_symbol].contract = new App.web3.eth.Contract(App.tokens[_symbol].contract.options.jsonInterface, App.tokens[_symbol].address);
-              } // Get user's account balance in the stablecoin fund and RFT balance
+              } // Get user's account balance in the stablecoin fund, RFT balance, and account balance limit
 
 
               if (App.contracts.RariFundManager) {
@@ -1217,6 +1206,8 @@ App = {
                 if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
                 /* App.getMyInterestAccrued();
                 if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000); */
+
+                App.getAccountBalanceLimit();
               }
 
               if (App.contracts.RariFundToken) {
@@ -1433,7 +1424,7 @@ App = {
    */
   initContracts: function initContracts() {
     $.getJSON('abi/RariFundManager.json?v=1599624605', function (data) {
-      App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0x93F1A63007f37596C72c4CC90DE29706454ab033");
+      App.contracts.RariFundManager = new App.web3.eth.Contract(data, "0x66507090dECA9332502AE09071DB1a0fF7adEddf");
       App.getFundBalance();
       setInterval(App.getFundBalance, 5 * 60 * 1000);
 
@@ -1442,6 +1433,8 @@ App = {
         if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
         /* App.getMyInterestAccrued();
         if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000); */
+
+        App.getAccountBalanceLimit();
       }
 
       App.getDirectlyDepositableCurrencies();
@@ -1451,21 +1444,19 @@ App = {
         App.getDirectlyWithdrawableCurrencies();
       }, 5 * 60 * 1000);
     });
-    $.getJSON('abi/RariFundToken.json?v=1595276956', function (data) {
-      App.contracts.RariFundToken = new App.web3.eth.Contract(data, "0x9366B7C00894c3555c7590b0384e5F6a9D55659f");
-
-      if (App.selectedAccount) {
-        App.getTokenBalance();
-        if (!App.intervalGetTokenBalance) App.intervalGetTokenBalance = setInterval(App.getTokenBalance, 5 * 60 * 1000);
-      }
-    });
     $.getJSON('abi/RariFundProxy.json?v=1599624605', function (data) {
-      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0xeB185c51d5640Cf5555972EC8DdD9B1b901F5730");
+      App.contracts.RariFundProxy = new App.web3.eth.Contract(data, "0xE5229e505E27ed7299E6aeb43E88B792f32906Be");
       App.getCurrentApy();
       setInterval(App.getCurrentApy, 5 * 60 * 1000);
     });
     $.getJSON('abi/ERC20.json', function (data) {
       App.erc20Abi = data;
+      App.contracts.RariFundToken = new App.web3.eth.Contract(data, "0x69Ad8451FA4E331ddb75675E406A7D1dEfF51d59");
+
+      if (App.selectedAccount) {
+        App.getTokenBalance();
+        if (!App.intervalGetTokenBalance) App.intervalGetTokenBalance = setInterval(App.getTokenBalance, 5 * 60 * 1000);
+      }
 
       for (var _i7 = 0, _Object$keys7 = Object.keys(App.tokens); _i7 < _Object$keys7.length; _i7++) {
         var symbol = _Object$keys7[_i7];
@@ -1603,6 +1594,8 @@ App = {
         if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
         /* App.getMyInterestAccrued();
         if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000); */
+
+        App.getAccountBalanceLimit();
       }
 
       if (App.contracts.RariFundToken) {
@@ -1830,12 +1823,12 @@ App = {
                         _context16.t1 = _context16.sent;
                         myFundBalanceBN = _context16.t0.toBN.call(_context16.t0, _context16.t1);
 
-                        if (!(App.checkAccountBalanceLimit && myFundBalanceBN.add(amountBN.mul(App.chainlinkPricesInUsd[token]).div(Web3.utils.toBN(10).pow(Web3.utils.toBN(App.tokens[token].decimals)))).gt(Web3.utils.toBN(350e18)))) {
+                        if (!(App.accountBalanceLimitUsdBN !== null && myFundBalanceBN.add(amountBN.mul(App.chainlinkPricesInUsd[token]).div(Web3.utils.toBN(10).pow(Web3.utils.toBN(App.tokens[token].decimals)))).gt(App.accountBalanceLimitUsdBN))) {
                           _context16.next = 13;
                           break;
                         }
 
-                        return _context16.abrupt("return", toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $350 USD.", "Deposit failed"));
+                        return _context16.abrupt("return", toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $" + new Big(App.accountBalanceLimitUsdBN.toString()).div(new Big(1e18)).toFormat(0) + " USD.", "Deposit failed"));
 
                       case 13:
                         console.log('Deposit ' + amount + ' ' + token + ' directly');
@@ -2015,7 +2008,7 @@ App = {
                           break;
                         }
 
-                        if (!App.checkAccountBalanceLimit) {
+                        if (!(App.accountBalanceLimitUsdBN !== null)) {
                           _context16.next = 101;
                           break;
                         }
@@ -2029,12 +2022,12 @@ App = {
                         myFundBalanceBN = _context16.t9.toBN.call(_context16.t9, _context16.t10);
                         outputAmountUsdBN = mStableOutputAmountAfterFeeBN.mul(App.chainlinkPricesInUsd[mStableOutputCurrency]).div(Web3.utils.toBN(10).pow(Web3.utils.toBN(App.tokens[mStableOutputCurrency].decimals)));
 
-                        if (!myFundBalanceBN.add(outputAmountUsdBN).gt(Web3.utils.toBN(350e18))) {
+                        if (!myFundBalanceBN.add(outputAmountUsdBN).gt(App.accountBalanceLimitUsdBN)) {
                           _context16.next = 101;
                           break;
                         }
 
-                        return _context16.abrupt("return", toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $350 USD.", "Deposit failed"));
+                        return _context16.abrupt("return", toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $" + new Big(App.accountBalanceLimitUsdBN.toString()).div(new Big(1e18)).toFormat(0) + " USD.", "Deposit failed"));
 
                       case 101:
                         // Warn user of slippage
@@ -2190,7 +2183,7 @@ App = {
                         return _context16.abrupt("return", toastr["error"]("Failed to get swap orders from 0x API: " + _context16.t16, "Deposit failed"));
 
                       case 176:
-                        if (!App.checkAccountBalanceLimit) {
+                        if (!(App.accountBalanceLimitUsdBN !== null)) {
                           _context16.next = 185;
                           break;
                         }
@@ -2204,12 +2197,12 @@ App = {
                         myFundBalanceBN = _context16.t17.toBN.call(_context16.t17, _context16.t18);
                         makerAssetFilledAmountUsdBN = makerAssetFilledAmountBN.mul(App.chainlinkPricesInUsd[acceptedCurrency]).div(Web3.utils.toBN(10).pow(Web3.utils.toBN(App.tokens[acceptedCurrency].decimals)));
 
-                        if (!myFundBalanceBN.add(makerAssetFilledAmountUsdBN).gt(Web3.utils.toBN(350e18))) {
+                        if (!myFundBalanceBN.add(makerAssetFilledAmountUsdBN).gt(App.accountBalanceLimitUsdBN)) {
                           _context16.next = 185;
                           break;
                         }
 
-                        return _context16.abrupt("return", toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $350 USD.", "Deposit failed"));
+                        return _context16.abrupt("return", toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $" + new Big(App.accountBalanceLimitUsdBN.toString()).div(new Big(1e18)).toFormat(0) + " USD.", "Deposit failed"));
 
                       case 185:
                         amountOutputted = makerAssetFilledAmountBN.toString() / Math.pow(10, App.tokens[acceptedCurrency].decimals); // Make sure input amount is completely filled
@@ -3340,7 +3333,47 @@ App = {
     }).catch(function (err) {
       console.error(err);
     });
-  }
+  },
+  getAccountBalanceLimit: function () {
+    var _getAccountBalanceLimit = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee22() {
+      return regeneratorRuntime.wrap(function _callee22$(_context22) {
+        while (1) {
+          switch (_context22.prev = _context22.next) {
+            case 0:
+              console.log('Getting account balance limit...');
+              _context22.prev = 1;
+              _context22.t0 = Web3.utils;
+              _context22.next = 5;
+              return App.contracts.RariFundManager.methods.getAccountBalanceLimit(App.selectedAccount).call();
+
+            case 5:
+              _context22.t1 = _context22.sent;
+              App.accountBalanceLimitUsdBN = _context22.t0.toBN.call(_context22.t0, _context22.t1);
+              _context22.next = 12;
+              break;
+
+            case 9:
+              _context22.prev = 9;
+              _context22.t2 = _context22["catch"](1);
+              return _context22.abrupt("return", console.error(_context22.t2));
+
+            case 12:
+              $('#AccountBalanceLimit').text(new Big(App.accountBalanceLimitUsdBN.toString()).div(new Big(1e18)).toFormat(0));
+
+            case 13:
+            case "end":
+              return _context22.stop();
+          }
+        }
+      }, _callee22, null, [[1, 9]]);
+    }));
+
+    function getAccountBalanceLimit() {
+      return _getAccountBalanceLimit.apply(this, arguments);
+    }
+
+    return getAccountBalanceLimit;
+  }()
 };
 $(function () {
   $(document).ready(function () {

@@ -171,7 +171,7 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundController.setDailyLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(0.02e18) : web3.utils.toBN(0.9e18));
 
     // Set default and individual account balance limits
-    await rariFundManager.setDefaultAccountBalanceLimit(web3.utils.toBN(350e18));
+    await rariFundManager.setDefaultAccountBalanceLimit(web3.utils.toBN(2000).mul(web3.utils.toBN(1e18)));
     for (const account of ["0xf9c18f2d1ea93e9a36507f238cffc6f0ad7d6eb3", "0xba46695289f0835d73658cb7de23dbf24667e0be", "0x58c1a65f5f39dd1b4fa899455d319422df4399f1"]) await rariFundManager.setIndividualAccountBalanceLimit(account, web3.utils.toBN(2).pow(web3.utils.toBN(255)).sub(web3.utils.toBN(1)));
 
     // Set fund rebalancer on controller and manager
@@ -257,7 +257,7 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundController.setDailyLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(0.02e18) : web3.utils.toBN(0.9e18));
 
     // Set default and individual account balance limits
-    await rariFundManager.setDefaultAccountBalanceLimit(web3.utils.toBN(350e18));
+    await rariFundManager.setDefaultAccountBalanceLimit(web3.utils.toBN(2000).mul(web3.utils.toBN(1e18)));
     for (const account of ["0xf9c18f2d1ea93e9a36507f238cffc6f0ad7d6eb3", "0xba46695289f0835d73658cb7de23dbf24667e0be", "0x58c1a65f5f39dd1b4fa899455d319422df4399f1"]) await rariFundManager.setIndividualAccountBalanceLimit(account, web3.utils.toBN(2).pow(web3.utils.toBN(255)).sub(web3.utils.toBN(1)));
 
     // Set fund rebalancer on controller and manager

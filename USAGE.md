@@ -31,7 +31,7 @@ The following document contains instructions on common usage of the smart contra
 2. User ensures that their deposit will not cause their account balance to breach the USD-based limit.
     * To check an account's balance limit: `uint256 RariFundManager.getAccountBalanceLimit(address account)`
     * To check the default account balance limit: `uint256 RariFundManager.getDefaultAccountBalanceLimit()`
-    * The default account balance limit is currently **$350 USD**, though this figure will be raised in the near future.
+    * The default account balance limit is currently **$2000 USD**, though this figure will be raised in the near future.
     * Note that this limit applies only to new deposits: there is no limit on the amount of interest an account can accrue.
 3. User calls `string[] RariFundManager.getAcceptedCurrencies()` to get an array of currency codes currently accepted for direct deposit to the fund.
     * If desired deposit currency is accepted:
