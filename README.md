@@ -40,7 +40,7 @@ If you are upgrading from `v1.2.0`, set `UPGRADE_FROM_LAST_VERSION=1` to enable 
     UPGRADE_OLD_FUND_TOKEN=0x9366B7C00894c3555c7590b0384e5F6a9D55659f
     UPGRADE_FUND_OWNER_ADDRESS=0xb568a7a185305e1cc027e13a27db7c5bf99e81d8
 
-Also, set `DEVELOPMENT_UPGRADE_FUND_TOKEN_HOLDERS` to a comma-separated list of all current RSFT holders (because `getPastEvents` does not work with Ganache).
+Also, set `GANACHE_UPGRADE_FUND_TOKEN_HOLDERS` to a comma-separated list of all current RSPT holders (because `getPastEvents` does not work with Ganache).
 
 First, fork the Ethereum mainnet (tested on Node.js `v10.21.0`). To start the fork, configure `DEVELOPMENT_WEB3_PROVIDER_URL_TO_BE_FORKED` (set to any mainnet Web3 HTTP provider JSON-RPC URL; we use a local `geth` instance, specifically a light client started with `geth --syncmode light --rpc --rpcapi eth,web3,debug,net`; Infura works too, but beware of latency and rate limiting) in `.env` and run `npm run ganache`. *If you would like to change the port, make sure to configure `scripts/ganache.js`, `scripts/test.sh`, and the `development` network in `truffle-config.js`.* Note that you will likely have to regularly restart your fork, especially when forking from a node without archive data or when using live 0x API responses to make currency exchanges.
 
@@ -69,6 +69,8 @@ If you are upgrading from `v1.2.0`, set `UPGRADE_FROM_LAST_VERSION=1` to enable 
     UPGRADE_FUND_OWNER_ADDRESS=0xb568a7a185305e1cc027e13a27db7c5bf99e81d8
 
 You must also set `UPGRADE_FUND_OWNER_PRIVATE_KEY` and `UPGRADE_TIMESTAMP_COMP_CLAIMED_AND_EXCHANGED` (set to current timestamp after claiming and exchanging COMP via rebalancer; you must run migrations within 1 hour of this timestamp).
+
+Furthermore, if you plan to migrate without the `--skip-dry-run` flag, set `GANACHE_UPGRADE_FUND_TOKEN_HOLDERS` to a comma-separated list of all current RSPT holders (because `getPastEvents` does not work with the Ganache fork used by the dry run).
 
 Then, migrate: `truffle migrate --network live`
 

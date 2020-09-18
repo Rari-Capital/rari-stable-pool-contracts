@@ -44,9 +44,9 @@ module.exports = async function(deployer, network, accounts) {
     if (["live", "live-fork"].indexOf(network) >= 0) {
       if (!process.env.UPGRADE_FUND_OWNER_PRIVATE_KEY) return console.error("UPGRADE_FUND_OWNER_PRIVATE_KEY is missing for live upgrade");
       if (!process.env.UPGRADE_TIMESTAMP_COMP_CLAIMED_AND_EXCHANGED || process.env.UPGRADE_TIMESTAMP_COMP_CLAIMED_AND_EXCHANGED < ((new Date()).getTime() / 1000) - 3600 || process.env.UPGRADE_TIMESTAMP_COMP_CLAIMED_AND_EXCHANGED > (new Date()).getTime() / 1000) return console.error("UPGRADE_TIMESTAMP_COMP_CLAIMED_AND_EXCHANGED is missing, invalid, or out of date for live upgrade");
-    } else {
-      if (!process.env.DEVELOPMENT_UPGRADE_FUND_TOKEN_HOLDERS) return console.error("DEVELOPMENT_UPGRADE_FUND_TOKEN_HOLDERS is missing for development upgrade");
     }
+
+    if (network != "live" && !process.env.GANACHE_UPGRADE_FUND_TOKEN_HOLDERS) return console.error("GANACHE_UPGRADE_FUND_TOKEN_HOLDERS is missing for development upgrade");
   }
 
   if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) {
@@ -131,7 +131,7 @@ module.exports = async function(deployer, network, accounts) {
     // Temporarily add RariFundTokenUpgrader as RariFundToken minter
     await rariFundToken.addMinter(RariFundTokenUpgrader.address);
 
-    // Get all current RFT holders (getPastEvents only works on Infura and full nodes (not Ganache)
+    // Get all current RFT holders (getPastEvents only works on Infura and full nodes, not Ganache)
     if (network == "live") {
       var currentRftHolders = [];
 
@@ -142,7 +142,7 @@ module.exports = async function(deployer, network, accounts) {
         currentRftHolders.push(event.returnValues.to);
       }
     } else {
-      currentRftHolders = process.env.DEVELOPMENT_UPGRADE_FUND_TOKEN_HOLDERS.split(",");
+      currentRftHolders = process.env.GANACHE_UPGRADE_FUND_TOKEN_HOLDERS.split(",");
     }
 
     // Upgrade all accounts (renounces minter role afterwards)
