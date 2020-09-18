@@ -93,7 +93,7 @@ App = {
       var priceInUsdBN = Web3.utils.toBN(allBalances["4"][i]);
       App.chainlinkPricesInUsd[currencyCode] = priceInUsdBN;
       var contractBalanceBN = Web3.utils.toBN(allBalances["1"][i]);
-      var contractBalanceUsdBN = contractBalanceBN.mul(priceInUsdBN).div(Web3.utils.toBN(10 ** App.tokens[currencyCode].decimals)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+      var contractBalanceUsdBN = contractBalanceBN.mul(priceInUsdBN).div(Web3.utils.toBN(10 ** App.tokens[currencyCode].decimals));
       factors.push([contractBalanceUsdBN, Web3.utils.toBN(0)]);
       totalBalanceUsdBN = totalBalanceUsdBN.add(contractBalanceUsdBN);
       App.allocationsByCurrency[currencyCode] = contractBalanceUsdBN;
@@ -103,7 +103,7 @@ App = {
       for (var j = 0; j < pools.length; j++) {
         var pool = pools[j];
         var poolBalanceBN = Web3.utils.toBN(poolBalances[j]);
-        var poolBalanceUsdBN = poolBalanceBN.mul(priceInUsdBN).div(Web3.utils.toBN(10 ** App.tokens[currencyCode].decimals)); // TODO: Factor in prices; for now we assume the value of all supported currencies = $1
+        var poolBalanceUsdBN = poolBalanceBN.mul(priceInUsdBN).div(Web3.utils.toBN(10 ** App.tokens[currencyCode].decimals));
         var apyBN = pool == 3 ? mstableApyBNs[currencyCode] : (
           pool == 2 ? aaveApyBNs[currencyCode] : (
             pool == 1 ? compoundApyBNs[currencyCode][0].add(compoundApyBNs[currencyCode][1]) : dydxApyBNs[currencyCode]
@@ -1254,7 +1254,19 @@ App = {
               }
 
               if (!maxSwap || !maxSwap["0"] || amountBN.gt(Web3.utils.toBN(maxSwap["2"]))) continue;
-              mStableOutputAmountAfterFeeBN = Web3.utils.toBN(maxSwap["3"]);
+              var outputAmountBeforeFeesBN = amountBN.mul(Web3.utils.toBN(10 ** App.tokens[acceptedCurrency].decimals)).div(Web3.utils.toBN(10 ** App.tokens[token].decimals));
+
+              if (acceptedCurrency === "mUSD") mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN;
+              else {
+                try {
+                  var swapFeeBN = await App.getMStableSwapFeeBN();
+                } catch (err) {
+                  console.error("Failed to check mUSD swap fee:", err);
+                  continue;
+                }
+
+                mStableOutputAmountAfterFeeBN = outputAmountBeforeFeesBN.sub(outputAmountBeforeFeesBN.mul(swapFeeBN).div(Web3.utils.toBN(1e18)));
+              }
             }
 
             mStableOutputCurrency = acceptedCurrency;
@@ -1283,7 +1295,7 @@ App = {
             }
           }
 
-          var amountOutputted = parseFloat(mStableOutputAmountAfterFeeBN.toString()) / 10 ** App.tokens[mStableOutputCurrency].decimals;
+          var amountOutputted = parseFloat(mStableOutputAmountAfterFeeBN.toString()) / (10 ** App.tokens[mStableOutputCurrency].decimals);
           if (App.zeroExPrices[token] && App.zeroExPrices[token][mStableOutputCurrency]) var slippage = 1 - (amountOutputted / amount * App.zeroExPrices[token][mStableOutputCurrency]);
           else if (["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"].indexOf(token) >= 0) var slippage = 1 - (amountOutputted / amount);
           else return toastr["error"]("Price not found on 0x swap API", "Deposit failed");
@@ -1503,7 +1515,7 @@ App = {
         var makerAssetFillAmountBNs = [];
         var protocolFeeBNs = [];
 
-        var amountInputtedUsdBN = Web3.utils.toBN(0);
+        // var amountInputtedUsdBN = Web3.utils.toBN(0);
         var amountWithdrawnBN = Web3.utils.toBN(0);
         var totalProtocolFeeBN = Web3.utils.toBN(0);
 
@@ -1516,7 +1528,7 @@ App = {
           makerAssetFillAmountBNs.push(0);
           protocolFeeBNs.push(0);
 
-          amountInputtedUsdBN.iadd(tokenRawFundBalanceBN.mul(Web3.utils.toBN(1e18)).div(Web3.utils.toBN(10 ** App.tokens[token].decimals)));
+          // amountInputtedUsdBN.iadd(tokenRawFundBalanceBN.mul(App.chainlinkPricesInUsd[token]).div(Web3.utils.toBN(10 ** App.tokens[token].decimals)));
           amountWithdrawnBN.iadd(tokenRawFundBalanceBN);
         }
 
@@ -1594,7 +1606,7 @@ App = {
           makerAssetFillAmountBNs.push(0);
           protocolFeeBNs.push(0);
 
-          amountInputtedUsdBN.iadd(inputAmountBN.mul(Web3.utils.toBN(1e18)).div(Web3.utils.toBN(10 ** App.tokens[inputCandidates[i].currencyCode].decimals)));
+          // amountInputtedUsdBN.iadd(inputAmountBN.mul(App.chainlinkPricesInUsd[inputCandidates[i].currencyCode]).div(Web3.utils.toBN(10 ** App.tokens[inputCandidates[i].currencyCode].decimals)));
           amountWithdrawnBN.iadd(outputAmountBN);
 
           inputCandidates[i].rawFundBalanceBN.isub(inputAmountBN);
@@ -1670,7 +1682,7 @@ App = {
               makerAssetFillAmountBNs.push(thisOutputAmountBN);
               protocolFeeBNs.push(Web3.utils.toBN(inputCandidates[i].protocolFee));
 
-              amountInputtedUsdBN.iadd(thisInputAmountBN.mul(Web3.utils.toBN(1e18)).div(Web3.utils.toBN(10 ** App.tokens[inputCandidates[i].currencyCode].decimals)));
+              // amountInputtedUsdBN.iadd(thisInputAmountBN.mul(App.chainlinkPricesInUsd[inputCandidates[i].currencyCode]).div(Web3.utils.toBN(10 ** App.tokens[inputCandidates[i].currencyCode].decimals)));
               amountWithdrawnBN.iadd(thisOutputAmountBN);
               totalProtocolFeeBN.iadd(Web3.utils.toBN(inputCandidates[i].protocolFee));
 
@@ -1686,7 +1698,7 @@ App = {
               makerAssetFillAmountBNs.push(inputCandidates[i].makerAssetFillAmountBN);
               protocolFeeBNs.push(Web3.utils.toBN(inputCandidates[i].protocolFee));
 
-              amountInputtedUsdBN.iadd(inputCandidates[i].inputFillAmountBN.mul(Web3.utils.toBN(1e18)).div(Web3.utils.toBN(10 ** App.tokens[inputCandidates[i].currencyCode].decimals)));
+              // amountInputtedUsdBN.iadd(inputCandidates[i].inputFillAmountBN.mul(App.chainlinkPricesInUsd[inputCandidates[i].currencyCode]).div(Web3.utils.toBN(10 ** App.tokens[inputCandidates[i].currencyCode].decimals)));
               amountWithdrawnBN.iadd(inputCandidates[i].makerAssetFillAmountBN);
               totalProtocolFeeBN.iadd(Web3.utils.toBN(inputCandidates[i].protocolFee));
 
@@ -1706,22 +1718,26 @@ App = {
         }
 
         // Warn user of slippage
+        var predictedExchangeOutput = 0;
         var epochNow = (new Date()).getTime();
 
-        if (!App.zeroExPrices["DAI"] || epochNow > App.zeroExPrices["DAI"]._lastUpdated + (60 * 1000)) {
-          try {
-            App.zeroExPrices["DAI"] = await App.get0xPrices("DAI");
-            App.zeroExPrices["DAI"]._lastUpdated = epochNow;
-          } catch (err) {
-            return toastr["error"]("Failed to get prices from 0x swap API: " + err, "Withdrawal failed");
+        for (var i = 0; i < inputCurrencyCodes.length; i++) {
+          if (!App.zeroExPrices[inputCurrencyCodes[i]] || epochNow > App.zeroExPrices[inputCurrencyCodes[i]]._lastUpdated + (60 * 1000)) {
+            try {
+              App.zeroExPrices[inputCurrencyCodes[i]] = await App.get0xPrices(inputCurrencyCodes[i]);
+              App.zeroExPrices[inputCurrencyCodes[i]]._lastUpdated = epochNow;
+            } catch (err) {
+              return toastr["error"]("Failed to get prices from 0x swap API: " + err, "Withdrawal failed");
+            }
           }
+
+          if (App.zeroExPrices[inputCurrencyCodes[i]][token === "ETH" ? "WETH" : token]) predictedExchangeOutput += parseFloat(inputAmountBNs[i].toString()) / (10 ** App.tokens[inputCurrencyCodes[i]].decimals) / App.zeroExPrices[inputCurrencyCodes[i]][token === "ETH" ? "WETH" : token];
+          else if (["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"].indexOf(token) >= 0) predictedExchangeOutput += parseFloat(inputAmountBNs[i].toString()) / (10 ** App.tokens[inputCurrencyCodes[i]].decimals);
+          else return toastr["error"]("Price not found on 0x swap API", "Withdrawal failed");
         }
 
-        if (App.zeroExPrices["DAI"][token === "ETH" ? "WETH" : token]) var amountOutputtedUsd = amount * App.zeroExPrices["DAI"][token === "ETH" ? "WETH" : token]; // TODO: Use actual input currencies instead of using DAI for USD price
-        else if (["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"].indexOf(token) >= 0) var amountOutputtedUsd = amount;
-        else return toastr["error"]("Price not found on 0x swap API", "Withdrawal failed");
-
-        var slippage = 1 - (amountOutputtedUsd / (amountInputtedUsdBN.toString() / 1e18));
+        var slippage = 1 - (amount / predictedExchangeOutput);
+        // var slippage = 1 - (amountOutputtedUsd / (amountInputtedUsdBN.toString() / 1e18));
         var slippageAbsPercentageString = Math.abs(slippage * 100).toFixed(3);
 
         if (!$('#modal-confirm-withdrawal').is(':visible')) {
