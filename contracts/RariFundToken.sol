@@ -18,7 +18,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Burn
 /**
  * @title RariFundToken
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice RariFundToken is the ERC20 token contract accounting for the ownership of RariFund's funds.
+ * @notice RariFundToken is the ERC20 token contract accounting for the ownership of RariFundController's funds.
  */
 contract RariFundToken is Initializable, ERC20, ERC20Detailed, ERC20Mintable, ERC20Burnable {
     /**

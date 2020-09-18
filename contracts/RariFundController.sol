@@ -173,6 +173,7 @@ contract RariFundController is Ownable {
      * @dev Sets or upgrades RariFundController by forwarding tokens from the old to the new.
      * @param newContract The address of the new RariFundController contract.
      * @param erc20Contract The ERC20 contract address of the token to forward.
+     * @return Boolean indicating if the balance transferred was greater than 0.
      */
     function upgradeFundController(address payable newContract, address erc20Contract) external onlyOwner returns (bool) {
         require(RariFundController(newContract).IS_RARI_FUND_CONTROLLER(), "New contract does not have IS_RARI_FUND_CONTROLLER set to true.");

@@ -664,8 +664,9 @@ contract RariFundManager is Initializable, Ownable {
         require(rariFundToken.mint(to, rftAmount), "Failed to mint output tokens.");
         emit Deposit(currencyCode, msg.sender, to, amount, amountUsd, rftAmount);
 
-        // Reset _rawFundBalanceCache if necessary
-        if (!cacheSetPreviously) _rawFundBalanceCache = -1;
+        // Modify or clear _rawFundBalanceCache
+        if (cacheSetPreviously) _rawFundBalanceCache = _rawFundBalanceCache.add(int256(amountUsd));
+        else _rawFundBalanceCache = -1;
     }
 
     /**
@@ -847,7 +848,7 @@ contract RariFundManager is Initializable, Ownable {
      */
     function setInterestFeeRate(uint256 rate) external fundEnabled onlyOwner cacheRawFundBalance {
         require(rate != _interestFeeRate, "This is already the current interest fee rate.");
-        require(rate < 1e18, "The interest fee rate cannot be greater than 100%.");
+        require(rate <= 1e18, "The interest fee rate cannot be greater than 100%.");
         _depositFees();
         _interestFeesGeneratedAtLastFeeRateChange = getInterestFeesGenerated(); // MUST update this first before updating _rawInterestAccruedAtLastFeeRateChange since it depends on it 
         _rawInterestAccruedAtLastFeeRateChange = getRawInterestAccrued();
