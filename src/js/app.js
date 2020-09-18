@@ -872,7 +872,7 @@ App = {
     // If any current data is displayed when
     // the user is switching acounts in the wallet
     // immediate hide this data
-    $("#MyDAIBalance, #MyUSDCBalance, #MyUSDTBalance, #RSFTBalance").text("?");
+    $("#MyDAIBalance, #MyUSDCBalance, #MyUSDTBalance, #RSPTBalance").text("?");
   
     // Disable button while UI is loading.
     // fetchAccountData() will take a while as it communicates
@@ -949,7 +949,7 @@ App = {
     $("#btn-disconnect").hide();
     $(".btn-connect").show();
     $('#MyUSDBalance').text("?");
-    $('#RSFTBalance').text("?");
+    $('#RSPTBalance').text("?");
     $('#MyInterestAccrued').text("?");
   },
   
@@ -1447,7 +1447,7 @@ App = {
       App.getFundBalance();
       $('#MyUSDBalance').text("?");
       App.getMyFundBalance();
-      $('#RSFTBalance').text("?");
+      $('#RSPTBalance').text("?");
       App.getTokenBalance();
       App.getDirectlyWithdrawableCurrencies();
     })();
@@ -1479,7 +1479,7 @@ App = {
         var allowanceBN = Web3.utils.toBN(await App.contracts.RariFundToken.methods.allowance(App.selectedAccount, App.contracts.RariFundManager.options.address).call());
         if (allowanceBN.lt(Web3.utils.toBN(2).pow(Web3.utils.toBN(255)).subn(1))) await App.contracts.RariFundToken.methods.approve(App.contracts.RariFundManager.options.address, Web3.utils.toBN(2).pow(Web3.utils.toBN(256)).subn(1)).send({ from: App.selectedAccount });
       } catch (error) {
-        return toastr["error"]("Failed to approve RSFT to RariFundManager: " + (error.message ? error.message : error), "Withdrawal failed");
+        return toastr["error"]("Failed to approve RSPT to RariFundManager: " + (error.message ? error.message : error), "Withdrawal failed");
       }
 
       // See how much we can withdraw directly if token is not ETH
@@ -1792,7 +1792,7 @@ App = {
       App.getFundBalance();
       $('#MyUSDBalance').text("?");
       App.getMyFundBalance();
-      $('#RSFTBalance').text("?");
+      $('#RSPTBalance').text("?");
       App.getTokenBalance();
       App.getDirectlyWithdrawableCurrencies();
     })();
@@ -1848,7 +1848,7 @@ App = {
     event.preventDefault();
 
     var currency = $('#TransferCurrency').val();
-    if (["USD", "RSFT"].indexOf(currency) < 0) return toastr["error"]("Invalid currency!", "Transfer failed");
+    if (["USD", "RSPT"].indexOf(currency) < 0) return toastr["error"]("Invalid currency!", "Transfer failed");
     var amount = parseFloat($('#TransferAmount').val());
     if (!amount || amount <= 0) return toastr["error"]("Transfer amount must be greater than 0!", "Transfer failed");
     var amountBN = Web3.utils.toBN((new Big(amount)).mul((new Big(10)).pow(18)).toFixed());
@@ -1873,9 +1873,9 @@ App = {
         return toastr["error"](err, "Transfer failed");
       }
 
-      if (typeof mixpanel !== 'undefined') mixpanel.track("RSFT transfer", { transactionHash: receipt.transactionHash, currencyCode: currency, amount });
+      if (typeof mixpanel !== 'undefined') mixpanel.track("RSPT transfer", { transactionHash: receipt.transactionHash, currencyCode: currency, amount });
       toastr["success"]("Transfer of " + (currency === "USD" ? "$" : "") + amount + " " + currency + " confirmed!", "Transfer successful");
-      $('#RSFTBalance').text("?");
+      $('#RSPTBalance').text("?");
       App.getTokenBalance();
       $('#MyUSDBalance').text("?");
       App.getMyFundBalance();
@@ -1891,7 +1891,7 @@ App = {
   getTokenBalance: function() {
     console.log('Getting token balance...');
     App.contracts.RariFundToken.methods.balanceOf(App.selectedAccount).call().then(function(result) {
-      $('#RSFTBalance').text((new Big(result)).div((new Big(10)).pow(18)).toFormat());
+      $('#RSPTBalance').text((new Big(result)).div((new Big(10)).pow(18)).toFormat());
     }).catch(function(err) {
       console.error(err);
     });

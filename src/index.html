@@ -169,7 +169,7 @@
               <samp class="d-block" id="MyUSDBalanceWrapper">$<span id="MyUSDBalance">?</span> USD</samp>
             </div>
             <div class="panel-footer">
-              <small class="d-block">All COMP earned by the fund is liquidated into additional interest for RSFT holders every 3 days.</small>
+              <small class="d-block">All COMP earned by the fund is liquidated into additional interest for RSPT holders every 3 days.</small>
             </div>
           </div>
           <!--<div class="panel panel-default">
@@ -180,18 +180,18 @@
               <samp class="d-block">$<span id="MyInterestAccrued">?</span> USD</samp>
             </div>
             <div class="panel-footer">
-              <small class="d-block">All COMP earned by the fund is liquidated into additional interest for RSFT holders every 3 days.</small>
+              <small class="d-block">All COMP earned by the fund is liquidated into additional interest for RSPT holders every 3 days.</small>
             </div>
           </div>-->
           <div class="panel panel-default">
             <div class="panel-heading">
-              <h3 class="panel-title">My RSFT <small>(Rari Stable Fund Token)</small> Balance</h3>
+              <h3 class="panel-title">My RSPT <small>(Rari Stable Pool Token)</small> Balance</h3>
             </div>
             <div class="panel-body">
-              <samp class="d-block"><span id="RSFTBalance">?</span> RSFT</samp>
+              <samp class="d-block"><span id="RSPTBalance">?</span> RSPT</samp>
             </div>
             <div class="panel-footer">
-              <small class="d-block">Your RSFT balance above is an internal representation of your equivalent USD balance.</small>
+              <small class="d-block">Your RSPT balance above is an internal representation of your equivalent USD balance.</small>
             </div>
           </div>
         </div>
@@ -252,7 +252,7 @@
                 <input type="text" class="form-control" id="TransferAmount" placeholder="Amount" />
                 <select class="custom-select" id="TransferCurrency">
                   <option selected>USD</option>
-                  <option>RSFT</option>
+                  <option>RSPT</option>
                 </select>
                 <button class="btn btn-info btn-lg" id="transferButton" type="button" disabled>Transfer</button><br />
               </div>
@@ -318,22 +318,22 @@
             </button>
           </div>
           <div class="modal-body">
-            <h4 class="text-dark">RSFT (Rari Stable Fund Token)</h4>
-            <p class="text-dark">Each user's share of the fund is determined by their RSFT balance. When you deposit funds to Rari, an equivalent amount of RSFT (Rari Stable Fund Token) is minted to your account. When you withdraw funds to Rari, the equivalent amount of RSFT is burned from your account. As soon as you deposit, you start earning yield. Essentially, fund holdings and yield are split up proportionally across RSFT holders by their USD balances.</p>
+            <h4 class="text-dark">RSPT (Rari Stable Pool Token)</h4>
+            <p class="text-dark">Each user's share of the fund is determined by their RSPT balance. When you deposit funds to Rari, an equivalent amount of RSPT (Rari Stable Pool Token) is minted to your account. When you withdraw funds to Rari, the equivalent amount of RSPT is burned from your account. As soon as you deposit, you start earning yield. Essentially, fund holdings and yield are split up proportionally across RSPT holders by their USD balances.</p>
             <h4 class="text-dark">Generating Yield</h4>
             <p class="text-dark">Currently, Rari generates yield by depositing a combination of DAI and USDC to the lending protocol <a href="https://dydx.exchange/">dYdX</a> as well as DAI, USDC, and USDT to the lending protocol <a href="https://compound.finance/">Compound</a>. In the near future, we will be generating yield from more currencies across more lending protocols, among other strategies.</p>
             <h4 class="text-dark">Deposits</h4>
             <p class="text-dark">Only certain stablecoins are accepted for direct deposits (direct meaning without exchange to an accepted currency). When depositing one of these stablecoins, the Rari web client approves tokens to <code>RariFundManager</code> and calls <code>RariFundManager.deposit(string currencyCode, uint256 amount)</code>. When you deposit another currency, the Rari web client approves tokens to <code>RariFundProxy</code> and calls <code>RariFundProxy.exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string outputCurrencyCode, LibOrder.Order[] orders, bytes[] signatures, uint256 takerAssetFillAmount)</code> to exchange your tokens via <a href="https://0x.org/">0x</a> and then deposit them (please be aware that 0x charges an ETH protocol fee).</p>
             <h4 class="text-dark">Withdrawals</h4>
-            <p class="text-dark">Just like only certain stablecoins are accepted for direct deposits, only stablecoins held by the fund are availble for direct withdrawals. When withdrawing one of these stablecoins, the Rari web client approves RSFT to <code>RariFundManager</code> and calls <code>RariFundManager.withdraw(string currencyCode, uint256 amount)</code>. When you withdraw another currency, the Rari web client approves RSFT to <code>RariFundProxy</code> and calls <code>RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)</code> to withdraw your tokens and then exchange them via <a href="https://0x.org/">0x</a> (please be aware that 0x charges an ETH protocol fee).</p>
+            <p class="text-dark">Just like only certain stablecoins are accepted for direct deposits, only stablecoins held by the fund are availble for direct withdrawals. When withdrawing one of these stablecoins, the Rari web client approves RSPT to <code>RariFundManager</code> and calls <code>RariFundManager.withdraw(string currencyCode, uint256 amount)</code>. When you withdraw another currency, the Rari web client approves RSPT to <code>RariFundProxy</code> and calls <code>RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)</code> to withdraw your tokens and then exchange them via <a href="https://0x.org/">0x</a> (please be aware that 0x charges an ETH protocol fee).</p>
             <h4 class="text-dark">Security</h4>
             <p class="text-dark">Rari's Ethereum-based smart contracts are written in Solidity and reviewed by multiple partners for security. Rari does not have control over your funds: instead, the Ethereum blockchain executes all secure code across its entire decentralized network (making it very difficult and extremely costly to rewrite history), and your funds are only withdrawable by you (or an upgrade of <code>RariFundManager</code>). However, upgrades will become decentralized in the future via a governance protocol based on a new token. Please note that using our web client online at <a href="https://app.rari.capital">app.rari.capital</a> is not nearly as trustworthy as downloading, verifying, and using it offline. Lastly, the rebalancer is centralized, but it can only rebalance funds to different currencies and pools. In the near future, we will be implementing a smart-contract-based (and therefore decentralized) slippage limit.</p>
             <h4 class="text-dark">Smart Contract Structure</h4>
             <p class="text-dark"><code>RariFundManager</code> handles deposits and withdrawals to the fund, as well as all other external functions, other than <code>RariFundToken</code>'s functions as well as the <code>exchangeAndDeposit</code> and <code>withdrawAndExchange</code> functions of <code>RariFundProxy</code> (see <strong>Deposits</strong> and <strong>Withdrawals</strong> above for more information on RariFundProxy). <code>RariFundManager</code> depends on the external library <code>RariFundController</code> (a library useful only to RariFundManager).</p>
             <h4 class="text-dark">Performance Fee</h4>
-            <p class="text-dark">A 20% performance fee is deducted from all interest earned by RSFT holders. This fee is liable to change in the future, but fees on past interest cannot be changed.</p>
+            <p class="text-dark">A 20% performance fee is deducted from all interest earned by RSPT holders. This fee is liable to change in the future, but fees on past interest cannot be changed.</p>
             <h4 class="text-dark">COMP</h4>
-            <p class="text-dark">All <a href="https://compound.finance/governance/comp">COMP (Compound's governance token)</a> earned by the fund is liquidated into additional interest for RSFT holders every 3 days.</p>
+            <p class="text-dark">All <a href="https://compound.finance/governance/comp">COMP (Compound's governance token)</a> earned by the fund is liquidated into additional interest for RSPT holders every 3 days.</p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

@@ -1,6 +1,6 @@
-# Rari Stable Fund: Smart Contracts & dApp
+# Rari Stable Pool: Smart Contracts & dApp
 
-Welcome to `rari-contracts`, the central repository for the Solidity source code behind the Rari Stable Fund's Ethereum-based smart contracts (with automated tests), our stablecoin fund's dApp (web client), and the documentation for it all. You can find out more about Rari at [www.rari.capital](https://rari.capital).
+Welcome to `rari-contracts`, the central repository for the Solidity source code behind the Rari Stable Pool's Ethereum-based smart contracts (with automated tests), our stablecoin fund's dApp (web client), and the documentation for it all. You can find out more about Rari at [www.rari.capital](https://rari.capital).
 
 ## How the fund works
 
