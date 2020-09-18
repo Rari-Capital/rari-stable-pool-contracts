@@ -199,7 +199,6 @@ module.exports = async function(deployer, network, accounts) {
       // Live network: transfer ownership of deployed contracts from the deployer to the owner
       await rariFundController.transferOwnership(process.env.LIVE_FUND_OWNER);
       await rariFundManager.transferOwnership(process.env.LIVE_FUND_OWNER);
-      await rariFundPriceConsumer.transferOwnership(process.env.LIVE_FUND_OWNER);
       await rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
       await admin.transferProxyAdminOwnership(process.env.LIVE_FUND_OWNER);
     } else {
@@ -288,7 +287,6 @@ module.exports = async function(deployer, network, accounts) {
       // Live network: transfer ownership of deployed contracts from the deployer to the owner
       await rariFundController.transferOwnership(process.env.LIVE_FUND_OWNER);
       await rariFundManager.transferOwnership(process.env.LIVE_FUND_OWNER);
-      await rariFundPriceConsumer.transferOwnership(process.env.LIVE_FUND_OWNER);
       await rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
       await admin.transferProxyAdminOwnership(process.env.LIVE_FUND_OWNER);
     } else {
