@@ -256,7 +256,7 @@ contract RariFundProxy is Ownable, GSNRecipient {
         // Transfer input tokens from msg.sender
         IERC20(inputErc20Contract).safeTransferFrom(msg.sender, address(this), inputAmount); // The user must approve the transfer of tokens beforehand
 
-        // Mint mUSD and redeem mUSD for output token
+        // Mint, redeem, or swap via mUSD
         if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
             uint256 outputDecimals = _erc20Decimals[outputErc20Contract];
             uint256 outputAmount = 18 >= outputDecimals ? inputAmount.div(10 ** (uint256(18).sub(outputDecimals))) : inputAmount.mul(10 ** (outputDecimals.sub(18)));
