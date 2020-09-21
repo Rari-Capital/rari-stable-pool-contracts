@@ -20,7 +20,7 @@ We, as well as others, had success using Truffle on Node.js `v12.18.2` with the 
 
 To install the latest version of Truffle: `npm install -g truffle`
 
-*Though the latest version of Truffle should work, to compile, deploy, and test our contracts, we used Truffle `v5.1.43` (which should use `solc` version `0.5.17+commit.d19bba13.Emscripten.clang` and Web3.js `v1.2.1`).*
+*Though the latest version of Truffle should work, to compile, deploy, and test our contracts, we used Truffle `v5.1.45` (which should use `solc` version `0.5.17+commit.d19bba13.Emscripten.clang` and Web3.js `v1.2.1`).*
 
 To install all our dependencies: `npm install`
 
