@@ -155,9 +155,6 @@ module.exports = async function(deployer, network, accounts) {
     // Add RariFundManager as as RariFundToken minter
     await rariFundToken.addMinter(RariFundManager.address);
 
-    // Owner renounces RariFundToken minter role
-    await rariFundToken.renounceMinter();
-
     // Connect RariFundToken to RariFundManager
     await rariFundManager.setFundToken(RariFundToken.address);
 
@@ -199,6 +196,8 @@ module.exports = async function(deployer, network, accounts) {
       // Live network: transfer ownership of deployed contracts from the deployer to the owner
       await rariFundController.transferOwnership(process.env.LIVE_FUND_OWNER);
       await rariFundManager.transferOwnership(process.env.LIVE_FUND_OWNER);
+      await rariFundToken.addMinter(process.env.LIVE_FUND_OWNER);
+      await rariFundToken.renounceMinter();
       await rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
       await admin.transferProxyAdminOwnership(process.env.LIVE_FUND_OWNER);
     } else {
@@ -239,9 +238,6 @@ module.exports = async function(deployer, network, accounts) {
     
     // Add RariFundManager as as RariFundToken minter
     await rariFundToken.addMinter(RariFundManager.address);
-
-    // Owner renounces RariFundToken minter role
-    await rariFundToken.renounceMinter();
 
     // Connect RariFundToken to RariFundManager
     await rariFundManager.setFundToken(RariFundToken.address);
@@ -287,6 +283,8 @@ module.exports = async function(deployer, network, accounts) {
       // Live network: transfer ownership of deployed contracts from the deployer to the owner
       await rariFundController.transferOwnership(process.env.LIVE_FUND_OWNER);
       await rariFundManager.transferOwnership(process.env.LIVE_FUND_OWNER);
+      await rariFundToken.addMinter(process.env.LIVE_FUND_OWNER);
+      await rariFundToken.renounceMinter();
       await rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
       await admin.transferProxyAdminOwnership(process.env.LIVE_FUND_OWNER);
     } else {
