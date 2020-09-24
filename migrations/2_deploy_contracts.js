@@ -149,7 +149,7 @@ module.exports = async function(deployer, network, accounts) {
     for (var i = 0; i < currentRftHolders.length; i += 100) await rariFundTokenUpgrader.upgrade(currentRftHolders.slice(i, i + 100));
 
     // Make sure we are finished upgrading
-    if (!(await rariFundTokenUpgrader.finished())) console.error("RariFundTokenUpgrader claims it is not finished after upgrade.");
+    if (!(await rariFundTokenUpgrader.finished.call())) console.error("RariFundTokenUpgrader claims it is not finished after upgrade.");
     if (!web3.utils.toBN(await oldRariFundToken.methods.totalSupply().call()).eq(await rariFundToken.totalSupply.call())) console.error("New RariFundToken total supply not equal to old RariFundToken total supply.");
 
     // Add RariFundManager as as RariFundToken minter
