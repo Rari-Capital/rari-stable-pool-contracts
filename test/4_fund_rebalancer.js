@@ -145,21 +145,25 @@ contract("RariFundController, RariFundManager", accounts => {
 
     // For each currency supported by mStable:
     for (const currencyCode of exchanges.mStableExchangeCurrencies) {
-      // Approve and deposit tokens to RariFundManager
       var tokenAmountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
       var tokenErc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
-      await tokenErc20Contract.methods.approve(RariFundManager.address, tokenAmountBN.toString()).send({ from: process.env.DEVELOPMENT_ADDRESS });
-      await fundManagerInstance.deposit(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+
+      // Check mint validity
+      var mAssetValidationHelper = new web3.eth.Contract(mAssetValidationHelperAbi, "0xabcc93c3be238884cc3309c19afd128fafc16911");
+      var maxSwap = await mAssetValidationHelper.methods.getMaxSwap("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", currencies[currencyCode].tokenAddress, "0xe2f2a5c287993345a840db3b0845fbc70f5935a5").call();
+      var canMint = maxSwap && maxSwap["0"] && tokenAmountBN.lte(web3.utils.toBN(maxSwap["2"]));
+
+      if (canMint) {
+        // Approve and deposit tokens to RariFundManager
+        await tokenErc20Contract.methods.approve(RariFundManager.address, tokenAmountBN.toString()).send({ from: process.env.DEVELOPMENT_ADDRESS });
+        await fundManagerInstance.deposit(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      }
 
       // Check initial mUSD and token balance
       var initialMUsdBalanceBN = web3.utils.toBN(await mUsdErc20Contract.methods.balanceOf(RariFundController.address).call());
       var initialTokenBalanceBN = web3.utils.toBN(await tokenErc20Contract.methods.balanceOf(RariFundController.address).call());
 
-      // Check mint validity
-      var mAssetValidationHelper = new web3.eth.Contract(mAssetValidationHelperAbi, "0xabcc93c3be238884cc3309c19afd128fafc16911");
-      var maxSwap = await mAssetValidationHelper.methods.getMaxSwap("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", currencies[currencyCode].tokenAddress, "0xe2f2a5c287993345a840db3b0845fbc70f5935a5").call();
-
-      if (maxSwap && maxSwap["0"] && tokenAmountBN.lte(web3.utils.toBN(maxSwap["2"]))) {
+      if (canMint) {
         // RariFundController.approveToMUsd and RariFundController.swapMStable
         // TODO: Ideally, we add actually call rari-fund-rebalancer
         await fundControllerInstance.approveToMUsd(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
@@ -174,7 +178,7 @@ contract("RariFundController, RariFundManager", accounts => {
       var postMintMUsdBalanceBN = web3.utils.toBN(await mUsdErc20Contract.methods.balanceOf(RariFundController.address).call());
       assert(postMintMUsdBalanceBN.eq(initialMUsdBalanceBN.add(mUsdAmountBN)));
       var postMintTokenBalanceBN = web3.utils.toBN(await tokenErc20Contract.methods.balanceOf(RariFundController.address).call());
-      assert(postMintTokenBalanceBN.eq(initialTokenBalanceBN.sub(tokenAmountBN)));
+      assert(canMint ? postMintTokenBalanceBN.eq(initialTokenBalanceBN.sub(tokenAmountBN)) : postMintTokenBalanceBN.eq(initialTokenBalanceBN));
 
       // Check redeem validity
       var redeemValidity = await mAssetValidationHelper.methods.getRedeemValidity("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", mUsdAmountBN.toString(), currencies[currencyCode].tokenAddress).call();
@@ -188,7 +192,7 @@ contract("RariFundController, RariFundManager", accounts => {
         var postRedeemMUsdBalanceBN = web3.utils.toBN(await mUsdErc20Contract.methods.balanceOf(RariFundController.address).call());
         assert(postRedeemMUsdBalanceBN.eq(initialMUsdBalanceBN));
         var postRedeemTokenBalanceBN = web3.utils.toBN(await tokenErc20Contract.methods.balanceOf(RariFundController.address).call());
-        assert(postRedeemTokenBalanceBN.gte(initialTokenBalanceBN.sub(tokenAmountBN.divn(100))));
+        assert(postRedeemTokenBalanceBN.gte(postMintTokenBalanceBN.add(tokenAmountBN.muln(99).divn(100))));
       }
     }
   });
