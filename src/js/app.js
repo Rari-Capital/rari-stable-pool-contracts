@@ -294,20 +294,20 @@ App = {
 
   // Based on calculateApy at https://github.com/mstable/mStable-app/blob/v1.8.1/src/web3/hooks.ts#L84
   calculateMStableApyBN: function(startTimestamp, startExchangeRate, endTimestamp, endExchangeRate) {
-    const SCALE = new Big(1e18);
-    const YEAR_BN = new Big(365 * 24 * 60 * 60);
+    const SCALE = 1e18;
+    const YEAR_BN = 365 * 24 * 60 * 60;
   
-    const rateDiff = new Big(endExchangeRate).mul(SCALE).div(startExchangeRate).sub(SCALE);
-    const timeDiff = new Big(endTimestamp - startTimestamp);
+    const rateDiff = endExchangeRate * SCALE / startExchangeRate - SCALE;
+    const timeDiff = endTimestamp - startTimestamp;
   
-    const portionOfYear = timeDiff.mul(SCALE).div(YEAR_BN);
-    const portionsInYear = SCALE.div(portionOfYear);
-    const rateDecimals = SCALE.add(rateDiff).div(SCALE);
+    const portionOfYear = timeDiff * SCALE / YEAR_BN;
+    const portionsInYear = SCALE / portionOfYear;
+    const rateDecimals = (SCALE + rateDiff) / SCALE;
 
-    if (rateDecimals.gt(0)) {
-        const diff = rateDecimals.pow(parseFloat(portionsInYear.toString()));
-        const parsed = diff.mul(SCALE);
-        return Web3.utils.toBN(parsed.sub(SCALE).toFixed(0)) || Web3.utils.toBN(0);
+    if (rateDecimals > 0) {
+        const diff = rateDecimals ** portionsInYear;
+        const parsed = diff * SCALE;
+        return Web3.utils.toBN((parsed - SCALE).toFixed(0)) || Web3.utils.toBN(0);
     }
 
     return Web3.utils.toBN(0);
