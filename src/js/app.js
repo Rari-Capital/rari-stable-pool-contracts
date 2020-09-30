@@ -1201,7 +1201,7 @@ App = {
     await (async function() {
       // Check if currency is directly depositable
       await App.getDirectlyDepositableCurrencies();
-      if (!App.acceptedCurrencies) return toastr["error"]("No accepted currencies found.", "Deposit failed");
+      if (!App.acceptedCurrencies || App.acceptedCurrencies.length == 0) return toastr["error"]("No accepted currencies found.", "Deposit failed");
 
       if (App.acceptedCurrencies.indexOf(token) >= 0) {
         if ($('#modal-confirm-deposit').is(':visible')) $('#modal-confirm-deposit').modal('hide');
@@ -1868,7 +1868,7 @@ App = {
       } else var rftAmountBN = amountBN;
 
       try {
-        var receipt = await App.contracts.RariFundToken.methods.transfer(toAddress, rftAmountBN).send({ from: App.selectedAccount });
+        var receipt = await App.contracts.RariFundToken.methods.transfer(toAddress, rftAmountBN).send({ from: App.selectedAccount, gas: 60000 });
       } catch (err) {
         return toastr["error"](err, "Transfer failed");
       }

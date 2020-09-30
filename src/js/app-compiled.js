@@ -1799,7 +1799,7 @@ App = {
                         return App.getDirectlyDepositableCurrencies();
 
                       case 2:
-                        if (App.acceptedCurrencies) {
+                        if (!(!App.acceptedCurrencies || App.acceptedCurrencies.length == 0)) {
                           _context16.next = 4;
                           break;
                         }
@@ -3310,7 +3310,8 @@ App = {
                         _context20.prev = 16;
                         _context20.next = 19;
                         return App.contracts.RariFundToken.methods.transfer(toAddress, rftAmountBN).send({
-                          from: App.selectedAccount
+                          from: App.selectedAccount,
+                          gas: 60000
                         });
 
                       case 19:
