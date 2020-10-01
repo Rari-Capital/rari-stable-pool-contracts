@@ -1,10 +1,12 @@
 # Rari Stable Pool: How to Use the Smart Contracts
 
-The following document contains instructions on common usage of the smart contracts' APIs.
+The following document contains instructions on common usage of the Rari Stable Pool smart contracts' APIs.
 
 * See [`API.md`](API.md) for a more detailed API reference on `RariFundController`, `RariFundManager`, `RariFundToken`, and `RariFundProxy`.
 * See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSPT.
 * Smart contract ABIs are available in the `abi` properties of the JSON files in the `build` folder.
+
+*If you're using JavaScript, don't waste your time directly integrating our smart contracts: the [Rari JavaScript SDK](https://github.com/Rari-Capital/rari-sdk) makes programmatic deposits and withdrawals as easy as just one line of code!*
 
 ## Stable Pool APY
 
@@ -23,8 +25,6 @@ The following document contains instructions on common usage of the smart contra
 * **Get my interest accrued:** Subtract total deposits and transfers in (in USD) and add total withdrawals and transfers out (in USD) from `uint256 RariFundManager.balanceOf(address account)`.
 
 ## Deposit
-
-*Our SDK, soon to be released, will make programmatic deposits and withdrawals as easy as just one line of code.*
 
 1. User chooses to deposit one of our directly supported tokens (DAI, USDC, USDT, TUSD, BUSD, and sUSD), ETH, or one of the tokens listed by the 0x swap tokens API (see [documentation](https://0x.org/docs/api#get-swapv0tokens) and [endpoint](https://api.0x.org/swap/v0/tokens)) in an amount no greater than the balance of their Ethereum account.
 2. User calls `string[] RariFundManager.getAcceptedCurrencies()` to get an array of currency codes currently accepted for direct deposit to the Stable Pool.
@@ -55,8 +55,6 @@ The following document contains instructions on common usage of the smart contra
                 * `takerAssetFillAmount` is the input amount sent by the user
 
 ## Withdraw
-
-*Our SDK, soon to be released, will make programmatic deposits and withdrawals as easy as just one line of code.*
 
 1. User ensures that their account possesses enough USD (represented internally by RSPT) to make their withdrawal.
 2. User approves RSPT to `RariFundManager` by calling `bool RariFundToken.approve(address spender, uint256 amount)` where `spender` is `RariFundManager` (to approve unlimited RSPT, set `amount` to `uint256(-1)`).

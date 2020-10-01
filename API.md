@@ -6,6 +6,8 @@ Welcome to the API docs for `RariFundManager`, `RariFundToken`, and `RariFundPro
 * See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSPT.
 * Smart contract ABIs are available in the `abi` properties of the JSON files in the `build` folder.
 
+*If you're using JavaScript, don't waste your time directly integrating our smart contracts: the [Rari JavaScript SDK](https://github.com/Rari-Capital/rari-sdk) makes programmatic deposits and withdrawals as easy as just one line of code!*
+
 ## **User Balances and Interest**
 
 ### `uint256 RariFundManager.balanceOf(address account)`
