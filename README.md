@@ -1,18 +1,18 @@
 # Rari Stable Pool: Smart Contracts & dApp
 
-Welcome to `rari-contracts`, the central repository for the Solidity source code behind the Rari Stable Pool's Ethereum-based smart contracts (with automated tests), our stablecoin fund's dApp (web client), and the documentation for it all. You can find out more about Rari at [www.rari.capital](https://rari.capital).
+Welcome to `rari-contracts`, the central repository for the Solidity source code behind the Rari Stable Pool's Ethereum-based smart contracts (with automated tests), web-based dApp, and documentation.
 
-## How the fund works
+## How it works
 
-Documentation on how the stablecoin fund works is available in `FUND.md`.
+The Rari Stable Pool is a decentralized and fully-audited stablecoin lending aggregator optimized for yield based on the Ethereum blockchain. A high-level overview of how the Rari Stable Pool works is available in [`CONCEPT.md`](CONCEPT.md). This information is also [available online](https://rari.capital/current.html). Find out more about Rari Capital at [rari.capital](https://rari.capital).
 
 ## Contract usage
 
-Documentation on common usage of the contracts is available in `USAGE.md`. Detailed API documentation for our smart contracts' public methods is available in `API.md`. Smart contract ABIs are available in the `abi` properties of the JSON files in the `build` folder.
+Documentation on common usage of the contracts is available in [`USAGE.md`](USAGE.md). Detailed API documentation for our smart contracts' public methods is available in [`API.md`](API.md). Smart contract ABIs are available in the `abi` properties of the JSON files in the `build` folder. For easy implementation, see the Rari SDK.
 
 ## dApp usage
 
-Anyone can use our dApp for our live stablecoin fund right now at [app.rari.capital](https://app.rari.capital). However, to be extra safe, you should download or clone this repository and use the web client (located in the `src` folder) locally simply by opening `src/index.html` in your web browser, but be mindful of updates!
+Anyone can use the dApp for the Rari Stable Pool right now at [app.rari.capital](https://app.rari.capital). However, to be extra safe, you should download or clone this repository and use the web client (located in the `src` folder) locally simply by opening `src/index.html` in your web browser, but be mindful of updates!
 
 ## Installation (for development and deployment)
 
@@ -94,4 +94,4 @@ See `LICENSE`.
 
 ## Credits
 
-Rari Capital's smart contracts are developed by [David Lucid](https://github.com/davidlucid).
+Rari Capital's smart contracts are developed by [David Lucid](https://github.com/davidlucid). Find out more about Rari Capital at [rari.capital](https://rari.capital).

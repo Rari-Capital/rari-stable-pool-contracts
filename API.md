@@ -1,8 +1,8 @@
 # Rari Stable Pool: Smart Contract API
 
-Welcome to the API docs for `RariFundManager`, `RariFundToken`, and `RariFundProxy`, the smart contracts behind Rari Capital's stablecoin fund.
+Welcome to the API docs for `RariFundManager`, `RariFundToken`, and `RariFundProxy`, the smart contracts behind the Rari Stable Pool.
 
-* See `USAGE.md` for instructions on common usage of the smart contracts' APIs.
+* See [`USAGE.md`](USAGE.md) for instructions on common usage of the smart contracts' APIs.
 * See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSPT.
 * Smart contract ABIs are available in the `abi` properties of the JSON files in the `build` folder.
 
@@ -22,8 +22,8 @@ Returns the total balance in USD (scaled by 1e18) of `account`.
 Returns the amount of RSPT owned by `account`.
 
 * A user's RSPT balance is an internal representation of their USD balance.
-    * While a user's USD balance is constantly increasing as the fund accrues interest, a user's RSPT balance does not change except on deposit, withdrawal, and transfer.
-    * The price of RSPT is equivalent to the current value of 1 USD deposited at the fund's inception.
+    * While a user's USD balance is constantly increasing as the Rari Stable Pool accrues interest, a user's RSPT balance does not change except on deposit, withdrawal, and transfer.
+    * The price of RSPT is equivalent to the current value of the first $1 USD deposited to the Rari Stable Pool.
 * Parameters:
     * `account` (address) - The account whose balance we are retrieving.
 
@@ -63,7 +63,7 @@ Returns an array of currency codes currently accepted for deposits.
 
 ***For a limited time only, we are paying gas fees for first-time deposits of at least 250 DAI/USDC/USDT!***
 
-Deposits funds to RariFund in exchange for RSPT (with GSN support).
+Deposits funds to the Rari Stable Pool in exchange for RSPT (with GSN support).
 
 * You may only deposit currencies accepted by the fund (see `RariFundManager.isCurrencyAccepted(string currencyCode)`).
 * Please note that you must approve RariFundProxy to transfer at least `amount`.
@@ -73,7 +73,7 @@ Deposits funds to RariFund in exchange for RSPT (with GSN support).
 
 ### `RariFundManager.deposit(string currencyCode, uint256 amount)`
 
-Deposits funds to RariFund in exchange for RSPT.
+Deposits funds to the Rari Stable Pool in exchange for RSPT.
 
 * You may only deposit currencies accepted by the fund (see `RariFundManager.isCurrencyAccepted(string currencyCode)`). However, `RariFundProxy.exchangeAndDeposit` exchanges your funds via 0x and deposits them in one transaction.
 * Please note that you must approve RariFundManager to transfer at least `amount`.
@@ -83,7 +83,7 @@ Deposits funds to RariFund in exchange for RSPT.
 
 ### `RariFundProxy.exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string outputCurrencyCode, LibOrder.Order[] orders, bytes[] signatures, uint256 takerAssetFillAmount)`
 
-Exchanges and deposits funds to RariFund in exchange for RSPT (via 0x).
+Exchanges and deposits funds to the Rari Stable Pool in exchange for RSPT (via 0x).
 
 * You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
 * Please note that you must approve RariFundProxy to transfer at least `inputAmount` unless you are inputting ETH.
@@ -100,7 +100,7 @@ Exchanges and deposits funds to RariFund in exchange for RSPT (via 0x).
 
 ### `RariFundProxy.exchangeAndDeposit(string inputCurrencyCode, uint256 inputAmount, string outputCurrencyCode)`
 
-Exchanges and deposits funds to RariFund in exchange for RSPT (no slippage and low fees via mStable, but only supports DAI, USDC, USDT, TUSD, and mUSD).
+Exchanges and deposits funds to the Rari Stable Pool in exchange for RSPT (no slippage and low fees via mStable, but only supports DAI, USDC, USDT, TUSD, and mUSD).
 
 * Please note that you must approve RariFundProxy to transfer at least `inputAmount`.
 * Parameters:
@@ -112,7 +112,7 @@ Exchanges and deposits funds to RariFund in exchange for RSPT (no slippage and l
 
 ### `RariFundManager.withdraw(string currencyCode, uint256 amount)`
 
-Withdraws funds from RariFund in exchange for RSPT.
+Withdraws funds from the Rari Stable Pool in exchange for RSPT.
 
 * You may only withdraw currencies held by the fund (see `RariFundManager.getRawFundBalance(string currencyCode)`). However, `RariFundProxy.withdrawAndExchange` withdraws your funds and exchanges them via 0x in one transaction.
 * Please note that you must approve RariFundManager to burn of the necessary amount of RSPT.
@@ -122,7 +122,7 @@ Withdraws funds from RariFund in exchange for RSPT.
 
 ### `RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)`
 
-Withdraws funds from RariFund in exchange for RSPT and exchanges to them to the desired currency (if no 0x orders are supplied, exchanges DAI, USDC, USDT, TUSD, and mUSD via mStable).
+Withdraws funds from the Rari Stable Pool in exchange for RSPT and exchanges to them to the desired currency (if no 0x orders are supplied, exchanges DAI, USDC, USDT, TUSD, and mUSD via mStable).
 
 * You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
 * Please note that you must approve RariFundManager to burn of the necessary amount of RSPT. You also must input at least enough ETH to cover the protocol fees.
@@ -143,7 +143,7 @@ Withdraws funds from RariFund in exchange for RSPT and exchanges to them to the 
 * Development notes:
     * *We should be able to make this function external and use calldata for all parameters, but [Solidity does not support calldata structs](https://github.com/ethereum/solidity/issues/5479).*
 
-## **Rari Stable Pool Token**
+## **RSPT (Rari Stable Pool Token)**
 
 See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSPT. Here are a few of the most common ones:
 
@@ -172,18 +172,18 @@ Returns the total supply of RSPT (scaled by 1e18).
 
 * Divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RSPT in USD (scaled by 1e18).
 
-## **Fund Balances and Interest**
+## **Total Supply and Interest**
 
 ### `uint256 RariFundManager.getFundBalance()`
 
-Returns the fund's total investor balance (all RSPT holders' funds but not unclaimed fees) of all currencies in USD (scaled by 1e18).
+Returns the total balance supplied by users to the Rari Stable Pool (all RSPT holders' funds but not unclaimed fees) in USD (scaled by 1e18).
 
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
 ### `int256 RariFundManager.getInterestAccrued()`
 
-Returns the total amount of interest accrued by past and current RSPT holders (excluding the fees paid on interest) in USD (scaled by 1e18).
+Returns the total amount of interest accrued (excluding the fees paid on interest) by past and current Rari Stable Pool users (i.e., RSPT holders) in USD (scaled by 1e18).
 
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
@@ -201,18 +201,18 @@ Returns the amount of interest fees accrued by beneficiaries in USD (scaled by 1
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
-## **Raw Fund Balances, Allocations, and Interest**
+## **Raw Total Supply, Allocations, and Interest**
 
 ### `uint256 RariFundManager.getRawFundBalance()`
 
-Returns the fund's raw total balance (all RSPT holders' funds + all unclaimed fees) of all currencies in USD (scaled by 1e18).
+Returns the raw total balance of the Rari Stable Pool (all RSPT holders' funds + all unclaimed fees) of all currencies in USD (scaled by 1e18).
 
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
 ### `uint256 RariFundManager.getRawFundBalance(string currencyCode)`
 
-Returns the fund's raw total balance (all RSPT holders' funds + all unclaimed fees) of the specified currency.
+Returns the raw total balance of the Rari Stable Pool (all RSPT holders' funds + all unclaimed fees) of the specified currency.
 
 * Parameters:
     * `currencyCode` (string): The currency code of the balance to be calculated.
@@ -229,12 +229,12 @@ Returns the fund controller's contract balance of each currency, balance of each
 
 ### `int256 RariFundManager.getRawInterestAccrued()`
 
-Returns the raw total amount of interest accrued by the fund as a whole (including the fees paid on interest) in USD (scaled by 1e18).
+Returns the raw total amount of interest accrued by the Rari Stable Pool (including the fees paid on interest) in USD (scaled by 1e18).
 
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
-## **Stablecoin Pricing**
+## **Internal Stablecoin Pricing**
 
 ### `uint256[] RariFundPriceConsumer.getCurrencyPricesInUsd()`
 

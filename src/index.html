@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>The Fund | Rari Capital</title>
+    <title>App | Rari Capital</title>
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
@@ -28,7 +28,7 @@
       <h5 class="my-0 mr-md-auto font-weight-normal"><a href="https://rari.capital" class="text-dark text-uppercase" style="font-family: Avenir-Black; font-weight: 600; letter-spacing: 1px; font-size: 22px; display: flex; align-items: center;"><img src="favicon.png" style="height: 32px; margin-right: 8px;">Rari Capital</a></h5>
       <nav class="my-2 my-md-0 mr-md-3">
         <a class="p-2 text-dark" href="https://rari.capital">Return Home</a>
-        <a class="p-2 text-dark" href="#fund" id="tab-fund" style="text-decoration: underline;">The Fund</a>
+        <a class="p-2 text-dark" href="#fund" id="tab-fund" style="text-decoration: underline;">Stable Pool</a>
         <a class="p-2 text-dark" href="#account" id="tab-account">My Account</a>
       </nav>
       <button class="btn btn-primary btn-connect" type="button">Connect Wallet</button>
@@ -39,8 +39,8 @@
       <div class="container">
         <div class="row">
           <div class="col-12">
-            <h1 class="text-center">The Fund</h1>
-            <p class="text-center">Earn through a variety of trusted DeFi protocols, optimized for the highest returns. <a href="https://www.rari.capital/current.html">Learn more here.</a></p>
+            <h1 class="text-center"><span class="d-none d-md-inline">Rari </span>Stable Pool</h1>
+            <p class="text-center">Earn through a variety of trusted DeFi protocols, optimized for the highest returns. <a href="#modal-how-it-works" data-toggle="modal" data-target="#modal-how-it-works">Learn more here.</a></p>
           </div>
         </div>
         
@@ -81,7 +81,7 @@
           <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-0">
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Fund APY Comparison</h3>
+                <h3 class="panel-title">Pool APY Comparison</h3>
               </div>
               <div class="panel-body" style="padding: 15px;">
                 <small class="d-block text-center mb-2">Track the theoretical daily APY over the past year of Rari compared to other protocols.</small>
@@ -92,7 +92,7 @@
           <div class="col-md-10 offset-md-1 col-lg-8 offset-lg-2 col-xl-6 offset-xl-0">
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Fund Return Comparison</h3>
+                <h3 class="panel-title">Pool Return Comparison</h3>
               </div>
               <div class="panel-body" style="padding: 15px;">
                 <small class="d-block text-center mb-2">Track the theoretical growth of $10,000 USD over the past year in Rari compared to other protocols.</small>
@@ -108,7 +108,7 @@
           <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-5 offset-lg-1 col-xl-4 offset-xl-2">
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Fund Currency Allocation</h3>
+                <h3 class="panel-title">Currency Allocations</h3>
               </div>
               <div class="panel-body" style="padding: 15px;">
                 <canvas id="chart-currencies"></canvas>
@@ -118,7 +118,7 @@
           <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2 col-lg-5 offset-lg-0 col-xl-4 offset-xl-0">
             <div class="panel panel-default">
               <div class="panel-heading">
-                <h3 class="panel-title">Fund Pool Allocation</h3>
+                <h3 class="panel-title">Subpool Allocations</h3>
               </div>
               <div class="panel-body" style="padding: 15px;">
                 <canvas id="chart-pools"></canvas>
@@ -133,7 +133,7 @@
       <div class="row">
         <div class="col-12">
           <h1 class="text-center">My Account</h1>
-          <p class="mb-2 text-center">Deposit to earn on DeFi, while being optimized for the highest returns. <a href="https://www.rari.capital/current.html">Learn more here.</a></p>
+          <p class="mb-2 text-center">Deposit to earn on DeFi, while being optimized for the highest returns. <a href="#modal-how-it-works" data-toggle="modal" data-target="#modal-how-it-works">Learn more here.</a></p>
           <p class="text-center text-danger">WARNING: Our contracts have undergone security reviews but have not yet been completely audited.</p>
         </div>
       </div>
@@ -169,7 +169,7 @@
               <samp class="d-block" id="MyUSDBalanceWrapper">$<span id="MyUSDBalance">?</span> USD</samp>
             </div>
             <div class="panel-footer">
-              <small class="d-block">All COMP earned by the fund is liquidated into additional interest for RSPT holders every 3 days.</small>
+              <small class="d-block">All COMP rewards are liquidated into additional interest for RSPT holders every 3 days.</small>
             </div>
           </div>
           <!--<div class="panel panel-default">
@@ -180,7 +180,7 @@
               <samp class="d-block">$<span id="MyInterestAccrued">?</span> USD</samp>
             </div>
             <div class="panel-footer">
-              <small class="d-block">All COMP earned by the fund is liquidated into additional interest for RSPT holders every 3 days.</small>
+              <small class="d-block">All COMP rewards are liquidated into additional interest for RSPT holders every 3 days.</small>
             </div>
           </div>-->
           <div class="panel panel-default">
@@ -272,7 +272,7 @@
             </button>
           </div>
           <div class="modal-body text-dark">
-            <p class="text-dark">You are depositing a currency that is either not supported or not currently desired by the fund <small>(due to other currencies having higher potential yield)</small>, so the fund must exchange it for you.</p>
+            <p class="text-dark">You are depositing a currency that is either not supported or not currently desired by the Rari Stable Pool <small>(due to other currencies having higher potential yield)</small>, so we must exchange your funds first. Continue to exchange and deposit your funds in just one transaction:</p>
             <div class="mb-2" id="DepositSlippage"><strong>Slippage:</strong> <kbd>?%</kbd></div>
             <div class="mb-3" id="DepositExchangeFee"><strong>Exchange Fee:</strong> <kbd>0 ETH <small>(0 USD)</small></kbd></div>
             <small class="d-block" id="DepositZeroExGasPriceWarning">Please do not increase the preset gas price without increasing the transaction value (as 0x exchange protocol fees are proportional to gas price).</small>
@@ -295,7 +295,7 @@
             </button>
           </div>
           <div class="modal-body text-dark">
-            <p class="text-dark">You are withdrawing a currency that the fund does not have enough of to directly process your withdrawal; instead, the fund must make exchange(s) first.</p>
+            <p class="text-dark">You are withdrawing a currency that the Rari Stable Pool does not have enough of to directly process your withdrawal; instead, we must withdraw other currencies and exchange them. Continue to withdraw and exchange your funds in just one transaction:</p>
             <div class="mb-2" id="WithdrawSlippage"><strong>Slippage:</strong> <kbd>?%</kbd></div>
             <div class="mb-3" id="WithdrawExchangeFee"><strong>Exchange Fee:</strong> <kbd>0 ETH <small>(0 USD)</small></kbd></div>
             <small class="d-block" id="WithdrawZeroExGasPriceWarning">Please do not increase the preset gas price without increasing the transaction value (as 0x exchange protocol fees are proportional to gas price).</small>
@@ -312,28 +312,55 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title text-dark">How Rari Works</h5>
+            <h5 class="modal-title text-dark">Rari Stable Pool: How it Works</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div class="modal-body">
-            <h4 class="text-dark">RSPT (Rari Stable Pool Token)</h4>
-            <p class="text-dark">Each user's share of the fund is determined by their RSPT balance. When you deposit funds to Rari, an equivalent amount of RSPT (Rari Stable Pool Token) is minted to your account. When you withdraw funds to Rari, the equivalent amount of RSPT is burned from your account. As soon as you deposit, you start earning yield. Essentially, fund holdings and yield are split up proportionally across RSPT holders by their USD balances.</p>
-            <h4 class="text-dark">Generating Yield</h4>
-            <p class="text-dark">Currently, Rari generates yield by depositing a combination of DAI and USDC to the lending protocol <a href="https://dydx.exchange/">dYdX</a> as well as DAI, USDC, and USDT to the lending protocol <a href="https://compound.finance/">Compound</a>. In the near future, we will be generating yield from more currencies across more lending protocols, among other strategies.</p>
-            <h4 class="text-dark">Deposits</h4>
-            <p class="text-dark">Only certain stablecoins are accepted for direct deposits (direct meaning without exchange to an accepted currency). When depositing one of these stablecoins, the Rari web client approves tokens to <code>RariFundManager</code> and calls <code>RariFundManager.deposit(string currencyCode, uint256 amount)</code>. When you deposit another currency, the Rari web client approves tokens to <code>RariFundProxy</code> and calls <code>RariFundProxy.exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string outputCurrencyCode, LibOrder.Order[] orders, bytes[] signatures, uint256 takerAssetFillAmount)</code> to exchange your tokens via <a href="https://0x.org/">0x</a> and then deposit them (please be aware that 0x charges an ETH protocol fee).</p>
-            <h4 class="text-dark">Withdrawals</h4>
-            <p class="text-dark">Just like only certain stablecoins are accepted for direct deposits, only stablecoins held by the fund are availble for direct withdrawals. When withdrawing one of these stablecoins, the Rari web client approves RSPT to <code>RariFundManager</code> and calls <code>RariFundManager.withdraw(string currencyCode, uint256 amount)</code>. When you withdraw another currency, the Rari web client approves RSPT to <code>RariFundProxy</code> and calls <code>RariFundProxy.withdrawAndExchange(string[] inputCurrencyCodes, uint256[] inputAmounts, address outputErc20Contract, LibOrder.Order[][] orders, bytes[][] signatures, uint256[] makerAssetFillAmounts, uint256[] protocolFees)</code> to withdraw your tokens and then exchange them via <a href="https://0x.org/">0x</a> (please be aware that 0x charges an ETH protocol fee).</p>
-            <h4 class="text-dark">Security</h4>
-            <p class="text-dark">Rari's Ethereum-based smart contracts are written in Solidity and reviewed by multiple partners for security. Rari does not have control over your funds: instead, the Ethereum blockchain executes all secure code across its entire decentralized network (making it very difficult and extremely costly to rewrite history), and your funds are only withdrawable by you (or an upgrade of <code>RariFundManager</code>). However, upgrades will become decentralized in the future via a governance protocol based on a new token. Please note that using our web client online at <a href="https://app.rari.capital">app.rari.capital</a> is not nearly as trustworthy as downloading, verifying, and using it offline. Lastly, the rebalancer is centralized, but it can only rebalance funds to different currencies and pools. In the near future, we will be implementing a smart-contract-based (and therefore decentralized) slippage limit.</p>
-            <h4 class="text-dark">Smart Contract Structure</h4>
-            <p class="text-dark"><code>RariFundManager</code> handles deposits and withdrawals to the fund, as well as all other external functions, other than <code>RariFundToken</code>'s functions as well as the <code>exchangeAndDeposit</code> and <code>withdrawAndExchange</code> functions of <code>RariFundProxy</code> (see <strong>Deposits</strong> and <strong>Withdrawals</strong> above for more information on RariFundProxy). <code>RariFundManager</code> depends on the external library <code>RariFundController</code> (a library useful only to RariFundManager).</p>
-            <h4 class="text-dark">Performance Fee</h4>
-            <p class="text-dark">A 20% performance fee is deducted from all interest earned by RSPT holders. This fee is liable to change in the future, but fees on past interest cannot be changed.</p>
-            <h4 class="text-dark">COMP</h4>
-            <p class="text-dark">All <a href="https://compound.finance/governance/comp">COMP (Compound's governance token)</a> earned by the fund is liquidated into additional interest for RSPT holders every 3 days.</p>
+          <div class="modal-body text-dark">
+            <h4>Generating Yield</h4>
+            <p>Currently, the Rari Stable Pool generates yield by depositing a combination of:</p>
+            <ul>
+              <li>DAI and USDC to the lending protocol <a href="https://dydx.exchange/">dYdX</a></li>
+              <li>DAI, USDC, and USDT to the lending protocol <a href="https://compound.finance/">Compound</a></li>
+              <li>DAI, USDC, USDT, TUSD, BUSD, and sUSD to the lending protocol <a href="https://aave.com/">Aave</a></li>
+              <li>mUSD to the savings protocol from <a href="https://mstable.org/">mStable</a></li>
+            </ul>
+            <p>Rari optimizes yield not only by allocating assets to the pools with the highest interest rates, but also by exchanging assets to the stablecoins with the highest interest rates via a combination of:</p>
+            <ul>
+              <li>the <a href="https://0x.org/">0x</a> exchange</li>
+              <li>swapping via mUSD from <a href="https://mstable.org">mStable</a></li>
+            </ul>
+            <p>In the near future, we will be generating yield from more currencies across more lending protocols, among other strategies.</p>
+            <h4>RSPT (Rari Stable Pool Token)</h4>
+            <p>Each user&#39;s share of the Rari Stable Pool is represented by their RSPT (Rari Stable Pool Token) balance. When you deposit funds to the Stable Pool, an equivalent amount of RSPT is minted to your account. When you withdraw funds from the Stable Pool, the equivalent amount of RSPT is burned from your account. As soon as you deposit, you start earning yield. Essentially, Rari Stable Pool holdings and yield are split up across RSPT holders proportionally to their balances.</p>
+            <h4>Deposits</h4>
+            <p>Only certain stablecoins are accepted for direct deposits (direct meaning without exchange to an accepted currency). To deposit another currency, you must exchange your funds before depositing. Fortunately, Rari can exchange and deposit your funds in the same transaction via <a href="https://0x.org/">0x</a> and/or <a href="https://mstable.org">mStable</a> (please be aware that exchanges via 0x are subject to slippage due to price spread as well as an ETH protocol fee, and exchanges via mStable are subject to a small denominational percentage fee, but can avoid slippage and even get you a bonus).</p>
+            <p>See <a href="USAGE.md"><code>USAGE.md</code></a> for more information on how to deposit via the smart contracts and <a href="API.md"><code>API.md</code></a> for a detailed reference on the smart contract methods involved. See the Rari SDK for easy implementation and the web client for easy usage.</p>
+            <h4>Withdrawals</h4>
+            <p>Only the stablecoins currently held by the Rari Stable Pool are available for direct withdrawals. To withdraw another currency, you must exchange your funds after withdrawing. Fortunately, Rari can withdraw and exchange your funds in the same transaction via <a href="https://0x.org/">0x</a> and/or <a href="https://mstable.org">mStable</a> (please be aware that exchanges via 0x are subject to slippage due to price spread as well as an ETH protocol fee, and exchanges via mStable are subject to a small denominational percentage fee, but can avoid slippage and even get you a bonus).</p>
+            <p>See <a href="USAGE.md"><code>USAGE.md</code></a> for more information on how to withdraw via the smart contracts and <a href="API.md"><code>API.md</code></a> for a detailed reference on the smart contract methods involved. See the Rari SDK for easy implementation and the web client for easy usage.</p>
+            <h4>Structure</h4>
+            <p>We have 4 user-facing <strong>smart contracts</strong> in total (see <a href="DEPLOYED.md"><code>DEPLOYED.md</code></a> for deployed addresses):</p>
+            <ul>
+              <li><code>RariFundManager</code> is the Rari Stable Pool&#39;s main contract, handling deposits, withdrawals, USD balances, interest, fees, etc.</li>
+              <li><code>RariFundController</code> holds supplied funds and is used by the rebalancer to deposit and withdraw from pools and make exchanges.</li>
+              <li><code>RariFundToken</code> is the contract behind the Rari Stable Pool Token (RSPT), an ERC20 token used to internally account for the ownership of funds supplied to the Rari Stable Pool.</li>
+              <li><code>RariFundPriceConsumer</code> retrieves stablecoin prices from Chainlink&#39;s public price feeds (used by <code>RariFundManager</code> and <code>RariFundController</code>).</li>
+              <li><code>RariFundProxy</code> includes wrapper functions built on top of <code>RariFundManager</code>: exchange and deposit, withdraw and exchange, and deposit without paying gas via the Gas Station Network (GSN).</li>
+            </ul>
+            <p>A centralized (but soon to be decentralized) <strong>rebalancer</strong> controls which pools hold which currencies at any given time but only has permission to move funds between pools and exchange currencies, not withdraw funds elsewhere.</p>
+            <h4>Security</h4>
+            <p>Rari&#39;s Ethereum-based smart contracts are written in Solidity and reviewed by multiple partners for security. Rari does not have control over your funds: instead, the Ethereum blockchain executes all secure code across its entire decentralized network (making it very difficult and extremely costly to rewrite history), and your funds are only withdrawable by you.</p>
+            <p>While the centralized (but soon to be decentralized) rebalancer does have control over which pools hold which currencies at any given time but only has permission to move funds between pools and exchange currencies, not withdraw funds elsewhere. Losses due to exchange slippage in a 24-hour period are limited proportionally to the total supply for security since 0x orders can come from anywhere. However, the rebalancer can approve any amount of funds to the pools and exchanges integrated.</p>
+            <p>Please note that at the moment, smart contract upgrades are approved via a 3-of-5 multisig federation controlled by Rari&#39;s co-founders and partners. However, upgrades will become decentralized in the future via a governance protocol based on a new token.</p>
+            <p>Please note that using our web client online at <a href="https://app.rari.capital">app.rari.capital</a> is not nearly as trustworthy as downloading, verifying, and using it offline. Lastly, the rebalancer is centralized, but it can only rebalance funds to different currencies and pools. In the near future, we will be implementing a smart-contract-based (and therefore decentralized) slippage limit.</p>
+            <h4>Risk</h4>
+            <p>We have covered security above, but see <a href="https://rari.capital/risks.html">our website</a> for more information on the risks associated with supplying funds to Rari.</p>
+            <h4>Performance Fee</h4>
+            <p>A 20% performance fee is deducted from all interest earned by RSPT holders. This fee is liable to change in the future (but fees on past interest cannot be changed).</p>
+            <h4>COMP</h4>
+            <p>All <a href="https://compound.finance/governance/comp">COMP (Compound&#39;s governance token)</a> earned by the fund is liquidated into additional interest for RSPT holders approximately every 3 days.</p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -379,6 +406,6 @@
     <script src="js/analytics.js"></script>
 
     <!-- Rari Fund Web App -->
-    <script src="js/app-compiled.js?v=1596931555"></script>
+    <script src="js/app-compiled.js?v=1600895769"></script>
   </body>
 </html>
