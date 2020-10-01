@@ -29,22 +29,6 @@ Returns the amount of RSPT owned by `account`.
 
 ## **Deposits**
 
-### `uint256 RariFundManager.getDefaultAccountBalanceLimit()`
-
-Returns the default account balance limit in USD.
-
-* Note that this limit applies only to new deposits: there is no limit on the amount of interest an account can accrue.
-* Users are subject to the default limit unless they have sorted out a special agreement with Rari.
-
-### `uint256 RariFundManager.getAccountBalanceLimit()`
-
-Returns the balance limit in USD of `account`.
-
-* Note that this limit applies only to new deposits: there is no limit on the amount of interest an account can accrue.
-* Users are subject to the default limit unless they have sorted out a special agreement with Rari.
-* Parameters:
-    * `account` (address): The Ethereum address whose balance limit we are checking.
-
 ### `bool RariFundManager.isCurrencyAccepted(string currencyCode)`
 
 Returns a boolean indicating if deposits in `currencyCode` are currently accepted.

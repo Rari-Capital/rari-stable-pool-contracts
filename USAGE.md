@@ -27,12 +27,7 @@ The following document contains instructions on common usage of the smart contra
 *Our SDK, soon to be released, will make programmatic deposits and withdrawals as easy as just one line of code.*
 
 1. User chooses to deposit one of our directly supported tokens (DAI, USDC, USDT, TUSD, BUSD, and sUSD), ETH, or one of the tokens listed by the 0x swap tokens API (see [documentation](https://0x.org/docs/api#get-swapv0tokens) and [endpoint](https://api.0x.org/swap/v0/tokens)) in an amount no greater than the balance of their Ethereum account.
-2. User ensures that their deposit will not cause their account balance to breach the USD-based limit.
-    * To check an account's balance limit: `uint256 RariFundManager.getAccountBalanceLimit(address account)`
-    * To check the default account balance limit: `uint256 RariFundManager.getDefaultAccountBalanceLimit()`
-    * The default account balance limit is currently **$5000 USD**, though this figure will be raised in the near future.
-    * Note that this limit applies only to new deposits: there is no limit on the amount of interest an account can accrue.
-3. User calls `string[] RariFundManager.getAcceptedCurrencies()` to get an array of currency codes currently accepted for direct deposit to the Stable Pool.
+2. User calls `string[] RariFundManager.getAcceptedCurrencies()` to get an array of currency codes currently accepted for direct deposit to the Stable Pool.
     * If desired deposit currency is accepted:
         * Generally, user simply approves tokens and deposits them:
             1. User approves tokens to `RariFundManager` by calling `approve(address spender, uint256 amount)` on the ERC20 contract of the desired input token where `spender` is `RariFundManager` (to approve unlimited funds, set `amount` to `uint256(-1)`).

@@ -32,7 +32,6 @@ App = {
   zeroExPrices: {},
   usdPrices: {},
   usdPricesLastUpdated: 0,
-  accountBalanceLimitUsdBN: null,
   acceptedCurrencies: [],
   supportedCurrencies: ["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"],
   chainlinkPricesInUsd: {},
@@ -847,7 +846,6 @@ App = {
       if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
       /* App.getMyInterestAccrued();
       if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000); */
-      App.getAccountBalanceLimit();
     }
     if (App.contracts.RariFundToken) {
       App.getTokenBalance();
@@ -983,7 +981,6 @@ App = {
         if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
         /* App.getMyInterestAccrued();
         if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000); */
-        App.getAccountBalanceLimit();
       }
       App.getDirectlyDepositableCurrencies();
       App.getDirectlyWithdrawableCurrencies();
@@ -1063,7 +1060,6 @@ App = {
         if (!App.intervalGetMyFundBalance) App.intervalGetMyFundBalance = setInterval(App.getMyFundBalance, 5 * 60 * 1000);
         /* App.getMyInterestAccrued();
         if (!App.intervalGetMyInterestAccrued) App.intervalGetMyInterestAccrued = setInterval(App.getMyInterestAccrued, 5 * 60 * 1000); */
-        App.getAccountBalanceLimit();
       }
       if (App.contracts.RariFundToken) {
         App.getTokenBalance();
@@ -1207,7 +1203,6 @@ App = {
         if ($('#modal-confirm-deposit').is(':visible')) $('#modal-confirm-deposit').modal('hide');
 
         var myFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call());
-        if (App.accountBalanceLimitUsdBN !== null && myFundBalanceBN.add(amountBN.mul(App.chainlinkPricesInUsd[token]).div(Web3.utils.toBN(10).pow(Web3.utils.toBN(App.tokens[token].decimals)))).gt(App.accountBalanceLimitUsdBN)) return toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $" + new Big(App.accountBalanceLimitUsdBN.toString()).div(new Big(1e18)).toFormat(0) + " USD.", "Deposit failed");
         console.log('Deposit ' + amount + ' ' + token + ' directly');
         var depositContract = amount >= 250 && myFundBalanceBN.isZero() ? App.contractsGsn.RariFundProxy : App.contracts.RariFundManager;
 
@@ -1276,13 +1271,6 @@ App = {
 
         // Ideally mStable, but 0x works too
         if (mStableOutputCurrency !== null) {
-          // Check account balance limit
-          if (App.accountBalanceLimitUsdBN !== null) {
-            var myFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call());
-            var outputAmountUsdBN = mStableOutputAmountAfterFeeBN.mul(App.chainlinkPricesInUsd[mStableOutputCurrency]).div(Web3.utils.toBN(10).pow(Web3.utils.toBN(App.tokens[mStableOutputCurrency].decimals)));
-            if (myFundBalanceBN.add(outputAmountUsdBN).gt(App.accountBalanceLimitUsdBN)) return toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $" + new Big(App.accountBalanceLimitUsdBN.toString()).div(new Big(1e18)).toFormat(0) + " USD.", "Deposit failed");
-          }
-
           // Warn user of slippage
           var epochNow = (new Date()).getTime();
 
@@ -1338,13 +1326,6 @@ App = {
             var [orders, inputFilledAmountBN, protocolFee, takerAssetFilledAmountBN, makerAssetFilledAmountBN, gasPrice] = await App.get0xSwapOrders(token === "ETH" ? "WETH" : App.tokens[token].address, App.tokens[acceptedCurrency].address, amountBN);
           } catch (err) {
             return toastr["error"]("Failed to get swap orders from 0x API: " + err, "Deposit failed");
-          }
-
-          // Check account balance limit
-          if (App.accountBalanceLimitUsdBN !== null) {
-            var myFundBalanceBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.balanceOf(App.selectedAccount).call());
-            var makerAssetFilledAmountUsdBN = makerAssetFilledAmountBN.mul(App.chainlinkPricesInUsd[acceptedCurrency]).div(Web3.utils.toBN(10).pow(Web3.utils.toBN(App.tokens[acceptedCurrency].decimals)));
-            if (myFundBalanceBN.add(makerAssetFilledAmountUsdBN).gt(App.accountBalanceLimitUsdBN)) return toastr["error"]("Making a deposit of this amount would cause your account balance to exceed the limit of $" + new Big(App.accountBalanceLimitUsdBN.toString()).div(new Big(1e18)).toFormat(0) + " USD.", "Deposit failed");
           }
 
           var amountOutputted = makerAssetFilledAmountBN.toString() / (10 ** App.tokens[acceptedCurrency].decimals);
@@ -1895,18 +1876,6 @@ App = {
     }).catch(function(err) {
       console.error(err);
     });
-  },
-
-  getAccountBalanceLimit: async function() {
-    console.log('Getting account balance limit...');
-
-    try {
-      App.accountBalanceLimitUsdBN = Web3.utils.toBN(await App.contracts.RariFundManager.methods.getAccountBalanceLimit(App.selectedAccount).call());
-    } catch (error) {
-      return console.error(error);
-    }
-
-    $('#AccountBalanceLimit').text(new Big(App.accountBalanceLimitUsdBN.toString()).div(new Big(1e18)).toFormat(0));
   }
 };
 
