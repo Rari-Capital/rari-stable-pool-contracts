@@ -21,7 +21,7 @@
     * Check for overflow before conversion from uint256 to int256 (QSP-9).
     * Locked all Solidity version pragmas to 0.5.17 (QSP-11, QSP-12).
     * Improved code comments (QSP-10, QSP-14).
-* Fixed bug in which `RariFundManager._withdrawFrom` could have overestimated the amount of RFT burned (see commit [9059e8c](https://github.com/Rari-Capital/rari-contracts/commit/9059e8c4c8c9de545680b70f20981f261bfc425d)).
+* Fixed bug in which `RariFundManager._withdrawFrom` could have overestimated the amount of RFT burned (see commit [9059e8c](https://github.com/Rari-Capital/rari-stable-pool-contracts/commit/9059e8c4c8c9de545680b70f20981f261bfc425d)).
     * It seems that this bug did not cause any issues before it was fixed: it was discovered during development and was never reported by any users.
 * Other changes to contracts:
     * Externalized pool and exchange libraries.

@@ -1,6 +1,6 @@
 # Rari Stable Pool: Smart Contracts & dApp
 
-Welcome to `rari-contracts`, the central repository for the Solidity source code behind the Rari Stable Pool's Ethereum-based smart contracts (with automated tests), web-based dApp, and documentation.
+Welcome to `rari-stable-pool-contracts`, the central repository for the Solidity source code behind the Rari Stable Pool's Ethereum-based smart contracts (with automated tests), web-based dApp, and documentation.
 
 ## How it works
 
