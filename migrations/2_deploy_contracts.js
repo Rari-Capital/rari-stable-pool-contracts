@@ -50,7 +50,7 @@ module.exports = async function(deployer, network, accounts) {
   }
 
   if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) {
-    // Upgrade from rari-stable-pool-contracts v1.2.0 (RariFundManager v1.1.0, RariFundManager v1.1.0, and RariFundProxy v1.2.0)
+    // Upgrade from v1.2.0 (RariFundManager v1.1.0, RariFundManager v1.1.0, RariFundToken v1.0.0, and RariFundProxy v1.2.0) to v2.0.0
     var oldRariFundController = new web3.eth.Contract(oldRariFundControllerAbi, process.env.UPGRADE_OLD_FUND_CONTROLLER);
     var oldRariFundManager = new web3.eth.Contract(oldRariFundManagerAbi, process.env.UPGRADE_OLD_FUND_MANAGER);
     var oldRariFundToken = new web3.eth.Contract(oldRariFundTokenAbi, process.env.UPGRADE_OLD_FUND_TOKEN);
