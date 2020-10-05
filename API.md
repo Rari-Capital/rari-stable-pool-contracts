@@ -8,26 +8,16 @@ Welcome to the API docs for `RariFundManager`, `RariFundToken`, and `RariFundPro
 
 *If you're using JavaScript, don't waste your time directly integrating our smart contracts: the [Rari JavaScript SDK](https://github.com/Rari-Capital/rari-sdk) makes programmatic deposits and withdrawals as easy as just one line of code!*
 
-## **User Balances and Interest**
+## **User Balance and Interest**
 
 ### `uint256 RariFundManager.balanceOf(address account)`
 
-Returns the total balance in USD (scaled by 1e18) of `account`.
+Returns the total balance in USD (scaled by 1e18) supplied to the Rari Stable Pool by `account`.
 
 * Parameters:
     * `account` (address) - The account whose balance we are calculating.
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
-
-### `uint256 RariFundToken.balanceOf(address account)`
-
-Returns the amount of RSPT owned by `account`.
-
-* A user's RSPT balance is an internal representation of their USD balance.
-    * While a user's USD balance is constantly increasing as the Rari Stable Pool accrues interest, a user's RSPT balance does not change except on deposit, withdrawal, and transfer.
-    * The price of RSPT is equivalent to the current value of the first $1 USD deposited to the Rari Stable Pool.
-* Parameters:
-    * `account` (address) - The account whose balance we are retrieving.
 
 ## **Deposits**
 
@@ -133,12 +123,22 @@ Withdraws funds from the Rari Stable Pool in exchange for RSPT and exchanges to 
 
 See [EIP-20: ERC-20 Token Standard](https://eips.ethereum.org/EIPS/eip-20) for reference on all common functions of ERC20 tokens like RSPT. Here are a few of the most common ones:
 
+### `uint256 RariFundToken.balanceOf(address account)`
+
+Returns the amount of RSPT owned by `account`.
+
+* A user's RSPT balance is an internal representation of their USD balance.
+    * While a user's USD balance is constantly increasing as the Rari Stable Pool accrues interest, a user's RSPT balance does not change except on deposit, withdrawal, and transfer.
+    * The price of RSPT is equivalent to the current value of the first $1 USD deposited to the Rari Stable Pool.
+* Parameters:
+    * `account` (address) - The account whose balance we are retrieving.
+
 ### `bool RariFundToken.transfer(address recipient, uint256 amount)`
 
 Transfers the specified `amount` of RSPT to `recipient`.
 
 * Parameters:
-    * `recipient` (address): The recipient of the .
+    * `recipient` (address): The recipient of the RSPT.
     * `inputAmounts` (uint256[]): The amounts of tokens to be withdrawn and exchanged (including taker fees).
 * Return value: Boolean indicating success.
 

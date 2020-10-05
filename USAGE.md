@@ -19,7 +19,7 @@ The following document contains instructions on common usage of the Rari Stable 
     1. Get RSPT exchange rates at start and end of time range: divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RSPT in USD (scaled by 1e18).
     2. Divide the ending exchange rate by the starting exchange rate, raise this quotient to the power of 1 year divided by the length of the time range, and subtract one to get the Stable Pool APY over this time range.
 
-## My Balances and Interest
+## My Balance and Interest
 
 * **Get my USD balance supplied:** `uint256 RariFundManager.balanceOf(address account)` returns the total balance in USD (scaled by 1e18) supplied to the Rari Stable Pool by `account`.
 * **Get my interest accrued:** Subtract total deposits and transfers in (in USD) and add total withdrawals and transfers out (in USD) from `uint256 RariFundManager.balanceOf(address account)`.
