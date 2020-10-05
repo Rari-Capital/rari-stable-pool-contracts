@@ -1,6 +1,6 @@
 # Changelog
 
-## `v2.0.0` (contracts deployed 2020-09-21; all code pushed 2020-10-02)
+## `v2.0.0` (contracts deployed 2020-09-21; all code pushed 2020-10-05)
 
 * Rebranded to Rari Stable Pool and Rari Stable Pool Token (RSPT).
 * Implemented lending via Aave.
