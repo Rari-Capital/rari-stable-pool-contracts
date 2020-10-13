@@ -29,7 +29,7 @@ import "./lib/exchanges/MStableExchangeController.sol";
 /**
  * @title RariFundController
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice This contract handles deposits to and withdrawals from the liquidity pools that power RariFund as well as currency exchanges via 0x.
+ * @notice This contract handles deposits to and withdrawals from the liquidity pools that power the Rari Stable Pool as well as currency exchanges via 0x.
  */
 contract RariFundController is Ownable {
     using SafeMath for uint256;

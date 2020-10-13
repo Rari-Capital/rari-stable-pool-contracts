@@ -26,7 +26,7 @@ import "./RariFundPriceConsumer.sol";
 /**
  * @title RariFundManager
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @notice This contract is the primary contract powering RariFund.
+ * @notice This contract is the primary contract powering the Rari Stable Pool.
  * Anyone can deposit to the fund with deposit(string currencyCode, uint256 amount).
  * Anyone can withdraw their funds (with interest) from the fund with withdraw(string currencyCode, uint256 amount).
  */

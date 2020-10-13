@@ -19,6 +19,11 @@ import "@chainlink/contracts/src/v0.5/interfaces/AggregatorV3Interface.sol";
 import "./external/mstable/IBasketManager.sol";
 import "./external/mstable/MassetStructs.sol";
 
+/**
+ * @title RariFundPriceConsumer
+ * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
+ * @notice RariFundPriceConsumer retrieves stablecoin prices from Chainlink's public price feeds (used by RariFundManager and RariFundController).
+ */
 contract RariFundPriceConsumer is Initializable {
     using SafeMath for uint256;
 
