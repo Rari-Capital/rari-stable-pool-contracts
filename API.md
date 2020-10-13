@@ -61,7 +61,7 @@ Deposits funds to the Rari Stable Pool in exchange for RSPT.
 
 Exchanges and deposits funds to the Rari Stable Pool in exchange for RSPT (via 0x).
 
-* You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
+* You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See [`USAGE.md`](USAGE.md), the SDK, or the web client for implementation.
 * Please note that you must approve RariFundProxy to transfer at least `inputAmount` unless you are inputting ETH.
 * You also must input at least enough ETH to cover the protocol fee (and enough to cover `orders` if you are inputting ETH).
 * Parameters:
@@ -100,7 +100,7 @@ Withdraws funds from the Rari Stable Pool in exchange for RSPT.
 
 Withdraws funds from the Rari Stable Pool in exchange for RSPT and exchanges to them to the desired currency (if no 0x orders are supplied, exchanges DAI, USDC, USDT, TUSD, and mUSD via mStable).
 
-* You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
+* You can retrieve order data from the [0x swap API](https://0x.org/docs/api#get-swapv0quote). See [`USAGE.md`](USAGE.md), the SDK, or the web client for implementation.
 * Please note that you must approve RariFundManager to burn of the necessary amount of RSPT. You also must input at least enough ETH to cover the protocol fees.
 * Parameters:
     * `inputCurrencyCodes` (string[]): The currency codes of the tokens to be withdrawn and exchanged.
