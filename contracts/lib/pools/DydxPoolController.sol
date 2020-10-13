@@ -1,17 +1,17 @@
 /**
  * COPYRIGHT © 2020 RARI CAPITAL, INC. ALL RIGHTS RESERVED.
- * Anyone is free to integrate the public APIs (described in `API.md` of the `rari-contracts` package) of the official smart contract instances deployed by Rari Capital, Inc. in any application (commercial or noncommercial and under any license) benefitting Rari Capital, Inc.
- * Only those with explicit permission from a co-founder of Rari Capital (Jai Bhavnani, Jack Lipstone, or David Lucid) are permitted to study, review, or analyze any part of the source code contained in the `rari-contracts` package.
- * Reuse (including deployment of smart contracts other than private testing on a private network), modification, redistribution, or sublicensing of any source code contained in the `rari-contracts` package is not permitted without the explicit permission of David Lucid of Rari Capital, Inc.
+ * Anyone is free to integrate the public (i.e., non-administrative) application programming interfaces (APIs) of the official Ethereum smart contract instances deployed by Rari Capital, Inc. in any application (commercial or noncommercial and under any license), provided that the application does not abuse the APIs or act against the interests of Rari Capital, Inc.
+ * Anyone is free to study, review, and analyze the source code contained in this package.
+ * Reuse (including deployment of smart contracts other than private testing on a private network), modification, redistribution, or sublicensing of any source code contained in this package is not permitted without the explicit permission of David Lucid of Rari Capital, Inc.
  * No one is permitted to use the software for any purpose other than those allowed by this license.
  * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
  */
 
-pragma solidity ^0.5.7;
+pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
 
 import "../../external/dydx/SoloMargin.sol";
 import "../../external/dydx/lib/Account.sol";
@@ -27,7 +27,14 @@ library DydxPoolController {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
+    /**
+     * @dev dYdX SoloMargin contract address.
+     */
     address constant private SOLO_MARGIN_CONTRACT = 0x1E0447b19BB6EcFdAe1e4AE1694b0C3659614e4e;
+
+    /**
+     * @dev dYdX SoloMargin contract object.
+     */
     SoloMargin constant private _soloMargin = SoloMargin(SOLO_MARGIN_CONTRACT);
 
     /**
@@ -44,7 +51,7 @@ library DydxPoolController {
      * @dev Returns the fund's balances of all currencies supported by dYdX.
      * @return An array of ERC20 token contract addresses and a corresponding array of balances.
      */
-    function getBalances() internal view returns (address[] memory, uint256[] memory) {
+    function getBalances() external view returns (address[] memory, uint256[] memory) {
         Account.Info memory account = Account.Info(address(this), 0);
         (address[] memory tokens, , Types.Wei[] memory weis) = _soloMargin.getAccountBalances(account);
         uint256[] memory balances = new uint256[](weis.length);
@@ -56,7 +63,7 @@ library DydxPoolController {
      * @dev Returns the fund's balance of the specified currency in the dYdX pool.
      * @param erc20Contract The ERC20 contract address of the token.
      */
-    function getBalance(address erc20Contract) internal view returns (uint256) {
+    function getBalance(address erc20Contract) external view returns (uint256) {
         uint256 marketId = getMarketId(erc20Contract);
         Account.Info memory account = Account.Info(address(this), 0);
         (, , Types.Wei[] memory weis) = _soloMargin.getAccountBalances(account);
@@ -67,24 +74,22 @@ library DydxPoolController {
      * @dev Approves tokens to dYdX without spending gas on every deposit.
      * @param erc20Contract The ERC20 contract address of the token.
      * @param amount Amount of the specified token to approve to dYdX.
-     * @return Boolean indicating success.
      */
-    function approve(address erc20Contract, uint256 amount) internal returns (bool) {
+    function approve(address erc20Contract, uint256 amount) external {
         IERC20 token = IERC20(erc20Contract);
         uint256 allowance = token.allowance(address(this), SOLO_MARGIN_CONTRACT);
-        if (allowance == amount) return true;
+        if (allowance == amount) return;
         if (amount > 0 && allowance > 0) token.safeApprove(SOLO_MARGIN_CONTRACT, 0);
         token.safeApprove(SOLO_MARGIN_CONTRACT, amount);
-        return true;
+        return;
     }
 
     /**
      * @dev Deposits funds to the dYdX pool. Assumes that you have already approved >= the amount to dYdX.
      * @param erc20Contract The ERC20 contract address of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
-     * @return Boolean indicating success.
      */
-    function deposit(address erc20Contract, uint256 amount) internal returns (bool) {
+    function deposit(address erc20Contract, uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0.");
         uint256 marketId = getMarketId(erc20Contract);
 
@@ -110,17 +115,14 @@ library DydxPoolController {
         actions[0] = action;
 
         _soloMargin.operate(accounts, actions);
-
-        return true;
     }
 
     /**
      * @dev Withdraws funds from the dYdX pool.
      * @param erc20Contract The ERC20 contract address of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
-     * @return Boolean indicating success.
      */
-    function withdraw(address erc20Contract, uint256 amount) internal returns (bool) {
+    function withdraw(address erc20Contract, uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0.");
         uint256 marketId = getMarketId(erc20Contract);
 
@@ -146,16 +148,13 @@ library DydxPoolController {
         actions[0] = action;
 
         _soloMargin.operate(accounts, actions);
-
-        return true;
     }
 
     /**
      * @dev Withdraws all funds from the dYdX pool.
      * @param erc20Contract The ERC20 contract address of the token to be withdrawn.
-     * @return Boolean indicating success.
      */
-    function withdrawAll(address erc20Contract) internal returns (bool) {
+    function withdrawAll(address erc20Contract) external {
         uint256 marketId = getMarketId(erc20Contract);
 
         Account.Info memory account = Account.Info(address(this), 0);
@@ -180,7 +179,5 @@ library DydxPoolController {
         actions[0] = action;
 
         _soloMargin.operate(accounts, actions);
-
-        return true;
     }
 }

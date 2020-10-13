@@ -1,16 +1,22 @@
 {
-  "name": "rari-contracts",
-  "version": "1.2.0",
-  "description": "Solidity contracts and web client for the Rari Capital stablecoin fund.",
+  "name": "rari-stable-pool-contracts",
+  "version": "2.0.0",
+  "description": "Smart contracts and web client for the Rari Stable Pool.",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "compile": "truffle compile --all",
-    "test": "truffle test --network development",
-    "build": "babel src/js/app.js --out-file src/js/app-compiled.js",
-    "dev": "lite-server"
+    "ganache": "node scripts/ganache.js",
+    "test": "sh scripts/test.sh",
+    "dev-gsn": "sh scripts/test-gsn.sh",
+    "build-dapp": "babel src/js/app.js --out-file src/js/app-compiled.js",
+    "dev-dapp": "lite-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rari-Capital/rari-stable-pool-contracts.git"
   },
   "author": {
     "name": "David Lucid",
@@ -18,17 +24,27 @@
     "url": "https://github.com/davidlucid"
   },
   "license": "SEE LICENSE IN LICENSE",
+  "bugs": {
+    "url": "https://github.com/Rari-Capital/rari-stable-pool-contracts/issues"
+  },
+  "homepage": "https://github.com/Rari-Capital/rari-stable-pool-contracts#readme",
   "devDependencies": {
     "@babel/cli": "^7.10.3",
     "@babel/core": "^7.10.3",
     "@babel/preset-env": "^7.10.3",
-    "lite-server": "^2.5.4"
+    "@openzeppelin/truffle-upgrades": "^1.1.0",
+    "@truffle/hdwallet-provider": "^1.0.36",
+    "dotenv": "^8.2.0",
+    "ganache-core": "^2.11.3-beta.0",
+    "lite-server": "^2.5.4",
+    "truffle": "^5.1.45"
   },
   "dependencies": {
     "@0x/contracts-exchange": "^3.2.5",
     "@0x/contracts-exchange-libs": "^4.3.5",
-    "@openzeppelin/contracts": "^2.5.0",
-    "@truffle/hdwallet-provider": "^1.0.36",
-    "dotenv": "^8.2.0"
+    "@0x/contracts-utils": "^4.5.1",
+    "@chainlink/contracts": "0.0.9",
+    "@openzeppelin/contracts-ethereum-package": "^2.5.0",
+    "@openzeppelin/upgrades": "^2.8.0"
   }
 }

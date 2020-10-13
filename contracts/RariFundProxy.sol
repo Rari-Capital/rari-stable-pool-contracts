@@ -1,28 +1,29 @@
 /**
  * COPYRIGHT © 2020 RARI CAPITAL, INC. ALL RIGHTS RESERVED.
- * Anyone is free to integrate the public APIs (described in `API.md` of the `rari-contracts` package) of the official smart contract instances deployed by Rari Capital, Inc. in any application (commercial or noncommercial and under any license) benefitting Rari Capital, Inc.
- * Only those with explicit permission from a co-founder of Rari Capital (Jai Bhavnani, Jack Lipstone, or David Lucid) are permitted to study, review, or analyze any part of the source code contained in the `rari-contracts` package.
- * Reuse (including deployment of smart contracts other than private testing on a private network), modification, redistribution, or sublicensing of any source code contained in the `rari-contracts` package is not permitted without the explicit permission of David Lucid of Rari Capital, Inc.
+ * Anyone is free to integrate the public (i.e., non-administrative) application programming interfaces (APIs) of the official Ethereum smart contract instances deployed by Rari Capital, Inc. in any application (commercial or noncommercial and under any license), provided that the application does not abuse the APIs or act against the interests of Rari Capital, Inc.
+ * Anyone is free to study, review, and analyze the source code contained in this package.
+ * Reuse (including deployment of smart contracts other than private testing on a private network), modification, redistribution, or sublicensing of any source code contained in this package is not permitted without the explicit permission of David Lucid of Rari Capital, Inc.
  * No one is permitted to use the software for any purpose other than those allowed by this license.
  * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
  */
 
-pragma solidity ^0.5.7;
+pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/drafts/SignedSafeMath.sol";
-import "@openzeppelin/contracts/ownership/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-import "@openzeppelin/contracts/GSN/GSNRecipient.sol";
-import "@openzeppelin/contracts/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/drafts/SignedSafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/GSN/GSNRecipient.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/cryptography/ECDSA.sol";
 
 import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
 import "@0x/contracts-erc20/contracts/src/interfaces/IEtherToken.sol";
 
 import "./lib/exchanges/ZeroExExchangeController.sol";
+import "./lib/exchanges/MStableExchangeController.sol";
+import "./RariFundController.sol";
 import "./RariFundManager.sol";
 
 /**
@@ -37,39 +38,67 @@ contract RariFundProxy is Ownable, GSNRecipient {
     using SafeERC20 for IERC20;
 
     /**
-     * @notice Package version of `rari-contracts` when this contract was deployed.
-     */
-    string public constant VERSION = "1.2.0";
-
-    /**
      * @dev Array of currencies supported by the fund.
      */
     string[] private _supportedCurrencies;
 
     /**
-     * @dev Maps ERC20 token contract addresses to supported currency codes.
+     * @dev Maps supported currency codes to ERC20 token contract addresses.
      */
     mapping(string => address) private _erc20Contracts;
 
     /**
+     * @dev Maps ERC20 token contract addresses to decimal precisions (number of digits after the decimal point).
+     */
+    mapping(address => uint256) private _erc20Decimals;
+
+    /**
+     * @dev Maps ERC20 token contract addresses to booleans indicating support for mStable mUSD minting and redeeming.
+     */
+    mapping(address => bool) private _mStableExchangeErc20Contracts;
+
+    /**
      * @dev Constructor that sets supported ERC20 token contract addresses.
      */
-    constructor () public {
+    constructor() public {
+        // Initialize base contracts
+        Ownable.initialize(msg.sender);
+        GSNRecipient.initialize();
+        
         // Add supported currencies
-        addSupportedCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F);
-        addSupportedCurrency("USDC", 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-        addSupportedCurrency("USDT", 0xdAC17F958D2ee523a2206206994597C13D831ec7);
+        addSupportedCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F, 18);
+        addSupportedCurrency("USDC", 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 6);
+        addSupportedCurrency("USDT", 0xdAC17F958D2ee523a2206206994597C13D831ec7, 6);
+        addSupportedCurrency("TUSD", 0x0000000000085d4780B73119b644AE5ecd22b376, 18);
+        addSupportedCurrency("BUSD", 0x4Fabb145d64652a948d72533023f6E7A623C7C53, 18);
+        addSupportedCurrency("sUSD", 0x57Ab1ec28D129707052df4dF418D58a2D46d5f51, 18);
+        addSupportedCurrency("mUSD", 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5, 18);
+        addMStableExchangeErc20Contract(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+        addMStableExchangeErc20Contract(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+        addMStableExchangeErc20Contract(0xdAC17F958D2ee523a2206206994597C13D831ec7);
+        addMStableExchangeErc20Contract(0x0000000000085d4780B73119b644AE5ecd22b376);
     }
 
     /**
-     * @dev Marks a token as supported by the fund, stores its ERC20 contract address, and approves the maximum amount to 0x.
+     * @dev Marks a token as supported by the fund, stores its decimal precision and ERC20 contract address, and approves the maximum amount to 0x.
      * @param currencyCode The currency code of the token.
-     * @param erc20Contract The ERC20 contract of the token.
+     * @param erc20Contract The ERC20 contract address of the token.
+     * @param decimals The decimal precision (number of digits after the decimal point) of the token.
      */
-    function addSupportedCurrency(string memory currencyCode, address erc20Contract) internal {
+    function addSupportedCurrency(string memory currencyCode, address erc20Contract, uint256 decimals) internal {
         _supportedCurrencies.push(currencyCode);
         _erc20Contracts[currencyCode] = erc20Contract;
-        require(ZeroExExchangeController.approve(erc20Contract, uint256(-1)), "Approval of tokens to 0x failed.");
+        _erc20Decimals[erc20Contract] = decimals;
+        ZeroExExchangeController.approve(erc20Contract, uint256(-1));
+    }
+
+    /**
+     * @dev Marks a token ERC20 contract address as supported by mStable, and approves the maximum amount to the mUSD token contract.
+     * @param erc20Contract The ERC20 contract address of the token.
+     */
+    function addMStableExchangeErc20Contract(address erc20Contract) internal {
+        _mStableExchangeErc20Contracts[erc20Contract] = true;
+        MStableExchangeController.approve(erc20Contract, uint256(-1));
     }
 
     /**
@@ -80,7 +109,7 @@ contract RariFundProxy is Ownable, GSNRecipient {
     /**
      * @dev Contract of the RariFundManager.
      */
-    RariFundManager private _rariFundManager;
+    RariFundManager public rariFundManager;
 
     /**
      * @dev Address of the trusted GSN signer.
@@ -105,7 +134,7 @@ contract RariFundProxy is Ownable, GSNRecipient {
         }
 
         _rariFundManagerContract = newContract;
-        _rariFundManager = RariFundManager(_rariFundManagerContract);
+        rariFundManager = RariFundManager(_rariFundManagerContract);
         emit FundManagerSet(newContract);
     }
 
@@ -127,9 +156,11 @@ contract RariFundProxy is Ownable, GSNRecipient {
     }
 
     /**
-     * @dev Payable fallback function called by 0x exchange to refund unspent protocol fee.
+     * @dev Payable fallback function called by 0x Exchange v3 to refund unspent protocol fee or by WETH to withdraw ETH.
      */
-    function () external payable { }
+    function () external payable {
+        require(msg.sender == 0x61935CbDd02287B511119DDb11Aeb42F1593b7Ef || msg.sender == WETH_CONTRACT, "msg.sender is not 0x Exchange v3 or WETH.");
+    }
 
     /**
      * @dev Emitted when funds have been exchanged before being deposited via RariFundManager.
@@ -144,7 +175,7 @@ contract RariFundProxy is Ownable, GSNRecipient {
     event PostWithdrawalExchange(string indexed inputCurrencyCode, address indexed outputErc20Contract, address indexed payee, uint256 withdrawalAmount, uint256 takerAssetFilledAmount);
 
     /**
-     * @notice Exchanges and deposits funds to RariFund in exchange for RFT.
+     * @notice Exchanges and deposits funds to RariFund in exchange for RFT (via 0x).
      * You can retrieve orders from the 0x swap API (https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
      * Please note that you must approve RariFundProxy to transfer at least `inputAmount` unless you are inputting ETH.
      * You also must input at least enough ETH to cover the protocol fee (and enough to cover `orders` if you are inputting ETH).
@@ -155,14 +186,14 @@ contract RariFundProxy is Ownable, GSNRecipient {
      * @param orders The limit orders to be filled in ascending order of the price you pay.
      * @param signatures The signatures for the orders.
      * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
-     * @return Boolean indicating success.
      */
-    function exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string memory outputCurrencyCode, LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public payable returns (bool) {
+    function exchangeAndDeposit(address inputErc20Contract, uint256 inputAmount, string memory outputCurrencyCode, LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public payable {
         // Input validation
         require(_rariFundManagerContract != address(0), "Fund manager contract not set. This may be due to an upgrade of this proxy contract.");
         require(inputAmount > 0, "Input amount must be greater than 0.");
         address outputErc20Contract = _erc20Contracts[outputCurrencyCode];
         require(outputErc20Contract != address(0), "Invalid output currency code.");
+        require(inputErc20Contract != outputErc20Contract, "Input and output currencies cannot be the same.");
         require(orders.length > 0, "Orders array is empty.");
         require(orders.length == signatures.length, "Length of orders and signatures arrays must be equal.");
         require(takerAssetFillAmount > 0, "Taker asset fill amount must be greater than 0.");
@@ -194,18 +225,58 @@ contract RariFundProxy is Ownable, GSNRecipient {
         emit PreDepositExchange(inputErc20Contract, outputCurrencyCode, msg.sender, filledAmounts[0], filledAmounts[1]);
 
         // Deposit output tokens
-        require(_rariFundManager.depositTo(msg.sender, outputCurrencyCode, filledAmounts[1]));
+        rariFundManager.depositTo(msg.sender, outputCurrencyCode, filledAmounts[1]);
 
         // Refund unused ETH
         uint256 ethBalance = address(this).balance;
-        if (ethBalance > 0) msg.sender.transfer(ethBalance);
-
-        // Return true
-        return true;
+        
+        if (ethBalance > 0) {
+            (bool success, ) = msg.sender.call.value(ethBalance)("");
+            require(success, "Failed to transfer ETH to msg.sender after exchange.");
+        }
     }
 
     /**
-     * @notice Exchanges and deposits funds to RariFund in exchange for RFT.
+     * @notice Exchanges and deposits funds to RariFund in exchange for RFT (no slippage and low fees via mStable, but only supports DAI, USDC, USDT, TUSD, and mUSD).
+     * Please note that you must approve RariFundProxy to transfer at least `inputAmount`.
+     * @param inputCurrencyCode The currency code of the token to be exchanged.
+     * @param inputAmount The amount of tokens to be exchanged (including taker fees).
+     * @param outputCurrencyCode The currency code of the token to be deposited after exchange.
+     */
+    function exchangeAndDeposit(string calldata inputCurrencyCode, uint256 inputAmount, string calldata outputCurrencyCode) external payable {
+        // Input validation
+        require(_rariFundManagerContract != address(0), "Fund manager contract not set. This may be due to an upgrade of this proxy contract.");
+        require(inputAmount > 0, "Input amount must be greater than 0.");
+        address inputErc20Contract = _erc20Contracts[inputCurrencyCode];
+        require(_mStableExchangeErc20Contracts[inputErc20Contract] || inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5, "Invalid input currency code.");
+        address outputErc20Contract = _erc20Contracts[outputCurrencyCode];
+        require(_mStableExchangeErc20Contracts[outputErc20Contract] || outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5, "Invalid input currency code.");
+        require(inputErc20Contract != outputErc20Contract, "Input and output currencies cannot be the same.");
+
+        // Transfer input tokens from msg.sender
+        IERC20(inputErc20Contract).safeTransferFrom(msg.sender, address(this), inputAmount); // The user must approve the transfer of tokens beforehand
+
+        // Mint, redeem, or swap via mUSD
+        if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
+            uint256 outputDecimals = _erc20Decimals[outputErc20Contract];
+            uint256 outputAmount = 18 >= outputDecimals ? inputAmount.div(10 ** (uint256(18).sub(outputDecimals))) : inputAmount.mul(10 ** (outputDecimals.sub(18)));
+            uint256 mUsdRedeemed = MStableExchangeController.redeem(outputErc20Contract, outputAmount);
+            require(inputAmount == mUsdRedeemed, "Redeemed mUSD amount not equal to input mUSD amount.");
+        } else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStableExchangeController.mint(inputErc20Contract, inputAmount);
+        else MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount);
+
+        // Get real output amount
+        uint256 realOutputAmount = IERC20(outputErc20Contract).balanceOf(address(this));
+
+        // Emit event
+        emit PreDepositExchange(inputErc20Contract, outputCurrencyCode, msg.sender, inputAmount, realOutputAmount);
+
+        // Deposit output tokens
+        rariFundManager.depositTo(msg.sender, outputCurrencyCode, realOutputAmount);
+    }
+
+    /**
+     * @notice Withdraws funds from RariFund in exchange for RFT and exchanges to them to the desired currency (if no 0x orders are supplied, exchanges DAI, USDC, USDT, TUSD, and mUSD via mStable).
      * You can retrieve orders from the 0x swap API (https://0x.org/docs/api#get-swapv0quote). See the web client for implementation.
      * Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
      * You also must input at least enough ETH to cover the protocol fees.
@@ -217,27 +288,50 @@ contract RariFundProxy is Ownable, GSNRecipient {
      * @param signatures The signatures for the orders.
      * @param makerAssetFillAmounts The amounts of the maker assets to buy.
      * @param protocolFees The protocol fees to pay to 0x in ETH for each order.
-     * @return Boolean indicating success.
      */
-    function withdrawAndExchange(string[] memory inputCurrencyCodes, uint256[] memory inputAmounts, address outputErc20Contract, LibOrder.Order[][] memory orders, bytes[][] memory signatures, uint256[] memory makerAssetFillAmounts, uint256[] memory protocolFees) public payable returns (bool) {
+    function withdrawAndExchange(string[] memory inputCurrencyCodes, uint256[] memory inputAmounts, address outputErc20Contract, LibOrder.Order[][] memory orders, bytes[][] memory signatures, uint256[] memory makerAssetFillAmounts, uint256[] memory protocolFees) public payable {
         // Input validation
         require(_rariFundManagerContract != address(0), "Fund manager contract not set. This may be due to an upgrade of this proxy contract.");
         require(inputCurrencyCodes.length == inputAmounts.length && inputCurrencyCodes.length == orders.length && inputCurrencyCodes.length == signatures.length && inputCurrencyCodes.length == makerAssetFillAmounts.length && inputCurrencyCodes.length == protocolFees.length, "Array parameters are not all the same length.");
 
+        // Withdraw input tokens
+        rariFundManager.withdrawFrom(msg.sender, inputCurrencyCodes, inputAmounts);
+
         // For each input currency
         for (uint256 i = 0; i < inputCurrencyCodes.length; i++) {
+            // Input validation
+            address inputErc20Contract = _erc20Contracts[inputCurrencyCodes[i]];
+            require(inputErc20Contract != address(0), "One or more input currency codes are invalid.");
             require(inputAmounts[i] > 0, "All input amounts must be greater than 0.");
 
-            // Withdraw input tokens
-            require(_rariFundManager.withdrawFrom(msg.sender, inputCurrencyCodes[i], inputAmounts[i]));
+            if (inputErc20Contract != outputErc20Contract) {
+                // Exchange input tokens for output tokens
+                if (orders[i].length > 0 && signatures[i].length > 0 && makerAssetFillAmounts[i] > 0) {
+                    // Input validation
+                    require(orders.length == signatures.length, "Lengths of all orders and signatures arrays must be equal.");
 
-            if (orders[i].length > 0 && signatures[i].length > 0 && makerAssetFillAmounts[i] > 0) {
-                // Input validation
-                require(orders.length == signatures.length, "Length of all orders and signatures arrays must be equal.");
+                    // Exchange tokens and emit event
+                    uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], protocolFees[i]);
+                    emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], filledAmounts[1]);
+                } else if ((_mStableExchangeErc20Contracts[inputErc20Contract] || inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) && (_mStableExchangeErc20Contracts[outputErc20Contract] || outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5)) {
+                    // Mint, redeem, or swap via mUSD
+                    uint256 realOutputAmount;
 
-                // Exchange tokens and emit event
-                uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], protocolFees[i]);
-                emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], filledAmounts[1]);
+                    if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
+                        uint256 outputDecimals = _erc20Decimals[outputErc20Contract];
+                        uint256 outputAmount = 18 >= outputDecimals ? inputAmounts[i].div(10 ** (uint256(18).sub(outputDecimals))) : inputAmounts[i].mul(10 ** (outputDecimals.sub(18)));
+                        uint256 mUsdRedeemed = MStableExchangeController.redeem(outputErc20Contract, outputAmount);
+                        require(inputAmounts[i] == mUsdRedeemed, "Redeemed mUSD amount not equal to input mUSD amount.");
+                        realOutputAmount = outputAmount.sub(outputAmount.mul(MStableExchangeController.getSwapFee()).div(1e18));
+                    } else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
+                        realOutputAmount = MStableExchangeController.mint(inputErc20Contract, inputAmounts[i]);
+                    } else {
+                        uint256 outputAmount = MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmounts[i]);
+                        realOutputAmount = outputAmount.sub(outputAmount.mul(MStableExchangeController.getSwapFee()).div(1e18));
+                    }
+
+                    emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], realOutputAmount);
+                } else revert("No 0x orders supplied and exchange not supported via mStable for at least one currency pair.");
             }
         }
 
@@ -254,10 +348,11 @@ contract RariFundProxy is Ownable, GSNRecipient {
 
         // Forward all ETH
         uint256 ethBalance = address(this).balance;
-        if (ethBalance > 0) msg.sender.transfer(ethBalance);
-
-        // Return true
-        return true;
+        
+        if (ethBalance > 0) {
+            (bool success, ) = msg.sender.call.value(ethBalance)("");
+            require(success, "Failed to transfer ETH to msg.sender after exchange.");
+        }
     }
 
     /**
@@ -266,13 +361,12 @@ contract RariFundProxy is Ownable, GSNRecipient {
      * Please note that you must approve RariFundProxy to transfer at least `amount`.
      * @param currencyCode The currency code of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
-     * @return Boolean indicating success.
      */
-    function deposit(string calldata currencyCode, uint256 amount) external returns (bool) {
+    function deposit(string calldata currencyCode, uint256 amount) external {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
         IERC20(erc20Contract).safeTransferFrom(_msgSender(), address(this), amount); // The user must approve the transfer of tokens beforehand
-        return _rariFundManager.depositTo(_msgSender(), currencyCode, amount);
+        rariFundManager.depositTo(_msgSender(), currencyCode, amount);
     }
 
     /**
@@ -317,5 +411,43 @@ contract RariFundProxy is Ownable, GSNRecipient {
      */
     function _postRelayedCall(bytes memory, bool, uint256, bytes32) internal {
         // solhint-disable-previous-line no-empty-blocks
+    }
+
+    /**
+     * @dev Forwards tokens lost in the fund proxy (in case of accidental transfer of funds to this contract).
+     * @param erc20Contract The ERC20 contract address of the token to forward.
+     * @param to The destination address to which the funds will be forwarded.
+     * @return Boolean indicating success.
+     */
+    function forwardLostFunds(address erc20Contract, address to) external onlyOwner returns (bool) {
+        IERC20 token = IERC20(erc20Contract);
+        uint256 balance = token.balanceOf(address(this));
+        if (balance <= 0) return false;
+        token.safeTransfer(to, balance);
+        return true;
+    }
+
+    /**
+     * @notice Returns the fund controller's contract balance of each currency, balance of each pool of each currency (checking `_poolsWithFunds` first to save gas), and price of each currency.
+     * @dev Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getPoolBalance`) potentially modifies the state.
+     * @return An array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, an array of arrays of corresponding balances at each pool index for each currency code, and an array of prices in USD (scaled by 1e18) for each currency code.
+     */
+    function getRawFundBalancesAndPrices() external returns (string[] memory, uint256[] memory, RariFundController.LiquidityPool[][] memory, uint256[][] memory, uint256[] memory) {
+        RariFundController rariFundController = rariFundManager.rariFundController();
+        address rariFundControllerContract = address(rariFundController);
+        uint256[] memory contractBalances = new uint256[](_supportedCurrencies.length);
+        RariFundController.LiquidityPool[][] memory pools = new RariFundController.LiquidityPool[][](_supportedCurrencies.length);
+        uint256[][] memory poolBalances = new uint256[][](_supportedCurrencies.length);
+
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
+            string memory currencyCode = _supportedCurrencies[i];
+            contractBalances[i] = IERC20(_erc20Contracts[currencyCode]).balanceOf(rariFundControllerContract);
+            RariFundController.LiquidityPool[] memory currencyPools = rariFundController.getPoolsByCurrency(currencyCode);
+            pools[i] = currencyPools;
+            poolBalances[i] = new uint256[](currencyPools.length);
+            for (uint256 j = 0; j < currencyPools.length; j++) poolBalances[i][j] = rariFundController.getPoolBalance(currencyPools[j], currencyCode);
+        }
+
+        return (_supportedCurrencies, contractBalances, pools, poolBalances, rariFundManager.rariFundPriceConsumer().getCurrencyPricesInUsd());
     }
 }
