@@ -114,7 +114,7 @@ contract("RariFundProxy", accounts => {
   it("should withdraw and exchange all input currencies without using too much gas", async () => {
     let fundManagerInstance = await RariFundManager.deployed();
     let fundTokenInstance = await RariFundToken.deployed();
-    let fundProxyInstance = await RariFundProxy.deployed();
+    let fundProxyInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundProxy.at(process.env.UPGRADE_FUND_PROXY_ADDRESS) : RariFundProxy.deployed());
 
     // Exchange data
     var inputCurrencyCodes = [];

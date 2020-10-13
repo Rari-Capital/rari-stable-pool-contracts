@@ -20,10 +20,10 @@ const RariFundPriceConsumer = artifacts.require("RariFundPriceConsumer");
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundManager, RariFundController", accounts => {
   it("should deposit to the fund, approve and deposit to pools, accrue interest, and withdraw from the fund", async () => {
-    let fundControllerInstance = await RariFundController.deployed();
+    let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
     let fundManagerInstance = await RariFundManager.deployed();
     let fundTokenInstance = await RariFundToken.deployed();
-    let fundPriceConsumerInstance = await RariFundPriceConsumer.deployed();
+    let fundPriceConsumerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundPriceConsumer.at(process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS) : RariFundPriceConsumer.deployed());
 
     // Get currency prices in USD used by contracts
     var currencyPricesInUsd = await fundPriceConsumerInstance.getCurrencyPricesInUsd.call();
