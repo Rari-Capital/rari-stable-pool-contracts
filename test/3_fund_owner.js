@@ -24,7 +24,7 @@ const DummyRariFundManager = artifacts.require("DummyRariFundManager");
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundController, RariFundManager", accounts => {
   it("should upgrade the fund manager owner", async () => {
-    let fundManagerInstance = await RariFundManager.deployed();
+    let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
 
     // RariFundManager.transferOwnership()
     await fundManagerInstance.transferOwnership(process.env.DEVELOPMENT_ADDRESS_SECONDARY, { from: process.env.DEVELOPMENT_ADDRESS });
@@ -53,8 +53,9 @@ contract("RariFundController, RariFundManager", accounts => {
 
   it("should disable and re-enable the fund", async () => {
     let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
-    let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await RariFundToken.deployed();
+    let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
+    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN_ADDRESS) : RariFundToken.deployed());
     let fundPriceConsumerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundPriceConsumer.at(process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS) : RariFundPriceConsumer.deployed());
 
     // Disable the fund (via RariFundController and RariFundManager)
@@ -120,7 +121,7 @@ contract("RariFundController, RariFundManager", accounts => {
 
   it("should upgrade the fund rebalancer", async () => {
     let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
-    let fundManagerInstance = await RariFundManager.deployed();
+    let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
 
     // Set fund rebalancer addresses
     await fundControllerInstance.setFundRebalancer(process.env.DEVELOPMENT_ADDRESS_SECONDARY, { from: process.env.DEVELOPMENT_ADDRESS });
@@ -143,8 +144,9 @@ contract("RariFundController, RariFundManager", accounts => {
 contract("RariFundManager", accounts => {
   it("should upgrade the FundManager implementation to a copy of its code", async () => {
     let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
-    let fundManagerInstance = await RariFundManager.deployed();
-    
+    let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
+
     // Approve and deposit tokens to the fund (using DAI as an example)
     var amountBN = web3.utils.toBN(10 ** (currencies["DAI"].decimals - 1));
     var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
@@ -184,8 +186,9 @@ contract("RariFundManager", accounts => {
 contract("RariFundManager", accounts => {
   it("should upgrade the proxy and implementation of FundManager to new code", async () => {
     let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
-    let fundManagerInstance = await RariFundManager.deployed();
-    
+    let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
+
     // Approve and deposit tokens to the fund (using DAI as an example)
     var amountBN = web3.utils.toBN(10 ** (currencies["DAI"].decimals - 1));
     var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
@@ -215,8 +218,9 @@ contract("RariFundManager", accounts => {
 contract("RariFundController", accounts => {
   it("should upgrade the FundController to a copy of its code", async () => {
     let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
-    let fundManagerInstance = await RariFundManager.deployed();
-    
+    let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
+
     // Approve and deposit tokens to the fund (using DAI as an example)
     var amountBN = web3.utils.toBN(10 ** (currencies["DAI"].decimals - 1));
     var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
@@ -259,8 +263,9 @@ contract("RariFundController", accounts => {
 contract("RariFundController", accounts => {
   it("should upgrade the FundController to new code", async () => {
     let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
-    let fundManagerInstance = await RariFundManager.deployed();
-    
+    let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
+
     // Approve and deposit tokens to the fund (using DAI as an example)
     var amountBN = web3.utils.toBN(10 ** (currencies["DAI"].decimals - 1));
     var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
@@ -302,9 +307,11 @@ contract("RariFundController", accounts => {
 contract("RariFundToken", accounts => {
   it("should upgrade the FundToken to a copy of its code", async () => {
     let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
-    let fundManagerInstance = await RariFundManager.deployed();
-    let fundTokenInstance = await RariFundToken.deployed();
-    
+    let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
+    let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN_ADDRESS) : RariFundToken.deployed());
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundToken.address = process.env.UPGRADE_FUND_TOKEN_ADDRESS;
+
     // Approve and deposit tokens to the fund (using DAI as an example)
     var amountBN = web3.utils.toBN(10 ** (currencies["DAI"].decimals - 1));
     var erc20Contract = new web3.eth.Contract(erc20Abi, currencies["DAI"].tokenAddress);
