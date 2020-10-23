@@ -14,13 +14,13 @@ As follows are all deployments of our smart contracts on the Ethereum mainnet. S
 
 `RariFundManager` is the Rari Stable Pool's main contract: it handles deposits, withdrawals, USD balances, interest, fees, etc.
 
-**v2.1.0**: (to be deployed)
+**v2.1.0**: `0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a`
 
 ### `RariFundToken`
 
 The Rari Stable Pool Token (RSPT) is an ERC20 token used to internally account for the ownership of funds supplied to the Rari Stable Pool.
 
-**v2.1.0**: (to be deployed)
+**v2.1.0**: `0x016bf078ABcaCB987f0589a6d3BEAdD4316922B0`
 
 ### `RariFundPriceConsumer`
 

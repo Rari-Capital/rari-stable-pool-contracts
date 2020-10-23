@@ -110,7 +110,7 @@ The following document contains instructions on common usage of the Rari Stable 
 
 ## Fees on Interest
 
-* Rari Capital currently takes a *20% performance fee* on all interest accrued by the Rari Stable Pool.
+* Rari Capital currently takes a *9.5% performance fee* on all interest accrued by the Rari Stable Pool.
 * This fee is liable to change in the future, but the following method returns its current value at any time.
 * **Get interest fee rate:** `uint256 RariFundManager.getInterestFeeRate()` returns the fee rate on interest (proportion of raw interest accrued scaled by 1e18).
 

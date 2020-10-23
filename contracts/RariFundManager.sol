@@ -558,7 +558,13 @@ contract RariFundManager is Initializable, Ownable {
         uint256 arrayLength = 0;
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) if (_acceptedCurrencies[_supportedCurrencies[i]]) arrayLength++;
         string[] memory acceptedCurrencies = new string[](arrayLength);
-        for (uint256 i = 0; i < _supportedCurrencies.length; i++) if (_acceptedCurrencies[_supportedCurrencies[i]]) acceptedCurrencies[acceptedCurrencies.length] = _supportedCurrencies[i];
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) if (_acceptedCurrencies[_supportedCurrencies[i]]) {
+            acceptedCurrencies[index] = _supportedCurrencies[i];
+            index++;
+        }
+
         return acceptedCurrencies;
     }
 

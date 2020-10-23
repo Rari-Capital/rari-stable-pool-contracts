@@ -73,8 +73,8 @@ contract RariFundToken is Initializable, ERC20, ERC20Detailed, ERC20Mintable, ER
     function transfer(address recipient, uint256 amount) public returns (bool) {
         // Claim RGT/set timestamp for initial transfer of RSPT to `recipient`
         if (address(rariGovernanceTokenDistributor) != address(0) && block.number > rariGovernanceTokenDistributor.distributionStartBlock()) {
-            rariGovernanceTokenDistributor._claimRgt(_msgSender(), IRariGovernanceTokenDistributor.RariPool.Stable);
-            if (balanceOf(recipient) > 0) rariGovernanceTokenDistributor._claimRgt(recipient, IRariGovernanceTokenDistributor.RariPool.Stable);
+            rariGovernanceTokenDistributor.distributeRgt(_msgSender(), IRariGovernanceTokenDistributor.RariPool.Stable);
+            if (balanceOf(recipient) > 0) rariGovernanceTokenDistributor.distributeRgt(recipient, IRariGovernanceTokenDistributor.RariPool.Stable);
             else rariGovernanceTokenDistributor.beforeFirstPoolTokenTransferIn(recipient, IRariGovernanceTokenDistributor.RariPool.Stable);
         }
 
@@ -91,8 +91,8 @@ contract RariFundToken is Initializable, ERC20, ERC20Detailed, ERC20Mintable, ER
     function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
         if (address(rariGovernanceTokenDistributor) != address(0) && block.number > rariGovernanceTokenDistributor.distributionStartBlock()) {
             // Claim RGT/set timestamp for initial transfer of RSPT to `recipient`
-            rariGovernanceTokenDistributor._claimRgt(sender, IRariGovernanceTokenDistributor.RariPool.Stable);
-            if (balanceOf(recipient) > 0) rariGovernanceTokenDistributor._claimRgt(recipient, IRariGovernanceTokenDistributor.RariPool.Stable);
+            rariGovernanceTokenDistributor.distributeRgt(sender, IRariGovernanceTokenDistributor.RariPool.Stable);
+            if (balanceOf(recipient) > 0) rariGovernanceTokenDistributor.distributeRgt(recipient, IRariGovernanceTokenDistributor.RariPool.Stable);
             else rariGovernanceTokenDistributor.beforeFirstPoolTokenTransferIn(recipient, IRariGovernanceTokenDistributor.RariPool.Stable);
         }
     
@@ -109,7 +109,7 @@ contract RariFundToken is Initializable, ERC20, ERC20Detailed, ERC20Mintable, ER
     function mint(address account, uint256 amount) public onlyMinter returns (bool) {
         if (address(rariGovernanceTokenDistributor) != address(0) && block.number > rariGovernanceTokenDistributor.distributionStartBlock()) {
             // Claim RGT/set timestamp for initial transfer of RSPT to `account`
-            if (balanceOf(account) > 0) rariGovernanceTokenDistributor._claimRgt(account, IRariGovernanceTokenDistributor.RariPool.Stable);
+            if (balanceOf(account) > 0) rariGovernanceTokenDistributor.distributeRgt(account, IRariGovernanceTokenDistributor.RariPool.Stable);
             else rariGovernanceTokenDistributor.beforeFirstPoolTokenTransferIn(account, IRariGovernanceTokenDistributor.RariPool.Stable);
         }
 
@@ -124,7 +124,7 @@ contract RariFundToken is Initializable, ERC20, ERC20Detailed, ERC20Mintable, ER
      */
     function burn(uint256 amount) public {
         // Claim RGT, then burn RSPT
-        if (address(rariGovernanceTokenDistributor) != address(0) && block.number > rariGovernanceTokenDistributor.distributionStartBlock()) rariGovernanceTokenDistributor._claimRgt(_msgSender(), IRariGovernanceTokenDistributor.RariPool.Stable);
+        if (address(rariGovernanceTokenDistributor) != address(0) && block.number > rariGovernanceTokenDistributor.distributionStartBlock()) rariGovernanceTokenDistributor.distributeRgt(_msgSender(), IRariGovernanceTokenDistributor.RariPool.Stable);
         _burn(_msgSender(), amount);
     }
 
@@ -134,7 +134,7 @@ contract RariFundToken is Initializable, ERC20, ERC20Detailed, ERC20Mintable, ER
      */
     function burnFrom(address account, uint256 amount) public {
         // Claim RGT, then burn RSPT
-        if (address(rariGovernanceTokenDistributor) != address(0) && block.number > rariGovernanceTokenDistributor.distributionStartBlock()) rariGovernanceTokenDistributor._claimRgt(account, IRariGovernanceTokenDistributor.RariPool.Stable);
+        if (address(rariGovernanceTokenDistributor) != address(0) && block.number > rariGovernanceTokenDistributor.distributionStartBlock()) rariGovernanceTokenDistributor.distributeRgt(account, IRariGovernanceTokenDistributor.RariPool.Stable);
         _burnFrom(account, amount);
     }
 
@@ -143,7 +143,7 @@ contract RariFundToken is Initializable, ERC20, ERC20Detailed, ERC20Mintable, ER
      */
     function fundManagerBurnFrom(address account, uint256 amount) public onlyMinter {
         // Claim RGT, then burn RSPT
-        if (address(rariGovernanceTokenDistributor) != address(0) && block.number > rariGovernanceTokenDistributor.distributionStartBlock()) rariGovernanceTokenDistributor._claimRgt(account, IRariGovernanceTokenDistributor.RariPool.Stable);
+        if (address(rariGovernanceTokenDistributor) != address(0) && block.number > rariGovernanceTokenDistributor.distributionStartBlock()) rariGovernanceTokenDistributor.distributeRgt(account, IRariGovernanceTokenDistributor.RariPool.Stable);
         _burn(account, amount);
     }
 }

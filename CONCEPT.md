@@ -62,7 +62,7 @@ We have covered security above, but see [our website](https://rari.capital/risks
 
 ## Performance Fee
 
-A 20% performance fee is deducted from all interest earned by RSPT holders. This fee is liable to change in the future (but fees on past interest cannot be changed).
+A 9.5% performance fee is deducted from all interest earned by RSPT holders. This fee is liable to change in the future (but fees on past interest cannot be changed).
 
 ## COMP
 

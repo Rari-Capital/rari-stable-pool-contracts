@@ -53,12 +53,12 @@ interface IRariGovernanceTokenDistributor {
     function refreshDistributionSpeeds(RariPool pool) external;
 
     /**
-     * @notice Claims all unclaimed RGT earned by `holder` in `pool` (without reverting if no RGT is available to claim).
-     * @param holder The holder of RSPT, RYPT, or REPT whose RGT is to be claimed.
-     * @param pool The Rari pool from which to claim RGT.
-     * @return The quantity of RGT claimed.
+     * @dev Distributes all undistributed RGT earned by `holder` in `pool` (without reverting if no RGT is available to distribute).
+     * @param holder The holder of RSPT, RYPT, or REPT whose RGT is to be distributed.
+     * @param pool The Rari pool for which to distribute RGT.
+     * @return The quantity of RGT distributed.
      */
-    function _claimRgt(address holder, RariPool pool) external returns (uint256);
+    function distributeRgt(address holder, RariPool pool) external returns (uint256);
 
     /**
      * @dev Stores the RGT distributed per RSPT/RYPT/REPT right before `holder`'s first incoming RSPT/RYPT/REPT transfer since having a zero balance.
