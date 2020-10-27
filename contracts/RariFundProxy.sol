@@ -166,13 +166,13 @@ contract RariFundProxy is Ownable, GSNRecipient {
      * @dev Emitted when funds have been exchanged before being deposited via RariFundManager.
      * If exchanging from ETH, `inputErc20Contract` = address(0).
      */
-    event PreDepositExchange(address indexed inputErc20Contract, string indexed outputCurrencyCode, address indexed payee, uint256 makerAssetFilledAmount, uint256 depositAmount);
+    event PreDepositExchange(address indexed inputErc20Contract, string indexed outputCurrencyCode, address indexed payee, uint256 takerAssetFilledAmount, uint256 depositAmount);
 
     /**
      * @dev Emitted when funds have been exchanged after being withdrawn via RariFundManager.
      * If exchanging from ETH, `outputErc20Contract` = address(0).
      */
-    event PostWithdrawalExchange(string indexed inputCurrencyCode, address indexed outputErc20Contract, address indexed payee, uint256 withdrawalAmount, uint256 takerAssetFilledAmount);
+    event PostWithdrawalExchange(string indexed inputCurrencyCode, address indexed outputErc20Contract, address indexed payee, uint256 withdrawalAmount, uint256 takerAssetFilledAmount, uint256 makerAssetFilledAmount);
 
     /**
      * @notice Exchanges and deposits funds to RariFund in exchange for RFT (via 0x).
@@ -295,14 +295,14 @@ contract RariFundProxy is Ownable, GSNRecipient {
         require(inputCurrencyCodes.length == inputAmounts.length && inputCurrencyCodes.length == orders.length && inputCurrencyCodes.length == signatures.length && inputCurrencyCodes.length == makerAssetFillAmounts.length && inputCurrencyCodes.length == protocolFees.length, "Array parameters are not all the same length.");
 
         // Withdraw input tokens
-        rariFundManager.withdrawFrom(msg.sender, inputCurrencyCodes, inputAmounts);
+        uint256[] memory inputAmountsAfterFees = rariFundManager.withdrawFrom(msg.sender, inputCurrencyCodes, inputAmounts);
 
         // For each input currency
         for (uint256 i = 0; i < inputCurrencyCodes.length; i++) {
             // Input validation
             address inputErc20Contract = _erc20Contracts[inputCurrencyCodes[i]];
             require(inputErc20Contract != address(0), "One or more input currency codes are invalid.");
-            require(inputAmounts[i] > 0, "All input amounts must be greater than 0.");
+            require(inputAmounts[i] > 0 && inputAmountsAfterFees[i] > 0, "All input amounts (before and after the withdrawal fee) must be greater than 0.");
 
             if (inputErc20Contract != outputErc20Contract) {
                 // Exchange input tokens for output tokens
@@ -311,26 +311,26 @@ contract RariFundProxy is Ownable, GSNRecipient {
                     require(orders.length == signatures.length, "Lengths of all orders and signatures arrays must be equal.");
 
                     // Exchange tokens and emit event
-                    uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], protocolFees[i]);
-                    emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], filledAmounts[1]);
+                    uint256[2] memory filledAmounts = inputAmountsAfterFees[i] < inputAmounts[i] ? ZeroExExchangeController.marketSellOrdersFillOrKill(orders[i], signatures[i], inputAmountsAfterFees[i], protocolFees[i]) : ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], protocolFees[i]);
+                    emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], inputAmountsAfterFees[i], filledAmounts[1]);
                 } else if ((_mStableExchangeErc20Contracts[inputErc20Contract] || inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) && (_mStableExchangeErc20Contracts[outputErc20Contract] || outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5)) {
                     // Mint, redeem, or swap via mUSD
                     uint256 realOutputAmount;
 
                     if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
                         uint256 outputDecimals = _erc20Decimals[outputErc20Contract];
-                        uint256 outputAmount = 18 >= outputDecimals ? inputAmounts[i].div(10 ** (uint256(18).sub(outputDecimals))) : inputAmounts[i].mul(10 ** (outputDecimals.sub(18)));
+                        uint256 outputAmount = 18 >= outputDecimals ? inputAmountsAfterFees[i].div(10 ** (uint256(18).sub(outputDecimals))) : inputAmountsAfterFees[i].mul(10 ** (outputDecimals.sub(18)));
                         uint256 mUsdRedeemed = MStableExchangeController.redeem(outputErc20Contract, outputAmount);
-                        require(inputAmounts[i] == mUsdRedeemed, "Redeemed mUSD amount not equal to input mUSD amount.");
+                        require(inputAmountsAfterFees[i] == mUsdRedeemed, "Redeemed mUSD amount not equal to input mUSD amount.");
                         realOutputAmount = outputAmount.sub(outputAmount.mul(MStableExchangeController.getSwapFee()).div(1e18));
                     } else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
-                        realOutputAmount = MStableExchangeController.mint(inputErc20Contract, inputAmounts[i]);
+                        realOutputAmount = MStableExchangeController.mint(inputErc20Contract, inputAmountsAfterFees[i]);
                     } else {
-                        uint256 outputAmount = MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmounts[i]);
+                        uint256 outputAmount = MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmountsAfterFees[i]);
                         realOutputAmount = outputAmount.sub(outputAmount.mul(MStableExchangeController.getSwapFee()).div(1e18));
                     }
 
-                    emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], realOutputAmount);
+                    emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], inputAmountsAfterFees[i], realOutputAmount);
                 } else revert("No 0x orders supplied and exchange not supported via mStable for at least one currency pair.");
             }
         }
