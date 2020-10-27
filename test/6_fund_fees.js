@@ -19,7 +19,7 @@ const RariFundPriceConsumer = artifacts.require("RariFundPriceConsumer");
 
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundManager", accounts => {
-  it("should deposit to pools, set the interest fee rate, wait for interest, set the master beneficiary of interest fees, deposit fees, wait for interest again, and withdraw fees", async () => {
+  it("should deposit to pools, set the interest fee rate, wait for interest, set the master beneficiary of interest fees, and deposit fees", async () => {
     let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
@@ -81,38 +81,6 @@ contract("RariFundManager", accounts => {
     assert(postDepositFundBalance.gte(initialFundBalance.add(nowInterestFeesGenerated.sub(initialInterestFeesGenerated))));
     let postDepositRftBalance = await fundTokenInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS_SECONDARY);
     assert(postDepositRftBalance.gt(initialRftBalance));
-
-    // Check initial raw interest accrued, interest accrued, and interest fees generated
-    initialRawInterestAccrued = await fundManagerInstance.getRawInterestAccrued.call();
-    initialInterestAccrued = await fundManagerInstance.getInterestAccrued.call();
-    initialInterestFeesGenerated = await fundManagerInstance.getInterestFeesGenerated.call();
-
-    // Force accrue interest
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await web3.eth.sendTransaction({ from: process.env.DEVELOPMENT_ADDRESS, to: process.env.DEVELOPMENT_ADDRESS, value: 0 });
-
-    // Check raw interest accrued, interest accrued, and interest fees generated
-    nowRawInterestAccrued = await fundManagerInstance.getRawInterestAccrued.call();
-    assert(nowRawInterestAccrued.gt(initialRawInterestAccrued));
-    nowInterestAccrued = await fundManagerInstance.getInterestAccrued.call();
-    assert(nowInterestAccrued.gt(initialInterestAccrued));
-    nowInterestFeesGenerated = await fundManagerInstance.getInterestFeesGenerated.call();
-    assert(nowInterestFeesGenerated.gte(initialInterestFeesGenerated.add(nowRawInterestAccrued.sub(initialRawInterestAccrued).divn(10))));
-
-    // Check initial account balance
-    let myOldBalanceBN = web3.utils.toBN(await erc20Contract.methods.balanceOf(process.env.DEVELOPMENT_ADDRESS_SECONDARY).call());
-
-    // Withdraw from pool and withdraw fees!
-    // TODO: Withdraw exact amount from pool instead of simply withdrawing all
-    await fundControllerInstance.withdrawAllFromPool(1, currencyCode, { from: process.env.DEVELOPMENT_ADDRESS });
-    await fundManagerInstance.withdrawFees(currencyCode, { from: process.env.DEVELOPMENT_ADDRESS });
-
-    // Check that we claimed fees
-    let myNewBalanceBN = web3.utils.toBN(await erc20Contract.methods.balanceOf(process.env.DEVELOPMENT_ADDRESS_SECONDARY).call());
-    var expectedGainUsdBN = nowInterestFeesGenerated.sub(initialInterestFeesGenerated);
-    var currencyPricesInUsd = await fundPriceConsumerInstance.getCurrencyPricesInUsd.call();
-    var expectedGainBN = expectedGainUsdBN.mul(web3.utils.toBN(10 ** currencies[currencyCode].decimals)).div(currencyPricesInUsd[Object.keys(currencies).indexOf(currencyCode)]);
-    assert(myNewBalanceBN.gte(myOldBalanceBN.add(expectedGainBN)));
 
     // Reset master beneficiary of interest fees
     await fundManagerInstance.setInterestFeeMasterBeneficiary(process.env.DEVELOPMENT_ADDRESS, { from: process.env.DEVELOPMENT_ADDRESS });

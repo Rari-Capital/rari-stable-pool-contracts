@@ -945,36 +945,6 @@ contract RariFundManager is Initializable, Ownable {
     }
 
     /**
-     * @notice Withdraws all accrued fees on interest to the master beneficiary.
-     * @param currencyCode The currency code of the interest fees to be claimed.
-     */
-    function withdrawFees(string calldata currencyCode) external fundEnabled onlyRebalancer {
-        // Input validation
-        require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
-        address erc20Contract = _erc20Contracts[currencyCode];
-        require(erc20Contract != address(0), "Invalid currency code.");
-
-        // Get currency prices
-        uint256[] memory pricesInUsd = rariFundPriceConsumer.getCurrencyPricesInUsd();
-
-        // Manually cache raw fund balance (no need to check if set previously because the function is external)
-        _rawFundBalanceCache = toInt256(getRawFundBalance(pricesInUsd));
-
-        // Get unclaimed interest fees, calculate withdrawal amount, and validate
-        uint256 amountUsd = getInterestFeesUnclaimed();
-        uint256 amount = amountUsd.mul(10 ** _currencyDecimals[currencyCode]).div(pricesInUsd[_currencyIndexes[currencyCode]]);
-        require(amount > 0, "No new fees are available to claim.");
-
-        // Update claimed interest fees, transfer tokens, and emit event
-        _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
-        IERC20(erc20Contract).safeTransferFrom(_rariFundControllerContract, _interestFeeMasterBeneficiary, amount);
-        emit InterestFeeWithdrawal(_interestFeeMasterBeneficiary, amountUsd, currencyCode, amount);
-
-        // Reset _rawFundBalanceCache
-        _rawFundBalanceCache = -1;
-    }
-
-    /**
      * @dev Converts an unsigned uint256 into a signed int256.
      * @param value The uint256 to convert.
      */
