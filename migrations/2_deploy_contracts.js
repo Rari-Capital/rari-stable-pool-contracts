@@ -31,19 +31,14 @@ module.exports = async function(deployer, network, accounts) {
   }
   
   if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) {
-    // Upgrade from v2.0.0 (only modifying RariFundManager v2.0.0 and RariFundToken v2.0.0) to v2.1.0
+    // Upgrade from v2.1.0 (only modifying RariFundManager v2.1.0) to v2.2.0
     if (!process.env.UPGRADE_FUND_MANAGER_ADDRESS) return console.error("UPGRADE_FUND_MANAGER_ADDRESS is missing for upgrade");
-    if (!process.env.UPGRADE_FUND_TOKEN_ADDRESS) return console.error("UPGRADE_FUND_MANAGER_ADDRESS is missing for upgrade");
     if (!process.env.UPGRADE_FUND_OWNER_ADDRESS) return console.error("UPGRADE_FUND_OWNER_ADDRESS is missing for upgrade");
     if (["live", "live-fork"].indexOf(network) >= 0 && !process.env.LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY) return console.error("LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY is missing for live upgrade");
 
     // Upgrade RariFundManager
     RariFundManager.class_defaults.from = process.env.UPGRADE_FUND_OWNER_ADDRESS;
     var rariFundManager = await upgradeProxy(process.env.UPGRADE_FUND_MANAGER_ADDRESS, RariFundManager, { deployer, unsafeAllowCustomTypes: true });
-
-    // Upgrade RariFundToken
-    RariFundToken.class_defaults.from = process.env.UPGRADE_FUND_OWNER_ADDRESS;
-    await upgradeProxy(process.env.UPGRADE_FUND_TOKEN_ADDRESS, RariFundToken, { deployer });
 
     // Development network: transfer ownership of contracts to development address, set development address as rebalancer, and set all currencies to accepted
     if (["live", "live-fork"].indexOf(network) < 0) {
@@ -114,6 +109,9 @@ module.exports = async function(deployer, network, accounts) {
 
     // Set interest fee rate to 9.5%
     await rariFundManager.setInterestFeeRate(web3.utils.toBN(0.095e18));
+  
+    // Set withdrawal fee rate to 0.5%
+    await rariFundManager.setWithdrawalFeeRate(web3.utils.toBN(0.005e18));
 
     // Link libraries to RariFundProxy
     await deployer.link(ZeroExExchangeController, RariFundProxy);

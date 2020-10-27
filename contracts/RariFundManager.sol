@@ -225,6 +225,7 @@ contract RariFundManager is Initializable, Ownable {
         _interestFeesGeneratedAtLastFeeRateChange = data.interestFeesGeneratedAtLastFeeRateChange;
         _interestFeesClaimed = data.interestFeesClaimed;
         _interestFeeRate = RariFundManager(_authorizedFundManagerDataSource).getInterestFeeRate();
+        _withdrawalFeeRate = RariFundManager(_authorizedFundManagerDataSource).getWithdrawalFeeRate();
     }
 
     /**
@@ -705,16 +706,21 @@ contract RariFundManager is Initializable, Ownable {
         bool cacheSetPreviously = _rawFundBalanceCache >= 0;
         if (!cacheSetPreviously) _rawFundBalanceCache = toInt256(getRawFundBalance(pricesInUsd));
 
+        // Calculate withdrawal fee
+        uint256 feeAmount = amount.mul(_withdrawalFeeRate).div(1e18);
+        uint256 amountWithFee = amount.add(feeAmount);
+
         // Get withdrawal amount in USD
-        uint256 amountUsd = amount.mul(pricesInUsd[_currencyIndexes[currencyCode]]).div(10 ** _currencyDecimals[currencyCode]);
+        uint256 amountUsd = amountWithFee.mul(pricesInUsd[_currencyIndexes[currencyCode]]).div(10 ** _currencyDecimals[currencyCode]);
 
         // Calculate RFT to burn
         uint256 rftAmount = getRftBurnAmount(from, amountUsd);
 
-        // Update net deposits, burn RFT, transfer funds to msg.sender, and emit event
+        // Update net deposits, burn RFT, transfer funds to msg.sender, transfer fee to _withdrawalFeeMasterBeneficiary, and emit event
         _netDeposits = _netDeposits.sub(int256(amountUsd));
         rariFundToken.fundManagerBurnFrom(from, rftAmount); // The user must approve the burning of tokens beforehand
         token.safeTransferFrom(_rariFundControllerContract, msg.sender, amount);
+        token.safeTransferFrom(_rariFundControllerContract, _withdrawalFeeMasterBeneficiary, feeAmount);
         emit Withdrawal(currencyCode, from, msg.sender, amount, amountUsd, rftAmount);
 
         // Update _rawFundBalanceCache
@@ -954,5 +960,41 @@ contract RariFundManager is Initializable, Ownable {
     function toInt256(uint256 value) internal pure returns (int256) {
         require(value < 2 ** 255, "SafeCast: value doesn't fit in an int256");
         return int256(value);
+    }
+
+    /**
+     * @dev The current withdrawal fee rate (scaled by 1e18).
+     */
+    uint256 private _withdrawalFeeRate;
+
+    /**
+     * @dev The master beneficiary of withdrawal fees; i.e., the recipient of all withdrawal fees.
+     */
+    address private _withdrawalFeeMasterBeneficiary;
+
+    /**
+     * @dev Returns the withdrawal fee rate (proportion of every withdrawal charged as a service fee scaled by 1e18).
+     */
+    function getWithdrawalFeeRate() public view returns (uint256) {
+        return _withdrawalFeeRate;
+    }
+
+    /**
+     * @dev Sets the withdrawal fee rate.
+     * @param rate The proportion of every withdrawal charged as a service fee (scaled by 1e18).
+     */
+    function setWithdrawalFeeRate(uint256 rate) external fundEnabled onlyOwner {
+        require(rate != _withdrawalFeeRate, "This is already the current withdrawal fee rate.");
+        require(rate <= 1e18, "The withdrawal fee rate cannot be greater than 100%.");
+        _withdrawalFeeRate = rate;
+    }
+
+    /**
+     * @dev Sets the master beneficiary of withdrawal fees.
+     * @param beneficiary The master beneficiary of withdrawal fees; i.e., the recipient of all withdrawal fees.
+     */
+    function setWithdrawalFeeMasterBeneficiary(address beneficiary) external fundEnabled onlyOwner {
+        require(beneficiary != address(0), "Master beneficiary cannot be the zero address.");
+        _withdrawalFeeMasterBeneficiary = beneficiary;
     }
 }
