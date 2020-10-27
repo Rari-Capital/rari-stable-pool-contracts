@@ -892,11 +892,6 @@ contract RariFundManager is Initializable, Ownable {
     event InterestFeeDeposit(address beneficiary, uint256 amountUsd);
 
     /**
-     * @dev Emitted when fees on interest are withdrawn.
-     */
-    event InterestFeeWithdrawal(address beneficiary, uint256 amountUsd, string currencyCode, uint256 amount);
-
-    /**
      * @dev Internal function to deposit all accrued fees on interest back into the fund on behalf of the master beneficiary.
      * @return Integer indicating success (0), no fees to claim (1), or no RFT to mint (2).
      */
