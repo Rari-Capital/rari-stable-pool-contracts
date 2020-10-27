@@ -45,9 +45,29 @@ module.exports = async function(deployer, network, accounts) {
   
     // Set withdrawal fee rate to 0.5%
     await rariFundManager.setWithdrawalFeeRate(web3.utils.toBN(0.005e18), { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+  
+    // Deploy currency exchange libraries
+    await deployer.deploy(ZeroExExchangeController);
+    await deployer.deploy(MStableExchangeController);
+
+    // Link existing libraries to RariFundProxy
+    await deployer.link(ZeroExExchangeController, RariFundProxy);
+    await deployer.link(MStableExchangeController, RariFundProxy);
+
+    // Deploy RariFundProxy
+    var rariFundProxy = await deployer.deploy(RariFundProxy);
+
+    // Connect RariFundManager and RariFundProxy
+    await rariFundManager.setFundProxy(RariFundProxy.address, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+    await rariFundProxy.setFundManager(RariFundManager.address);
+
+    // Set GSN trusted signer
+    await rariFundProxy.setGsnTrustedSigner(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_GSN_TRUSTED_SIGNER : process.env.DEVELOPMENT_ADDRESS);
 
     // Development network: transfer ownership of contracts to development address, set development address as rebalancer, and set all currencies to accepted
-    if (["live", "live-fork"].indexOf(network) < 0) {
+    if (["live", "live-fork"].indexOf(network) >= 0) {
+      await rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
+    } else {
       var rariFundController = await RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS);
       await rariFundController.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       await rariFundManager.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
