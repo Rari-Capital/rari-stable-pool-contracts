@@ -40,6 +40,12 @@ module.exports = async function(deployer, network, accounts) {
     RariFundManager.class_defaults.from = process.env.UPGRADE_FUND_OWNER_ADDRESS;
     var rariFundManager = await upgradeProxy(process.env.UPGRADE_FUND_MANAGER_ADDRESS, RariFundManager, { deployer, unsafeAllowCustomTypes: true });
 
+    // Set withdrawal fee master beneficiary
+    await rariFundManager.setWithdrawalFeeMasterBeneficiary(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_WITHDRAWAL_FEE_MASTER_BENEFICIARY : process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+  
+    // Set withdrawal fee rate to 0.5%
+    await rariFundManager.setWithdrawalFeeRate(web3.utils.toBN(0.005e18), { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+
     // Development network: transfer ownership of contracts to development address, set development address as rebalancer, and set all currencies to accepted
     if (["live", "live-fork"].indexOf(network) < 0) {
       var rariFundController = await RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS);
@@ -109,6 +115,9 @@ module.exports = async function(deployer, network, accounts) {
 
     // Set interest fee rate to 9.5%
     await rariFundManager.setInterestFeeRate(web3.utils.toBN(0.095e18));
+  
+    // Set withdrawal fee master beneficiary
+    await rariFundManager.setWithdrawalFeeMasterBeneficiary(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_WITHDRAWAL_FEE_MASTER_BENEFICIARY : process.env.DEVELOPMENT_ADDRESS);
   
     // Set withdrawal fee rate to 0.5%
     await rariFundManager.setWithdrawalFeeRate(web3.utils.toBN(0.005e18));
