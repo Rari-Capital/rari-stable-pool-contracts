@@ -671,7 +671,7 @@ contract RariFundManager is Initializable, Ownable {
      * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The minimum amount of tokens that must be held by `RariFundController` after withdrawing.
      */
-    function withdrawFromPoolsIfNecessary(string memory currencyCode, uint256 amount) internal cacheDydxBalances {
+    function withdrawFromPoolsIfNecessary(string memory currencyCode, uint256 amount) internal {
         // Check contract balance of token and withdraw from pools if necessary
         address erc20Contract = _erc20Contracts[currencyCode];
         uint256 contractBalance = IERC20(erc20Contract).balanceOf(_rariFundControllerContract);
