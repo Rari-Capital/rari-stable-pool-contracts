@@ -172,7 +172,7 @@ contract RariFundProxy is Ownable, GSNRecipient {
      * @dev Emitted when funds have been exchanged after being withdrawn via RariFundManager.
      * If exchanging from ETH, `outputErc20Contract` = address(0).
      */
-    event PostWithdrawalExchange(string indexed inputCurrencyCode, address indexed outputErc20Contract, address indexed payee, uint256 withdrawalAmount, uint256 takerAssetFilledAmount, uint256 makerAssetFilledAmount);
+    event PostWithdrawalExchange(string indexed inputCurrencyCode, address indexed outputErc20Contract, address indexed payee, uint256 withdrawalAmount, uint256 withdrawalAmountAfterFee, uint256 makerAssetFilledAmount);
 
     /**
      * @notice Exchanges and deposits funds to RariFund in exchange for RFT (via 0x).
@@ -311,7 +311,8 @@ contract RariFundProxy is Ownable, GSNRecipient {
                     require(orders.length == signatures.length, "Lengths of all orders and signatures arrays must be equal.");
 
                     // Exchange tokens and emit event
-                    uint256[2] memory filledAmounts = inputAmountsAfterFees[i] < inputAmounts[i] ? ZeroExExchangeController.marketSellOrdersFillOrKill(orders[i], signatures[i], inputAmountsAfterFees[i], protocolFees[i]) : ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], protocolFees[i]);
+                    if (inputAmountsAfterFees[i] < inputAmounts[i]) makerAssetFillAmounts[i] = makerAssetFillAmounts[i].mul(inputAmountsAfterFees[i]).div(inputAmounts[i]);
+                    uint256[2] memory filledAmounts = ZeroExExchangeController.marketBuyOrdersFillOrKill(orders[i], signatures[i], makerAssetFillAmounts[i], protocolFees[i]);
                     emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], inputAmountsAfterFees[i], filledAmounts[1]);
                 } else if ((_mStableExchangeErc20Contracts[inputErc20Contract] || inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) && (_mStableExchangeErc20Contracts[outputErc20Contract] || outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5)) {
                     // Mint, redeem, or swap via mUSD
