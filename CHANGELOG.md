@@ -1,5 +1,10 @@
 # Changelog
 
+## `v2.2.0` (contracts deployed 2020-10-27; all code pushed 2020-10-29)
+
+* Added 0.5% withdrawal fee.
+    * Removed `RariFundManager.withdrawFees` to save gas on deployment.
+
 ## `v2.1.0` (contracts deployed 2020-10-20; all code pushed 2020-10-28)
 
 * Implemented liquidity mining of RGT (Rari Governance Token) distributions.

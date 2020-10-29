@@ -115,7 +115,7 @@ contract("RariFundProxy", accounts => {
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
     let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN_ADDRESS) : RariFundToken.deployed());
-    let fundProxyInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundProxy.at(process.env.UPGRADE_FUND_PROXY_ADDRESS) : RariFundProxy.deployed());
+    let fundProxyInstance = await RariFundProxy.deployed();
 
     // Exchange data
     var inputCurrencyCodes = [];

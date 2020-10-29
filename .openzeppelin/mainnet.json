@@ -869,6 +869,295 @@
           }
         }
       }
+    },
+    "e8a214b313be697d6a8ff67a44fb90cdec93561bab4b757992959f5e39c22277": {
+      "address": "0xFBd8fa4Ae1ca58FA6fd4cF683f94E54235266141",
+      "txHash": "0x613fb9d47bdde4430261b6dd762a632b04e2c01dfde96e8b6f91206e22aff684",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/upgrades/contracts/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/upgrades/contracts/Initializable.sol:26"
+          },
+          {
+            "contract": "Initializable",
+            "label": "______gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/upgrades/contracts/Initializable.sol:61"
+          },
+          {
+            "contract": "Ownable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol:17"
+          },
+          {
+            "contract": "Ownable",
+            "label": "______gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol:80"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "fundDisabled",
+            "type": "t_bool",
+            "src": "RariFundManager.sol:42"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_rariFundControllerContract",
+            "type": "t_address_payable",
+            "src": "RariFundManager.sol:47"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "rariFundController",
+            "type": "t_contract(RariFundController)1949",
+            "src": "RariFundManager.sol:52"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_rariFundTokenContract",
+            "type": "t_address",
+            "src": "RariFundManager.sol:57"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "rariFundToken",
+            "type": "t_contract(RariFundToken)6862",
+            "src": "RariFundManager.sol:62"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "rariFundPriceConsumer",
+            "type": "t_contract(RariFundPriceConsumer)4806",
+            "src": "RariFundManager.sol:67"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_rariFundProxyContract",
+            "type": "t_address",
+            "src": "RariFundManager.sol:72"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_rariFundRebalancerAddress",
+            "type": "t_address",
+            "src": "RariFundManager.sol:77"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_supportedCurrencies",
+            "type": "t_array(t_string_storage)dyn_storage",
+            "src": "RariFundManager.sol:82"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_currencyIndexes",
+            "type": "t_mapping(t_string_memory,t_uint8)",
+            "src": "RariFundManager.sol:87"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_currencyDecimals",
+            "type": "t_mapping(t_string_memory,t_uint256)",
+            "src": "RariFundManager.sol:92"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_erc20Contracts",
+            "type": "t_mapping(t_string_memory,t_address)",
+            "src": "RariFundManager.sol:97"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_poolsByCurrency",
+            "type": "t_mapping(t_string_memory,t_array(t_enum(LiquidityPool)114)dyn_storage)",
+            "src": "RariFundManager.sol:102"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_authorizedFundManagerDataSource",
+            "type": "t_address",
+            "src": "RariFundManager.sol:195"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_cachePoolBalances",
+            "type": "t_bool",
+            "src": "RariFundManager.sol:363"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_cacheDydxBalances",
+            "type": "t_bool",
+            "src": "RariFundManager.sol:368"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_poolBalanceCache",
+            "type": "t_mapping(t_string_memory,t_mapping(t_uint8,t_uint256))",
+            "src": "RariFundManager.sol:373"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_dydxTokenAddressesCache",
+            "type": "t_array(t_address)dyn_storage",
+            "src": "RariFundManager.sol:378"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_dydxBalancesCache",
+            "type": "t_array(t_uint256)dyn_storage",
+            "src": "RariFundManager.sol:383"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_rawFundBalanceCache",
+            "type": "t_int256",
+            "src": "RariFundManager.sol:464"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_accountBalanceLimitDefault",
+            "type": "t_uint256",
+            "src": "RariFundManager.sol:530"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_accountBalanceLimits",
+            "type": "t_mapping(t_address,t_int256)",
+            "src": "RariFundManager.sol:535"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_acceptedCurrencies",
+            "type": "t_mapping(t_string_memory,t_bool)",
+            "src": "RariFundManager.sol:540"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_acceptedCurrenciesArray",
+            "type": "t_array(t_string_storage)dyn_storage",
+            "src": "RariFundManager.sol:553"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_netDeposits",
+            "type": "t_int256",
+            "src": "RariFundManager.sol:797"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_interestFeeRate",
+            "type": "t_uint256",
+            "src": "RariFundManager.sol:818"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_rawInterestAccruedAtLastFeeRateChange",
+            "type": "t_int256",
+            "src": "RariFundManager.sol:843"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_interestFeesGeneratedAtLastFeeRateChange",
+            "type": "t_int256",
+            "src": "RariFundManager.sol:848"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_interestFeesClaimed",
+            "type": "t_uint256",
+            "src": "RariFundManager.sol:864"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_interestFeeMasterBeneficiary",
+            "type": "t_address",
+            "src": "RariFundManager.sol:878"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_withdrawalFeeRate",
+            "type": "t_uint256",
+            "src": "RariFundManager.sol:954"
+          },
+          {
+            "contract": "RariFundManager",
+            "label": "_withdrawalFeeMasterBeneficiary",
+            "type": "t_address",
+            "src": "RariFundManager.sol:959"
+          }
+        ],
+        "types": {
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_address_payable": {
+            "label": "address payable"
+          },
+          "t_contract(RariFundController)1949": {
+            "label": "contract RariFundController"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_contract(RariFundToken)6862": {
+            "label": "contract RariFundToken"
+          },
+          "t_contract(RariFundPriceConsumer)4806": {
+            "label": "contract RariFundPriceConsumer"
+          },
+          "t_array(t_string_storage)dyn_storage": {
+            "label": "string[]"
+          },
+          "t_mapping(t_string_memory,t_uint8)": {
+            "label": "mapping(string => uint8)"
+          },
+          "t_mapping(t_string_memory,t_uint256)": {
+            "label": "mapping(string => uint256)"
+          },
+          "t_mapping(t_string_memory,t_address)": {
+            "label": "mapping(string => address)"
+          },
+          "t_mapping(t_string_memory,t_array(t_enum(LiquidityPool)114)dyn_storage)": {
+            "label": "mapping(string => enum RariFundController.LiquidityPool[])"
+          },
+          "t_mapping(t_string_memory,t_mapping(t_uint8,t_uint256))": {
+            "label": "mapping(string => mapping(uint8 => uint256))"
+          },
+          "t_array(t_address)dyn_storage": {
+            "label": "address[]"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_int256": {
+            "label": "int256"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_int256)": {
+            "label": "mapping(address => int256)"
+          },
+          "t_mapping(t_string_memory,t_bool)": {
+            "label": "mapping(string => bool)"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
     }
   },
   "admin": {
