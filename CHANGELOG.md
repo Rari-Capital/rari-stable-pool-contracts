@@ -1,6 +1,6 @@
 # Changelog
 
-## `v2.1.0` (contracts deployed 2020-10-20; all code pushed 2020-10-27)
+## `v2.1.0` (contracts deployed 2020-10-20; all code pushed 2020-10-28)
 
 * Implemented liquidity mining of RGT (Rari Governance Token) distributions.
 * Removed account balance limit functions.
