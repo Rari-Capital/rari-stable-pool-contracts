@@ -60,9 +60,12 @@ Please note that using our web client online at [app.rari.capital](https://app.r
 
 We have covered security above, but see [our website](https://rari.capital/risks.html) for more information on the risks associated with supplying funds to Rari.
 
-## Performance Fee
+## Fees
 
-A 9.5% performance fee is deducted from all interest earned by RSPT holders. This fee is liable to change in the future (but fees on past interest cannot be changed).
+See [this Notion article](https://www.notion.so/Fees-e4689d7b800f485098548dd9e9d0a69f) for more information about fees and where they go.
+
+* A *9.5% performance fee* is deducted from all interest earned by RSPT holders. This fee is liable to change in the future (but fees on past interest cannot be changed).
+* Furthermore, a *0.5% withdrawal fee* is deducted from all withdrawals from the Rari Stable Pool. This fee is also liable to change in the future.
 
 ## COMP
 

@@ -92,10 +92,16 @@ The following document contains instructions on common usage of the Rari Stable 
 
 ## RSPT (Rari Stable Pool Token)
 
-* Your RSPT (Rari Stable Pool Token) balance is a *token-based representation of your Rari Stable Pool balance.*
-    * RSPT is minted to you when you deposit to the Stable Pool and redeemed (i.e., burned) when you withdraw from the Stable Pool.
-    * Accrued interest is constantly added to your USD balance supplied to the Stable Pool, meaning the USD value of your RSPT increases. However, your RSPT balance itself does not increase: instead, the exchange rate of RSPT increases at the same rate for every user as they accrue interest.
-    * When you transfer your RSPT, you transfer your holdings supplied to the Stable Pool (deposits + interest).
+### Introduction
+
+Your RSPT (Rari Stable Pool Token) balance is a *token-based representation of your Rari Stable Pool balance.*
+
+* RSPT is minted to you when you deposit to the Stable Pool and redeemed (i.e., burned) when you withdraw from the Stable Pool.
+* Accrued interest is constantly added to your USD balance supplied to the Stable Pool, meaning the USD value of your RSPT increases. However, your RSPT balance itself does not increase: instead, the exchange rate of RSPT increases at the same rate for every user as they accrue interest.
+* When you transfer your RSPT, you transfer your holdings supplied to the Stable Pool (deposits + interest).
+
+### Usage
+
 * **Get RSPT exchange rate:** Divide `RariFundManager.getFundBalance()` by `RariFundToken.totalSupply()` to get the exchange rate of RSPT in USD (scaled by 1e18).
 * **Get my RSPT balance (internal representation of my USD balance supplied):** `uint256 RariFundToken.balanceOf(address account)` returns the amount of RSPT owned by `account`.
 * **Transfer RSPT:** `bool RariFundToken.transfer(address recipient, uint256 amount)` transfers `amount` RSPT to `recipient` (as with other ERC20 tokens like RSPT).
@@ -108,11 +114,23 @@ The following document contains instructions on common usage of the Rari Stable 
 * **Get total USD supplied (by all users):** `uint256 RariFundManager.getFundBalance()` returns the total balance supplied by users to the Rari Stable Pool (all RSPT holders' funds but not unclaimed fees) in USD (scaled by 1e18).
 * **Get total interest accrued (by all users):** `int256 RariFundManager.getInterestAccrued()` returns the total amount of interest accrued (excluding the fees paid on interest) by past and current Rari Stable Pool users (i.e., RSPT holders) in USD (scaled by 1e18).
 
-## Fees on Interest
+## Fees
 
-* Rari Capital currently takes a *9.5% performance fee* on all interest accrued by the Rari Stable Pool.
+See [this Notion article](https://www.notion.so/Fees-e4689d7b800f485098548dd9e9d0a69f) for more information about fees and where they go.
+
+### Performance Fees
+
+Rari Capital currently takes a *9.5% performance fee* on all interest accrued by the Rari Stable Pool.
+
 * This fee is liable to change in the future, but the following method returns its current value at any time.
 * **Get interest fee rate:** `uint256 RariFundManager.getInterestFeeRate()` returns the fee rate on interest (proportion of raw interest accrued scaled by 1e18).
+
+### Withdrawal Fees
+
+Rari Capital currently takes a *0.5% withdrawal fee* on all withdrawals from the Rari Stable Pool.
+
+* This fee is liable to change in the future, but the following method returns its current value at any time.
+* **Get withdrawal fee rate:** `uint256 RariFundManager.getWithdrawalFeeRate()` returns the withdrawal fee rate (proportion of every withdrawal taken as a service fee scaled by 1e18).
 
 ## Raw Allocations
 

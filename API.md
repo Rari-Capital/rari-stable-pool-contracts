@@ -174,7 +174,7 @@ Returns the total amount of interest accrued (excluding the fees paid on interes
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
 
-## **Fees on Interest**
+## **Fees**
 
 ### `uint256 RariFundManager.getInterestFeeRate()`
 
@@ -186,6 +186,10 @@ Returns the amount of interest fees accrued by beneficiaries in USD (scaled by 1
 
 * Development notes:
     * *Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getRawFundBalance`) potentially modifies the state.*
+
+### `uint256 RariFundManager.getWithdrawalFeeRate()`
+
+Returns the withdrawal fee rate (proportion of every withdrawal taken as a service fee scaled by 1e18).
 
 ## **Raw Total Supply, Allocations, and Interest**
 
