@@ -22,6 +22,7 @@ import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
 import "./RariFundController.sol";
 import "./RariFundToken.sol";
 import "./RariFundPriceConsumer.sol";
+import "./interfaces/IRariGovernanceTokenDistributor.sol";
 
 /**
  * @title RariFundManager
@@ -38,7 +39,7 @@ contract RariFundManager is Initializable, Ownable {
     /**
      * @dev Boolean that, if true, disables the primary functionality of this RariFundManager.
      */
-    bool private _fundDisabled;
+    bool public fundDisabled;
 
     /**
      * @dev Address of the RariFundController.
@@ -165,6 +166,8 @@ contract RariFundManager is Initializable, Ownable {
      * @param newContract The address of the new RariFundManager contract.
      */
     function upgradeFundManager(address newContract) external onlyOwner {
+        require(fundDisabled, "This fund manager contract must be disabled before it can be upgraded.");
+
         // Pass data to the new contract
         FundManagerData memory data;
 
@@ -315,7 +318,7 @@ contract RariFundManager is Initializable, Ownable {
     /**
      * @dev Emitted when the RariFundPriceConsumer of the RariFundManager is set.
      */
-    event RariFundPriceConsumerSet(address newContract);
+    event FundPriceConsumerSet(address newContract);
 
     /**
      * @dev Sets or upgrades the RariFundPriceConsumer of the RariFundManager.
@@ -323,7 +326,7 @@ contract RariFundManager is Initializable, Ownable {
      */
     function setFundPriceConsumer(address newContract) external onlyOwner {
         rariFundPriceConsumer = RariFundPriceConsumer(newContract);
-        emit RariFundPriceConsumerSet(newContract);
+        emit FundPriceConsumerSet(newContract);
     }
 
     /**
@@ -337,28 +340,19 @@ contract RariFundManager is Initializable, Ownable {
     event FundEnabled();
 
     /**
-     * @dev Disables primary functionality of this RariFundManager so contract(s) can be upgraded.
+     * @dev Disables/enables primary functionality of this RariFundManager so contract(s) can be upgraded.
      */
-    function disableFund() external onlyOwner {
-        require(!_fundDisabled, "Fund already disabled.");
-        _fundDisabled = true;
-        emit FundDisabled();
-    }
-
-    /**
-     * @dev Enables primary functionality of this RariFundManager once contract(s) are upgraded.
-     */
-    function enableFund() external onlyOwner {
-        require(_fundDisabled, "Fund already enabled.");
-        _fundDisabled = false;
-        emit FundEnabled();
+    function setFundDisabled(bool disabled) external onlyOwner {
+        require(disabled != fundDisabled, "No change to fund enabled/disabled status.");
+        fundDisabled = disabled;
+        if (disabled) emit FundDisabled(); else emit FundEnabled();
     }
 
     /**
      * @dev Throws if fund is disabled.
      */
     modifier fundEnabled() {
-        require(!_fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
+        require(!fundDisabled, "This fund manager contract is disabled. This may be due to an upgrade.");
         _;
     }
 
@@ -530,48 +524,14 @@ contract RariFundManager is Initializable, Ownable {
     }
 
     /**
-     * @dev Fund balance limit in USD per Ethereum address.
+     * @dev UNUSED AFTER UPGRADE: Fund balance limit in USD per Ethereum address.
      */
     uint256 private _accountBalanceLimitDefault;
 
     /**
-     * @dev Returns the default account balance limit in USD.
-     */
-    function getDefaultAccountBalanceLimit() external view returns (uint256) {
-        return _accountBalanceLimitDefault;
-    }
-
-    /**
-     * @dev Sets or upgrades the default account balance limit in USD.
-     * @param limitUsd The default fund balance limit per Ethereum address in USD.
-     */
-    function setDefaultAccountBalanceLimit(uint256 limitUsd) external onlyOwner {
-        _accountBalanceLimitDefault = limitUsd;
-    }
-
-    /**
-     * @dev Maps user accounts to individual account balance limits (where 0 indicates the default while any negative value indicates 0).
+     * @dev UNUSED AFTER UPGRADE: Maps user accounts to individual account balance limits (where 0 indicates the default while any negative value indicates 0).
      */
     mapping(address => int256) private _accountBalanceLimits;
-
-    /**
-     * @dev Returns the balance limit in USD of `account`.
-     * @param account The Ethereum address whose balance limit we are checking.
-     */
-    function getAccountBalanceLimit(address account) external view returns (uint256) {
-        if (_accountBalanceLimits[account] == 0) return _accountBalanceLimitDefault;
-        if (_accountBalanceLimits[account] < 0) return 0;
-        return uint256(_accountBalanceLimits[account]);
-    }
-
-    /**
-     * @dev Sets the balance limit in USD of `account`.
-     * @param account The Ethereum address for which to set the limit.
-     * @param limitUsd The fund balance limit of `account` in USD. Use 0 to unset individual limit (and restore account to global limit). Use -1 to disable deposits from `account`.
-     */
-    function setIndividualAccountBalanceLimit(address account, int256 limitUsd) external onlyOwner {
-        _accountBalanceLimits[account] = limitUsd;
-    }
 
     /**
      * @dev Maps currency codes to booleans indicating if they are accepted for deposits.
@@ -587,19 +547,25 @@ contract RariFundManager is Initializable, Ownable {
     }
 
     /**
-     * @dev Array of accepted currencies (only used by `getAcceptedCurrencies`).
-     * This variable is only in storage because Solidity does not support resizing memory arrays (https://solidity.readthedocs.io/en/develop/types.html#allocating-memory-arrays).
+     * @dev UNUSED AFTER UPGRADE: Array of accepted currencies (only used by `getAcceptedCurrencies`).
      */
     string[] private _acceptedCurrenciesArray;
 
     /**
      * @notice Returns an array of currency codes currently accepted for deposits.
-     * @dev Ideally, we can add the `view` modifier to this function, but it potentially modifies the state (see comments on `_acceptedCurrenciesArray`).
      */
-    function getAcceptedCurrencies() external returns (string[] memory) {
-        _acceptedCurrenciesArray.length = 0;
-        for (uint256 i = 0; i < _supportedCurrencies.length; i++) if (_acceptedCurrencies[_supportedCurrencies[i]]) _acceptedCurrenciesArray.push(_supportedCurrencies[i]);
-        return _acceptedCurrenciesArray;
+    function getAcceptedCurrencies() external view returns (string[] memory) {
+        uint256 arrayLength = 0;
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) if (_acceptedCurrencies[_supportedCurrencies[i]]) arrayLength++;
+        string[] memory acceptedCurrencies = new string[](arrayLength);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) if (_acceptedCurrencies[_supportedCurrencies[i]]) {
+            acceptedCurrencies[index] = _supportedCurrencies[i];
+            index++;
+        }
+
+        return acceptedCurrencies;
     }
 
     /**
@@ -623,7 +589,7 @@ contract RariFundManager is Initializable, Ownable {
     event Withdrawal(string indexed currencyCode, address indexed sender, address indexed payee, uint256 amount, uint256 amountUsd, uint256 rftBurned);
 
     /**
-     * @notice Deposits funds from `msg.sender` to RariFund in exchange for RFT minted to `to`.
+     * @notice Deposits funds from `msg.sender` to the Rari Stable Pool in exchange for RFT minted to `to`.
      * You may only deposit currencies accepted by the fund (see `isCurrencyAccepted(string currencyCode)`).
      * Please note that you must approve RariFundManager to transfer at least `amount`.
      * @param to The address that will receieve the minted RFT.
@@ -655,42 +621,25 @@ contract RariFundManager is Initializable, Ownable {
         else rftAmount = amountUsd;
         require(rftAmount > 0, "Deposit amount is so small that no RFT would be minted.");
 
-        // Check account balance limit if `to` is not whitelisted
-        require(checkAccountBalanceLimit(to, amountUsd, rftTotalSupply, fundBalanceUsd), "Making this deposit would cause the balance of this account to exceed the maximum.");
-
         // Update net deposits, transfer funds from msg.sender, mint RFT, and emit event
         _netDeposits = _netDeposits.add(int256(amountUsd));
         IERC20(erc20Contract).safeTransferFrom(msg.sender, _rariFundControllerContract, amount); // The user must approve the transfer of tokens beforehand
         require(rariFundToken.mint(to, rftAmount), "Failed to mint output tokens.");
         emit Deposit(currencyCode, msg.sender, to, amount, amountUsd, rftAmount);
 
-        // Modify or clear _rawFundBalanceCache
-        if (cacheSetPreviously) _rawFundBalanceCache = _rawFundBalanceCache.add(int256(amountUsd));
-        else _rawFundBalanceCache = -1;
+        // Update _rawFundBalanceCache
+        _rawFundBalanceCache = _rawFundBalanceCache.add(int256(amountUsd));
+
+        // Update RGT distribution speeds
+        IRariGovernanceTokenDistributor rariGovernanceTokenDistributor = rariFundToken.rariGovernanceTokenDistributor();
+        if (address(rariGovernanceTokenDistributor) != address(0) && block.number < rariGovernanceTokenDistributor.distributionEndBlock()) rariGovernanceTokenDistributor.refreshDistributionSpeeds(IRariGovernanceTokenDistributor.RariPool.Stable, getFundBalance());
+
+        // Clear _rawFundBalanceCache
+        if (!cacheSetPreviously) _rawFundBalanceCache = -1;
     }
 
     /**
-     * @dev Checks to make sure that, if `to` is not whitelisted, its balance will not exceed the maximum after depositing `amountUsd`.
-     * This function was separated from the `depositTo` function to avoid the stack getting too deep.
-     * @param to The address that will receieve the minted RFT.
-     * @param amountUsd The amount of tokens to be deposited in USD.
-     * @param rftTotalSupply The total supply of RFT representing the fund's total investor balance.
-     * @param fundBalanceUsd The fund's total investor balance in USD.
-     * @return Boolean indicating success.
-     */
-    function checkAccountBalanceLimit(address to, uint256 amountUsd, uint256 rftTotalSupply, uint256 fundBalanceUsd) internal view returns (bool) {
-        if (to != owner() && to != _interestFeeMasterBeneficiary) {
-            if (_accountBalanceLimits[to] < 0) return false;
-            uint256 initialBalanceUsd = rftTotalSupply > 0 && fundBalanceUsd > 0 ? rariFundToken.balanceOf(to).mul(fundBalanceUsd).div(rftTotalSupply) : 0; // Save gas by reusing value of getFundBalance() instead of calling balanceOf
-            uint256 accountBalanceLimitUsd = _accountBalanceLimits[to] > 0 ? uint256(_accountBalanceLimits[to]) : _accountBalanceLimitDefault;
-            if (initialBalanceUsd.add(amountUsd) > accountBalanceLimitUsd) return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @notice Deposits funds to RariFund in exchange for RFT.
+     * @notice Deposits funds to the Rari Stable Pool in exchange for RFT.
      * You may only deposit currencies accepted by the fund (see `isCurrencyAccepted(string currencyCode)`).
      * Please note that you must approve RariFundManager to transfer at least `amount`.
      * @param currencyCode The currency code of the token to be deposited.
@@ -716,7 +665,7 @@ contract RariFundManager is Initializable, Ownable {
     }
 
     /**
-     * @dev Internal function to withdraw funds from RariFund to `msg.sender` in exchange for RFT burned from `from`.
+     * @dev Internal function to withdraw funds from the Rari Stable Pool to `msg.sender` in exchange for RFT burned from `from`.
      * You may only withdraw currencies held by the fund (see `getRawFundBalance(string currencyCode)`).
      * Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
      * @param from The address from which RFT will be burned.
@@ -762,19 +711,25 @@ contract RariFundManager is Initializable, Ownable {
         // Calculate RFT to burn
         uint256 rftAmount = getRftBurnAmount(from, amountUsd);
 
-        // Burn RFT, transfer funds to msg.sender, update net deposits, and emit event
-        rariFundToken.burnFrom(from, rftAmount); // The user must approve the burning of tokens beforehand
-        token.safeTransferFrom(_rariFundControllerContract, msg.sender, amount);
+        // Update net deposits, burn RFT, transfer funds to msg.sender, and emit event
         _netDeposits = _netDeposits.sub(int256(amountUsd));
+        rariFundToken.fundManagerBurnFrom(from, rftAmount); // The user must approve the burning of tokens beforehand
+        token.safeTransferFrom(_rariFundControllerContract, msg.sender, amount);
         emit Withdrawal(currencyCode, from, msg.sender, amount, amountUsd, rftAmount);
 
-        // Modify or clear _rawFundBalanceCache
-        if (cacheSetPreviously) _rawFundBalanceCache = _rawFundBalanceCache.sub(int256(amountUsd));
-        else _rawFundBalanceCache = -1;
+        // Update _rawFundBalanceCache
+        _rawFundBalanceCache = _rawFundBalanceCache.sub(int256(amountUsd));
+
+        // Update RGT distribution speeds
+        IRariGovernanceTokenDistributor rariGovernanceTokenDistributor = rariFundToken.rariGovernanceTokenDistributor();
+        if (address(rariGovernanceTokenDistributor) != address(0) && block.number < rariGovernanceTokenDistributor.distributionEndBlock()) rariGovernanceTokenDistributor.refreshDistributionSpeeds(IRariGovernanceTokenDistributor.RariPool.Stable, getFundBalance());
+
+        // Clear _rawFundBalanceCache
+        if (!cacheSetPreviously) _rawFundBalanceCache = -1;
     }
 
     /**
-     * @notice Withdraws funds from RariFund in exchange for RFT.
+     * @notice Withdraws funds from the Rari Stable Pool in exchange for RFT.
      * You may only withdraw currencies held by the fund (see `getRawFundBalance(string currencyCode)`).
      * Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
      * @param currencyCode The currency code of the token to be withdrawn.
@@ -785,7 +740,7 @@ contract RariFundManager is Initializable, Ownable {
     }
 
     /**
-     * @dev Withdraws multiple currencies from RariFund to `msg.sender` (RariFundProxy) in exchange for RFT burned from `from`.
+     * @dev Withdraws multiple currencies from the Rari Stable Pool to `msg.sender` (RariFundProxy) in exchange for RFT burned from `from`.
      * You may only withdraw currencies held by the fund (see `getRawFundBalance(string currencyCode)`).
      * Please note that you must approve RariFundManager to burn of the necessary amount of RFT.
      * @param from The address from which RFT will be burned.
@@ -944,6 +899,12 @@ contract RariFundManager is Initializable, Ownable {
         require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
         emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
         emit InterestFeeDeposit(_interestFeeMasterBeneficiary, amountUsd);
+
+        // Update RGT distribution speeds
+        IRariGovernanceTokenDistributor rariGovernanceTokenDistributor = rariFundToken.rariGovernanceTokenDistributor();
+        if (address(rariGovernanceTokenDistributor) != address(0) && block.number < rariGovernanceTokenDistributor.distributionEndBlock()) rariGovernanceTokenDistributor.refreshDistributionSpeeds(IRariGovernanceTokenDistributor.RariPool.Stable, getFundBalance());
+
+        // Return no error
         return 0;
     }
 

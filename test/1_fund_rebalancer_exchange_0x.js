@@ -17,14 +17,15 @@ const exchanges = require('./fixtures/exchanges.json');
 const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
 
-var fundControllerWeb3Instance = new web3.eth.Contract(RariFundController.abi, RariFundController.address);
 var zeroExExchange = new ZeroExExchange(web3);
 
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundController, RariFundManager", accounts => {
   it("should exchange tokens", async () => {
-    let fundControllerInstance = await RariFundController.deployed();
-    let fundManagerInstance = await RariFundManager.deployed();
+    let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundController.address = process.env.UPGRADE_FUND_CONTROLLER_ADDRESS;
+    let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
 
     // For each currency combination, calculate amount to deposit to the fund
     var deposits = {};
@@ -89,7 +90,7 @@ contract("RariFundController, RariFundManager", accounts => {
       // Fill 0x orders
       // TODO: Ideally, we add actually call rari-fund-rebalancer
       await fundControllerInstance.approveTo0x(currencies[currencyCombination[0]].tokenAddress, maxInputAmountBN);
-      await fundControllerWeb3Instance.methods.marketSell0xOrdersFillOrKill(currencyCombination[0], currencyCombination[1], orders, signatures, takerAssetFilledAmountBN.toString()).send({ from: process.env.DEVELOPMENT_ADDRESS, value: protocolFee, gas: 2e6 });
+      await fundControllerInstance.marketSell0xOrdersFillOrKill(currencyCombination[0], currencyCombination[1], orders, signatures, takerAssetFilledAmountBN.toString(), { from: process.env.DEVELOPMENT_ADDRESS, value: protocolFee, gas: 2e6 });
 
       // Check source and destination wallet balances
       let newInputBalanceBN = web3.utils.toBN(await inputErc20Contract.methods.balanceOf(RariFundController.address).call());

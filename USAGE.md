@@ -57,8 +57,7 @@ The following document contains instructions on common usage of the Rari Stable 
 ## Withdraw
 
 1. User ensures that their account possesses enough USD (represented internally by RSPT) to make their withdrawal.
-2. User approves RSPT to `RariFundManager` by calling `bool RariFundToken.approve(address spender, uint256 amount)` where `spender` is `RariFundManager` (to approve unlimited RSPT, set `amount` to `uint256(-1)`).
-3. User calls `uint256 RariFundManager.getRawFundBalance(string currencyCode)` to get the raw total balance (currently held by the Stable Pool and available for direct withdrawal) of the desired withdrawal currency.
+2. User calls `uint256 RariFundManager.getRawFundBalance(string currencyCode)` to get the raw total balance (currently held by the Stable Pool and available for direct withdrawal) of the desired withdrawal currency.
     * If the returned balance >= withdrawal amount, user calls `bool RariFundManager.withdraw(string currencyCode, uint256 amount)`
     * If returned balance < withdrawal amount:
         1. Until the whole withdrawal amount (including the directly withdrawable balance returned above) is filled, try to withdraw and exchange each of the other currencies held by the Stable Pool (DAI, USDC, USDT, TUSD, BUSD, sUSD, and mUSD) to the desired output currency:
@@ -111,7 +110,7 @@ The following document contains instructions on common usage of the Rari Stable 
 
 ## Fees on Interest
 
-* Rari Capital currently takes a *20% performance fee* on all interest accrued by the Rari Stable Pool.
+* Rari Capital currently takes a *9.5% performance fee* on all interest accrued by the Rari Stable Pool.
 * This fee is liable to change in the future, but the following method returns its current value at any time.
 * **Get interest fee rate:** `uint256 RariFundManager.getInterestFeeRate()` returns the fee rate on interest (proportion of raw interest accrued scaled by 1e18).
 

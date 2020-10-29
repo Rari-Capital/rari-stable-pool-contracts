@@ -1,5 +1,15 @@
 # Changelog
 
+## `v2.1.0` (contracts deployed 2020-10-20; all code pushed 2020-10-28)
+
+* Implemented liquidity mining of RGT (Rari Governance Token) distributions.
+* Removed account balance limit functions.
+* Moved dApp to `rari-dapp-legacy`.
+* Gave `RariFundManager` permission to burn RSPT on withdrawals without the need for approval transactions.
+* Various minor improvements to `RariFundManager` (e.g., replaced `disableFund` and `enableFund` with `setFundDisabled`).
+* Fixed `LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY` in `truffle-config.js`.
+* Changed performance/interest fee rate to 9.5%.
+
 ## `v2.0.0` (contracts deployed 2020-09-21; all code pushed 2020-10-05)
 
 * Rebranded to Rari Stable Pool and Rari Stable Pool Token (RSPT).

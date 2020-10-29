@@ -20,8 +20,9 @@ const RariFundManager = artifacts.require("RariFundManager");
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundController", accounts => {
   it("should upgrade the FundController with funds in all pools in all currencies without using too much gas", async () => {
-    let fundControllerInstance = await RariFundController.deployed();
-    let fundManagerInstance = await RariFundManager.deployed();
+    let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
+    let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
 
     // Tally up fund deposits by currency so we deposit 0.1 tokens of each currency to each pool
     var depositsByCurrency = {};
@@ -50,7 +51,7 @@ contract("RariFundController", accounts => {
 
     // Disable original FundController and FundManager
     await fundControllerInstance.disableFund({ from: process.env.DEVELOPMENT_ADDRESS });
-    await fundManagerInstance.disableFund({ from: process.env.DEVELOPMENT_ADDRESS });
+    await fundManagerInstance.setFundDisabled(true, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Create new FundController and set its FundManager
     var newFundControllerInstance = await RariFundController.new({ from: process.env.DEVELOPMENT_ADDRESS });

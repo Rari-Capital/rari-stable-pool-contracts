@@ -1,7 +1,7 @@
 {
   "name": "rari-stable-pool-contracts",
-  "version": "2.0.0",
-  "description": "Smart contracts and web client for the Rari Stable Pool.",
+  "version": "2.1.0",
+  "description": "Smart contracts for the Rari Stable Pool.",
   "main": "truffle-config.js",
   "directories": {
     "test": "test"
@@ -10,9 +10,7 @@
     "compile": "truffle compile --all",
     "ganache": "node scripts/ganache.js",
     "test": "sh scripts/test.sh",
-    "dev-gsn": "sh scripts/test-gsn.sh",
-    "build-dapp": "babel src/js/app.js --out-file src/js/app-compiled.js",
-    "dev-dapp": "lite-server"
+    "dev-gsn": "sh scripts/test-gsn.sh"
   },
   "repository": {
     "type": "git",
@@ -29,14 +27,10 @@
   },
   "homepage": "https://github.com/Rari-Capital/rari-stable-pool-contracts#readme",
   "devDependencies": {
-    "@babel/cli": "^7.10.3",
-    "@babel/core": "^7.10.3",
-    "@babel/preset-env": "^7.10.3",
     "@openzeppelin/truffle-upgrades": "^1.1.0",
     "@truffle/hdwallet-provider": "^1.0.36",
     "dotenv": "^8.2.0",
     "ganache-core": "^2.11.3-beta.0",
-    "lite-server": "^2.5.4",
     "truffle": "^5.1.45"
   },
   "dependencies": {
