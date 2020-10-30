@@ -72,8 +72,6 @@ module.exports = async function(deployer, network, accounts) {
       var rariFundController = await RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS);
       await rariFundController.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       await rariFundManager.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
-      var rariFundProxy = await RariFundProxy.at(process.env.UPGRADE_FUND_PROXY_ADDRESS);
-      await rariFundProxy.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       // TODO: await admin.transferProxyAdminOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       await rariFundController.setFundRebalancer(process.env.DEVELOPMENT_ADDRESS);
       RariFundManager.class_defaults.from = process.env.DEVELOPMENT_ADDRESS;
