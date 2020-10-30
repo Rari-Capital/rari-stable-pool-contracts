@@ -28,6 +28,7 @@ module.exports = async function(deployer, network, accounts) {
     if (!process.env.LIVE_FUND_OWNER) return console.error("LIVE_FUND_OWNER is missing for live deployment");
     if (!process.env.LIVE_FUND_REBALANCER) return console.error("LIVE_FUND_REBALANCER is missing for live deployment");
     if (!process.env.LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY) return console.error("LIVE_FUND_INTEREST_FEE_MASTER_BENEFICIARY is missing for live deployment");
+    if (!process.env.LIVE_FUND_WITHDRAWAL_FEE_MASTER_BENEFICIARY) return console.error("LIVE_FUND_WITHDRAWAL_FEE_MASTER_BENEFICIARY is missing for live deployment");
   }
   
   if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) {
