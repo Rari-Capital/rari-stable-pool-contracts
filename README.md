@@ -44,7 +44,6 @@ To run automated tests on the contracts on your private mainnet fork, run `npm t
     UPGRADE_FUND_CONTROLLER_ADDRESS=0xEe7162bB5191E8EC803F7635dE9A920159F1F40C
     UPGRADE_FUND_TOKEN_ADDRESS=0x016bf078ABcaCB987f0589a6d3BEAdD4316922B0
     UPGRADE_FUND_PRICE_CONSUMER_ADDRESS=0x77a817077cd7Cf0c6e0d4d2c4464648FF6C3fdB8
-    UPGRADE_FUND_PROXY_ADDRESS=0xD4be7E211680e12c08bbE9054F0dA0D646c45228
 
 If you'd like to test gasless deposits via `RariFundProxy.deposit` via the Gas Station Network:
 
