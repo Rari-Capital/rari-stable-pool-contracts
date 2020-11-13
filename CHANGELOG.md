@@ -1,6 +1,6 @@
 # Changelog
 
-## `v2.3.0` (contracts deployed 2020-10-29; all code pushed 2020-11-02)
+## `v2.3.0` (contracts deployed 2020-10-29; all code pushed 2020-11-13)
 
 * Added `RariFundPriceConsumer.allCurrenciesPeggedTo1Usd` variable.
 
