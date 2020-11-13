@@ -1,5 +1,9 @@
 # Changelog
 
+## `v2.3.0` (contracts deployed 2020-10-29; all code pushed 2020-11-02)
+
+* Added `RariFundPriceConsumer.allCurrenciesPeggedTo1Usd` variable.
+
 ## `v2.2.0` (contracts deployed 2020-10-27; all code pushed 2020-10-29)
 
 * Added 0.5% withdrawal fee.

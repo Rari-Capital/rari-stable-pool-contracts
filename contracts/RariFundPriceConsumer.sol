@@ -11,6 +11,7 @@ pragma solidity 0.5.17;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/upgrades/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 
@@ -24,8 +25,16 @@ import "./external/mstable/MassetStructs.sol";
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
  * @notice RariFundPriceConsumer retrieves stablecoin prices from Chainlink's public price feeds (used by RariFundManager and RariFundController).
  */
-contract RariFundPriceConsumer is Initializable {
+contract RariFundPriceConsumer is Initializable, Ownable {
     using SafeMath for uint256;
+
+    /**
+     * @dev Initializer for RariFundPriceConsumer.
+     */
+    function initialize(bool _allCurrenciesPeggedTo1Usd) public initializer {
+        Ownable.initialize(msg.sender);
+        allCurrenciesPeggedTo1Usd = _allCurrenciesPeggedTo1Usd;
+    }
 
     /**
      * @dev Chainlink price feed for DAI/USD.
@@ -100,12 +109,19 @@ contract RariFundPriceConsumer is Initializable {
     }
 
     /**
-     * @notice Returns the price of each supported currency in USD.
+     * @notice Returns the price of each supported currency in USD (scaled by 1e18).
      */
     function getCurrencyPricesInUsd() external view returns (uint256[] memory) {
+        uint256[] memory prices = new uint256[](7);
+
+        // If all pegged to $1
+        if (allCurrenciesPeggedTo1Usd) {
+            for (uint256 i = 0; i < 7; i++) prices[i] = 1e18;
+            return prices;
+        }
+
         // Get bAsset prices and mUSD price
         uint256 ethUsdPrice = getEthUsdPrice();
-        uint256[] memory prices = new uint256[](7);
         prices[0] = getDaiUsdPrice();
         prices[1] = getPriceInEth("USDC").mul(ethUsdPrice).div(1e18);
         prices[2] = getPriceInEth("TUSD").mul(ethUsdPrice).div(1e18);
@@ -123,5 +139,18 @@ contract RariFundPriceConsumer is Initializable {
 
         // Return prices array
         return prices;
+    }
+
+    /**
+     * @notice Boolean indicating if all currencies are stablecoins pegged to the value of $1.
+     */
+    bool public allCurrenciesPeggedTo1Usd;
+
+    /**
+     * @dev Admin function to peg all stablecoin prices to $1.
+     */
+    function set1UsdPegOnAllCurrencies(bool enabled) external onlyOwner {
+        require(allCurrenciesPeggedTo1Usd != enabled, "$1 USD peg status already set to the requested value.");
+        allCurrenciesPeggedTo1Usd = enabled;
     }
 }
