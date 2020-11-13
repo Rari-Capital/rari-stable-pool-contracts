@@ -1158,6 +1158,85 @@
           }
         }
       }
+    },
+    "901b3a805ee6964e019091bc8442975bbd0cdc61728cbf1a264e0d4b320ced5a": {
+      "address": "0xc34D76cBB18a5976e38Fe0f0c580DCEE6D8954ee",
+      "txHash": "0x33c533bf65b871fc07d6daa9794990943527841cf79576ddd213f44846932f72",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "initialized",
+            "type": "t_bool",
+            "src": "../@openzeppelin/upgrades/contracts/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "initializing",
+            "type": "t_bool",
+            "src": "../@openzeppelin/upgrades/contracts/Initializable.sol:26"
+          },
+          {
+            "contract": "Initializable",
+            "label": "______gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/upgrades/contracts/Initializable.sol:61"
+          },
+          {
+            "contract": "Ownable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol:17"
+          },
+          {
+            "contract": "Ownable",
+            "label": "______gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "../@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol:80"
+          },
+          {
+            "contract": "RariFundPriceConsumer",
+            "label": "_daiUsdPriceFeed",
+            "type": "t_contract(AggregatorV3Interface)11646",
+            "src": "RariFundPriceConsumer.sol:42"
+          },
+          {
+            "contract": "RariFundPriceConsumer",
+            "label": "_ethUsdPriceFeed",
+            "type": "t_contract(AggregatorV3Interface)11646",
+            "src": "RariFundPriceConsumer.sol:47"
+          },
+          {
+            "contract": "RariFundPriceConsumer",
+            "label": "_ethBasedPriceFeeds",
+            "type": "t_mapping(t_string_memory,t_contract(AggregatorV3Interface)11646)",
+            "src": "RariFundPriceConsumer.sol:52"
+          },
+          {
+            "contract": "RariFundPriceConsumer",
+            "label": "allCurrenciesPeggedTo1Usd",
+            "type": "t_bool",
+            "src": "RariFundPriceConsumer.sol:147"
+          }
+        ],
+        "types": {
+          "t_contract(AggregatorV3Interface)11646": {
+            "label": "contract AggregatorV3Interface"
+          },
+          "t_mapping(t_string_memory,t_contract(AggregatorV3Interface)11646)": {
+            "label": "mapping(string => contract AggregatorV3Interface)"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
     }
   },
   "admin": {

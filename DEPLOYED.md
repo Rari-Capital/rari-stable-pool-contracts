@@ -26,7 +26,7 @@ The Rari Stable Pool Token (RSPT) is an ERC20 token used to internally account f
 
 `RariFundPriceConsumer` retrieves stablecoin prices from Chainlink's public price feeds (used by `RariFundManager` and `RariFundController`).
 
-**v2.0.0**: `0x77a817077cd7Cf0c6e0d4d2c4464648FF6C3fdB8`
+**v2.3.0**: `0xFE98A52bCAcC86432E7aa76376751DcFAB202244`
 
 ### `RariFundProxy`
 
@@ -51,6 +51,10 @@ The Rari Stable Pool Token (RSPT) is an ERC20 token used to internally account f
 
 * **v2.0.0**: `0x016bf078ABcaCB987f0589a6d3BEAdD4316922B0`
 * **v1.0.0**: `0x9366B7C00894c3555c7590b0384e5F6a9D55659f`
+
+### `RariFundPriceConsumer`
+
+* **v2.0.0**: `0x77a817077cd7Cf0c6e0d4d2c4464648FF6C3fdB8`
 
 ### `RariFundProxy`
 
