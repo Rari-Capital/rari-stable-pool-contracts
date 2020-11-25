@@ -32,7 +32,7 @@ The Rari Stable Pool Token (RSPT) is an ERC20 token used to internally account f
 
 `RariFundProxy` includes wrapper functions built on top of `RariFundManager`: exchange and deposit, withdraw and exchange, deposit without paying gas via the Gas Station Network (GSN).
 
-**v2.2.0**: `0xB202cAd3965997f2F5E67B349B2C5df036b9792e`
+**v2.4.0**: `0xe4deE94233dd4d7c2504744eE6d34f3875b3B439`
 
 ## Older Versions
 
@@ -58,6 +58,7 @@ The Rari Stable Pool Token (RSPT) is an ERC20 token used to internally account f
 
 ### `RariFundProxy`
 
+* **v2.2.0**: `0xB202cAd3965997f2F5E67B349B2C5df036b9792e`
 * **v2.0.0**: `0xD4be7E211680e12c08bbE9054F0dA0D646c45228`
 * **v1.2.0**: `0xb6b79D857858004BF475e4A57D4A446DA4884866`
 * **v1.1.0**: `0x318cfd99b60a63d265d2291a4ab982073fbf245d`
