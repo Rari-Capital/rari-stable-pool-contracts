@@ -321,8 +321,7 @@ contract RariFundProxy is Ownable, GSNRecipient {
                     if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
                         uint256 outputDecimals = _erc20Decimals[outputErc20Contract];
                         uint256 outputAmount = 18 >= outputDecimals ? inputAmountsAfterFees[i].div(10 ** (uint256(18).sub(outputDecimals))) : inputAmountsAfterFees[i].mul(10 ** (outputDecimals.sub(18)));
-                        uint256 mUsdRedeemed = MStableExchangeController.redeem(outputErc20Contract, outputAmount);
-                        require(inputAmountsAfterFees[i] == mUsdRedeemed, "Redeemed mUSD amount not equal to input mUSD amount.");
+                        MStableExchangeController.redeem(outputErc20Contract, outputAmount);
                         realOutputAmount = outputAmount.sub(outputAmount.mul(MStableExchangeController.getSwapFee()).div(1e18));
                     } else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
                         realOutputAmount = MStableExchangeController.mint(inputErc20Contract, inputAmountsAfterFees[i]);

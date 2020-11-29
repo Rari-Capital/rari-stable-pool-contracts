@@ -32,37 +32,40 @@ module.exports = async function(deployer, network, accounts) {
   }
   
   if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) {
-    // Upgrade from v2.2.0 (only modifying RariFundPriceConsumer v2.2.0) to v2.3.0
+    // Upgrade from v2.3.0 (only modifying RariFundProxy v2.2.0) to v2.4.0
     if (!process.env.UPGRADE_FUND_MANAGER_ADDRESS) return console.error("UPGRADE_FUND_MANAGER_ADDRESS is missing for upgrade");
     if (!process.env.UPGRADE_FUND_OWNER_ADDRESS) return console.error("UPGRADE_FUND_OWNER_ADDRESS is missing for upgrade");
     if (["live", "live-fork"].indexOf(network) >= 0 && !process.env.LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY) return console.error("LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY is missing for live upgrade");
 
-    // Get deployed RariFundManager
+    // Deploy currency exchange libraries
+    await deployer.deploy(ZeroExExchangeController);
+    await deployer.deploy(MStableExchangeController);
+
+    // Link libraries to RariFundProxy
+    await deployer.link(ZeroExExchangeController, RariFundProxy);
+    await deployer.link(MStableExchangeController, RariFundProxy);
+
+    // Deploy RariFundProxy
+    var rariFundProxy = await deployer.deploy(RariFundProxy);
+
+    // Connect RariFundManager and RariFundProxy
     var rariFundManager = await RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS);
+    await rariFundManager.setFundProxy(RariFundProxy.address, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+    await rariFundProxy.setFundManager(process.env.UPGRADE_FUND_MANAGER_ADDRESS);
 
-    // Live network: ensure USDC is the only currency in the fund and the only accepted currency
-    if (["live", "live-fork"].indexOf(network) >= 0) {
-      var acceptedCurrencies = await rariFundManager.getAcceptedCurrencies.call();
-      if (acceptedCurrencies.length !== 1 || acceptedCurrencies[0] !== "USDC") return console.error("USDC is not the only accepted currency.");
-      for (const currencyCode of ["DAI", "USDT", "TUSD", "BUSD", "sUSD"]) if ((await rariFundManager.methods["getRawFundBalance(string)"].call(currencyCode)).gt(web3.utils.toBN(0))) return console.error("USDC and mUSD are not the only currencies with funds in the Stable Pool: " + currencyCode + " balance is greater than 0.");
-    }
-
-    // Deploy RariFundPriceConsumer, pegging all currencies to $1 USD
-    var rariFundPriceConsumer = await deployProxy(RariFundPriceConsumer, [true], { deployer });
-
-    // Connect RariFundPriceConsumer to RariFundManager
-    await rariFundManager.setFundPriceConsumer(RariFundPriceConsumer.address, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+    // Set GSN trusted signer
+    await rariFundProxy.setGsnTrustedSigner(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_GSN_TRUSTED_SIGNER : process.env.DEVELOPMENT_ADDRESS);
 
     if (["live", "live-fork"].indexOf(network) >= 0) {
-      // Live network: transfer ownership of RariFundPriceConsumer to live owner
-      await rariFundPriceConsumer.transferOwnership(process.env.LIVE_FUND_OWNER);
+      // Live network: transfer ownership of RariFundProxy to live owner
+      await rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
     } else {
       // Development network: transfer ownership of contracts to development address, set development address as rebalancer, and set all currencies to accepted
       var rariFundController = await RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS);
       await rariFundController.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       await rariFundManager.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
-      var rariFundProxy = await RariFundProxy.at(process.env.UPGRADE_FUND_PROXY_ADDRESS);
-      await rariFundProxy.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+      var rariFundPriceConsumer = await RariFundPriceConsumer.at(process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS);
+      await rariFundPriceConsumer.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       // TODO: await admin.transferProxyAdminOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       await rariFundController.setFundRebalancer(process.env.DEVELOPMENT_ADDRESS);
       await rariFundManager.setFundRebalancer(process.env.DEVELOPMENT_ADDRESS);
