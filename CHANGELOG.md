@@ -1,6 +1,6 @@
 # Changelog
 
-## `v2.4.0` (contracts deployed 2020-11-25; all code pushed 2020-11-25)
+## `v2.4.0` (contracts deployed 2020-11-25; all code pushed 2020-11-29)
 
 * Fixed bug in validation of mUSD redemption in `RariFundController.withdrawAndExchange`.
 
