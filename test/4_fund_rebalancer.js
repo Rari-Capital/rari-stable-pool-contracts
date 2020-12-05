@@ -154,7 +154,15 @@ contract("RariFundController, RariFundManager", accounts => {
 
       // Check mint validity
       var mAssetValidationHelper = new web3.eth.Contract(mAssetValidationHelperAbi, "0xabcc93c3be238884cc3309c19afd128fafc16911");
-      var maxSwap = await mAssetValidationHelper.methods.getMaxSwap("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", currencies[currencyCode].tokenAddress, "0xe2f2a5c287993345a840db3b0845fbc70f5935a5").call();
+
+      try {
+        var maxSwap = await mAssetValidationHelper.methods.getMaxSwap("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", currencies[currencyCode].tokenAddress, "0xe2f2a5c287993345a840db3b0845fbc70f5935a5").call();
+      } catch (error) {
+        // If the bAsset does not currently exist, move on to the next one
+        assert.include(error.message, "bAsset must exist");
+        continue;
+      }
+
       var canMint = maxSwap && maxSwap["0"] && tokenAmountBN.lte(web3.utils.toBN(maxSwap["2"]));
 
       if (canMint) {
