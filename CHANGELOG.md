@@ -1,5 +1,9 @@
 # Changelog
 
+## `v2.4.1` (no contracts deployed; all code pushed 2020-12-07)
+
+* Updated mStable swap tests to skip removed bAssets (i.e., DAI).
+
 ## `v2.4.0` (contracts deployed 2020-11-25; all code pushed 2020-11-29)
 
 * Fixed bug in validation of mUSD redemption in `RariFundController.withdrawAndExchange`.
