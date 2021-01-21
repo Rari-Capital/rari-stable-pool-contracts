@@ -1,5 +1,11 @@
 # Changelog
 
+## `v2.5.0` (contracts not yet deployed; all code not yet pushed)
+
+* Upgraded mStable SAVE V1 to V2.
+* Avoid loss of deposit due to underestimated `makerAssetFilledAmount` in 0x/underlying exchanges.
+* Fixed bug in calculation of `outputFilledAmountUsd` in `RariFundController.marketSell0xOrdersFillOrKill`.
+
 ## `v2.4.1` (no contracts deployed; all code pushed 2020-12-07)
 
 * Updated mStable swap tests to skip removed bAssets (i.e., DAI).

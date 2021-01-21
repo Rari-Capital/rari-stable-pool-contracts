@@ -32,12 +32,9 @@ Returns a boolean indicating if deposits in `currencyCode` are currently accepte
 
 Returns an array of currency codes currently accepted for deposits.
 
-* Development notes:
-    * *Ideally, we can add the `view` modifier to this function, but it potentially modifies the state (see comments on `_acceptedCurrenciesArray`).*
-
 ### `RariFundProxy.deposit(string currencyCode, uint256 amount)`
 
-***For a limited time only, we are paying gas fees for first-time deposits of at least 250 DAI/USDC/USDT!***
+***For the time being, we are no longer subsidizing gas fees.***
 
 Deposits funds to the Rari Stable Pool in exchange for RSPT (with GSN support).
 
