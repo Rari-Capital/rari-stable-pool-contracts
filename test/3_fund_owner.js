@@ -205,6 +205,7 @@ contract("RariFundManager", accounts => {
     // Upgrade!
     await newFundManagerInstance.authorizeFundManagerDataSource(fundManagerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
     await fundManagerInstance.upgradeFundManager(newFundManagerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    await newFundManagerInstance.authorizeFundManagerDataSource("0x0000000000000000000000000000000000000000", { from: process.env.DEVELOPMENT_ADDRESS });
   });
 });
 

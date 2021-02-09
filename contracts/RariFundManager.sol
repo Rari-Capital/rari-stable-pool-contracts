@@ -156,14 +156,9 @@ contract RariFundManager is Initializable, Ownable {
     }
 
     /**
-     * @dev Emitted when this RariFundManager is upgraded to a new contract.
+     * @dev Emitted when RariFundManager is upgraded.
      */
     event FundManagerUpgraded(address newContract);
-
-    /**
-     * @dev Emitted when RariFundManager is upgraded from an old contract to this one.
-     */
-    event FundManagerUpgradedFrom(address oldContract);
 
     /**
      * @dev Upgrades RariFundManager.
@@ -224,22 +219,13 @@ contract RariFundManager is Initializable, Ownable {
      * @param data The data from the old contract necessary to initialize the new contract.
      */
     function setFundManagerData(FundManagerData calldata data) external {
-        // Check source
         require(_authorizedFundManagerDataSource != address(0) && msg.sender == _authorizedFundManagerDataSource, "Caller is not an authorized source.");
-
-        // Copy data from old contract to this one
         _netDeposits = data.netDeposits;
         _rawInterestAccruedAtLastFeeRateChange = data.rawInterestAccruedAtLastFeeRateChange;
         _interestFeesGeneratedAtLastFeeRateChange = data.interestFeesGeneratedAtLastFeeRateChange;
         _interestFeesClaimed = data.interestFeesClaimed;
         _interestFeeRate = RariFundManager(_authorizedFundManagerDataSource).getInterestFeeRate();
         _withdrawalFeeRate = RariFundManager(_authorizedFundManagerDataSource).getWithdrawalFeeRate();
-
-        // Emit event
-        emit FundManagerUpgradedFrom(msg.sender);
-
-        // Reset data source to zero address
-        _authorizedFundManagerDataSource = address(0);
     }
 
     /**
@@ -460,7 +446,7 @@ contract RariFundManager is Initializable, Ownable {
      * @dev Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `RariFundController.getPoolBalance`) potentially modifies the state.
      * @param currencyCode The currency code of the balance to be calculated.
      */
-    function getRawFundBalance(string memory currencyCode) public fundEnabled returns (uint256) {
+    function getRawFundBalance(string memory currencyCode) public returns (uint256) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
 
@@ -788,9 +774,9 @@ contract RariFundManager is Initializable, Ownable {
     function withdrawFrom(address from, string[] calldata currencyCodes, uint256[] calldata amounts) external onlyProxy cachePoolBalances returns (uint256[] memory) {
         // Input validation
         require(currencyCodes.length > 0 && currencyCodes.length == amounts.length, "Lengths of currency code and amount arrays must be greater than 0 and equal.");
+        uint256[] memory pricesInUsd = rariFundPriceConsumer.getCurrencyPricesInUsd();
 
         // Manually cache raw fund balance (no need to check if set previously because the function is external)
-        uint256[] memory pricesInUsd = rariFundPriceConsumer.getCurrencyPricesInUsd();
         _rawFundBalanceCache = toInt256(getRawFundBalance(pricesInUsd));
 
         // Make withdrawals

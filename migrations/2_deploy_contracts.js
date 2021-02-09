@@ -38,10 +38,6 @@ module.exports = async function(deployer, network, accounts) {
     if (!process.env.UPGRADE_FUND_OWNER_ADDRESS) return console.error("UPGRADE_FUND_OWNER_ADDRESS is missing for upgrade");
     if (["live", "live-fork"].indexOf(network) >= 0 && !process.env.LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY) return console.error("LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY is missing for live upgrade");
 
-    // Upgrade from v2.4.0 (RariFundManager v2.2.0) to v2.5.0
-    RariFundManager.class_defaults.from = process.env.UPGRADE_FUND_OWNER_ADDRESS;
-    var rariFundManager = await upgradeProxy(process.env.UPGRADE_FUND_MANAGER_ADDRESS, RariFundManager, { deployer, unsafeAllowCustomTypes: true });
-
     // Upgrade from v2.4.0 (RariFundController v2.0.0) to v2.5.0
     var oldRariFundController = await RariFundController.at(process.env.UPGRADE_OLD_FUND_CONTROLLER);
 
@@ -68,6 +64,8 @@ module.exports = async function(deployer, network, accounts) {
     await oldRariFundController.disableFund({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
 
     // Disable the fund on the RariFundManager
+    RariFundManager.class_defaults.from = process.env.UPGRADE_FUND_OWNER_ADDRESS;
+    var rariFundManager = await RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS);
     await rariFundManager.setFundDisabled(true);
 
     // Upgrade RariFundController
@@ -77,7 +75,7 @@ module.exports = async function(deployer, network, accounts) {
     await oldRariFundController.methods["upgradeFundController(address,address)"](RariFundController.address, "0xc00e94cb662c3520282e6f5717214004a7f26888", { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
 
     // Connect new RariFundController and RariFundManager
-    await rariFundController.setFundManager(RariFundManager.address);
+    await rariFundController.setFundManager(process.env.UPGRADE_FUND_MANAGER_ADDRESS);
     await rariFundManager.setFundController(RariFundController.address);
 
     // Re-enable the fund on the RariFundManager
