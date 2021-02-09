@@ -156,9 +156,14 @@ contract RariFundManager is Initializable, Ownable {
     }
 
     /**
-     * @dev Emitted when RariFundManager is upgraded.
+     * @dev Emitted when this RariFundManager is upgraded to a new contract.
      */
     event FundManagerUpgraded(address newContract);
+
+    /**
+     * @dev Emitted when RariFundManager is upgraded from an old contract to this one.
+     */
+    event FundManagerUpgradedFrom(address oldContract);
 
     /**
      * @dev Upgrades RariFundManager.
@@ -219,13 +224,22 @@ contract RariFundManager is Initializable, Ownable {
      * @param data The data from the old contract necessary to initialize the new contract.
      */
     function setFundManagerData(FundManagerData calldata data) external {
+        // Check source
         require(_authorizedFundManagerDataSource != address(0) && msg.sender == _authorizedFundManagerDataSource, "Caller is not an authorized source.");
+
+        // Copy data from old contract to this one
         _netDeposits = data.netDeposits;
         _rawInterestAccruedAtLastFeeRateChange = data.rawInterestAccruedAtLastFeeRateChange;
         _interestFeesGeneratedAtLastFeeRateChange = data.interestFeesGeneratedAtLastFeeRateChange;
         _interestFeesClaimed = data.interestFeesClaimed;
         _interestFeeRate = RariFundManager(_authorizedFundManagerDataSource).getInterestFeeRate();
         _withdrawalFeeRate = RariFundManager(_authorizedFundManagerDataSource).getWithdrawalFeeRate();
+
+        // Emit event
+        emit FundManagerUpgradedFrom(msg.sender);
+
+        // Reset data source to zero address
+        _authorizedFundManagerDataSource = address(0);
     }
 
     /**
