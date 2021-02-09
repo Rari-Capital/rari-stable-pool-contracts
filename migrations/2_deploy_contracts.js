@@ -40,7 +40,7 @@ module.exports = async function(deployer, network, accounts) {
 
     // Upgrade from v2.4.0 (RariFundManager v2.2.0) to v2.5.0
     RariFundManager.class_defaults.from = process.env.UPGRADE_FUND_OWNER_ADDRESS;
-    var rariFundManager = await upgradeProxy(process.env.UPGRADE_FUND_MANAGER_ADDRESS, RariFundManager, { deployer });
+    var rariFundManager = await upgradeProxy(process.env.UPGRADE_FUND_MANAGER_ADDRESS, RariFundManager, { deployer, unsafeAllowCustomTypes: true });
 
     // Upgrade from v2.4.0 (RariFundController v2.0.0) to v2.5.0
     var oldRariFundController = await RariFundController.at(process.env.UPGRADE_OLD_FUND_CONTROLLER);
@@ -99,9 +99,9 @@ module.exports = async function(deployer, network, accounts) {
       // Development network: transfer ownership of contracts to development address, set development address as rebalancer, and set all currencies to accepted
       await rariFundManager.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       var rariFundPriceConsumer = await RariFundPriceConsumer.at(process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS); 
-      await rariFundPriceConsumer.transferOwnership(process.env.LIVE_FUND_OWNER);
+      await rariFundPriceConsumer.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       var rariFundProxy = await RariFundProxy.at(process.env.UPGRADE_FUND_PROXY_ADDRESS); 
-      await rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
+      await rariFundProxy.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       // TODO: await admin.transferProxyAdminOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       RariFundManager.class_defaults.from = process.env.DEVELOPMENT_ADDRESS;
       await rariFundManager.setFundRebalancer(process.env.DEVELOPMENT_ADDRESS);

@@ -162,7 +162,6 @@ contract("RariFundController, RariFundManager", accounts => {
 contract("RariFundController, RariFundManager", accounts => {
   it("should exchange tokens to and from mStable mUSD via RariFundController.mintMUsd and redeemMUsd", async () => {
     let fundControllerInstance = await RariFundController.deployed();
-    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundController.address = process.env.UPGRADE_FUND_CONTROLLER_ADDRESS;
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
     var mUsdErc20Contract = new web3.eth.Contract(erc20Abi, currencies["mUSD"].tokenAddress);
