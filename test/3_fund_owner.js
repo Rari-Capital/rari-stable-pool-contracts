@@ -241,7 +241,7 @@ contract("RariFundController", accounts => {
     await newFundControllerInstance.setFundManager(RariFundManager.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Upgrade!
-    await fundControllerInstance.upgradeFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    await fundControllerInstance.methods["upgradeFundController(address)"](newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
     await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Re-enable FundManager
@@ -288,7 +288,7 @@ contract("RariFundController", accounts => {
     var newFundControllerInstance = await DummyRariFundController.new({ from: process.env.DEVELOPMENT_ADDRESS });
 
     // Upgrade!
-    await fundControllerInstance.upgradeFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    await fundControllerInstance.methods["upgradeFundController(address)"](newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
     await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Re-enable FundManager

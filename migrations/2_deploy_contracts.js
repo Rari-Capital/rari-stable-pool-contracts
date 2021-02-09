@@ -71,10 +71,10 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundManager.setFundDisabled(true);
 
     // Upgrade RariFundController
-    await oldRariFundController.upgradeFundController(RariFundController.address, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+    await oldRariFundController.methods["upgradeFundController(address)"](RariFundController.address, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
 
     // Forward COMP governance tokens
-    await oldRariFundController.upgradeFundController(RariFundController.address, "0xc00e94cb662c3520282e6f5717214004a7f26888", { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+    await oldRariFundController.methods["upgradeFundController(address,address)"](RariFundController.address, "0xc00e94cb662c3520282e6f5717214004a7f26888", { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
 
     // Connect new RariFundController and RariFundManager
     await rariFundController.setFundManager(RariFundManager.address);

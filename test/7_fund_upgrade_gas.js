@@ -58,7 +58,7 @@ contract("RariFundController", accounts => {
     await newFundControllerInstance.setFundManager(RariFundManager.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Upgrade!
-    var result = await fundControllerInstance.upgradeFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    var result = await fundControllerInstance.methods["upgradeFundController(address)"](newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
     console.log("Gas usage of RariFundController.upgradeFundController:", result.receipt.gasUsed);
     assert.isAtMost(result.receipt.gasUsed, 5000000); // Assert it uses no more than 5 million gas
 
