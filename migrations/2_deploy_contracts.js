@@ -40,7 +40,7 @@ module.exports = async function(deployer, network, accounts) {
 
     // Upgrade from v2.4.0 (RariFundManager v2.2.0) to v2.5.0
     RariFundManager.class_defaults.from = process.env.UPGRADE_FUND_OWNER_ADDRESS;
-    var rariFundManager = await upgradeProxy(process.env.UPGRADE_FUND_MANAGER_ADDRESS, RariFundManager, { deployer, unsafeAllowCustomTypes: true });
+    var rariFundManager = await upgradeProxy(process.env.UPGRADE_FUND_MANAGER_ADDRESS, RariFundManager, { deployer });
 
     // Upgrade from v2.4.0 (RariFundController v2.0.0) to v2.5.0
     var oldRariFundController = await RariFundController.at(process.env.UPGRADE_OLD_FUND_CONTROLLER);
@@ -127,7 +127,7 @@ module.exports = async function(deployer, network, accounts) {
 
     // Deploy RariFundController and RariFundManager
     var rariFundController = await deployer.deploy(RariFundController);
-    var rariFundManager = await deployProxy(RariFundManager, [], { deployer, unsafeAllowCustomTypes: true });
+    var rariFundManager = await deployProxy(RariFundManager, [], { deployer });
 
     // Connect RariFundController and RariFundManager
     await rariFundController.setFundManager(RariFundManager.address);
