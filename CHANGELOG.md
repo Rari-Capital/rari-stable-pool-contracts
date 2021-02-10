@@ -1,6 +1,6 @@
 # Changelog
 
-## `v2.5.0` (contracts not yet deployed; all code not yet pushed)
+## `v2.5.0` (contracts deployed 2020-02-09; all code pushed 2020-02-10)
 
 * Upgraded mStable SAVE V1 to V2.
 * Avoid loss of deposit due to underestimated `makerAssetFilledAmount` in 0x/underlying exchanges.
