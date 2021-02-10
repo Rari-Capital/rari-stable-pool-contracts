@@ -36,7 +36,15 @@ module.exports = async function(deployer, network, accounts) {
     if (!process.env.UPGRADE_OLD_FUND_CONTROLLER) return console.error("UPGRADE_OLD_FUND_CONTROLLER is missing for upgrade");
     if (!process.env.UPGRADE_FUND_MANAGER_ADDRESS) return console.error("UPGRADE_FUND_MANAGER_ADDRESS is missing for upgrade");
     if (!process.env.UPGRADE_FUND_OWNER_ADDRESS) return console.error("UPGRADE_FUND_OWNER_ADDRESS is missing for upgrade");
-    if (["live", "live-fork"].indexOf(network) >= 0 && !process.env.LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY) return console.error("LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY is missing for live upgrade");
+
+    if (["live", "live-fork"].indexOf(network) >= 0) {
+      if (!process.env.LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY) return console.error("LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY is missing for live upgrade");
+      if (!process.env.LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED || process.env.LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED < ((new Date()).getTime() / 1000) - 3600 || process.env.LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED > (new Date()).getTime() / 1000) return console.error("LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED is missing, invalid, or out of date for live upgrade");
+    } else {
+      if (!process.env.UPGRADE_FUND_TOKEN_ADDRESS) return console.error("UPGRADE_FUND_TOKEN_ADDRESS is missing for development upgrade");
+      if (!process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS) return console.error("UPGRADE_FUND_PRICE_CONSUMER_ADDRESS is missing for development upgrade");
+      if (!process.env.UPGRADE_FUND_PROXY_ADDRESS) return console.error("UPGRADE_FUND_PROXY_ADDRESS is missing for development upgrade");
+    }
 
     // Upgrade from v2.4.0 (RariFundController v2.0.0) to v2.5.0
     var oldRariFundController = await RariFundController.at(process.env.UPGRADE_OLD_FUND_CONTROLLER);
@@ -72,7 +80,7 @@ module.exports = async function(deployer, network, accounts) {
     await oldRariFundController.methods["upgradeFundController(address)"](RariFundController.address, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
 
     // Forward COMP governance tokens
-    await oldRariFundController.methods["upgradeFundController(address,address)"](RariFundController.address, "0xc00e94cb662c3520282e6f5717214004a7f26888", { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
+    if ((await (await IERC20.at("0xc00e94cb662c3520282e6f5717214004a7f26888")).balanceOf.call(process.env.UPGRADE_OLD_FUND_CONTROLLER)).gt(Web3.utils.toBN(0))) await oldRariFundController.methods["upgradeFundController(address,address)"](RariFundController.address, "0xc00e94cb662c3520282e6f5717214004a7f26888", { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
 
     // Connect new RariFundController and RariFundManager
     await rariFundController.setFundManager(process.env.UPGRADE_FUND_MANAGER_ADDRESS);
