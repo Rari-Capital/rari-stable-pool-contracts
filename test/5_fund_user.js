@@ -81,7 +81,6 @@ contract("RariFundManager, RariFundController", accounts => {
       assert(preWithdrawalPoolBalance[requireInterestAccrual ? "gt" : "gte"](acceptMarginOfError ? postDepositPoolBalance.add(amountBN).subn(10) : postDepositPoolBalance.add(amountBN)));
 
       // RariFundManager.withdraw
-      await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1), { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
       var withdrawalAmountBN = web3.utils.BN.min(amountBN, preWithdrawalPoolBalance);
       await fundManagerInstance.withdraw(currencyCode, withdrawalAmountBN, { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
 

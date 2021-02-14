@@ -170,9 +170,6 @@ contract("RariFundProxy", accounts => {
       protocolFeeBNs.push(web3.utils.toBN(protocolFee));
       totalProtocolFeeBN.iadd(web3.utils.toBN(protocolFee));
     }
-
-    // Approve RFT to RariFundManager
-    await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1));
     
     // Fill 0x orders
     var result = await fundProxyInstance.withdrawAndExchange(inputCurrencyCodes, inputAmountBNs, "0x0000000000000000000000000000000000000000", allOrders, allSignatures, makerAssetFillAmountBNs, protocolFeeBNs, { value: totalProtocolFeeBN, gas: 8e6 });

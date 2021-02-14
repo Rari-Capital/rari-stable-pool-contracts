@@ -80,9 +80,7 @@ contract("RariFundController, RariFundManager", accounts => {
     } catch (error) {
       assert.include(error.message, "This fund manager contract is disabled. This may be due to an upgrade.");
     }
-    
-    await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
-    
+        
     try {
       await fundManagerInstance.withdraw(currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
       assert.fail();
@@ -110,7 +108,6 @@ contract("RariFundController, RariFundManager", accounts => {
     let myPostDepositBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
     assert(myPostDepositBalance.gte(myInitialBalance.add(amountUsdBN.mul(web3.utils.toBN(999999)).div(web3.utils.toBN(1000000)))));
     
-    await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
     await fundManagerInstance.withdraw(currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
     let myPostWithdrawalBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
     assert(myPostWithdrawalBalance.lt(myPostDepositBalance));
