@@ -20,7 +20,7 @@ const RariFundManager = artifacts.require("RariFundManager");
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundController", accounts => {
   it("should upgrade the FundController with funds in all pools in all currencies without using too much gas", async () => {
-    let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
 
@@ -45,7 +45,7 @@ contract("RariFundController", accounts => {
     // Approve and deposit 0.1 tokens of each currency to each pool
     for (const poolName of Object.keys(pools)) for (const currencyCode of Object.keys(pools[poolName].currencies)) {
       var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
-      await fundControllerInstance.approveToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.approveToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, poolName === "mStable" ? web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1) : amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
       await fundControllerInstance.depositToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
     }
 
@@ -58,12 +58,15 @@ contract("RariFundController", accounts => {
     await newFundControllerInstance.setFundManager(RariFundManager.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Upgrade!
-    var result = await fundControllerInstance.upgradeFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
+    var result = await fundControllerInstance.methods["upgradeFundController(address)"](newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
     console.log("Gas usage of RariFundController.upgradeFundController:", result.receipt.gasUsed);
     assert.isAtMost(result.receipt.gasUsed, 5000000); // Assert it uses no more than 5 million gas
 
     // Set FundController of FundManager to the new FundController
     await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
+
+    // Re-enable FundManager
+    await fundManagerInstance.setFundDisabled(false, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Check token balances of new FundController
     for (const currencyCode of Object.keys(depositsByCurrency)) {

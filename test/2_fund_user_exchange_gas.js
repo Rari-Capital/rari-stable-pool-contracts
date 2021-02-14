@@ -115,7 +115,7 @@ contract("RariFundProxy", accounts => {
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
     let fundTokenInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundToken.at(process.env.UPGRADE_FUND_TOKEN_ADDRESS) : RariFundToken.deployed());
-    let fundProxyInstance = await RariFundProxy.deployed();
+    let fundProxyInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundProxy.at(process.env.UPGRADE_FUND_PROXY_ADDRESS) : RariFundProxy.deployed());
 
     // Exchange data
     var inputCurrencyCodes = [];
@@ -170,9 +170,6 @@ contract("RariFundProxy", accounts => {
       protocolFeeBNs.push(web3.utils.toBN(protocolFee));
       totalProtocolFeeBN.iadd(web3.utils.toBN(protocolFee));
     }
-
-    // Approve RFT to RariFundManager
-    await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1));
     
     // Fill 0x orders
     var result = await fundProxyInstance.withdrawAndExchange(inputCurrencyCodes, inputAmountBNs, "0x0000000000000000000000000000000000000000", allOrders, allSignatures, makerAssetFillAmountBNs, protocolFeeBNs, { value: totalProtocolFeeBN, gas: 8e6 });

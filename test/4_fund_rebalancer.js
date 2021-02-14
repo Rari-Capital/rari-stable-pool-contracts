@@ -19,6 +19,9 @@ const RariFundManager = artifacts.require("RariFundManager");
 const RariFundToken = artifacts.require("RariFundToken");
 const RariFundPriceConsumer = artifacts.require("RariFundPriceConsumer");
 
+const IBoostedSavingsVault = artifacts.require("IBoostedSavingsVault");
+const IERC20 = artifacts.require("IERC20");
+
 // These tests expect the owner and the fund rebalancer of RariFundController and RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundManager", accounts => {
   it("should set accepted currencies", async () => {
@@ -65,7 +68,6 @@ contract("RariFundManager", accounts => {
     assert(myPostDepositBalance.gte(myOldBalance.add(amountUsdBN).mul(web3.utils.toBN(999999)).div(web3.utils.toBN(1000000))));
     
     // Withdraw what we deposited
-    await fundTokenInstance.approve(RariFundManager.address, web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1)), { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
     await fundManagerInstance.withdraw(currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS, nonce: await web3.eth.getTransactionCount(process.env.DEVELOPMENT_ADDRESS) });
     let myNewBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
     assert(myNewBalance.lt(myPostDepositBalance));
@@ -74,7 +76,7 @@ contract("RariFundManager", accounts => {
 
 contract("RariFundController, RariFundManager", accounts => {
   it("should deposit to the fund, approve deposits to pools via RariFundController.approveToPool, and deposit to pools via RariFundController.depositToPool", async () => {
-    let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
 
@@ -91,7 +93,7 @@ contract("RariFundController, RariFundManager", accounts => {
 
       // Approve and deposit to pool
       // TODO: Ideally, we add actually call rari-fund-rebalancer
-      await fundControllerInstance.approveToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.approveToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, poolName === "mStable" ? web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1) : amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
       await fundControllerInstance.depositToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Check new pool balance
@@ -102,7 +104,7 @@ contract("RariFundController, RariFundManager", accounts => {
   });
 
   it("should withdraw half from all pools via RariFundController.withdrawFromPool", async () => {
-    let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
+    let fundControllerInstance = await RariFundController.deployed();
 
     // For each currency of each pool:
     for (const poolName of Object.keys(pools)) for (const currencyCode of Object.keys(pools[poolName].currencies)) {
@@ -123,7 +125,7 @@ contract("RariFundController, RariFundManager", accounts => {
   });
 
   it("should withdraw everything from all pools via RariFundController.withdrawAllFromPool", async () => {
-    let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
+    let fundControllerInstance = await RariFundController.deployed();
     
     // For each currency of each pool:
     for (const poolName of Object.keys(pools)) for (const currencyCode of Object.keys(pools[poolName].currencies)) {
@@ -136,12 +138,29 @@ contract("RariFundController, RariFundManager", accounts => {
       assert(newBalanceOfUnderlying.isZero());
     }
   });
+
+  it("should claim mStable MTA rewards", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
+
+    // Get unclaimed MTA and indexes necessary to claim MTA and check unclaimed MTA > 0
+    let savingsVaultInstance = await IBoostedSavingsVault.at(pools["mStable"].currencies["mUSD"].savingsVaultContract);
+    var data = await savingsVaultInstance.unclaimedRewards.call(fundControllerInstance.address);
+    assert(web3.utils.toBN(data["0"]).gt(web3.utils.toBN(0)));
+
+    // Claim MTA rewards
+    let mtaTokenInstance = await IERC20.at(pools["mStable"].mtaTokenAddress);
+    var mtaBalanceBeforeClaim = await mtaTokenInstance.balanceOf.call(fundControllerInstance.address);
+    await fundControllerInstance.claimMStableRewards(true, data["1"], data["2"]);
+
+    // Check claimed MTA > 0
+    var mtaBalanceAfterClaim = await mtaTokenInstance.balanceOf.call(fundControllerInstance.address);
+    assert(mtaBalanceAfterClaim.gt(mtaBalanceBeforeClaim));
+  });
 });
 
 contract("RariFundController, RariFundManager", accounts => {
   it("should exchange tokens to and from mStable mUSD via RariFundController.mintMUsd and redeemMUsd", async () => {
-    let fundControllerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundController.at(process.env.UPGRADE_FUND_CONTROLLER_ADDRESS) : RariFundController.deployed());
-    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundController.address = process.env.UPGRADE_FUND_CONTROLLER_ADDRESS;
+    let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
     var mUsdErc20Contract = new web3.eth.Contract(erc20Abi, currencies["mUSD"].tokenAddress);

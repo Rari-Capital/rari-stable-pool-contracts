@@ -1,5 +1,11 @@
 # Changelog
 
+## `v2.5.0` (contracts deployed 2020-02-09; all code pushed 2020-02-14)
+
+* Upgraded mStable SAVE V1 to V2 (and implemented MTA rewards).
+* Fixed bug in calculation of `outputFilledAmountUsd` in `RariFundController.marketSell0xOrdersFillOrKill`.
+* Check `fundDisabled` in `RariFundManager.upgradeFundController`.
+
 ## `v2.4.1` (no contracts deployed; all code pushed 2020-12-07)
 
 * Updated mStable swap tests to skip removed bAssets (i.e., DAI).

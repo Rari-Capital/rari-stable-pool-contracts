@@ -8,7 +8,7 @@ As follows are all deployments of our smart contracts on the Ethereum mainnet. S
 
 `RariFundController` holds supplied funds and is used by the rebalancer to deposit and withdraw from pools and make exchanges.
 
-**v2.0.0**: `0xEe7162bB5191E8EC803F7635dE9A920159F1F40C`
+**v2.5.0**: `0x369855b051d1b2dbee88a792dcfc08614ff4e262`
 
 ### `RariFundManager`
 
@@ -16,17 +16,23 @@ As follows are all deployments of our smart contracts on the Ethereum mainnet. S
 
 **v2.2.0**: `0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a`
 
+Implementation contract: `0xfbd8fa4ae1ca58fa6fd4cf683f94e54235266141`
+
 ### `RariFundToken`
 
 The Rari Stable Pool Token (RSPT) is an ERC20 token used to internally account for the ownership of funds supplied to the Rari Stable Pool.
 
 **v2.1.0**: `0x016bf078ABcaCB987f0589a6d3BEAdD4316922B0`
 
+Implementation contract: `0xCC0e9e16B48B952c961999383297E605A0ceAD73`
+
 ### `RariFundPriceConsumer`
 
 `RariFundPriceConsumer` retrieves stablecoin prices from Chainlink's public price feeds (used by `RariFundManager` and `RariFundController`).
 
 **v2.3.0**: `0xFE98A52bCAcC86432E7aa76376751DcFAB202244`
+
+Implementation contract: `0xc34D76cBB18a5976e38Fe0f0c580DCEE6D8954ee`
 
 ### `RariFundProxy`
 
@@ -38,6 +44,7 @@ The Rari Stable Pool Token (RSPT) is an ERC20 token used to internally account f
 
 ### `RariFundController`
 
+* **v2.0.0**: `0xEe7162bB5191E8EC803F7635dE9A920159F1F40C`
 * **v1.1.0**: `0x15c4ae284fbb3a6ceb41fa8eb5f3408ac485fabb`
 
 ### `RariFundManager`
