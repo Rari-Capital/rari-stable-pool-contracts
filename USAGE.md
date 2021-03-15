@@ -127,7 +127,7 @@ Rari Capital currently takes a *9.5% performance fee* on all interest accrued by
 
 ### Withdrawal Fees
 
-Rari Capital currently takes a *0.5% withdrawal fee* on all withdrawals from the Rari Stable Pool.
+Rari Capital currently takes a *0.5% withdrawal fee* on all withdrawals from the Rari Yield Pool.
 
 * This fee is liable to change in the future, but the following method returns its current value at any time.
 * **Get withdrawal fee rate:** `uint256 RariFundManager.getWithdrawalFeeRate()` returns the withdrawal fee rate (proportion of every withdrawal taken as a service fee scaled by 1e18).
