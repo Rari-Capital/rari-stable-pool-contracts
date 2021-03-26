@@ -102,6 +102,20 @@ module.exports = async function(deployer, network, accounts) {
       // Live network: transfer ownership of RariFundController to live owner
       await rariFundController.transferOwnership(process.env.LIVE_FUND_OWNER);
     } else {
+      // Register Fuse pools
+      var testFusePools = require("../test/fuse.json");
+      var poolKeys = Object.keys(testFusePools);
+      var poolIds = [];
+      var cTokens = [];
+      for (var i = 0; i < poolKeys.length; i++) {
+        poolIds[i] = 100 + i;
+        for (const currencyCode of Object.keys(testFusePools[poolKeys[i]].currencies)) {
+          currencyCodes[i].push(currencyCode);
+          cTokens[i].push(testFusePools[poolKeys[i]].currencies[currencyCode].cTokenAddress);
+        }
+      }
+      await rariFundController.addFuseAssets(poolIds, currencyCodes, cTokens);
+
       // Development network: transfer ownership of contracts to development address, set development address as rebalancer, and set all currencies to accepted
       await rariFundManager.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       var rariFundPriceConsumer = await RariFundPriceConsumer.at(process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS); 
@@ -200,6 +214,20 @@ module.exports = async function(deployer, network, accounts) {
       await rariFundPriceConsumer.transferOwnership(process.env.LIVE_FUND_OWNER);
       await admin.transferProxyAdminOwnership(process.env.LIVE_FUND_OWNER);
     } else {
+      // Register Fuse pools
+      var testFusePools = require("../test/fuse.json");
+      var poolKeys = Object.keys(testFusePools);
+      var poolIds = [];
+      var cTokens = [];
+      for (var i = 0; i < poolKeys.length; i++) {
+        poolIds[i] = 100 + i;
+        for (const currencyCode of Object.keys(testFusePools[poolKeys[i]].currencies)) {
+          currencyCodes[i].push(currencyCode);
+          cTokens[i].push(testFusePools[poolKeys[i]].currencies[currencyCode].cTokenAddress);
+        }
+      }
+      await rariFundController.addFuseAssets(poolIds, currencyCodes, cTokens);
+
       // Development network: set all currencies to accepted
       await rariFundManager.setAcceptedCurrencies(["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"], [true, true, true, true, true, true, true]);
     }

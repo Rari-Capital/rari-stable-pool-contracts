@@ -23,8 +23,10 @@ import "./lib/pools/DydxPoolController.sol";
 import "./lib/pools/CompoundPoolController.sol";
 import "./lib/pools/AavePoolController.sol";
 import "./lib/pools/MStablePoolController.sol";
+import "./lib/pools/FusePoolController.sol";
 import "./lib/exchanges/ZeroExExchangeController.sol";
 import "./lib/exchanges/MStableExchangeController.sol";
+import "./external/compound/CErc20.sol";
 
 /**
  * @title RariFundController
@@ -89,7 +91,7 @@ contract RariFundController is Ownable {
     /**
      * @dev Maps currency codes to arrays of supported pools.
      */
-    mapping(string => LiquidityPool[]) private _poolsByCurrency;
+    mapping(string => uint8[]) private _poolsByCurrency;
 
     /**
      * @dev Constructor that sets supported ERC20 contract addresses and supported pools for each supported token.
@@ -139,7 +141,7 @@ contract RariFundController is Ownable {
      * @param pool Pool ID to be supported.
      */
     function addPoolToCurrency(string memory currencyCode, LiquidityPool pool) internal {
-        _poolsByCurrency[currencyCode].push(pool);
+        _poolsByCurrency[currencyCode].push(uint8(pool));
     }
 
     /**
@@ -158,13 +160,22 @@ contract RariFundController is Ownable {
         require(_fundDisabled, "This fund controller contract must be disabled before it can be upgraded.");
         require(RariFundController(newContract).IS_RARI_FUND_CONTROLLER(), "New contract does not have IS_RARI_FUND_CONTROLLER set to true.");
 
+        // For each supported currency:
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
 
-            for (uint256 j = 0; j < _poolsByCurrency[currencyCode].length; j++)
-                if (hasCurrencyInPool(_poolsByCurrency[currencyCode][j], currencyCode))
-                    _withdrawAllFromPool(_poolsByCurrency[currencyCode][j], currencyCode);
+            // For each pool supported by this currency:
+            for (uint256 j = 0; j < _poolsByCurrency[currencyCode].length; j++) {
+                uint8 pool = _poolsByCurrency[currencyCode][j];
 
+                // If the pool has any funds in this currency, withdraw it
+                if (hasCurrencyInPool(pool, currencyCode)) {                
+                    if (fuseAssets[pool][currencyCode] != address(0)) FusePoolController.transferAll(fuseAssets[pool][currencyCode], newContract); // Transfer Fuse cTokens directly
+                    else _withdrawAllFromPool(pool, currencyCode);
+                }
+            }
+
+            // Transfer all of this token to new fund controller
             IERC20 token = IERC20(_erc20Contracts[currencyCode]);
             uint256 balance = token.balanceOf(address(this));
             if (balance > 0) token.safeTransfer(newContract, balance);
@@ -178,7 +189,11 @@ contract RariFundController is Ownable {
      * @return Boolean indicating if the balance transferred was greater than 0.
      */
     function upgradeFundController(address payable newContract, address erc20Contract) external onlyOwner returns (bool) {
+        // Verify fund is disabled + verify new fund controller contract
+        require(_fundDisabled, "This fund controller contract must be disabled before it can be upgraded.");
         require(RariFundController(newContract).IS_RARI_FUND_CONTROLLER(), "New contract does not have IS_RARI_FUND_CONTROLLER set to true.");
+
+        // Transfer all of this token to new fund controller
         IERC20 token = IERC20(erc20Contract);
         uint256 balance = token.balanceOf(address(this));
         if (balance <= 0) return false;
@@ -277,7 +292,7 @@ contract RariFundController is Ownable {
     /**
      * @dev Returns `_poolsByCurrency[currencyCode]`. Used by `RariFundProxy.getRawFundBalancesAndPrices`.
      */
-    function getPoolsByCurrency(string calldata currencyCode) external view returns (LiquidityPool[] memory) {
+    function getPoolsByCurrency(string calldata currencyCode) external view returns (uint8[] memory) {
         return _poolsByCurrency[currencyCode];
     }
 
@@ -295,13 +310,14 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.
      */
-    function _getPoolBalance(LiquidityPool pool, string memory currencyCode) public returns (uint256) {
+    function _getPoolBalance(uint8 pool, string memory currencyCode) public returns (uint256) {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == LiquidityPool.dYdX) return DydxPoolController.getBalance(erc20Contract);
-        else if (pool == LiquidityPool.Compound) return CompoundPoolController.getBalance(erc20Contract);
-        else if (pool == LiquidityPool.Aave) return AavePoolController.getBalance(erc20Contract);
-        else if (pool == LiquidityPool.mStable && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) return MStablePoolController.getBalance();
+        if (pool == uint8(LiquidityPool.dYdX)) return DydxPoolController.getBalance(erc20Contract);
+        else if (pool == uint8(LiquidityPool.Compound)) return CompoundPoolController.getBalance(erc20Contract);
+        else if (pool == uint8(LiquidityPool.Aave)) return AavePoolController.getBalance(erc20Contract);
+        else if (pool == uint8(LiquidityPool.mStable) && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) return MStablePoolController.getBalance();
+        else if (fuseAssets[pool][currencyCode] != address(0)) return FusePoolController.getBalance(fuseAssets[pool][currencyCode]);
         else revert("Invalid pool index.");
     }
 
@@ -311,8 +327,8 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.
      */
-    function getPoolBalance(LiquidityPool pool, string memory currencyCode) public returns (uint256) {
-        if (!_poolsWithFunds[currencyCode][uint8(pool)]) return 0;
+    function getPoolBalance(uint8 pool, string memory currencyCode) public returns (uint256) {
+        if (!_poolsWithFunds[currencyCode][pool]) return 0;
         return _getPoolBalance(pool, currencyCode);
     }
 
@@ -323,13 +339,14 @@ contract RariFundController is Ownable {
      * @param currencyCode The currency code of the token to be approved.
      * @param amount The amount of tokens to be approved.
      */
-    function approveToPool(LiquidityPool pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
+    function approveToPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == LiquidityPool.dYdX) DydxPoolController.approve(erc20Contract, amount);
-        else if (pool == LiquidityPool.Compound) CompoundPoolController.approve(erc20Contract, amount);
-        else if (pool == LiquidityPool.Aave) AavePoolController.approve(erc20Contract, amount);
-        else if (pool == LiquidityPool.mStable && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) return MStablePoolController.approve(amount);
+        if (pool == uint8(LiquidityPool.dYdX)) DydxPoolController.approve(erc20Contract, amount);
+        else if (pool == uint8(LiquidityPool.Compound)) CompoundPoolController.approve(erc20Contract, amount);
+        else if (pool == uint8(LiquidityPool.Aave)) AavePoolController.approve(erc20Contract, amount);
+        else if (pool == uint8(LiquidityPool.mStable) && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) return MStablePoolController.approve(amount);
+        else if (fuseAssets[pool][currencyCode] != address(0)) FusePoolController.approve(fuseAssets[pool][currencyCode], erc20Contract, amount);
         else revert("Invalid pool index.");
     }
 
@@ -343,8 +360,8 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool to check.
      * @param currencyCode The currency code of the token to check.
      */
-    function hasCurrencyInPool(LiquidityPool pool, string memory currencyCode) public view returns (bool) {
-        return _poolsWithFunds[currencyCode][uint8(pool)];
+    function hasCurrencyInPool(uint8 pool, string memory currencyCode) public view returns (bool) {
+        return _poolsWithFunds[currencyCode][pool];
     }
 
     /**
@@ -369,7 +386,7 @@ contract RariFundController is Ownable {
      * @dev Emitted when a deposit or withdrawal is made.
      * Note that `amount` is not set for `WithdrawAll` actions.
      */
-    event PoolAllocation(PoolAllocationAction indexed action, LiquidityPool indexed pool, string indexed currencyCode, uint256 amount);
+    event PoolAllocation(PoolAllocationAction indexed action, uint8 indexed pool, string indexed currencyCode, uint256 amount);
 
     /**
      * @dev Deposits funds to the specified pool.
@@ -377,15 +394,16 @@ contract RariFundController is Ownable {
      * @param currencyCode The currency code of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
      */
-    function depositToPool(LiquidityPool pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
+    function depositToPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == LiquidityPool.dYdX) DydxPoolController.deposit(erc20Contract, amount);
-        else if (pool == LiquidityPool.Compound) CompoundPoolController.deposit(erc20Contract, amount);
-        else if (pool == LiquidityPool.Aave) AavePoolController.deposit(erc20Contract, amount, _aaveReferralCode);
-        else if (pool == LiquidityPool.mStable && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStablePoolController.deposit(amount);
+        if (pool == uint8(LiquidityPool.dYdX)) DydxPoolController.deposit(erc20Contract, amount);
+        else if (pool == uint8(LiquidityPool.Compound)) CompoundPoolController.deposit(erc20Contract, amount);
+        else if (pool == uint8(LiquidityPool.Aave)) AavePoolController.deposit(erc20Contract, amount, _aaveReferralCode);
+        else if (pool == uint8(LiquidityPool.mStable) && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStablePoolController.deposit(amount);
+        else if (fuseAssets[pool][currencyCode] != address(0)) FusePoolController.deposit(fuseAssets[pool][currencyCode], amount);
         else revert("Invalid pool index.");
-        _poolsWithFunds[currencyCode][uint8(pool)] = true;
+        _poolsWithFunds[currencyCode][pool] = true;
         emit PoolAllocation(PoolAllocationAction.Deposit, pool, currencyCode, amount);
     }
 
@@ -395,13 +413,14 @@ contract RariFundController is Ownable {
      * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
      */
-    function _withdrawFromPool(LiquidityPool pool, string memory currencyCode, uint256 amount) internal {
+    function _withdrawFromPool(uint8 pool, string memory currencyCode, uint256 amount) internal {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == LiquidityPool.dYdX) DydxPoolController.withdraw(erc20Contract, amount);
-        else if (pool == LiquidityPool.Compound) CompoundPoolController.withdraw(erc20Contract, amount);
-        else if (pool == LiquidityPool.Aave) AavePoolController.withdraw(erc20Contract, amount);
-        else if (pool == LiquidityPool.mStable && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStablePoolController.withdraw(amount);
+        if (pool == uint8(LiquidityPool.dYdX)) DydxPoolController.withdraw(erc20Contract, amount);
+        else if (pool == uint8(LiquidityPool.Compound)) CompoundPoolController.withdraw(erc20Contract, amount);
+        else if (pool == uint8(LiquidityPool.Aave)) AavePoolController.withdraw(erc20Contract, amount);
+        else if (pool == uint8(LiquidityPool.mStable) && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStablePoolController.withdraw(amount);
+        else if (fuseAssets[pool][currencyCode] != address(0)) FusePoolController.withdraw(fuseAssets[pool][currencyCode], amount);
         else revert("Invalid pool index.");
         emit PoolAllocation(PoolAllocationAction.Withdraw, pool, currencyCode, amount);
     }
@@ -412,9 +431,9 @@ contract RariFundController is Ownable {
      * @param currencyCode The currency code of the token to be withdrawn.
      * @param amount The amount of tokens to be withdrawn.
      */
-    function withdrawFromPool(LiquidityPool pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
+    function withdrawFromPool(uint8 pool, string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
         _withdrawFromPool(pool, currencyCode, amount);
-        _poolsWithFunds[currencyCode][uint8(pool)] = _getPoolBalance(pool, currencyCode) > 0;
+        _poolsWithFunds[currencyCode][pool] = _getPoolBalance(pool, currencyCode) > 0;
     }
 
     /**
@@ -427,9 +446,9 @@ contract RariFundController is Ownable {
      * @param amount The amount of tokens to be withdrawn.
      * @param all Boolean indicating if all funds are being withdrawn.
      */
-    function withdrawFromPoolOptimized(LiquidityPool pool, string calldata currencyCode, uint256 amount, bool all) external fundEnabled onlyManager {
+    function withdrawFromPoolOptimized(uint8 pool, string calldata currencyCode, uint256 amount, bool all) external fundEnabled onlyManager {
         all ? _withdrawAllFromPool(pool, currencyCode) : _withdrawFromPool(pool, currencyCode, amount);
-        if (all) _poolsWithFunds[currencyCode][uint8(pool)] = false;
+        if (all) _poolsWithFunds[currencyCode][pool] = false;
     }
 
     /**
@@ -437,15 +456,16 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
      */
-    function _withdrawAllFromPool(LiquidityPool pool, string memory currencyCode) internal {
+    function _withdrawAllFromPool(uint8 pool, string memory currencyCode) internal {
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
-        if (pool == LiquidityPool.dYdX) DydxPoolController.withdrawAll(erc20Contract);
-        else if (pool == LiquidityPool.Compound) require(CompoundPoolController.withdrawAll(erc20Contract), "No Compound balance to withdraw from.");
-        else if (pool == LiquidityPool.Aave) require(AavePoolController.withdrawAll(erc20Contract), "No Aave balance to withdraw from.");
-        else if (pool == LiquidityPool.mStable && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) require(MStablePoolController.withdrawAll(), "No mStable balance to withdraw from.");
+        if (pool == uint8(LiquidityPool.dYdX)) DydxPoolController.withdrawAll(erc20Contract);
+        else if (pool == uint8(LiquidityPool.Compound)) require(CompoundPoolController.withdrawAll(erc20Contract), "No Compound balance to withdraw from.");
+        else if (pool == uint8(LiquidityPool.Aave)) require(AavePoolController.withdrawAll(erc20Contract), "No Aave balance to withdraw from.");
+        else if (pool == uint8(LiquidityPool.mStable) && erc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) require(MStablePoolController.withdrawAll(), "No mStable balance to withdraw from.");
+        else if (fuseAssets[pool][currencyCode] != address(0)) require(FusePoolController.withdrawAll(fuseAssets[pool][currencyCode]), "No Fuse pool balance to withdraw from.");
         else revert("Invalid pool index.");
-        _poolsWithFunds[currencyCode][uint8(pool)] = false;
+        _poolsWithFunds[currencyCode][pool] = false;
         emit PoolAllocation(PoolAllocationAction.WithdrawAll, pool, currencyCode, 0);
     }
 
@@ -454,7 +474,7 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
     */
-    function withdrawAllFromPool(LiquidityPool pool, string calldata currencyCode) external fundEnabled onlyRebalancer {
+    function withdrawAllFromPool(uint8 pool, string calldata currencyCode) external fundEnabled onlyRebalancer {
         _withdrawAllFromPool(pool, currencyCode);
     }
 
@@ -463,7 +483,7 @@ contract RariFundController is Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The ERC20 contract of the token to be withdrawn.
      */
-    function withdrawAllFromPoolOnUpgrade(LiquidityPool pool, string calldata currencyCode) external onlyOwner {
+    function withdrawAllFromPoolOnUpgrade(uint8 pool, string calldata currencyCode) external onlyOwner {
         _withdrawAllFromPool(pool, currencyCode);
     }
 
@@ -668,5 +688,36 @@ contract RariFundController is Ownable {
      */
     function claimMStableRewards(bool all, uint256 first, uint256 last) external fundEnabled onlyRebalancer {
         MStablePoolController.claimRewards(all, first, last);
+    }
+
+    /**
+     * @notice Fuse cToken contract addresses approved for deposits by the rebalancer.
+     */
+    mapping(string => address)[] public fuseAssets;
+
+    /**
+     * @dev Adds `cTokens` to `fuseAssets` (indexed by `pools` and `currencyCodes`).
+     * @param pools The pool indexes.
+     * @param currencyCodes The corresponding currency codes for `_fuseAssets`.
+     * @param cTokens The Fuse cToken contract addresses.
+     */
+    function addFuseAssets(uint8[] calldata pools, string[][] calldata currencyCodes, address[][] calldata cTokens) external onlyOwner {
+        require(pools.length > 0 && pools.length == currencyCodes.length && pools.length == cTokens.length, "Array parameter lengths must all be equal and greater than 0.");
+
+        for (uint256 i = 0; i < pools.length; i++) {
+            uint8 pool = pools[i];
+            require(pool > 100, "Pool index too low.");
+            require(currencyCodes[i].length > 0 && currencyCodes[i].length == cTokens[i].length, "Nested array parameter lengths must all be equal and greater than 0.");
+
+            for (uint256 j = 0; j < currencyCodes[i].length; j++) {
+                address cToken = cTokens[i][j];
+                string memory currencyCode = currencyCodes[i][j];
+                require(fuseAssets[pool][currencyCode] == address(0), "cToken address already set for this currency code.");
+                require(CErc20(cToken).underlying() == _erc20Contracts[currencyCode], "Underlying ERC20 token mismatch.");
+                fuseAssets[pool][currencyCode] = cToken;
+                _poolsByCurrency[currencyCode].push(pool);
+                rariFundManager.addPoolToCurrency(currencyCode, pool);
+            }
+        }
     }
 }

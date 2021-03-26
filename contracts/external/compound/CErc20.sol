@@ -15,6 +15,7 @@ pragma solidity 0.5.17;
  * @author Compound
  */
 interface CErc20 {
+    function underlying() external view returns (address);
     function mint(uint mintAmount) external returns (uint);
     function redeem(uint redeemTokens) external returns (uint);
     function redeemUnderlying(uint redeemAmount) external returns (uint);
@@ -22,4 +23,5 @@ interface CErc20 {
     function balanceOfUnderlying(address owner) external returns (uint);
     function accrueInterest() external returns (uint);
     function exchangeRateStored() external view returns (uint);
+    function transfer(address dst, uint256 amount) external returns (bool);
 }

@@ -99,7 +99,7 @@ contract RariFundManager is Initializable, Ownable {
     /**
      * @dev Maps currency codes to arrays of supported pools.
      */
-    mapping(string => RariFundController.LiquidityPool[]) private _poolsByCurrency;
+    mapping(string => uint8[]) private _poolsByCurrency;
 
     /**
      * @dev Initializer that sets supported ERC20 contract addresses and supported pools for each supported token.
@@ -152,6 +152,16 @@ contract RariFundManager is Initializable, Ownable {
      * @param pool Pool ID to be supported.
      */
     function addPoolToCurrency(string memory currencyCode, RariFundController.LiquidityPool pool) internal {
+        _poolsByCurrency[currencyCode].push(uint8(pool));
+    }
+
+    /**
+     * @dev Adds a supported pool for a token.
+     * @param currencyCode The currency code of the token.
+     * @param pool Pool ID to be supported.
+     */
+    function addPoolToCurrency(string calldata currencyCode, uint8 pool) external {
+        require(_rariFundControllerContract == msg.sender, "Caller is not the RariFundController.");
         _poolsByCurrency[currencyCode].push(pool);
     }
 
@@ -388,20 +398,19 @@ contract RariFundManager is Initializable, Ownable {
      * @param pool The index of the pool.
      * @param currencyCode The currency code of the token.
      */
-    function getPoolBalance(RariFundController.LiquidityPool pool, string memory currencyCode) internal returns (uint256) {
+    function getPoolBalance(uint8 pool, string memory currencyCode) internal returns (uint256) {
         if (!rariFundController.hasCurrencyInPool(pool, currencyCode)) return 0;
 
         if (_cachePoolBalances || _cacheDydxBalances) {
-            if (pool == RariFundController.LiquidityPool.dYdX) {
+            if (pool == uint8(RariFundController.LiquidityPool.dYdX)) {
                 address erc20Contract = _erc20Contracts[currencyCode];
                 require(erc20Contract != address(0), "Invalid currency code.");
                 if (_dydxBalancesCache.length == 0) (_dydxTokenAddressesCache, _dydxBalancesCache) = rariFundController.getDydxBalances();
                 for (uint256 i = 0; i < _dydxBalancesCache.length; i++) if (_dydxTokenAddressesCache[i] == erc20Contract) return _dydxBalancesCache[i];
                 revert("Failed to get dYdX balance of this currency code.");
             } else if (_cachePoolBalances) {
-                uint8 poolAsUint8 = uint8(pool);
-                if (_poolBalanceCache[currencyCode][poolAsUint8] == 0) _poolBalanceCache[currencyCode][poolAsUint8] = rariFundController._getPoolBalance(pool, currencyCode);
-                return _poolBalanceCache[currencyCode][poolAsUint8];
+                if (_poolBalanceCache[currencyCode][pool] == 0) _poolBalanceCache[currencyCode][pool] = rariFundController._getPoolBalance(pool, currencyCode);
+                return _poolBalanceCache[currencyCode][pool];
             }
         }
 
@@ -678,7 +687,7 @@ contract RariFundManager is Initializable, Ownable {
 
         for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++) {
             if (contractBalance >= amount) break;
-            RariFundController.LiquidityPool pool = _poolsByCurrency[currencyCode][i];
+            uint8 pool = _poolsByCurrency[currencyCode][i];
             uint256 poolBalance = getPoolBalance(pool, currencyCode);
             if (poolBalance <= 0) continue;
             uint256 amountLeft = amount.sub(contractBalance);
@@ -686,9 +695,9 @@ contract RariFundManager is Initializable, Ownable {
             uint256 poolAmount = withdrawAll ? poolBalance : amountLeft;
             rariFundController.withdrawFromPoolOptimized(pool, currencyCode, poolAmount, withdrawAll);
 
-            if (pool == RariFundController.LiquidityPool.dYdX) {
+            if (pool == uint8(RariFundController.LiquidityPool.dYdX)) {
                 for (uint256 j = 0; j < _dydxBalancesCache.length; j++) if (_dydxTokenAddressesCache[j] == erc20Contract) _dydxBalancesCache[j] = poolBalance.sub(poolAmount);
-            } else _poolBalanceCache[currencyCode][uint8(pool)] = poolBalance.sub(poolAmount);
+            } else _poolBalanceCache[currencyCode][pool] = poolBalance.sub(poolAmount);
 
             contractBalance = contractBalance.add(poolAmount);
         }

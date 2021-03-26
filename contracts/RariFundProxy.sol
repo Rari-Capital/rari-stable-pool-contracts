@@ -432,17 +432,17 @@ contract RariFundProxy is Ownable, GSNRecipient {
      * @dev Ideally, we can add the `view` modifier, but Compound's `getUnderlyingBalance` function (called by `getPoolBalance`) potentially modifies the state.
      * @return An array of currency codes, an array of corresponding fund controller contract balances for each currency code, an array of arrays of pool indexes for each currency code, an array of arrays of corresponding balances at each pool index for each currency code, and an array of prices in USD (scaled by 1e18) for each currency code.
      */
-    function getRawFundBalancesAndPrices() external returns (string[] memory, uint256[] memory, RariFundController.LiquidityPool[][] memory, uint256[][] memory, uint256[] memory) {
+    function getRawFundBalancesAndPrices() external returns (string[] memory, uint256[] memory, uint8[][] memory, uint256[][] memory, uint256[] memory) {
         RariFundController rariFundController = rariFundManager.rariFundController();
         address rariFundControllerContract = address(rariFundController);
         uint256[] memory contractBalances = new uint256[](_supportedCurrencies.length);
-        RariFundController.LiquidityPool[][] memory pools = new RariFundController.LiquidityPool[][](_supportedCurrencies.length);
+        uint8[][] memory pools = new uint8[][](_supportedCurrencies.length);
         uint256[][] memory poolBalances = new uint256[][](_supportedCurrencies.length);
 
         for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
             string memory currencyCode = _supportedCurrencies[i];
             contractBalances[i] = IERC20(_erc20Contracts[currencyCode]).balanceOf(rariFundControllerContract);
-            RariFundController.LiquidityPool[] memory currencyPools = rariFundController.getPoolsByCurrency(currencyCode);
+            uint8[] memory currencyPools = rariFundController.getPoolsByCurrency(currencyCode);
             pools[i] = currencyPools;
             poolBalances[i] = new uint256[](currencyPools.length);
             for (uint256 j = 0; j < currencyPools.length; j++) poolBalances[i][j] = rariFundController.getPoolBalance(currencyPools[j], currencyCode);
