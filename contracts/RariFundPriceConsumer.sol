@@ -17,8 +17,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.so
 
 import "@chainlink/contracts/src/v0.5/interfaces/AggregatorV3Interface.sol";
 
-import "./external/mstable/IBasketManager.sol";
-import "./external/mstable/MassetStructs.sol";
+import "./external/mstable/IMasset.sol";
 
 /**
  * @title RariFundPriceConsumer
@@ -52,14 +51,9 @@ contract RariFundPriceConsumer is Initializable, Ownable {
     mapping(string => AggregatorV3Interface) private _ethBasedPriceFeeds;
 
     /**
-     * @dev mStable mUSD basket manager contract.
+     * @dev mStable mUSD token address.
      */
-    IBasketManager constant private _basketManager = IBasketManager(0x66126B4aA2a1C07536Ef8E5e8bD4EfDA1FdEA96D);
-
-    /**
-     * @dev mStable mUSD token contract.
-     */
-    IERC20 constant private _mUsd = IERC20(0xe2f2a5C287993345a840Db3B0845fbC70f5935a5);
+    address constant private MUSD = 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5;
 
     /**
      * @dev Initializer that sets supported ERC20 contract addresses and price feeds for each supported token.
@@ -102,10 +96,11 @@ contract RariFundPriceConsumer is Initializable, Ownable {
      * @dev Retrives the latest mUSD/USD price given the prices of the underlying bAssets.
      */
     function getMUsdUsdPrice(uint256[] memory bAssetUsdPrices) internal view returns (uint256) {
-        (MassetStructs.Basset[] memory bAssets, ) = _basketManager.getBassets();
+        (, IMasset.BassetData[] memory bAssetData) = IMasset(MUSD).getBassets();
+        require(bAssetData.length == bAssetUsdPrices.length, "mUSD underlying bAsset data length not equal to bAsset USD prices length.");
         uint256 usdSupplyScaled = 0;
-        for (uint256 i = 0; i < bAssets.length; i++) usdSupplyScaled = usdSupplyScaled.add(bAssets[i].vaultBalance.mul(bAssets[i].ratio).div(1e8).mul(bAssetUsdPrices[i]));
-        return usdSupplyScaled.div(_mUsd.totalSupply());
+        for (uint256 i = 0; i < bAssetData.length; i++) usdSupplyScaled = usdSupplyScaled.add(uint256(bAssetData[i].vaultBalance).mul(uint256(bAssetData[i].ratio)).div(1e8).mul(bAssetUsdPrices[i]));
+        return usdSupplyScaled.div(IERC20(MUSD).totalSupply());
     }
 
     /**
@@ -122,18 +117,19 @@ contract RariFundPriceConsumer is Initializable, Ownable {
 
         // Get bAsset prices and mUSD price
         uint256 ethUsdPrice = getEthUsdPrice();
-        prices[0] = getDaiUsdPrice();
+        prices[0] = getPriceInEth("sUSD").mul(ethUsdPrice).div(1e18);
         prices[1] = getPriceInEth("USDC").mul(ethUsdPrice).div(1e18);
-        prices[2] = getPriceInEth("TUSD").mul(ethUsdPrice).div(1e18);
+        prices[2] = getDaiUsdPrice();
         prices[3] = getPriceInEth("USDT").mul(ethUsdPrice).div(1e18);
         prices[6] = getMUsdUsdPrice(prices);
 
         // Reorder bAsset prices to match _supportedCurrencies
-        uint256 tusdPrice = prices[2];
-        prices[2] = prices[3];
-        prices[3] = tusdPrice;
+        prices[5] = prices[0]; // Set prices[5] to sUSD
+        prices[0] = prices[2]; // Set prices[0] to DAI
+        prices[2] = prices[3]; // Set prices[2] to USDT
 
         // Get other prices
+        prices[3] = getPriceInEth("TUSD").mul(ethUsdPrice).div(1e18);
         prices[4] = getPriceInEth("BUSD").mul(ethUsdPrice).div(1e18);
         prices[5] = getPriceInEth("sUSD").mul(ethUsdPrice).div(1e18);
 

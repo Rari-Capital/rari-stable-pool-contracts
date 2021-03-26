@@ -73,10 +73,10 @@ contract RariFundProxy is Ownable, GSNRecipient {
         addSupportedCurrency("BUSD", 0x4Fabb145d64652a948d72533023f6E7A623C7C53, 18);
         addSupportedCurrency("sUSD", 0x57Ab1ec28D129707052df4dF418D58a2D46d5f51, 18);
         addSupportedCurrency("mUSD", 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5, 18);
-        addMStableExchangeErc20Contract(0x6B175474E89094C44Da98b954EedeAC495271d0F);
+        addMStableExchangeErc20Contract(0x57Ab1ec28D129707052df4dF418D58a2D46d5f51);
         addMStableExchangeErc20Contract(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
+        addMStableExchangeErc20Contract(0x6B175474E89094C44Da98b954EedeAC495271d0F);
         addMStableExchangeErc20Contract(0xdAC17F958D2ee523a2206206994597C13D831ec7);
-        addMStableExchangeErc20Contract(0x0000000000085d4780B73119b644AE5ecd22b376);
     }
 
     /**
@@ -257,13 +257,9 @@ contract RariFundProxy is Ownable, GSNRecipient {
         IERC20(inputErc20Contract).safeTransferFrom(msg.sender, address(this), inputAmount); // The user must approve the transfer of tokens beforehand
 
         // Mint, redeem, or swap via mUSD
-        if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
-            uint256 outputDecimals = _erc20Decimals[outputErc20Contract];
-            uint256 outputAmount = 18 >= outputDecimals ? inputAmount.div(10 ** (uint256(18).sub(outputDecimals))) : inputAmount.mul(10 ** (outputDecimals.sub(18)));
-            uint256 mUsdRedeemed = MStableExchangeController.redeem(outputErc20Contract, outputAmount);
-            require(inputAmount == mUsdRedeemed, "Redeemed mUSD amount not equal to input mUSD amount.");
-        } else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStableExchangeController.mint(inputErc20Contract, inputAmount);
-        else MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount);
+        if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStableExchangeController.redeem(outputErc20Contract, inputAmount, 1);
+        else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStableExchangeController.mint(inputErc20Contract, inputAmount, 1);
+        else MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount, 1);
 
         // Get real output amount
         uint256 realOutputAmount = IERC20(outputErc20Contract).balanceOf(address(this));
@@ -316,20 +312,12 @@ contract RariFundProxy is Ownable, GSNRecipient {
                     emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], inputAmountsAfterFees[i], filledAmounts[1]);
                 } else if ((_mStableExchangeErc20Contracts[inputErc20Contract] || inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) && (_mStableExchangeErc20Contracts[outputErc20Contract] || outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5)) {
                     // Mint, redeem, or swap via mUSD
-                    uint256 realOutputAmount;
+                    if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStableExchangeController.redeem(outputErc20Contract, inputAmountsAfterFees[i], 1);
+                    else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStableExchangeController.mint(inputErc20Contract, inputAmountsAfterFees[i], 1);
+                    else MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmountsAfterFees[i], 1);
 
-                    if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
-                        uint256 outputDecimals = _erc20Decimals[outputErc20Contract];
-                        uint256 outputAmount = 18 >= outputDecimals ? inputAmountsAfterFees[i].div(10 ** (uint256(18).sub(outputDecimals))) : inputAmountsAfterFees[i].mul(10 ** (outputDecimals.sub(18)));
-                        MStableExchangeController.redeem(outputErc20Contract, outputAmount);
-                        realOutputAmount = outputAmount.sub(outputAmount.mul(MStableExchangeController.getSwapFee()).div(1e18));
-                    } else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
-                        realOutputAmount = MStableExchangeController.mint(inputErc20Contract, inputAmountsAfterFees[i]);
-                    } else {
-                        uint256 outputAmount = MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmountsAfterFees[i]);
-                        realOutputAmount = outputAmount.sub(outputAmount.mul(MStableExchangeController.getSwapFee()).div(1e18));
-                    }
-
+                    // Get real output amount and emit event
+                    uint256 realOutputAmount = IERC20(outputErc20Contract).balanceOf(address(this));
                     emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], inputAmountsAfterFees[i], realOutputAmount);
                 } else revert("No 0x orders supplied and exchange not supported via mStable for at least one currency pair.");
             }

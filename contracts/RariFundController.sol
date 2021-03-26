@@ -645,8 +645,9 @@ contract RariFundController is Ownable {
      * @param inputCurrencyCode The currency code of the input token to be sold.
      * @param outputCurrencyCode The currency code of the output token to be bought.
      * @param inputAmount The amount of input tokens to be sold.
+     * @param minOutputAmount The minimum amount of output tokens to be bought.
      */
-    function swapMStable(string calldata inputCurrencyCode, string calldata outputCurrencyCode, uint256 inputAmount) external fundEnabled onlyRebalancer {
+    function swapMStable(string calldata inputCurrencyCode, string calldata outputCurrencyCode, uint256 inputAmount, uint256 minOutputAmount) external fundEnabled onlyRebalancer {
         // Input validation
         address inputErc20Contract = _erc20Contracts[inputCurrencyCode];
         address outputErc20Contract = _erc20Contracts[outputCurrencyCode];
@@ -661,15 +662,9 @@ contract RariFundController is Ownable {
 
         // Swap stablecoins via mUSD
         uint256 outputAmount;
-
-        if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) {
-            uint256 outputDecimals = _currencyDecimals[outputCurrencyCode];
-            uint256 outputAmountBeforeFees = outputDecimals >= 18 ? inputAmount.mul(10 ** outputDecimals.sub(18)) : inputAmount.div(10 ** uint256(18).sub(outputDecimals));
-            uint256 mUsdRedeemed = MStableExchangeController.redeem(outputErc20Contract, outputAmountBeforeFees);
-            require(mUsdRedeemed == inputAmount, "Amount of mUSD redeemed not equal to input mUSD amount.");
-            outputAmount = outputAmountBeforeFees.sub(outputAmountBeforeFees.mul(MStableExchangeController.getSwapFee()).div(1e18));
-        } else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) outputAmount = MStableExchangeController.mint(inputErc20Contract, inputAmount);
-        else outputAmount = MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount);
+        if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) outputAmount = MStableExchangeController.redeem(outputErc20Contract, inputAmount, minOutputAmount);
+        else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) outputAmount = MStableExchangeController.mint(inputErc20Contract, inputAmount, minOutputAmount);
+        else outputAmount = MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount, minOutputAmount);
 
         // Check 24-hour loss rate limit
         uint256 inputFilledAmountUsd = toUsd(inputCurrencyCode, inputAmount, pricesInUsd);
