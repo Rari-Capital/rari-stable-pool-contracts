@@ -14,6 +14,7 @@ var DydxPoolController = artifacts.require("./lib/pools/DydxPoolController.sol")
 var CompoundPoolController = artifacts.require("./lib/pools/CompoundPoolController.sol");
 var AavePoolController = artifacts.require("./lib/pools/AavePoolController.sol");
 var MStablePoolController = artifacts.require("./lib/pools/MStablePoolController.sol");
+var FusePoolController = artifacts.require("./lib/pools/FusePoolController.sol");
 var ZeroExExchangeController = artifacts.require("./lib/exchanges/ZeroExExchangeController.sol");
 var MStableExchangeController = artifacts.require("./lib/exchanges/MStableExchangeController.sol");
 var RariFundController = artifacts.require("./RariFundController.sol");
@@ -54,6 +55,7 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.deploy(CompoundPoolController);
     await deployer.deploy(AavePoolController);
     await deployer.deploy(MStablePoolController);
+    await deployer.deploy(FusePoolController);
     await deployer.deploy(ZeroExExchangeController);
     await deployer.deploy(MStableExchangeController);
 
@@ -62,6 +64,7 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.link(CompoundPoolController, RariFundController);
     await deployer.link(AavePoolController, RariFundController);
     await deployer.link(MStablePoolController, RariFundController);
+    await deployer.link(FusePoolController, RariFundController);
     await deployer.link(ZeroExExchangeController, RariFundController);
     await deployer.link(MStableExchangeController, RariFundController);
 
@@ -134,6 +137,7 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.deploy(CompoundPoolController);
     await deployer.deploy(AavePoolController);
     await deployer.deploy(MStablePoolController);
+    await deployer.deploy(FusePoolController);
     await deployer.deploy(ZeroExExchangeController);
     await deployer.deploy(MStableExchangeController);
 
@@ -142,6 +146,7 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.link(CompoundPoolController, RariFundController);
     await deployer.link(AavePoolController, RariFundController);
     await deployer.link(MStablePoolController, RariFundController);
+    await deployer.link(FusePoolController, RariFundController);
     await deployer.link(ZeroExExchangeController, RariFundController);
     await deployer.link(MStableExchangeController, RariFundController);
 
