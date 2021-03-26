@@ -45,8 +45,8 @@ contract("RariFundController", accounts => {
     // Approve and deposit 0.1 tokens of each currency to each pool
     for (const poolName of Object.keys(pools)) for (const currencyCode of Object.keys(pools[poolName].currencies)) {
       var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
-      await fundControllerInstance.approveToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, poolName === "mStable" ? web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1) : amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-      await fundControllerInstance.depositToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.approveToPool(Object.keys(pools).indexOf(poolName), currencyCode, poolName === "mStable" ? web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1) : amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.depositToPool(Object.keys(pools).indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
     }
 
     // Disable original FundController and FundManager

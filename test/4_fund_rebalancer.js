@@ -89,16 +89,16 @@ contract("RariFundController, RariFundManager", accounts => {
       await fundManagerInstance.deposit(currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Check initial pool balance
-      var initialBalanceOfUnderlying = await fundControllerInstance.getPoolBalance.call(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode);
+      var initialBalanceOfUnderlying = await fundControllerInstance.getPoolBalance.call(Object.keys(pools).indexOf(poolName), currencyCode);
 
       // Approve and deposit to pool
       // TODO: Ideally, we add actually call rari-fund-rebalancer
-      await fundControllerInstance.approveToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, poolName === "mStable" ? web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1) : amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-      await fundControllerInstance.depositToPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.approveToPool(Object.keys(pools).indexOf(poolName), currencyCode, poolName === "mStable" ? web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1) : amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.depositToPool(Object.keys(pools).indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Check new pool balance
       // Accounting for dYdX and Compound losing some dust using amountBN.mul(9999).div(10000)
-      var postDepositBalanceOfUnderlying = await fundControllerInstance.getPoolBalance.call(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode);
+      var postDepositBalanceOfUnderlying = await fundControllerInstance.getPoolBalance.call(Object.keys(pools).indexOf(poolName), currencyCode);
       assert(postDepositBalanceOfUnderlying.gte(initialBalanceOfUnderlying.add(amountBN.mul(web3.utils.toBN(9999)).div(web3.utils.toBN(10000)))));
     }
   });
@@ -109,17 +109,17 @@ contract("RariFundController, RariFundManager", accounts => {
     // For each currency of each pool:
     for (const poolName of Object.keys(pools)) for (const currencyCode of Object.keys(pools[poolName].currencies)) {
       // Check initial pool balance
-      var oldBalanceOfUnderlying = await fundControllerInstance.getPoolBalance.call(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode);
+      var oldBalanceOfUnderlying = await fundControllerInstance.getPoolBalance.call(Object.keys(pools).indexOf(poolName), currencyCode);
       
       // Calculate amount to deposit to & withdraw from the pool
       var amountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
 
       // RariFundController.withdrawFromPool
       // TODO: Ideally, we add actually call rari-fund-rebalancer
-      await fundControllerInstance.withdrawFromPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, amountBN.div(web3.utils.toBN(2)), { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.withdrawFromPool(Object.keys(pools).indexOf(poolName), currencyCode, amountBN.div(web3.utils.toBN(2)), { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Check new pool balance
-      var newBalanceOfUnderlying = await fundControllerInstance.getPoolBalance.call(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode);
+      var newBalanceOfUnderlying = await fundControllerInstance.getPoolBalance.call(Object.keys(pools).indexOf(poolName), currencyCode);
       assert(newBalanceOfUnderlying.lt(oldBalanceOfUnderlying));
     }
   });
@@ -131,10 +131,10 @@ contract("RariFundController, RariFundManager", accounts => {
     for (const poolName of Object.keys(pools)) for (const currencyCode of Object.keys(pools[poolName].currencies)) {
       // RariFundController.withdrawAllFromPool
       // TODO: Ideally, we add actually call rari-fund-rebalancer
-      await fundControllerInstance.withdrawAllFromPool(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.withdrawAllFromPool(Object.keys(pools).indexOf(poolName), currencyCode, { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Check new pool balance
-      var newBalanceOfUnderlying = await fundControllerInstance.getPoolBalance.call(["dYdX", "Compound", "Aave", "mStable"].indexOf(poolName), currencyCode);
+      var newBalanceOfUnderlying = await fundControllerInstance.getPoolBalance.call(Object.keys(pools).indexOf(poolName), currencyCode);
       assert(newBalanceOfUnderlying.isZero());
     }
   });

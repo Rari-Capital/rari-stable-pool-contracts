@@ -9,7 +9,6 @@
 
 pragma solidity 0.5.17;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
 
@@ -21,7 +20,6 @@ import "../../external/compound/CErc20.sol";
  * @dev This library handles deposits to and withdrawals from dYdX liquidity pools.
  */
 library CompoundPoolController {
-    using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
     /**
