@@ -488,13 +488,15 @@ contract RariFundController is Ownable {
     }
 
     /**
-     * @dev Approves tokens to 0x without spending gas on every deposit.
+     * @dev Approves tokens to 0x or mStable without spending gas on every deposit.
      * Note that this function is vulnerable to the allowance double-spend exploit, as with the `approve` functions of the ERC20 contracts themselves. If you are concerned and setting exact allowances, make sure to set allowance to 0 on the client side before setting an allowance greater than 0.
+     * @param exchange The `CurrencyExchange` (0x or mStable) to which tokens are to be approved.
      * @param erc20Contract The ERC20 contract address of the token to be approved.
      * @param amount The amount of tokens to be approved.
      */
-    function approveTo0x(address erc20Contract, uint256 amount) external fundEnabled onlyRebalancer {
-        ZeroExExchangeController.approve(erc20Contract, amount);
+    function approveToExchange(CurrencyExchange exchange, address erc20Contract, uint256 amount) external fundEnabled onlyRebalancer {
+        if (exchange == CurrencyExchange.ZeroEx) ZeroExExchangeController.approve(erc20Contract, amount);
+        else if (exchange == CurrencyExchange.mStable) MStableExchangeController.approve(erc20Contract, amount);
     }
 
     /**
@@ -550,13 +552,7 @@ contract RariFundController is Ownable {
         require(outputErc20Contract != address(0), "Invalid output currency code.");
 
         // Check orders (if inputting a supported stablecoin)
-        if (inputErc20Contract != address(0)) for (uint256 i = 0; i < orders.length; i++) {
-            address takerAssetAddress = ZeroExExchangeController.decodeTokenAddress(orders[i].takerAssetData);
-            require(inputErc20Contract == takerAssetAddress, "Not all input assets correspond to input currency code.");
-            address makerAssetAddress = ZeroExExchangeController.decodeTokenAddress(orders[i].makerAssetData);
-            require(outputErc20Contract == makerAssetAddress, "Not all output assets correspond to output currency code.");
-            if (orders[i].takerFee > 0) require(orders[i].takerFeeAssetData.length == 0, "Taker fees are not supported."); // TODO: Support orders with taker fees (need to include taker fees in loss calculation)
-        }
+        if (inputErc20Contract != address(0)) ZeroExExchangeController.checkTokenAddresses(orders, inputErc20Contract, outputErc20Contract);
 
         // Get prices and raw fund balance before exchange
         uint256[] memory pricesInUsd;
@@ -629,18 +625,6 @@ contract RariFundController is Ownable {
     }
 
     /**
-     * @dev Approves tokens to the mUSD token contract without spending gas on every deposit.
-     * Note that this function is vulnerable to the allowance double-spend exploit, as with the `approve` functions of the ERC20 contracts themselves. If you are concerned and setting exact allowances, make sure to set allowance to 0 on the client side before setting an allowance greater than 0.
-     * @param currencyCode The currency code of the token to be approved.
-     * @param amount Amount of the specified token to approve to the mUSD token contract.
-     */
-    function approveToMUsd(string calldata currencyCode, uint256 amount) external fundEnabled onlyRebalancer {
-        address erc20Contract = _erc20Contracts[currencyCode];
-        require(erc20Contract != address(0), "Invalid currency code.");
-        MStableExchangeController.approve(erc20Contract, amount);
-    }
-
-    /**
      * @dev Swaps tokens via mStable mUSD.
      * @param inputCurrencyCode The currency code of the input token to be sold.
      * @param outputCurrencyCode The currency code of the output token to be bought.
@@ -661,10 +645,7 @@ contract RariFundController is Ownable {
         rawFundBalanceBeforeExchange = rariFundManager.getRawFundBalance(pricesInUsd);
 
         // Swap stablecoins via mUSD
-        uint256 outputAmount;
-        if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) outputAmount = MStableExchangeController.redeem(outputErc20Contract, inputAmount, minOutputAmount);
-        else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) outputAmount = MStableExchangeController.mint(inputErc20Contract, inputAmount, minOutputAmount);
-        else outputAmount = MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount, minOutputAmount);
+        uint256 outputAmount = MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount, minOutputAmount);
 
         // Check 24-hour loss rate limit
         uint256 inputFilledAmountUsd = toUsd(inputCurrencyCode, inputAmount, pricesInUsd);

@@ -257,9 +257,7 @@ contract RariFundProxy is Ownable, GSNRecipient {
         IERC20(inputErc20Contract).safeTransferFrom(msg.sender, address(this), inputAmount); // The user must approve the transfer of tokens beforehand
 
         // Mint, redeem, or swap via mUSD
-        if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStableExchangeController.redeem(outputErc20Contract, inputAmount, 1);
-        else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStableExchangeController.mint(inputErc20Contract, inputAmount, 1);
-        else MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount, 1);
+        MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount, 1);
 
         // Get real output amount
         uint256 realOutputAmount = IERC20(outputErc20Contract).balanceOf(address(this));
@@ -312,9 +310,7 @@ contract RariFundProxy is Ownable, GSNRecipient {
                     emit PostWithdrawalExchange(inputCurrencyCodes[i], outputErc20Contract, msg.sender, inputAmounts[i], inputAmountsAfterFees[i], filledAmounts[1]);
                 } else if ((_mStableExchangeErc20Contracts[inputErc20Contract] || inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) && (_mStableExchangeErc20Contracts[outputErc20Contract] || outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5)) {
                     // Mint, redeem, or swap via mUSD
-                    if (inputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStableExchangeController.redeem(outputErc20Contract, inputAmountsAfterFees[i], 1);
-                    else if (outputErc20Contract == 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5) MStableExchangeController.mint(inputErc20Contract, inputAmountsAfterFees[i], 1);
-                    else MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmountsAfterFees[i], 1);
+                    MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmountsAfterFees[i], 1);
 
                     // Get real output amount and emit event
                     uint256 realOutputAmount = IERC20(outputErc20Contract).balanceOf(address(this));

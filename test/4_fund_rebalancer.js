@@ -195,9 +195,9 @@ contract("RariFundController, RariFundManager", accounts => {
       var initialTokenBalanceBN = web3.utils.toBN(await tokenErc20Contract.methods.balanceOf(RariFundController.address).call());
 
       if (canMint) {
-        // RariFundController.approveToMUsd and RariFundController.swapMStable
+        // RariFundController.approveToExchange and RariFundController.swapMStable
         // TODO: Ideally, we add actually call rari-fund-rebalancer
-        await fundControllerInstance.approveToMUsd(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+        await fundControllerInstance.approveToExchange(1, currencies[currencyCode].tokenAddress, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
         await fundControllerInstance.swapMStable(currencyCode, "mUSD", tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
       } else {
         // Deposit mUSD for redeeming if we didn't just mint

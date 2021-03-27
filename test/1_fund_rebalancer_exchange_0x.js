@@ -88,7 +88,7 @@ contract("RariFundController, RariFundManager", accounts => {
       
       // Fill 0x orders
       // TODO: Ideally, we add actually call rari-fund-rebalancer
-      await fundControllerInstance.approveTo0x(currencies[currencyCombination[0]].tokenAddress, maxInputAmountBN);
+      await fundControllerInstance.approveToExchange(0, currencies[currencyCombination[0]].tokenAddress, maxInputAmountBN);
       await fundControllerInstance.marketSell0xOrdersFillOrKill(currencyCombination[0], currencyCombination[1], orders, signatures, takerAssetFilledAmountBN.toString(), { from: process.env.DEVELOPMENT_ADDRESS, value: protocolFee, gas: 2e6 });
 
       // Check source and destination wallet balances

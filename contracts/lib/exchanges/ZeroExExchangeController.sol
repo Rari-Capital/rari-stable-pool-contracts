@@ -48,10 +48,23 @@ library ZeroExExchangeController {
      * @param assetData The ERC20 or ERC20Bridge asset data.
      * @return The asset token address.
      */
-    function decodeTokenAddress(bytes calldata assetData) external pure returns (address) {
+    function decodeTokenAddress(bytes memory assetData) private pure returns (address) {
         bytes4 assetProxyId = assetData.readBytes4(0);
         if (assetProxyId == 0xf47261b0 || assetProxyId == 0xdc1600f3) return assetData.readAddress(16);
         revert("Invalid asset proxy ID.");
+    }
+
+    /**
+     * @dev Checks `orders` to confirm `inputErc20Contract` and `outputErc20Contract`, reverting on failure.
+     */
+    function checkTokenAddresses(LibOrder.Order[] calldata orders, address inputErc20Contract, address outputErc20Contract) external pure {
+        for (uint256 i = 0; i < orders.length; i++) {
+            address takerAssetAddress = decodeTokenAddress(orders[i].takerAssetData);
+            require(inputErc20Contract == takerAssetAddress, "Not all input assets correspond to input token.");
+            address makerAssetAddress = decodeTokenAddress(orders[i].makerAssetData);
+            require(outputErc20Contract == makerAssetAddress, "Not all output assets correspond to output token.");
+            if (orders[i].takerFee > 0) require(orders[i].takerFeeAssetData.length == 0, "Taker fees are not supported."); // TODO: Support orders with taker fees (need to include taker fees in loss calculation)
+        }
     }
 
     /**
