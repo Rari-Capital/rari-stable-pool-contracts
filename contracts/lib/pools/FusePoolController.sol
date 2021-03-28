@@ -17,7 +17,7 @@ import "../../external/compound/CErc20.sol";
 /**
  * @title FusePoolController
  * @author David Lucid <david@rari.capital> (https://github.com/davidlucid)
- * @dev This library handles deposits to and withdrawals from Fuse money markets.
+ * @dev This library handles deposits to and withdrawals from Fuse liquidity pools.
  */
 library FusePoolController {
     using SafeERC20 for IERC20;
