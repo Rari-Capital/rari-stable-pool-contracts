@@ -97,6 +97,11 @@ contract RariFundManager is Initializable, Ownable {
     mapping(string => address) private _erc20Contracts;
 
     /**
+     * @dev UNUSED AFTER UPGRADE: Maps currency codes to arrays of supported pools.
+     */
+    mapping(string => uint8[]) private _poolsByCurrency;
+
+    /**
      * @dev Initializer that sets supported ERC20 contract addresses and supported pools for each supported token.
      */
     function initialize() public initializer {
