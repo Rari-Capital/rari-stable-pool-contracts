@@ -10,7 +10,7 @@
 const erc20Abi = require('./abi/ERC20.json');
 
 const currencies = require('./fixtures/currencies.json');
-const pools = require('./fixtures/pools.json');
+const pools = require('./fixtures/fuse.json');
 
 const RariFundController = artifacts.require("RariFundController");
 const RariFundManager = artifacts.require("RariFundManager");
@@ -54,20 +54,20 @@ contract("RariFundManager, RariFundController", accounts => {
       let postDepositRftBalance = await fundTokenInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       assert(postDepositRftBalance.gt(initialRftBalance));
       let postDepositInterestAccrued = await fundManagerInstance.getInterestAccrued.call();
-      let postDepositPoolBalance = await fundControllerInstance.getPoolBalance.call(Object.keys(pools).indexOf(poolName), currencyCode);
+      let postDepositPoolBalance = await fundControllerInstance.getPoolBalance.call(100 + Object.keys(pools).indexOf(poolName), currencyCode);
 
       // Deposit to pool (using Compound as an example)
       // TODO: Ideally, deposit to pool via rari-fund-rebalancer
-      await fundControllerInstance.approveToPool(Object.keys(pools).indexOf(poolName), currencyCode, poolName === "mStable" ? web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1) : amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-      await fundControllerInstance.depositToPool(Object.keys(pools).indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.approveToPool(100 + Object.keys(pools).indexOf(poolName), currencyCode, poolName === "mStable" ? web3.utils.toBN(2).pow(web3.utils.toBN(256)).subn(1) : amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.depositToPool(100 + Object.keys(pools).indexOf(poolName), currencyCode, amountBN, { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Force accrue interest
       await new Promise(resolve => setTimeout(resolve, 1000));
       await web3.eth.sendTransaction({ from: process.env.DEVELOPMENT_ADDRESS, to: process.env.DEVELOPMENT_ADDRESS, value: 0 });
 
       // Check balances and interest after waiting for interest
-      var requireInterestAccrual = ["DAI", "TUSD"].indexOf(currencyCode) >= 0;
-      var acceptMarginOfError = (poolName == "dYdX" && currencyCode != "DAI") || poolName == "mStable";
+      var requireInterestAccrual = false;
+      var acceptMarginOfError = true;
       if (acceptMarginOfError) var usdMarginOfErrorBN = web3.utils.toBN(1e13);
       let preWithdrawalAccountBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
       assert(preWithdrawalAccountBalance[requireInterestAccrual ? "gt" : "gte"](acceptMarginOfError ? postDepositAccountBalance.sub(usdMarginOfErrorBN) : postDepositAccountBalance));
@@ -77,8 +77,8 @@ contract("RariFundManager, RariFundController", accounts => {
       assert(preWithdrawalRftBalance.eq(postDepositRftBalance));
       let preWithdrawalInterestAccrued = await fundManagerInstance.getInterestAccrued.call();
       assert(preWithdrawalInterestAccrued[requireInterestAccrual ? "gt" : "gte"](acceptMarginOfError ? postDepositInterestAccrued.sub(usdMarginOfErrorBN) : postDepositInterestAccrued));
-      let preWithdrawalPoolBalance = await fundControllerInstance.getPoolBalance.call(Object.keys(pools).indexOf(poolName), currencyCode);
-      assert(preWithdrawalPoolBalance[requireInterestAccrual ? "gt" : "gte"](acceptMarginOfError ? postDepositPoolBalance.add(amountBN).subn(10) : postDepositPoolBalance.add(amountBN)));
+      let preWithdrawalPoolBalance = await fundControllerInstance.getPoolBalance.call(100 + Object.keys(pools).indexOf(poolName), currencyCode);
+      assert(preWithdrawalPoolBalance[requireInterestAccrual ? "gt" : "gte"](acceptMarginOfError ? postDepositPoolBalance.add(amountBN).sub(usdMarginOfErrorBN) : postDepositPoolBalance.add(amountBN)));
 
       // RariFundManager.withdraw
       var withdrawalAmountBN = web3.utils.BN.min(amountBN, preWithdrawalPoolBalance);

@@ -8,7 +8,6 @@
  */
 
 const erc20Abi = require('./abi/ERC20.json');
-const mAssetValidationHelperAbi = require('./abi/MassetValidationHelper.json');
 
 const currencies = require('./fixtures/currencies.json');
 const pools = require('./fixtures/pools.json');
@@ -171,60 +170,34 @@ contract("RariFundController, RariFundManager", accounts => {
       var tokenAmountBN = web3.utils.toBN(10 ** (currencies[currencyCode].decimals - 1));
       var tokenErc20Contract = new web3.eth.Contract(erc20Abi, currencies[currencyCode].tokenAddress);
 
-      // Check mint validity
-      var mAssetValidationHelper = new web3.eth.Contract(mAssetValidationHelperAbi, "0xabcc93c3be238884cc3309c19afd128fafc16911");
-
-      try {
-        var maxSwap = await mAssetValidationHelper.methods.getMaxSwap("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", currencies[currencyCode].tokenAddress, "0xe2f2a5c287993345a840db3b0845fbc70f5935a5").call();
-      } catch (error) {
-        // If the bAsset does not currently exist, move on to the next one
-        assert.include(error.message, "bAsset must exist");
-        continue;
-      }
-
-      var canMint = maxSwap && maxSwap["0"] && tokenAmountBN.lte(web3.utils.toBN(maxSwap["2"]));
-
-      if (canMint) {
-        // Approve and deposit tokens to RariFundManager
-        await tokenErc20Contract.methods.approve(RariFundManager.address, tokenAmountBN.toString()).send({ from: process.env.DEVELOPMENT_ADDRESS });
-        await fundManagerInstance.deposit(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-      }
+      // Approve and deposit tokens to RariFundManager
+      await tokenErc20Contract.methods.approve(RariFundManager.address, tokenAmountBN.toString()).send({ from: process.env.DEVELOPMENT_ADDRESS });
+      await fundManagerInstance.deposit(currencyCode, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Check initial mUSD and token balance
       var initialMUsdBalanceBN = web3.utils.toBN(await mUsdErc20Contract.methods.balanceOf(RariFundController.address).call());
       var initialTokenBalanceBN = web3.utils.toBN(await tokenErc20Contract.methods.balanceOf(RariFundController.address).call());
 
-      if (canMint) {
-        // RariFundController.approveToExchange and RariFundController.swapMStable
-        // TODO: Ideally, we add actually call rari-fund-rebalancer
-        await fundControllerInstance.approveToExchange(1, currencies[currencyCode].tokenAddress, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-        await fundControllerInstance.swapMStable(currencyCode, "mUSD", tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-      } else {
-        // Deposit mUSD for redeeming if we didn't just mint
-        await mUsdErc20Contract.methods.approve(RariFundManager.address, mUsdAmountBN.toString()).send({ from: process.env.DEVELOPMENT_ADDRESS });
-        await fundManagerInstance.deposit("mUSD", mUsdAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-      }
+      // RariFundController.approveToExchange and RariFundController.swapMStable
+      // TODO: Ideally, we add actually call rari-fund-rebalancer
+      await fundControllerInstance.approveToExchange(1, currencies[currencyCode].tokenAddress, tokenAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
+      await fundControllerInstance.swapMStable(currencyCode, "mUSD", tokenAmountBN, 1, { from: process.env.DEVELOPMENT_ADDRESS });
 
       // Check new mUSD and token balance
       var postMintMUsdBalanceBN = web3.utils.toBN(await mUsdErc20Contract.methods.balanceOf(RariFundController.address).call());
-      assert(postMintMUsdBalanceBN.eq(initialMUsdBalanceBN.add(mUsdAmountBN)));
+      assert(postMintMUsdBalanceBN.gte(initialMUsdBalanceBN.add(mUsdAmountBN.muln(98).divn(100))) && postMintMUsdBalanceBN.lte(initialMUsdBalanceBN.add(mUsdAmountBN.muln(102).divn(100))));
       var postMintTokenBalanceBN = web3.utils.toBN(await tokenErc20Contract.methods.balanceOf(RariFundController.address).call());
-      assert(canMint ? postMintTokenBalanceBN.eq(initialTokenBalanceBN.sub(tokenAmountBN)) : postMintTokenBalanceBN.eq(initialTokenBalanceBN));
+      assert(postMintTokenBalanceBN.eq(initialTokenBalanceBN.sub(tokenAmountBN)));
 
-      // Check redeem validity
-      var redeemValidity = await mAssetValidationHelper.methods.getRedeemValidity("0xe2f2a5c287993345a840db3b0845fbc70f5935a5", mUsdAmountBN.toString(), currencies[currencyCode].tokenAddress).call();
+      // RariFundController.swapMStable
+      // TODO: Ideally, we add actually call rari-fund-rebalancer
+      await fundControllerInstance.swapMStable("mUSD", currencyCode, postMintMUsdBalanceBN.sub(initialMUsdBalanceBN), 1, { from: process.env.DEVELOPMENT_ADDRESS });
 
-      if (redeemValidity && redeemValidity["0"]) {
-        // RariFundController.swapMStable
-        // TODO: Ideally, we add actually call rari-fund-rebalancer
-        await fundControllerInstance.swapMStable("mUSD", currencyCode, mUsdAmountBN, { from: process.env.DEVELOPMENT_ADDRESS });
-
-        // Check new mUSD and token balance
-        var postRedeemMUsdBalanceBN = web3.utils.toBN(await mUsdErc20Contract.methods.balanceOf(RariFundController.address).call());
-        assert(postRedeemMUsdBalanceBN.eq(initialMUsdBalanceBN));
-        var postRedeemTokenBalanceBN = web3.utils.toBN(await tokenErc20Contract.methods.balanceOf(RariFundController.address).call());
-        assert(postRedeemTokenBalanceBN.gte(postMintTokenBalanceBN.add(tokenAmountBN.muln(99).divn(100))));
-      }
+      // Check new mUSD and token balance
+      var postRedeemMUsdBalanceBN = web3.utils.toBN(await mUsdErc20Contract.methods.balanceOf(RariFundController.address).call());
+      assert(postRedeemMUsdBalanceBN.eq(initialMUsdBalanceBN));
+      var postRedeemTokenBalanceBN = web3.utils.toBN(await tokenErc20Contract.methods.balanceOf(RariFundController.address).call());
+      assert(postRedeemTokenBalanceBN.gte(postMintTokenBalanceBN.add(tokenAmountBN.muln(99).divn(100))) && postRedeemTokenBalanceBN.lte(postMintTokenBalanceBN.add(tokenAmountBN.muln(101).divn(100))));
     }
   });
 });
