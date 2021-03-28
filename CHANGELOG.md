@@ -1,5 +1,10 @@
 # Changelog
 
+## `v2.6.0` (contracts not yet deployed; all code not yet pushed)
+
+* Fuse integration!
+* Upgrade to mStable mUSD v3.
+
 ## `v2.5.0` (contracts deployed 2020-02-09; all code pushed 2020-02-14)
 
 * Upgraded mStable SAVE V1 to V2 (and implemented MTA rewards).
