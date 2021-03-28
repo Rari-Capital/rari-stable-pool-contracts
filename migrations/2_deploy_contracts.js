@@ -44,7 +44,6 @@ module.exports = async function(deployer, network, accounts) {
     } else {
       if (!process.env.UPGRADE_FUND_TOKEN_ADDRESS) return console.error("UPGRADE_FUND_TOKEN_ADDRESS is missing for development upgrade");
       if (!process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS) return console.error("UPGRADE_FUND_PRICE_CONSUMER_ADDRESS is missing for development upgrade");
-      if (!process.env.UPGRADE_FUND_PROXY_ADDRESS) return console.error("UPGRADE_FUND_PROXY_ADDRESS is missing for development upgrade");
     }
 
     // Upgrade from v2.4.0 (RariFundController v2.0.0) to v2.5.0
@@ -101,17 +100,35 @@ module.exports = async function(deployer, network, accounts) {
     // Set fund rebalancer on controller and manager
     await rariFundController.setFundRebalancer(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_REBALANCER : process.env.DEVELOPMENT_ADDRESS);
 
+    // Link libraries to RariFundProxy
+    await deployer.link(ZeroExExchangeController, RariFundProxy);
+    await deployer.link(MStableExchangeController, RariFundProxy);
+
+    // Deploy RariFundProxy
+    var rariFundProxy = await deployer.deploy(RariFundProxy);
+
+    // Connect RariFundManager and RariFundProxy
+    await rariFundManager.setFundProxy(RariFundProxy.address);
+    await rariFundProxy.setFundManager(RariFundManager.address);
+
+    // Set GSN trusted signer
+    await rariFundProxy.setGsnTrustedSigner(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_GSN_TRUSTED_SIGNER : process.env.DEVELOPMENT_ADDRESS);
+
     if (["live", "live-fork"].indexOf(network) >= 0) {
       // Live network: transfer ownership of RariFundController to live owner
       await rariFundController.transferOwnership(process.env.LIVE_FUND_OWNER);
+      await rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
     } else {
       // Register Fuse pools
-      var testFusePools = require("../test/fuse.json");
+      var testFusePools = require("../test/fixtures/fuse.json");
       var poolKeys = Object.keys(testFusePools);
       var poolIds = [];
+      var currencyCodes = [];
       var cTokens = [];
       for (var i = 0; i < poolKeys.length; i++) {
         poolIds[i] = 100 + i;
+        currencyCodes[i] = [];
+        cTokens[i] = [];
         for (const currencyCode of Object.keys(testFusePools[poolKeys[i]].currencies)) {
           currencyCodes[i].push(currencyCode);
           cTokens[i].push(testFusePools[poolKeys[i]].currencies[currencyCode].cTokenAddress);
@@ -123,8 +140,6 @@ module.exports = async function(deployer, network, accounts) {
       await rariFundManager.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       var rariFundPriceConsumer = await RariFundPriceConsumer.at(process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS); 
       await rariFundPriceConsumer.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
-      var rariFundProxy = await RariFundProxy.at(process.env.UPGRADE_FUND_PROXY_ADDRESS); 
-      await rariFundProxy.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       // TODO: await admin.transferProxyAdminOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       RariFundManager.class_defaults.from = process.env.DEVELOPMENT_ADDRESS;
       await rariFundManager.setFundRebalancer(process.env.DEVELOPMENT_ADDRESS);
@@ -220,12 +235,15 @@ module.exports = async function(deployer, network, accounts) {
       await admin.transferProxyAdminOwnership(process.env.LIVE_FUND_OWNER);
     } else {
       // Register Fuse pools
-      var testFusePools = require("../test/fuse.json");
+      var testFusePools = require("../test/fixtures/fuse.json");
       var poolKeys = Object.keys(testFusePools);
       var poolIds = [];
+      var currencyCodes = [];
       var cTokens = [];
       for (var i = 0; i < poolKeys.length; i++) {
         poolIds[i] = 100 + i;
+        currencyCodes[i] = [];
+        cTokens[i] = [];
         for (const currencyCode of Object.keys(testFusePools[poolKeys[i]].currencies)) {
           currencyCodes[i].push(currencyCode);
           cTokens[i].push(testFusePools[poolKeys[i]].currencies[currencyCode].cTokenAddress);
