@@ -97,11 +97,6 @@ contract RariFundManager is Initializable, Ownable {
     mapping(string => address) private _erc20Contracts;
 
     /**
-     * @dev Maps currency codes to arrays of supported pools.
-     */
-    mapping(string => uint8[]) private _poolsByCurrency;
-
-    /**
      * @dev Initializer that sets supported ERC20 contract addresses and supported pools for each supported token.
      */
     function initialize() public initializer {
@@ -110,24 +105,12 @@ contract RariFundManager is Initializable, Ownable {
         
         // Add supported currencies
         addSupportedCurrency("DAI", 0x6B175474E89094C44Da98b954EedeAC495271d0F, 18);
-        addPoolToCurrency("DAI", RariFundController.LiquidityPool.dYdX);
-        addPoolToCurrency("DAI", RariFundController.LiquidityPool.Compound);
-        addPoolToCurrency("DAI", RariFundController.LiquidityPool.Aave);
         addSupportedCurrency("USDC", 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 6);
-        addPoolToCurrency("USDC", RariFundController.LiquidityPool.dYdX);
-        addPoolToCurrency("USDC", RariFundController.LiquidityPool.Compound);
-        addPoolToCurrency("USDC", RariFundController.LiquidityPool.Aave);
         addSupportedCurrency("USDT", 0xdAC17F958D2ee523a2206206994597C13D831ec7, 6);
-        addPoolToCurrency("USDT", RariFundController.LiquidityPool.Compound);
-        addPoolToCurrency("USDT", RariFundController.LiquidityPool.Aave);
         addSupportedCurrency("TUSD", 0x0000000000085d4780B73119b644AE5ecd22b376, 18);
-        addPoolToCurrency("TUSD", RariFundController.LiquidityPool.Aave);
         addSupportedCurrency("BUSD", 0x4Fabb145d64652a948d72533023f6E7A623C7C53, 18);
-        addPoolToCurrency("BUSD", RariFundController.LiquidityPool.Aave);
         addSupportedCurrency("sUSD", 0x57Ab1ec28D129707052df4dF418D58a2D46d5f51, 18);
-        addPoolToCurrency("sUSD", RariFundController.LiquidityPool.Aave);
         addSupportedCurrency("mUSD", 0xe2f2a5C287993345a840Db3B0845fbC70f5935a5, 18);
-        addPoolToCurrency("mUSD", RariFundController.LiquidityPool.mStable);
 
         // Initialize raw fund balance cache (can't set initial values in field declarations with proxy storage)
         _rawFundBalanceCache = -1;
@@ -144,25 +127,6 @@ contract RariFundManager is Initializable, Ownable {
         _supportedCurrencies.push(currencyCode);
         _erc20Contracts[currencyCode] = erc20Contract;
         _currencyDecimals[currencyCode] = decimals;
-    }
-
-    /**
-     * @dev Adds a supported pool for a token.
-     * @param currencyCode The currency code of the token.
-     * @param pool Pool ID to be supported.
-     */
-    function addPoolToCurrency(string memory currencyCode, RariFundController.LiquidityPool pool) internal {
-        _poolsByCurrency[currencyCode].push(uint8(pool));
-    }
-
-    /**
-     * @dev Adds a supported pool for a token.
-     * @param currencyCode The currency code of the token.
-     * @param pool Pool ID to be supported.
-     */
-    function addPoolToCurrency(string calldata currencyCode, uint8 pool) external {
-        require(_rariFundControllerContract == msg.sender, "Caller is not the RariFundController.");
-        _poolsByCurrency[currencyCode].push(pool);
     }
 
     /**
@@ -445,7 +409,8 @@ contract RariFundManager is Initializable, Ownable {
 
             for (uint256 i = 0; i < _supportedCurrencies.length; i++) {
                 string memory currencyCode = _supportedCurrencies[i];
-                for (uint256 j = 0; j < _poolsByCurrency[currencyCode].length; j++) _poolBalanceCache[currencyCode][uint8(_poolsByCurrency[currencyCode][j])] = 0;
+                uint8[] memory poolsByCurrency = rariFundController.getPoolsByCurrency(currencyCode);
+                for (uint256 j = 0; j < poolsByCurrency.length; j++) _poolBalanceCache[currencyCode][uint8(poolsByCurrency[j])] = 0;
             }
         }
     }
@@ -461,8 +426,9 @@ contract RariFundManager is Initializable, Ownable {
 
         IERC20 token = IERC20(erc20Contract);
         uint256 totalBalance = token.balanceOf(_rariFundControllerContract);
-        for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++)
-            totalBalance = totalBalance.add(getPoolBalance(_poolsByCurrency[currencyCode][i], currencyCode));
+        uint8[] memory poolsByCurrency = rariFundController.getPoolsByCurrency(currencyCode);
+        for (uint256 i = 0; i < poolsByCurrency.length; i++)
+            totalBalance = totalBalance.add(getPoolBalance(poolsByCurrency[i], currencyCode));
 
         return totalBalance;
     }
@@ -681,13 +647,16 @@ contract RariFundManager is Initializable, Ownable {
      * @param amount The minimum amount of tokens that must be held by `RariFundController` after withdrawing.
      */
     function withdrawFromPoolsIfNecessary(string memory currencyCode, uint256 amount) internal {
-        // Check contract balance of token and withdraw from pools if necessary
+        // Check contract balance of token
         address erc20Contract = _erc20Contracts[currencyCode];
         uint256 contractBalance = IERC20(erc20Contract).balanceOf(_rariFundControllerContract);
 
-        for (uint256 i = 0; i < _poolsByCurrency[currencyCode].length; i++) {
+        // Withdraw from pools if necessary
+        uint8[] memory poolsByCurrency = rariFundController.getPoolsByCurrency(currencyCode);
+
+        for (uint256 i = 0; i < poolsByCurrency.length; i++) {
             if (contractBalance >= amount) break;
-            uint8 pool = _poolsByCurrency[currencyCode][i];
+            uint8 pool = poolsByCurrency[i];
             uint256 poolBalance = getPoolBalance(pool, currencyCode);
             if (poolBalance <= 0) continue;
             uint256 amountLeft = amount.sub(contractBalance);
@@ -702,6 +671,7 @@ contract RariFundManager is Initializable, Ownable {
             contractBalance = contractBalance.add(poolAmount);
         }
 
+        // Final check of amount <= contractBalance
         require(amount <= contractBalance, "Available balance not enough to cover amount even after withdrawing from pools.");
     }
 

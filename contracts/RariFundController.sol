@@ -71,7 +71,7 @@ contract RariFundController is Ownable {
     /**
      * @dev Maps `_supportedCurrencies` items to their indexes.
      */
-    mapping(string => uint8) private _currencyIndexes;
+    mapping(string => uint8) public _currencyIndexes;
 
     /**
      * @dev Maps supported currency codes to their decimal precisions (number of digits after the decimal point).
@@ -692,7 +692,6 @@ contract RariFundController is Ownable {
                 require(CErc20(cToken).underlying() == _erc20Contracts[currencyCode], "Underlying ERC20 token mismatch.");
                 fuseAssets[pool][currencyCode] = cToken;
                 _poolsByCurrency[currencyCode].push(pool);
-                rariFundManager.addPoolToCurrency(currencyCode, pool);
             }
         }
     }
