@@ -56,4 +56,11 @@ contract DummyRariFundController {
     function hasCurrencyInPool(uint8 pool, string calldata currencyCode) external view returns (bool) {
         return false;
     }
+
+    /**
+     * @dev Returns `_poolsByCurrency[currencyCode]`. Used by `RariFundManager` and `RariFundProxy.getRawFundBalancesAndPrices`.
+     */
+    function getPoolsByCurrency(string calldata currencyCode) external view returns (uint8[] memory) {
+        return new uint8[](0);
+    }
 }

@@ -97,7 +97,7 @@ contract RariFundPriceConsumer is Initializable, Ownable {
      */
     function getMUsdUsdPrice(uint256[] memory bAssetUsdPrices) internal view returns (uint256) {
         (, IMasset.BassetData[] memory bAssetData) = IMasset(MUSD).getBassets();
-        require(bAssetData.length == bAssetUsdPrices.length, "mUSD underlying bAsset data length not equal to bAsset USD prices length.");
+        require(bAssetData.length == 4, "mUSD underlying bAsset data length not equal to bAsset USD prices length.");
         uint256 usdSupplyScaled = 0;
         for (uint256 i = 0; i < bAssetData.length; i++) usdSupplyScaled = usdSupplyScaled.add(uint256(bAssetData[i].vaultBalance).mul(uint256(bAssetData[i].ratio)).div(1e8).mul(bAssetUsdPrices[i]));
         return usdSupplyScaled.div(IERC20(MUSD).totalSupply());
@@ -131,7 +131,6 @@ contract RariFundPriceConsumer is Initializable, Ownable {
         // Get other prices
         prices[3] = getPriceInEth("TUSD").mul(ethUsdPrice).div(1e18);
         prices[4] = getPriceInEth("BUSD").mul(ethUsdPrice).div(1e18);
-        prices[5] = getPriceInEth("sUSD").mul(ethUsdPrice).div(1e18);
 
         // Return prices array
         return prices;

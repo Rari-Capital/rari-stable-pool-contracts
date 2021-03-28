@@ -290,7 +290,7 @@ contract RariFundController is Ownable {
     }
 
     /**
-     * @dev Returns `_poolsByCurrency[currencyCode]`. Used by `RariFundProxy.getRawFundBalancesAndPrices`.
+     * @dev Returns `_poolsByCurrency[currencyCode]`. Used by `RariFundManager` and `RariFundProxy.getRawFundBalancesAndPrices`.
      */
     function getPoolsByCurrency(string calldata currencyCode) external view returns (uint8[] memory) {
         return _poolsByCurrency[currencyCode];
