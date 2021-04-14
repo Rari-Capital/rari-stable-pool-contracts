@@ -1,6 +1,6 @@
 # Rari Stable Pool: How it Works
 
-This document explains how the Rari Stable Pool works under the hood. This content is also available [on our website](https://rari.capital/current.html).
+This document explains how the Rari Stable Pool works under the hood. This content is also available [on our website](https://www.rari.capital/).
 
 ## Generating Yield
 
@@ -50,11 +50,11 @@ A centralized (but soon to be decentralized) **rebalancer** controls which pools
 
 Rari's Ethereum-based smart contracts are written in Solidity and audited by [Quantstamp](https://quantstamp.com/) (as well as various other partners) for security. Rari does not have control over your funds: instead, the Ethereum blockchain executes all secure code across its entire decentralized network (making it very difficult and extremely costly to rewrite history), and your funds are only withdrawable by you.
 
-While the centralized (but soon to be decentralized) rebalancer does have control over which pools hold which currencies at any given time but only has permission to move funds between pools and exchange currencies, not withdraw funds elsewhere. Losses due to exchange slippage in a 24-hour period are limited proportionally to the total supply for security since 0x orders can come from anywhere. However, the rebalancer can approve any amount of funds to the pools and exchanges integrated.
+The rebalancer only has permission to move funds between pools and exchange currencies, not withdraw funds elsewhere. Losses due to exchange slippage in a 24-hour period are limited proportionally to the total supply for security since 0x orders can come from anywhere. However, the rebalancer can approve any amount of funds to the pools and exchanges integrated.
 
-Please note that at the moment, smart contract upgrades are approved via a 3-of-5 multisig federation controlled by Rari's co-founders and partners. However, upgrades will become decentralized in the future via a governance protocol based on the Rari Governance Token (RGT).
+Please note that at the moment, smart contract upgrades are approved via a multisig federation controlled by various trusted parties. Each of the upgrades need to be voted on by governance at: vote.rari.capital for them to go live. 
 
-Please note that using our web client online at [app.rari.capital](https://app.rari.capital) is not nearly as trustworthy as downloading, verifying, and using it offline. Lastly, the rebalancer is centralized, but it can only rebalance funds to different pools and currencies (with limits on slippage).
+Please note that using our web client online at [app.rari.capital](https://app.rari.capital) is not nearly as trustworthy as downloading, verifying, and using it offline. Lastly, the rebalancer can only rebalance funds to different pools and currencies (with limits on slippage).
 
 ## Risk
 
@@ -63,9 +63,6 @@ We have covered security above, but see [our website](https://rari.capital/risks
 ## Fees
 
 See [this Notion article](https://www.notion.so/Fees-e4689d7b800f485098548dd9e9d0a69f) for more information about fees and where they go.
-
-* A *9.5% performance fee* is deducted from all interest earned by RSPT holders. This fee is liable to change in the future (but fees on past interest cannot be changed).
-* Furthermore, a *0.5% withdrawal fee* is deducted from all withdrawals from the Rari Stable Pool. This fee is also liable to change in the future.
 
 ## COMP
 
