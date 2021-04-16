@@ -88,6 +88,9 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundController.setFundManager(process.env.UPGRADE_FUND_MANAGER_ADDRESS);
     await rariFundManager.setFundController(RariFundController.address);
 
+    // Upgrade RariFundManager
+    rariFundManager = await upgradeProxy(process.env.UPGRADE_FUND_MANAGER_ADDRESS, RariFundManager, { deployer, unsafeAllowCustomTypes: true });
+
     // Re-enable the fund on the RariFundManager
     await rariFundManager.setFundDisabled(false);
 
