@@ -99,7 +99,7 @@ contract RariFundManager is Initializable, Ownable {
     /**
      * @dev UNUSED AFTER UPGRADE: Maps currency codes to arrays of supported pools.
      */
-    mapping(string => uint8[]) private _poolsByCurrency;
+    mapping(string => RariFundController.LiquidityPool[]) private _poolsByCurrency;
 
     /**
      * @dev Initializer that sets supported ERC20 contract addresses and supported pools for each supported token.
