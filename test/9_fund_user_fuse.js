@@ -19,7 +19,7 @@ const RariFundPriceConsumer = artifacts.require("RariFundPriceConsumer");
 
 // These tests expect the owner and the fund rebalancer of RariFundManager to be set to process.env.DEVELOPMENT_ADDRESS
 contract("RariFundManager, RariFundController", accounts => {
-  it("should deposit to the fund, approve and deposit to pools, accrue interest, and withdraw from the fund", async () => {
+  it("should deposit to the fund, approve and deposit to Fuse pools, accrue interest, and withdraw from the fund", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
