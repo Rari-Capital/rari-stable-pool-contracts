@@ -40,7 +40,6 @@ module.exports = async function(deployer, network, accounts) {
 
     if (["live", "live-fork"].indexOf(network) >= 0) {
       if (!process.env.LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY) return console.error("LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY is missing for live upgrade");
-      if (!process.env.LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED || process.env.LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED < ((new Date()).getTime() / 1000) - 3600 || process.env.LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED > (new Date()).getTime() / 1000) return console.error("LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED is missing, invalid, or out of date for live upgrade");
     } else {
       if (!process.env.UPGRADE_FUND_TOKEN_ADDRESS) return console.error("UPGRADE_FUND_TOKEN_ADDRESS is missing for development upgrade");
       if (!process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS) return console.error("UPGRADE_FUND_PRICE_CONSUMER_ADDRESS is missing for development upgrade");
