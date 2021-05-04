@@ -17,6 +17,7 @@ var MStablePoolController = artifacts.require("./lib/pools/MStablePoolController
 var FusePoolController = artifacts.require("./lib/pools/FusePoolController.sol");
 var ZeroExExchangeController = artifacts.require("./lib/exchanges/ZeroExExchangeController.sol");
 var MStableExchangeController = artifacts.require("./lib/exchanges/MStableExchangeController.sol");
+var UniswapExchangeController = artifacts.require("./lib/exchanges/UniswapExchangeController.sol");
 var RariFundController = artifacts.require("./RariFundController.sol");
 var RariFundManager = artifacts.require("./RariFundManager.sol");
 var RariFundToken = artifacts.require("./RariFundToken.sol");
@@ -54,8 +55,8 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.deploy(AavePoolController);
     await deployer.deploy(MStablePoolController);
     await deployer.deploy(FusePoolController);
-    await deployer.deploy(ZeroExExchangeController);
     await deployer.deploy(MStableExchangeController);
+    await deployer.deploy(UniswapExchangeController);
 
     // Link libraries to RariFundController
     await deployer.link(DydxPoolController, RariFundController);
@@ -63,11 +64,11 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.link(AavePoolController, RariFundController);
     await deployer.link(MStablePoolController, RariFundController);
     await deployer.link(FusePoolController, RariFundController);
-    await deployer.link(ZeroExExchangeController, RariFundController);
     await deployer.link(MStableExchangeController, RariFundController);
+    await deployer.link(UniswapExchangeController, RariFundController);
 
     // Deploy new RariFundController
-    var rariFundController = await deployer.deploy(RariFundController);
+    var rariFundController = await deployProxy(RariFundController, { deployer, unsafeAllowLinkedLibraries: true });
 
     // Disable the fund on the old RariFundController
     await oldRariFundController.disableFund({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
@@ -97,7 +98,7 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundController.setAaveReferralCode(86);
 
     // Set daily loss rate limit for currency exchanges
-    await rariFundController.setDailyLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(0.02e18) : web3.utils.toBN(0.9e18));
+    await rariFundController.setExchangeLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(2).pow(web3.utils.toBN(128)).subn(1).neg() : web3.utils.toBN(0.5e18));
 
     // Set fund rebalancer on controller and manager
     await rariFundController.setFundRebalancer(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_REBALANCER : process.env.DEVELOPMENT_ADDRESS);
@@ -155,8 +156,8 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.deploy(AavePoolController);
     await deployer.deploy(MStablePoolController);
     await deployer.deploy(FusePoolController);
-    await deployer.deploy(ZeroExExchangeController);
     await deployer.deploy(MStableExchangeController);
+    await deployer.deploy(UniswapExchangeController);
 
     // Link libraries to RariFundController
     await deployer.link(DydxPoolController, RariFundController);
@@ -164,11 +165,11 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.link(AavePoolController, RariFundController);
     await deployer.link(MStablePoolController, RariFundController);
     await deployer.link(FusePoolController, RariFundController);
-    await deployer.link(ZeroExExchangeController, RariFundController);
     await deployer.link(MStableExchangeController, RariFundController);
+    await deployer.link(UniswapExchangeController, RariFundController);
 
     // Deploy RariFundController and RariFundManager
-    var rariFundController = await deployer.deploy(RariFundController);
+    var rariFundController = await deployProxy(RariFundController, { deployer, unsafeAllowLinkedLibraries: true });
     var rariFundManager = await deployProxy(RariFundManager, [], { deployer });
 
     // Connect RariFundController and RariFundManager
@@ -194,7 +195,7 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundManager.setFundPriceConsumer(RariFundPriceConsumer.address);
 
     // Set daily loss rate limit for currency exchanges
-    await rariFundController.setDailyLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(0.02e18) : web3.utils.toBN(0.9e18));
+    await rariFundController.setExchangeLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(2).pow(web3.utils.toBN(128)).subn(1).neg() : web3.utils.toBN(0.5e18));
 
     // Set fund rebalancer on controller and manager
     await rariFundController.setFundRebalancer(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_REBALANCER : process.env.DEVELOPMENT_ADDRESS);
@@ -211,6 +212,9 @@ module.exports = async function(deployer, network, accounts) {
   
     // Set withdrawal fee rate to 0.5%
     await rariFundManager.setWithdrawalFeeRate(web3.utils.toBN(0.005e18));
+
+    // Deploy ZeroExExchangeController for RariFundProxy
+    await deployer.deploy(ZeroExExchangeController);
 
     // Link libraries to RariFundProxy
     await deployer.link(ZeroExExchangeController, RariFundProxy);

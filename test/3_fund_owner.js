@@ -197,7 +197,7 @@ contract("RariFundManager", accounts => {
     // TODO: Check _fundDisabled (no way to do this as of now)
 
     // Upgrade to new FundManager
-    var newFundManagerInstance = await deployProxy(DummyRariFundManager, []);
+    var newFundManagerInstance = await deployProxy(DummyRariFundManager);
 
     // Upgrade!
     await newFundManagerInstance.authorizeFundManagerDataSource(fundManagerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
@@ -207,7 +207,7 @@ contract("RariFundManager", accounts => {
 });
 
 contract("RariFundController", accounts => {
-  it("should upgrade the FundController to a copy of its code", async () => {
+  it("should upgrade the FundController implementation to a copy of its code", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
@@ -227,22 +227,10 @@ contract("RariFundController", accounts => {
     var oldFundBalance = await fundManagerInstance.getFundBalance.call();
     var oldAccountBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
 
-    // Disable original FundController and FundManager
-    await fundControllerInstance.disableFund({ from: process.env.DEVELOPMENT_ADDRESS });
-    await fundManagerInstance.setFundDisabled(true, { from: process.env.DEVELOPMENT_ADDRESS });
-
-    // TODO: Check _fundDisabled (no way to do this as of now)
-
-    // Create new FundController
-    var newFundControllerInstance = await RariFundController.new({ from: process.env.DEVELOPMENT_ADDRESS });
-    await newFundControllerInstance.setFundManager(RariFundManager.address, { from: process.env.DEVELOPMENT_ADDRESS });
-
-    // Upgrade!
-    await fundControllerInstance.methods["upgradeFundController(address)"](newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
-    await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
-
-    // Re-enable FundManager
-    await fundManagerInstance.setFundDisabled(false, { from: process.env.DEVELOPMENT_ADDRESS });
+    // Upgrade FundController
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundController.class_defaults.from = process.env.UPGRADE_FUND_OWNER_ADDRESS;
+    await upgradeProxy(RariFundController.address, RariFundController);
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundController.class_defaults.from = process.env.DEVELOPMENT_ADDRESS;
 
     // Check balance of new FundController
     let newRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
@@ -255,7 +243,7 @@ contract("RariFundController", accounts => {
 });
 
 contract("RariFundController", accounts => {
-  it("should upgrade the FundController to new code", async () => {
+  it("should upgrade the proxy and implementation of FundController to new code", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
@@ -282,7 +270,7 @@ contract("RariFundController", accounts => {
     // TODO: Check _fundDisabled (no way to do this as of now)
 
     // Create new FundController
-    var newFundControllerInstance = await DummyRariFundController.new({ from: process.env.DEVELOPMENT_ADDRESS });
+    var newFundControllerInstance = await deployProxy(DummyRariFundController);
 
     // Upgrade!
     await fundControllerInstance.methods["upgradeFundController(address)"](newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });

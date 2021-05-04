@@ -54,7 +54,7 @@ contract("RariFundController", accounts => {
     await fundManagerInstance.setFundDisabled(true, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Create new FundController and set its FundManager
-    var newFundControllerInstance = await RariFundController.new({ from: process.env.DEVELOPMENT_ADDRESS });
+    var newFundControllerInstance = await deployProxy(RariFundController);
     await newFundControllerInstance.setFundManager(RariFundManager.address, { from: process.env.DEVELOPMENT_ADDRESS });
 
     // Upgrade!

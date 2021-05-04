@@ -15,6 +15,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/drafts/SignedSafeMath
 import "@openzeppelin/contracts-ethereum-package/contracts/ownership/Ownable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Detailed.sol";
 
 import "@0x/contracts-exchange-libs/contracts/src/LibOrder.sol";
 
@@ -24,8 +25,9 @@ import "./lib/pools/CompoundPoolController.sol";
 import "./lib/pools/AavePoolController.sol";
 import "./lib/pools/MStablePoolController.sol";
 import "./lib/pools/FusePoolController.sol";
-import "./lib/exchanges/ZeroExExchangeController.sol";
 import "./lib/exchanges/MStableExchangeController.sol";
+import "./lib/exchanges/UniswapExchangeController.sol";
+
 import "./external/compound/CErc20.sol";
 
 /**
@@ -96,7 +98,7 @@ contract RariFundController is Ownable {
     /**
      * @dev Constructor that sets supported ERC20 contract addresses and supported pools for each supported token.
      */
-    constructor () public {
+    function initialize() public initializer {
         // Initialize base contracts
         Ownable.initialize(msg.sender);
         
@@ -145,13 +147,6 @@ contract RariFundController is Ownable {
     }
 
     /**
-     * @dev Payable fallback function called by 0x Exchange v3 to refund unspent protocol fee.
-     */
-    function () external payable {
-        require(msg.sender == 0x61935CbDd02287B511119DDb11Aeb42F1593b7Ef, "msg.sender is not 0x Exchange v3.");
-    }
-
-    /**
      * @dev Sets or upgrades RariFundController by withdrawing all tokens from all pools and forwarding them from the old to the new.
      * @param newContract The address of the new RariFundController contract.
      */
@@ -169,7 +164,7 @@ contract RariFundController is Ownable {
                 uint8 pool = _poolsByCurrency[currencyCode][j];
 
                 // If the pool has any funds in this currency, withdraw it
-                if (hasCurrencyInPool(pool, currencyCode)) {                
+                if (hasCurrencyInPool(pool, currencyCode)) {           
                     if (fuseAssets[pool][currencyCode] != address(0)) FusePoolController.transferAll(fuseAssets[pool][currencyCode], newContract); // Transfer Fuse cTokens directly
                     else _withdrawAllFromPool(pool, currencyCode);
                 }
@@ -488,21 +483,13 @@ contract RariFundController is Ownable {
     }
 
     /**
-     * @dev Approves tokens to 0x or mStable without spending gas on every deposit.
-     * Note that this function is vulnerable to the allowance double-spend exploit, as with the `approve` functions of the ERC20 contracts themselves. If you are concerned and setting exact allowances, make sure to set allowance to 0 on the client side before setting an allowance greater than 0.
-     * @param exchange The `CurrencyExchange` (0x or mStable) to which tokens are to be approved.
-     * @param erc20Contract The ERC20 contract address of the token to be approved.
-     * @param amount The amount of tokens to be approved.
-     */
-    function approveToExchange(CurrencyExchange exchange, address erc20Contract, uint256 amount) external fundEnabled onlyRebalancer {
-        if (exchange == CurrencyExchange.ZeroEx) ZeroExExchangeController.approve(erc20Contract, amount);
-        else if (exchange == CurrencyExchange.mStable) MStableExchangeController.approve(erc20Contract, amount);
-    }
-
-    /**
      * @dev Enum for currency exchanges supported by Rari.
      */
-    enum CurrencyExchange { ZeroEx, mStable }
+    enum CurrencyExchange {
+        ZeroEx, // No longer in use (kept to keep this enum backwards-compatible)
+        mStable,
+        Uniswap
+    }
 
     /**
      * @dev Emitted when currencies are exchanged via 0x or mStable.
@@ -511,16 +498,16 @@ contract RariFundController is Ownable {
     event CurrencyTrade(string indexed inputCurrencyCode, string indexed outputCurrencyCode, uint256 inputAmount, uint256 inputAmountUsd, uint256 outputAmount, uint256 outputAmountUsd, CurrencyExchange indexed exchange);
 
     /**
-     * @dev Daily limit on 0x exchange order slippage (scaled by 1e18).
+     * @dev Per-trade and daily limit on exchange order slippage (scaled by 1e18) of supported stablecoins.
      */
-    uint256 private _dailyLossRateLimit;
+    int256 private _exchangeLossRateLimit;
 
     /**
-     * @dev Sets or upgrades the daily limit on 0x exchange order loss over raw total fund balance.
-     * @param limit The daily limit on 0x exchange order loss over raw total fund balance (scaled by 1e18).
+     * @dev Sets or upgrades the per-trade and daily limit on exchange order loss over raw total fund balance.
+     * @param limit The per-trade and daily limit on exchange order loss over raw total fund balance (scaled by 1e18).
      */
-    function setDailyLossRateLimit(uint256 limit) external onlyOwner {
-        _dailyLossRateLimit = limit;
+    function setExchangeLossRateLimit(int256 limit) external onlyOwner {
+        _exchangeLossRateLimit = limit;
     }
 
     /**
@@ -537,55 +524,59 @@ contract RariFundController is Ownable {
     CurrencyExchangeLoss[] private _lossRateHistory;
 
     /**
-     * @dev Market sell to 0x exchange orders (reverting if `takerAssetFillAmount` is not filled or the 24-hour slippage limit is surpassed).
-     * We should be able to make this function external and use calldata for all parameters, but Solidity does not support calldata structs (https://github.com/ethereum/solidity/issues/5479).
-     * @param inputCurrencyCode The currency code of the token to be sold.
-     * @param outputCurrencyCode The currency code of the token to be bought.
-     * @param orders The limit orders to be filled in ascending order of price.
-     * @param signatures The signatures for the orders.
-     * @param takerAssetFillAmount The amount of the taker asset to sell (excluding taker fees).
+     * @dev Gets currency code for `erc20Contract` if it maps to a valid supported currency code.
      */
-    function marketSell0xOrdersFillOrKill(string memory inputCurrencyCode, string memory outputCurrencyCode, LibOrder.Order[] memory orders, bytes[] memory signatures, uint256 takerAssetFillAmount) public payable fundEnabled onlyRebalancer {
-        // Check if input is a supported stablecoin and make sure output is a supported stablecoin
-        address inputErc20Contract = _erc20Contracts[inputCurrencyCode];
-        address outputErc20Contract = _erc20Contracts[outputCurrencyCode];
-        require(outputErc20Contract != address(0), "Invalid output currency code.");
+    function getCurrencyCodeByErc20Contract(address erc20Contract) internal view returns (string memory) {
+        for (uint256 i = 0; i < _supportedCurrencies.length; i++) if (_erc20Contracts[_supportedCurrencies[i]] == erc20Contract) return _supportedCurrencies[i];
+        return "";
+    }
 
-        // Check orders (if inputting a supported stablecoin)
-        if (inputErc20Contract != address(0)) ZeroExExchangeController.checkTokenAddresses(orders, inputErc20Contract, outputErc20Contract);
+    /**
+     * @dev Market sell `inputAmount` via Uniswap (reverting if the output is not a supported stablecoin, there is not enough liquidity to sell `inputAmount`, `minOutputAmount` is not satisfied, or the 24-hour slippage limit is surpassed).
+     * We should be able to make this function external and use calldata for all parameters, but Solidity does not support calldata structs (https://github.com/ethereum/solidity/issues/5479).
+     * @param path The Uniswap V2 ERC20 token address path to use for the exchange.
+     * @param inputAmount The amount of the input asset to sell/send.
+     * @param minOutputAmount The minimum amount of the output asset to buy/receive.
+     */
+    function swapExactTokensForTokens(address[] calldata path, uint256 inputAmount, uint256 minOutputAmount) external fundEnabled onlyRebalancer {
+        // Exchanges not supported if _exchangeLossRateLimit == min value for int256
+        require(_exchangeLossRateLimit > int256(uint256(1) << 255), "Exchanges have been disabled.");
+
+        // Check if input is a supported stablecoin and make sure output is a supported stablecoin
+        string memory inputCurrencyCode = getCurrencyCodeByErc20Contract(path[0]);
+        string memory outputCurrencyCode = getCurrencyCodeByErc20Contract(path[path.length - 1]);
+        require(bytes(outputCurrencyCode).length > 0, "Output token is not a supported stablecoin.");
 
         // Get prices and raw fund balance before exchange
         uint256[] memory pricesInUsd;
         uint256 rawFundBalanceBeforeExchange;
 
-        if (inputErc20Contract != address(0)) {
+        if (bytes(inputCurrencyCode).length > 0) {
             pricesInUsd = rariFundManager.rariFundPriceConsumer().getCurrencyPricesInUsd();
             rawFundBalanceBeforeExchange = rariFundManager.getRawFundBalance(pricesInUsd);
         }
 
+        // Approve tokens
+        UniswapExchangeController.approve(path[0], inputAmount);
+
         // Market sell
-        uint256[2] memory filledAmounts = ZeroExExchangeController.marketSellOrdersFillOrKill(orders, signatures, takerAssetFillAmount, msg.value);
+        uint256 outputAmount = UniswapExchangeController.swapExactTokensForTokens(inputAmount, minOutputAmount, path);
 
-        // Check 24-hour loss rate limit (if inputting a supported stablecoin)
-        uint256 inputFilledAmountUsd = 0;
-        uint256 outputFilledAmountUsd = 0;
+        // Check per-trade and 24-hour loss rate limit (if inputting a supported stablecoin)
+        uint256 inputAmountUsd = 0;
+        uint256 outputAmountUsd = 0;
 
-        if (inputErc20Contract != address(0)) {
-            inputFilledAmountUsd = toUsd(inputCurrencyCode, filledAmounts[0], pricesInUsd);
-            outputFilledAmountUsd = toUsd(outputCurrencyCode, filledAmounts[1], pricesInUsd);
-            handleExchangeLoss(inputFilledAmountUsd, outputFilledAmountUsd, rawFundBalanceBeforeExchange);
+        if (bytes(inputCurrencyCode).length > 0) {
+            // Get amount in USD
+            inputAmountUsd = toUsd(inputCurrencyCode, inputAmount, pricesInUsd);
+            outputAmountUsd = toUsd(outputCurrencyCode, outputAmount, pricesInUsd);
+
+            // Check loss rate limits
+            handleExchangeLoss(inputAmountUsd, outputAmountUsd, rawFundBalanceBeforeExchange);
         }
 
         // Emit event
-        emit CurrencyTrade(inputCurrencyCode, outputCurrencyCode, filledAmounts[0], inputFilledAmountUsd, filledAmounts[1], outputFilledAmountUsd, CurrencyExchange.ZeroEx);
-
-        // Refund unused ETH
-        uint256 ethBalance = address(this).balance;
-        
-        if (ethBalance > 0) {
-            (bool success, ) = msg.sender.call.value(ethBalance)("");
-            require(success, "Failed to transfer ETH to msg.sender after exchange.");
-        }
+        emit CurrencyTrade(bytes(inputCurrencyCode).length > 0 ? inputCurrencyCode : ERC20Detailed(path[path.length - 1]).symbol(), outputCurrencyCode, inputAmount, inputAmountUsd, outputAmount, outputAmountUsd, CurrencyExchange.Uniswap);
     }
 
     /**
@@ -606,10 +597,13 @@ contract RariFundController is Ownable {
      * @param outputAmountUsd The amount bought in USD (scaled by 1e18).
      */
     function handleExchangeLoss(uint256 inputAmountUsd, uint256 outputAmountUsd, uint256 rawFundBalanceBeforeExchange) internal {
-        // Calculate loss rate
+        // Calculate loss in USD
         int256 lossUsd = int256(inputAmountUsd).sub(int256(outputAmountUsd));
-        int256 lossRate = lossUsd.mul(1e18).div(int256(rawFundBalanceBeforeExchange));
 
+        // Check per-trade loss rate limit (equals daily loss rate limit)
+        int256 tradeLossRateOnTrade = lossUsd.mul(1e18).div(int256(inputAmountUsd));
+        require(tradeLossRateOnTrade <= _exchangeLossRateLimit, "This exchange would violate the per-trade loss rate limit.");
+        
         // Check if sum of loss rates over the last 24 hours + this trade's loss rate > the limit
         int256 lossRateLastDay = 0;
 
@@ -618,10 +612,11 @@ contract RariFundController is Ownable {
             lossRateLastDay = lossRateLastDay.add(_lossRateHistory[i - 1].lossRate);
         }
 
-        require(lossRateLastDay.add(lossRate) <= int256(_dailyLossRateLimit), "This exchange would violate the 24-hour loss rate limit.");
+        int256 tradeLossRateOnFund = lossUsd.mul(1e18).div(int256(rawFundBalanceBeforeExchange));
+        require(lossRateLastDay.add(tradeLossRateOnFund) <= _exchangeLossRateLimit, "This exchange would violate the 24-hour loss rate limit.");
 
         // Log loss rate in history
-        _lossRateHistory.push(CurrencyExchangeLoss(block.timestamp, lossRate));
+        _lossRateHistory.push(CurrencyExchangeLoss(block.timestamp, tradeLossRateOnFund));
     }
 
     /**
@@ -632,6 +627,9 @@ contract RariFundController is Ownable {
      * @param minOutputAmount The minimum amount of output tokens to be bought.
      */
     function swapMStable(string calldata inputCurrencyCode, string calldata outputCurrencyCode, uint256 inputAmount, uint256 minOutputAmount) external fundEnabled onlyRebalancer {
+        // Exchanges not supported if _exchangeLossRateLimit == min value for int256
+        require(_exchangeLossRateLimit > int256(uint256(1) << 255), "Exchanges have been disabled.");
+
         // Input validation
         address inputErc20Contract = _erc20Contracts[inputCurrencyCode];
         address outputErc20Contract = _erc20Contracts[outputCurrencyCode];
@@ -643,6 +641,9 @@ contract RariFundController is Ownable {
         uint256 rawFundBalanceBeforeExchange;
         pricesInUsd = rariFundManager.rariFundPriceConsumer().getCurrencyPricesInUsd();
         rawFundBalanceBeforeExchange = rariFundManager.getRawFundBalance(pricesInUsd);
+
+        // Approve to mUSD
+        MStableExchangeController.approve(inputErc20Contract, inputAmount);
 
         // Swap stablecoins via mUSD
         uint256 outputAmount = MStableExchangeController.swap(inputErc20Contract, outputErc20Contract, inputAmount, minOutputAmount);
