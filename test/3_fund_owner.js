@@ -229,7 +229,7 @@ contract("RariFundController", accounts => {
 
     // Upgrade FundController
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundController.class_defaults.from = process.env.UPGRADE_FUND_OWNER_ADDRESS;
-    await upgradeProxy(RariFundController.address, RariFundController);
+    await upgradeProxy(RariFundController.address, RariFundController, { unsafeAllowLinkedLibraries: true });
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundController.class_defaults.from = process.env.DEVELOPMENT_ADDRESS;
 
     // Check balance of new FundController

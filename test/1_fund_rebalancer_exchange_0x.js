@@ -68,8 +68,10 @@ contract("RariFundController, RariFundManager", accounts => {
   });
       
   it("should fail to exchange tokens via Uniswap V2 if loss rate limit is breached", async () => {
+    let fundControllerInstance = await RariFundController.deployed();
+
     // Try and fail to swap via Uniswap with the loss rate limit at almost negative infinity
-    await fundControllerInstance.setExchangeLossRateLimit(web3.utils.toBN(2).pow(web3.utils.toBN(128)).subn(1).neg());
+    await fundControllerInstance.setExchangeLossRateLimit(web3.utils.toBN(2).pow(web3.utils.toBN(255)).neg());
     var inputAmountBN = web3.utils.toBN(10 ** (currencies["USDC"].decimals - 1));
     var minOutputAmountBN = web3.utils.toBN(10 ** (currencies["USDT"].decimals - 1)).muln(95).divn(100); // At least 0.95 outputs per input
 

@@ -98,10 +98,13 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundController.setAaveReferralCode(86);
 
     // Set daily loss rate limit for currency exchanges
-    await rariFundController.setExchangeLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(2).pow(web3.utils.toBN(128)).subn(1).neg() : web3.utils.toBN(0.5e18));
+    await rariFundController.setExchangeLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(2).pow(web3.utils.toBN(255)).neg() : web3.utils.toBN(0.5e18));
 
     // Set fund rebalancer on controller and manager
     await rariFundController.setFundRebalancer(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_REBALANCER : process.env.DEVELOPMENT_ADDRESS);
+
+    // Deploy ZeroExExchangeController for RariFundProxy
+    await deployer.deploy(ZeroExExchangeController);
 
     // Link libraries to RariFundProxy
     await deployer.link(ZeroExExchangeController, RariFundProxy);
@@ -195,7 +198,7 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundManager.setFundPriceConsumer(RariFundPriceConsumer.address);
 
     // Set daily loss rate limit for currency exchanges
-    await rariFundController.setExchangeLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(2).pow(web3.utils.toBN(128)).subn(1).neg() : web3.utils.toBN(0.5e18));
+    await rariFundController.setExchangeLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(2).pow(web3.utils.toBN(255)).neg() : web3.utils.toBN(0.5e18));
 
     // Set fund rebalancer on controller and manager
     await rariFundController.setFundRebalancer(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_REBALANCER : process.env.DEVELOPMENT_ADDRESS);
