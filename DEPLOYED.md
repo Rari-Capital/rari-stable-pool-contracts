@@ -8,15 +8,17 @@ As follows are all deployments of our smart contracts on the Ethereum mainnet. S
 
 `RariFundController` holds supplied funds and is used by the rebalancer to deposit and withdraw from pools and make exchanges.
 
-**v2.5.0**: `0x369855b051d1b2dbee88a792dcfc08614ff4e262`
+**v2.6.0**: `0x66f4856f1bbd1eb09e1c8d9d646f5a3a193da569`
+
+Implementation contract: `0xdac4585b741e5b6625cec460d2a255fb3fbe0d47`
 
 ### `RariFundManager`
 
 `RariFundManager` is the Rari Stable Pool's main contract: it handles deposits, withdrawals, USD balances, interest, fees, etc.
 
-**v2.2.0**: `0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a`
+**v2.6.0**: `0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a`
 
-Implementation contract: `0xfbd8fa4ae1ca58fa6fd4cf683f94e54235266141`
+Implementation contract: `0x6C85e8101e52ea7B569230f93bC452f291edCBEC`
 
 ### `RariFundToken`
 
@@ -38,17 +40,19 @@ Implementation contract: `0xc34D76cBB18a5976e38Fe0f0c580DCEE6D8954ee`
 
 `RariFundProxy` includes wrapper functions built on top of `RariFundManager`: exchange and deposit, withdraw and exchange, deposit without paying gas via the Gas Station Network (GSN).
 
-**v2.4.0**: `0xe4deE94233dd4d7c2504744eE6d34f3875b3B439`
+**v2.6.0**: `0x4a785fa6fcd2e0845a24847beb7bddd26f996d4d`
 
 ## Older Versions
 
 ### `RariFundController`
 
+* **v2.5.0**: `0x369855b051d1b2dbee88a792dcfc08614ff4e262`
 * **v2.0.0**: `0xEe7162bB5191E8EC803F7635dE9A920159F1F40C`
 * **v1.1.0**: `0x15c4ae284fbb3a6ceb41fa8eb5f3408ac485fabb`
 
 ### `RariFundManager`
 
+* **v2.2.0**: `0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a`
 * **v2.1.0**: `0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a`
 * **v2.0.0**: `0xC6BF8C8A55f77686720E0a88e2Fd1fEEF58ddf4a`
 * **v1.1.0**: `0x6bdaf490c5b6bb58564b3e79c8d18e8dfd270464`
@@ -65,6 +69,7 @@ Implementation contract: `0xc34D76cBB18a5976e38Fe0f0c580DCEE6D8954ee`
 
 ### `RariFundProxy`
 
+* **v2.4.0**: `0xe4deE94233dd4d7c2504744eE6d34f3875b3B439`
 * **v2.2.0**: `0xB202cAd3965997f2F5E67B349B2C5df036b9792e`
 * **v2.0.0**: `0xD4be7E211680e12c08bbE9054F0dA0D646c45228`
 * **v1.2.0**: `0xb6b79D857858004BF475e4A57D4A446DA4884866`
