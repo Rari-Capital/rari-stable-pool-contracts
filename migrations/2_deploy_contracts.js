@@ -1,12 +1,4 @@
-/**
- * COPYRIGHT © 2020 RARI CAPITAL, INC. ALL RIGHTS RESERVED.
- * Anyone is free to integrate the public (i.e., non-administrative) application programming interfaces (APIs) of the official Ethereum smart contract instances deployed by Rari Capital, Inc. in any application (commercial or noncommercial and under any license), provided that the application does not abuse the APIs or act against the interests of Rari Capital, Inc.
- * Anyone is free to study, review, and analyze the source code contained in this package.
- * Reuse (including deployment of smart contracts other than private testing on a private network), modification, redistribution, or sublicensing of any source code contained in this package is not permitted without the explicit permission of David Lucid of Rari Capital, Inc.
- * No one is permitted to use the software for any purpose other than those allowed by this license.
- * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
- */
-
+// SPDX-License-Identifier: UNLICENSED
 const { deployProxy, upgradeProxy, admin } = require('@openzeppelin/truffle-upgrades');
 require('dotenv').config();
 
@@ -14,8 +6,10 @@ var DydxPoolController = artifacts.require("./lib/pools/DydxPoolController.sol")
 var CompoundPoolController = artifacts.require("./lib/pools/CompoundPoolController.sol");
 var AavePoolController = artifacts.require("./lib/pools/AavePoolController.sol");
 var MStablePoolController = artifacts.require("./lib/pools/MStablePoolController.sol");
+var FusePoolController = artifacts.require("./lib/pools/FusePoolController.sol");
 var ZeroExExchangeController = artifacts.require("./lib/exchanges/ZeroExExchangeController.sol");
 var MStableExchangeController = artifacts.require("./lib/exchanges/MStableExchangeController.sol");
+var UniswapExchangeController = artifacts.require("./lib/exchanges/UniswapExchangeController.sol");
 var RariFundController = artifacts.require("./RariFundController.sol");
 var RariFundManager = artifacts.require("./RariFundManager.sol");
 var RariFundToken = artifacts.require("./RariFundToken.sol");
@@ -39,11 +33,9 @@ module.exports = async function(deployer, network, accounts) {
 
     if (["live", "live-fork"].indexOf(network) >= 0) {
       if (!process.env.LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY) return console.error("LIVE_UPGRADE_FUND_OWNER_PRIVATE_KEY is missing for live upgrade");
-      if (!process.env.LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED || process.env.LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED < ((new Date()).getTime() / 1000) - 3600 || process.env.LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED > (new Date()).getTime() / 1000) return console.error("LIVE_UPGRADE_TIMESTAMP_COMP_CLAIMED is missing, invalid, or out of date for live upgrade");
     } else {
       if (!process.env.UPGRADE_FUND_TOKEN_ADDRESS) return console.error("UPGRADE_FUND_TOKEN_ADDRESS is missing for development upgrade");
       if (!process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS) return console.error("UPGRADE_FUND_PRICE_CONSUMER_ADDRESS is missing for development upgrade");
-      if (!process.env.UPGRADE_FUND_PROXY_ADDRESS) return console.error("UPGRADE_FUND_PROXY_ADDRESS is missing for development upgrade");
     }
 
     // Upgrade from v2.4.0 (RariFundController v2.0.0) to v2.5.0
@@ -54,19 +46,21 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.deploy(CompoundPoolController);
     await deployer.deploy(AavePoolController);
     await deployer.deploy(MStablePoolController);
-    await deployer.deploy(ZeroExExchangeController);
+    await deployer.deploy(FusePoolController);
     await deployer.deploy(MStableExchangeController);
+    await deployer.deploy(UniswapExchangeController);
 
     // Link libraries to RariFundController
     await deployer.link(DydxPoolController, RariFundController);
     await deployer.link(CompoundPoolController, RariFundController);
     await deployer.link(AavePoolController, RariFundController);
     await deployer.link(MStablePoolController, RariFundController);
-    await deployer.link(ZeroExExchangeController, RariFundController);
+    await deployer.link(FusePoolController, RariFundController);
     await deployer.link(MStableExchangeController, RariFundController);
+    await deployer.link(UniswapExchangeController, RariFundController);
 
     // Deploy new RariFundController
-    var rariFundController = await deployer.deploy(RariFundController);
+    var rariFundController = await deployProxy(RariFundController, { deployer, unsafeAllowLinkedLibraries: true });
 
     // Disable the fund on the old RariFundController
     await oldRariFundController.disableFund({ from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
@@ -86,6 +80,9 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundController.setFundManager(process.env.UPGRADE_FUND_MANAGER_ADDRESS);
     await rariFundManager.setFundController(RariFundController.address);
 
+    // Upgrade RariFundManager
+    rariFundManager = await upgradeProxy(process.env.UPGRADE_FUND_MANAGER_ADDRESS, RariFundManager, { deployer, unsafeAllowCustomTypes: true });
+
     // Re-enable the fund on the RariFundManager
     await rariFundManager.setFundDisabled(false);
 
@@ -93,21 +90,54 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundController.setAaveReferralCode(86);
 
     // Set daily loss rate limit for currency exchanges
-    await rariFundController.setDailyLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(0.02e18) : web3.utils.toBN(0.9e18));
+    await rariFundController.setExchangeLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(2).pow(web3.utils.toBN(255)).neg() : web3.utils.toBN(0.5e18));
 
     // Set fund rebalancer on controller and manager
     await rariFundController.setFundRebalancer(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_REBALANCER : process.env.DEVELOPMENT_ADDRESS);
 
+    // Deploy ZeroExExchangeController for RariFundProxy
+    await deployer.deploy(ZeroExExchangeController);
+
+    // Link libraries to RariFundProxy
+    await deployer.link(ZeroExExchangeController, RariFundProxy);
+    await deployer.link(MStableExchangeController, RariFundProxy);
+
+    // Deploy RariFundProxy
+    var rariFundProxy = await deployer.deploy(RariFundProxy);
+
+    // Connect RariFundManager and RariFundProxy
+    await rariFundManager.setFundProxy(RariFundProxy.address);
+    await rariFundProxy.setFundManager(RariFundManager.address);
+
+    // Set GSN trusted signer
+    await rariFundProxy.setGsnTrustedSigner(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_GSN_TRUSTED_SIGNER : process.env.DEVELOPMENT_ADDRESS);
+
     if (["live", "live-fork"].indexOf(network) >= 0) {
       // Live network: transfer ownership of RariFundController to live owner
       await rariFundController.transferOwnership(process.env.LIVE_FUND_OWNER);
+      await rariFundProxy.transferOwnership(process.env.LIVE_FUND_OWNER);
     } else {
+      // Register Fuse pools
+      var testFusePools = require("../test/fixtures/fuse.json");
+      var poolKeys = Object.keys(testFusePools);
+      var poolIds = [];
+      var currencyCodes = [];
+      var cTokens = [];
+      for (var i = 0; i < poolKeys.length; i++) {
+        poolIds[i] = 100 + i;
+        currencyCodes[i] = [];
+        cTokens[i] = [];
+        for (const currencyCode of Object.keys(testFusePools[poolKeys[i]].currencies)) {
+          currencyCodes[i].push(currencyCode);
+          cTokens[i].push(testFusePools[poolKeys[i]].currencies[currencyCode].cTokenAddress);
+        }
+      }
+      await rariFundController.addFuseAssets(poolIds, currencyCodes, cTokens);
+
       // Development network: transfer ownership of contracts to development address, set development address as rebalancer, and set all currencies to accepted
       await rariFundManager.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       var rariFundPriceConsumer = await RariFundPriceConsumer.at(process.env.UPGRADE_FUND_PRICE_CONSUMER_ADDRESS); 
       await rariFundPriceConsumer.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
-      var rariFundProxy = await RariFundProxy.at(process.env.UPGRADE_FUND_PROXY_ADDRESS); 
-      await rariFundProxy.transferOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       // TODO: await admin.transferProxyAdminOwnership(process.env.DEVELOPMENT_ADDRESS, { from: process.env.UPGRADE_FUND_OWNER_ADDRESS });
       RariFundManager.class_defaults.from = process.env.DEVELOPMENT_ADDRESS;
       await rariFundManager.setFundRebalancer(process.env.DEVELOPMENT_ADDRESS);
@@ -120,19 +150,21 @@ module.exports = async function(deployer, network, accounts) {
     await deployer.deploy(CompoundPoolController);
     await deployer.deploy(AavePoolController);
     await deployer.deploy(MStablePoolController);
-    await deployer.deploy(ZeroExExchangeController);
+    await deployer.deploy(FusePoolController);
     await deployer.deploy(MStableExchangeController);
+    await deployer.deploy(UniswapExchangeController);
 
     // Link libraries to RariFundController
     await deployer.link(DydxPoolController, RariFundController);
     await deployer.link(CompoundPoolController, RariFundController);
     await deployer.link(AavePoolController, RariFundController);
     await deployer.link(MStablePoolController, RariFundController);
-    await deployer.link(ZeroExExchangeController, RariFundController);
+    await deployer.link(FusePoolController, RariFundController);
     await deployer.link(MStableExchangeController, RariFundController);
+    await deployer.link(UniswapExchangeController, RariFundController);
 
     // Deploy RariFundController and RariFundManager
-    var rariFundController = await deployer.deploy(RariFundController);
+    var rariFundController = await deployProxy(RariFundController, { deployer, unsafeAllowLinkedLibraries: true });
     var rariFundManager = await deployProxy(RariFundManager, [], { deployer });
 
     // Connect RariFundController and RariFundManager
@@ -158,7 +190,7 @@ module.exports = async function(deployer, network, accounts) {
     await rariFundManager.setFundPriceConsumer(RariFundPriceConsumer.address);
 
     // Set daily loss rate limit for currency exchanges
-    await rariFundController.setDailyLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(0.02e18) : web3.utils.toBN(0.9e18));
+    await rariFundController.setExchangeLossRateLimit(["live", "live-fork"].indexOf(network) >= 0 ? web3.utils.toBN(2).pow(web3.utils.toBN(255)).neg() : web3.utils.toBN(0.5e18));
 
     // Set fund rebalancer on controller and manager
     await rariFundController.setFundRebalancer(["live", "live-fork"].indexOf(network) >= 0 ? process.env.LIVE_FUND_REBALANCER : process.env.DEVELOPMENT_ADDRESS);
@@ -175,6 +207,9 @@ module.exports = async function(deployer, network, accounts) {
   
     // Set withdrawal fee rate to 0.5%
     await rariFundManager.setWithdrawalFeeRate(web3.utils.toBN(0.005e18));
+
+    // Deploy ZeroExExchangeController for RariFundProxy
+    await deployer.deploy(ZeroExExchangeController);
 
     // Link libraries to RariFundProxy
     await deployer.link(ZeroExExchangeController, RariFundProxy);
@@ -200,6 +235,23 @@ module.exports = async function(deployer, network, accounts) {
       await rariFundPriceConsumer.transferOwnership(process.env.LIVE_FUND_OWNER);
       await admin.transferProxyAdminOwnership(process.env.LIVE_FUND_OWNER);
     } else {
+      // Register Fuse pools
+      var testFusePools = require("../test/fixtures/fuse.json");
+      var poolKeys = Object.keys(testFusePools);
+      var poolIds = [];
+      var currencyCodes = [];
+      var cTokens = [];
+      for (var i = 0; i < poolKeys.length; i++) {
+        poolIds[i] = 100 + i;
+        currencyCodes[i] = [];
+        cTokens[i] = [];
+        for (const currencyCode of Object.keys(testFusePools[poolKeys[i]].currencies)) {
+          currencyCodes[i].push(currencyCode);
+          cTokens[i].push(testFusePools[poolKeys[i]].currencies[currencyCode].cTokenAddress);
+        }
+      }
+      await rariFundController.addFuseAssets(poolIds, currencyCodes, cTokens);
+
       // Development network: set all currencies to accepted
       await rariFundManager.setAcceptedCurrencies(["DAI", "USDC", "USDT", "TUSD", "BUSD", "sUSD", "mUSD"], [true, true, true, true, true, true, true]);
     }

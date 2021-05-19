@@ -1,19 +1,22 @@
 {
-    "zeroExCurrencyCombinations": [
-        ["DAI", "USDC"],
-        ["DAI", "USDT"],
-        ["DAI", "TUSD"],
-        ["DAI", "BUSD"],
-        ["DAI", "sUSD"],
-        ["USDC", "DAI"],
-        ["USDT", "DAI"],
-        ["TUSD", "DAI"],
-        ["BUSD", "DAI"],
-        ["sUSD", "DAI"]
+    "uniswapCurrencyPaths": [
+        ["USDC", "USDT"],
+        ["USDT", "USDC"],
+        ["DAI", "WETH", "USDC"],
+        ["DAI", "WETH", "USDT"],
+        ["DAI", "WETH", "TUSD"],
+        ["DAI", "WETH", "BUSD"],
+        ["DAI", "WETH", "sUSD"],
+        ["USDC", "WETH", "DAI"],
+        ["USDT", "WETH", "DAI"],
+        ["TUSD", "WETH", "DAI"],
+        ["BUSD", "WETH", "DAI"],
+        ["sUSD", "WETH", "DAI"]
     ],
     "mStableExchangeCurrencies": [
+        "sUSD",
         "USDC",
-        "USDT",
-        "TUSD"
+        "DAI",
+        "USDT"
     ]
 }

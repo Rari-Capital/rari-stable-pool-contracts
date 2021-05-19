@@ -38,10 +38,11 @@ The following document contains instructions on common usage of the Rari Stable 
                 * Note that `checkSig.php` may go offline at some point in the future, in which case the user should deposit normally as described above.
             3. User calls `bool RariFundProxy.deposit(string currencyCode, uint256 amount)` via the Gas Station Network (GSN).
     * If desired deposit currency is not accepted, get exchange data from mStable (preferably) and/or 0x:
-        * If desired deposit currency is DAI, USDC, USDT, TUSD, or mUSD, until the user fulfills their entire deposit, exchange to any depositable currency among DAI, USDC, USDT, TUSD, or mUSD via mStable and deposit:
-            1. Get exchange data from mStable:
-                * If desired deposit currency is DAI, USDC, USDT, or TUSD, check `(bool, string, uint256, uint256) MassetValidationHelper(0xabcc93c3be238884cc3309c19afd128fafc16911).getMaxSwap(0xe2f2a5c287993345a840db3b0845fbc70f5935a5, address _input, address _output)`. If the first returned value is `true`, the user can exchange a maximum input amount of the third returned value.
-                * If desired deposit currency is mUSD, check `(bool, string, uint256 output, uint256 bassetQuantityArg) MassetValidationHelper(0xabcc93c3be238884cc3309c19afd128fafc16911).getRedeemValidity(0xabcc93c3be238884cc3309c19afd128fafc16911, uint256 _mAssetQuantity, address _outputBasset)`. If the first returned value is `true`, the user can exchange a maximum input amount of `bassetQuantityArg` (the fourth returned value).
+        * If desired deposit currency is DAI, USDC, USDT, sUSD, or mUSD, until the user fulfills their entire deposit, exchange to any depositable currency among DAI, USDC, USDT, sUSD, or mUSD via mStable and deposit:
+            1. Get exchange output from mStable:
+                * If desired deposit currency is DAI, USDC, USDT, or sUSD and accepted currency is mUSD, check `(uint256 mintOutput) Masset(0xe2f2a5c287993345a840db3b0845fbc70f5935a5).getMintOutput(address _input, uint256 _inputQuantity)`. The user can exchange `_inputQuantity` of `_input` for `mintOutput` of mUSD.
+                * If desired deposit currency is mUSD and accepted currency is DAI, USDC, USDT, or sUSD, check `(uint256 bAssetOutput) Masset(0xe15aad5d6b7433e5988415274529311f6bf6e8a3).getRedeemValidity(address _output, uint256 _mAssetQuantity)`. The user can exchange `_mAssetQuantity` of mUSD for `bAssetOutput` of `_output`.
+                * If desired deposit currency is DAI, USDC, USDT, or sUSD and accepted currency is DAI, USDC, USDT, or sUSD, check `(uint256 swapOutput) Masset(0xe2f2a5c287993345a840db3b0845fbc70f5935a5).getMintOutput(address _input, address _output, uint256 _inputQuantity)`. The user can exchange `_inputQuantity` of `_input` for `swapOutput` of `_output`.
             2. User calls `bool RariFundProxy.exchangeAndDeposit(string inputCurrencyCode, uint256 inputAmount, string outputCurrencyCode)` to exchange and deposit.
         * If exchange via mStable is not possible (or if the user wants to exchange the rest of their deposit via 0x if mStable cannot exchange it all), retrieve order data from 0x:
             1. User retrieves data from 0x swap quote API (see [documentation](https://0x.org/docs/api#get-swapv0quote) and [endpoint](https://api.0x.org/swap/v0/quote?sellToken=DAI&buyToken=USDC&sellAmount=1000000000000000000)) where:
@@ -62,11 +63,9 @@ The following document contains instructions on common usage of the Rari Stable 
     * If returned balance < withdrawal amount:
         1. Until the whole withdrawal amount (including the directly withdrawable balance returned above) is filled, try to withdraw and exchange each of the other currencies held by the Stable Pool (DAI, USDC, USDT, TUSD, BUSD, sUSD, and mUSD) to the desired output currency:
             1. User calls `uint256 RariFundManager.getRawFundBalance(string currencyCode)` to get the raw total balance held by the Stable Pool of the potential input currency in question.
-            2. Get exchange data from mStable (preferably) and/or 0x:
-                * If output currency is DAI, USDC, USDT, TUSD, or mUSD, get exchange data via mStable:
-                    * If input currency is DAI, USDC, USDT, or TUSD, check `(bool, string, uint256, uint256) MassetValidationHelper(0xabcc93c3be238884cc3309c19afd128fafc16911).getMaxSwap(0xe2f2a5c287993345a840db3b0845fbc70f5935a5, address _input, address _output)`. If the first returned value is `true`, the user can exchange a maximum input amount of the third returned value.
-                    * If input currency is mUSD, check `(bool, string, uint256 output, uint256 bassetQuantityArg) MassetValidationHelper(0xabcc93c3be238884cc3309c19afd128fafc16911).getRedeemValidity(0xabcc93c3be238884cc3309c19afd128fafc16911, uint256 _mAssetQuantity, address _outputBasset)`. If the first returned value is `true`, the user can exchange a maximum input amount of `bassetQuantityArg` (the fourth returned value).
-                * If exchange via mStable is not possible (or if the user wants to exchange additional funds via 0x if mStable cannot exchange it all), retrieve order data from 0x:
+            2. Get exchange input from mStable (preferably) and/or 0x:
+                * If output currency is DAI, USDC, USDT, sUSD, or mUSD, try exchanging via mStable.
+                * If exchange via mStable is not entirely profitable, retrieve order data from 0x:
                     * If the raw total balance of this input currency is enough to cover the remaining withdrawal amount, user retrieves data from the 0x swap quote API (see [documentation](https://0x.org/docs/api#get-swapv0quote) and [endpoint](https://api.0x.org/swap/v0/quote?sellToken=DAI&buyToken=USDC&buyAmount=1000000)) where:
                         * `sellToken` is the input currency to be directly withdrawn from the Stable Pool
                         * `buyToken` is the output currency to be sent to the user

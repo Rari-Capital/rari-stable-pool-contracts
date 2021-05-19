@@ -35,7 +35,7 @@ class ZeroExExchange {
     }
     getSwapOrders(inputTokenAddress, inputTokenDecimals, outputTokenAddress, maxInputAmountBN, minMarginalOutputAmountBN) {
         return new Promise((resolve, reject) => {
-            https_1.default.get('https://api.0x.org/swap/v0/quote?sellToken=' + inputTokenAddress + '&buyToken=' + outputTokenAddress + '&sellAmount=' + maxInputAmountBN.toString(), (resp) => {
+            https_1.default.get('https://api.0x.org/swap/v0/quote?excludedSources=mStable&sellToken=' + inputTokenAddress + '&buyToken=' + outputTokenAddress + '&sellAmount=' + maxInputAmountBN.toString(), (resp) => {
                 let data = '';
                 // A chunk of data has been recieved
                 resp.on('data', (chunk) => {

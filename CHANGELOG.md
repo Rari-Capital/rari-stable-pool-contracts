@@ -1,6 +1,12 @@
 # Changelog
 
-## `v2.5.0` (contracts deployed 2020-02-09; all code pushed 2020-02-14)
+## `v2.6.0` (contracts deployed 2021-05-04; all code pushed 2021-05-06)
+
+* Fuse integration!
+* Upgrade to mStable mUSD v3.
+* Integrate swaps via Uniswap V2 in `RariFundController`.
+
+## `v2.5.0` (contracts deployed 2021-02-09; all code pushed 2021-02-14)
 
 * Upgraded mStable SAVE V1 to V2 (and implemented MTA rewards).
 * Fixed bug in calculation of `outputFilledAmountUsd` in `RariFundController.marketSell0xOrdersFillOrKill`.

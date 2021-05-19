@@ -1,12 +1,4 @@
-/**
- * COPYRIGHT © 2020 RARI CAPITAL, INC. ALL RIGHTS RESERVED.
- * Anyone is free to integrate the public (i.e., non-administrative) application programming interfaces (APIs) of the official Ethereum smart contract instances deployed by Rari Capital, Inc. in any application (commercial or noncommercial and under any license), provided that the application does not abuse the APIs or act against the interests of Rari Capital, Inc.
- * Anyone is free to study, review, and analyze the source code contained in this package.
- * Reuse (including deployment of smart contracts other than private testing on a private network), modification, redistribution, or sublicensing of any source code contained in this package is not permitted without the explicit permission of David Lucid of Rari Capital, Inc.
- * No one is permitted to use the software for any purpose other than those allowed by this license.
- * This license is liable to change at any time at the sole discretion of David Lucid of Rari Capital, Inc.
- */
-
+// SPDX-License-Identifier: UNLICENSED
 const { deployProxy, upgradeProxy } = require('@openzeppelin/truffle-upgrades');
 
 const erc20Abi = require('./abi/ERC20.json');
@@ -197,7 +189,7 @@ contract("RariFundManager", accounts => {
     // TODO: Check _fundDisabled (no way to do this as of now)
 
     // Upgrade to new FundManager
-    var newFundManagerInstance = await deployProxy(DummyRariFundManager, []);
+    var newFundManagerInstance = await deployProxy(DummyRariFundManager);
 
     // Upgrade!
     await newFundManagerInstance.authorizeFundManagerDataSource(fundManagerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
@@ -207,7 +199,7 @@ contract("RariFundManager", accounts => {
 });
 
 contract("RariFundController", accounts => {
-  it("should upgrade the FundController to a copy of its code", async () => {
+  it("should upgrade the FundController implementation to a copy of its code", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
@@ -227,22 +219,10 @@ contract("RariFundController", accounts => {
     var oldFundBalance = await fundManagerInstance.getFundBalance.call();
     var oldAccountBalance = await fundManagerInstance.balanceOf.call(process.env.DEVELOPMENT_ADDRESS);
 
-    // Disable original FundController and FundManager
-    await fundControllerInstance.disableFund({ from: process.env.DEVELOPMENT_ADDRESS });
-    await fundManagerInstance.setFundDisabled(true, { from: process.env.DEVELOPMENT_ADDRESS });
-
-    // TODO: Check _fundDisabled (no way to do this as of now)
-
-    // Create new FundController
-    var newFundControllerInstance = await RariFundController.new({ from: process.env.DEVELOPMENT_ADDRESS });
-    await newFundControllerInstance.setFundManager(RariFundManager.address, { from: process.env.DEVELOPMENT_ADDRESS });
-
-    // Upgrade!
-    await fundControllerInstance.methods["upgradeFundController(address)"](newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
-    await fundManagerInstance.setFundController(newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
-
-    // Re-enable FundManager
-    await fundManagerInstance.setFundDisabled(false, { from: process.env.DEVELOPMENT_ADDRESS });
+    // Upgrade FundController
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundController.class_defaults.from = process.env.UPGRADE_FUND_OWNER_ADDRESS;
+    await upgradeProxy(RariFundController.address, RariFundController, { unsafeAllowLinkedLibraries: true });
+    if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundController.class_defaults.from = process.env.DEVELOPMENT_ADDRESS;
 
     // Check balance of new FundController
     let newRawFundBalance = await fundManagerInstance.getRawFundBalance.call();
@@ -255,7 +235,7 @@ contract("RariFundController", accounts => {
 });
 
 contract("RariFundController", accounts => {
-  it("should upgrade the FundController to new code", async () => {
+  it("should upgrade the proxy and implementation of FundController to new code", async () => {
     let fundControllerInstance = await RariFundController.deployed();
     let fundManagerInstance = await (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0 ? RariFundManager.at(process.env.UPGRADE_FUND_MANAGER_ADDRESS) : RariFundManager.deployed());
     if (parseInt(process.env.UPGRADE_FROM_LAST_VERSION) > 0) RariFundManager.address = process.env.UPGRADE_FUND_MANAGER_ADDRESS;
@@ -282,7 +262,7 @@ contract("RariFundController", accounts => {
     // TODO: Check _fundDisabled (no way to do this as of now)
 
     // Create new FundController
-    var newFundControllerInstance = await DummyRariFundController.new({ from: process.env.DEVELOPMENT_ADDRESS });
+    var newFundControllerInstance = await deployProxy(DummyRariFundController);
 
     // Upgrade!
     await fundControllerInstance.methods["upgradeFundController(address)"](newFundControllerInstance.address, { from: process.env.DEVELOPMENT_ADDRESS });
