@@ -237,6 +237,7 @@ contract RariFundController is Ownable {
      */
     modifier onlyRebalancer() {
         require(_rariFundRebalancerAddress == msg.sender, "Caller is not the rebalancer.");
+        require(!rariFundManager.isActionPaused(uint8(RariFundManager.Action.Rebalance)), "Rebalances are paused.");
         _;
     }
 

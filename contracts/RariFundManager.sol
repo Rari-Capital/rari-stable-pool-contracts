@@ -569,7 +569,7 @@ contract RariFundManager is Initializable, Ownable {
      * @param currencyCode The currency code of the token to be deposited.
      * @param amount The amount of tokens to be deposited.
      */
-    function depositTo(address to, string memory currencyCode, uint256 amount) public fundEnabled {
+    function depositTo(address to, string memory currencyCode, uint256 amount) public fundEnabled actionNotPaused(Action.Deposit) exchangeRateInvariant {
         // Input validation
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
@@ -584,7 +584,7 @@ contract RariFundManager is Initializable, Ownable {
         if (!cacheSetPreviously) _rawFundBalanceCache = toInt256(getRawFundBalance(pricesInUsd));
 
         // Get deposit amount in USD
-        uint256 amountUsd = amount.mul(pricesInUsd[_currencyIndexes[currencyCode]]).div(10 ** _currencyDecimals[currencyCode]);
+        uint256 amountUsd = toUsd(currencyCode, amount, pricesInUsd);
 
         // Calculate RFT to mint
         uint256 rftTotalSupply = rariFundToken.totalSupply();
@@ -594,14 +594,21 @@ contract RariFundManager is Initializable, Ownable {
         else rftAmount = amountUsd;
         require(rftAmount > 0, "Deposit amount is so small that no RFT would be minted.");
 
-        // Update net deposits, transfer funds from msg.sender, mint RFT, and emit event
+        // Update net deposits
         _netDeposits = _netDeposits.add(int256(amountUsd));
+
+        // Transfer funds from msg.sender and mint RFT
         IERC20(erc20Contract).safeTransferFrom(msg.sender, _rariFundControllerContract, amount); // The user must approve the transfer of tokens beforehand
         require(rariFundToken.mint(to, rftAmount), "Failed to mint output tokens.");
+
+        // Emit deposit event
         emit Deposit(currencyCode, msg.sender, to, amount, amountUsd, rftAmount);
 
         // Update _rawFundBalanceCache
         _rawFundBalanceCache = _rawFundBalanceCache.add(int256(amountUsd));
+
+        // Update stored fund balance
+        fundBalanceStored = getFundBalance();
 
         // Update RGT distribution speeds
         IRariGovernanceTokenDistributor rariGovernanceTokenDistributor = rariFundToken.rariGovernanceTokenDistributor();
@@ -681,7 +688,7 @@ contract RariFundManager is Initializable, Ownable {
      * @param amount The amount of tokens to be withdrawn.
      * @return The amount withdrawn after the fee.
      */
-    function _withdrawFrom(address from, string memory currencyCode, uint256 amount, uint256[] memory pricesInUsd) internal fundEnabled cachePoolBalances returns (uint256) {
+    function _withdrawFrom(address from, string memory currencyCode, uint256 amount, uint256[] memory pricesInUsd) internal fundEnabled actionNotPaused(Action.Withdrawal) exchangeRateInvariant cachePoolBalances returns (uint256) {
         // Input validation
         address erc20Contract = _erc20Contracts[currencyCode];
         require(erc20Contract != address(0), "Invalid currency code.");
@@ -699,21 +706,31 @@ contract RariFundManager is Initializable, Ownable {
         uint256 amountAfterFee = amount.sub(feeAmount);
 
         // Get withdrawal amount in USD
-        uint256 amountUsd = amount.mul(pricesInUsd[_currencyIndexes[currencyCode]]).div(10 ** _currencyDecimals[currencyCode]);
+        uint256 amountUsd = toUsd(currencyCode, amount, pricesInUsd);
 
         // Calculate RFT to burn
         uint256 rftAmount = getRftBurnAmount(from, amountUsd);
 
-        // Update net deposits, burn RFT, transfer funds to msg.sender, transfer fee to _withdrawalFeeMasterBeneficiary, and emit event
+        // Update net deposits
         _netDeposits = _netDeposits.sub(int256(amountUsd));
-        rariFundToken.fundManagerBurnFrom(from, rftAmount); // The user must approve the burning of tokens beforehand
-        IERC20 token = IERC20(erc20Contract);
-        token.safeTransferFrom(_rariFundControllerContract, msg.sender, amountAfterFee);
-        token.safeTransferFrom(_rariFundControllerContract, _withdrawalFeeMasterBeneficiary, feeAmount);
+
+        // Scope the following code to avoid a "stack too deep" compiler error
+        {
+            // Burn RFT, transfer funds to msg.sender, and transfer fee to _withdrawalFeeMasterBeneficiary
+            rariFundToken.fundManagerBurnFrom(from, rftAmount); // No need to approve the burning of tokens beforehand
+            IERC20 token = IERC20(erc20Contract);
+            token.safeTransferFrom(_rariFundControllerContract, msg.sender, amountAfterFee);
+            token.safeTransferFrom(_rariFundControllerContract, _withdrawalFeeMasterBeneficiary, feeAmount);
+        }
+
+        // Emit withdrawal event
         emit Withdrawal(currencyCode, from, msg.sender, amount, amountUsd, rftAmount, _withdrawalFeeRate);
 
         // Update _rawFundBalanceCache
         _rawFundBalanceCache = _rawFundBalanceCache.sub(int256(amountUsd));
+
+        // Update stored fund balance
+        fundBalanceStored = getFundBalance();
 
         // Update RGT distribution speeds
         IRariGovernanceTokenDistributor rariGovernanceTokenDistributor = rariFundToken.rariGovernanceTokenDistributor();
@@ -724,6 +741,17 @@ contract RariFundManager is Initializable, Ownable {
 
         // Return amount after fee
         return amountAfterFee;
+    }
+
+    /**
+     * @dev Converts an amount to USD (scaled by 1e18).
+     * @param currencyCode The currency code to convert.
+     * @param amount The amount to convert.
+     * @param pricesInUsd An array of prices in USD for all supported currencies (in order).
+     * @return The equivalent USD amount (scaled by 1e18).
+     */
+    function toUsd(string memory currencyCode, uint256 amount, uint256[] memory pricesInUsd) internal view returns (uint256) {
+        return amount.mul(pricesInUsd[_currencyIndexes[currencyCode]]).div(10 ** _currencyDecimals[currencyCode]);
     }
 
     /**
@@ -871,7 +899,7 @@ contract RariFundManager is Initializable, Ownable {
      * @dev Internal function to deposit all accrued fees on interest back into the fund on behalf of the master beneficiary.
      * @return Integer indicating success (0), no fees to claim (1), or no RFT to mint (2).
      */
-    function _depositFees() internal fundEnabled cacheRawFundBalance returns (uint8) {
+    function _depositFees() internal fundEnabled actionNotPaused(Action.InterestFeeClaim) exchangeRateInvariant cacheRawFundBalance returns (uint8) {
         // Input validation
         require(_interestFeeMasterBeneficiary != address(0), "Master beneficiary cannot be the zero address.");
 
@@ -891,12 +919,19 @@ contract RariFundManager is Initializable, Ownable {
 
         if (rftAmount <= 0) return 2;
 
-        // Update claimed interest fees and net deposits, mint RFT, emit events, and return no error
+        // Update claimed interest fees and net deposits
         _interestFeesClaimed = _interestFeesClaimed.add(amountUsd);
         _netDeposits = _netDeposits.add(int256(amountUsd));
+
+        // Mint RFT
         require(rariFundToken.mint(_interestFeeMasterBeneficiary, rftAmount), "Failed to mint output tokens.");
+
+        // Emit events
         emit Deposit("USD", _interestFeeMasterBeneficiary, _interestFeeMasterBeneficiary, amountUsd, amountUsd, rftAmount);
         emit InterestFeeDeposit(_interestFeeMasterBeneficiary, amountUsd);
+
+        // Update stored fund balance
+        fundBalanceStored = getFundBalance();
 
         // Update RGT distribution speeds
         IRariGovernanceTokenDistributor rariGovernanceTokenDistributor = rariFundToken.rariGovernanceTokenDistributor();
@@ -958,5 +993,85 @@ contract RariFundManager is Initializable, Ownable {
     function setWithdrawalFeeMasterBeneficiary(address beneficiary) external fundEnabled onlyOwner {
         require(beneficiary != address(0), "Master beneficiary cannot be the zero address.");
         _withdrawalFeeMasterBeneficiary = beneficiary;
+    }
+
+    /**
+     * @dev Caches this vault's total investor balance (all RFT holders' funds but not unclaimed fees) of all currencies in USD (scaled by 1e18).
+     */
+    uint256 public fundBalanceStored;
+
+    /**
+     * @dev Caches the peak RSPT exchange rate.
+     */
+    uint256 public peakExchangeRate;
+
+    /**
+     * @dev The maximum proportional loss in RSPT exchange rate for the invariant to be triggered.
+     */
+    uint256 public constant MAX_EXCHANGE_RATE_LOSS = 0.05e18; // 5%
+
+    /**
+     * @dev RSPT exchange rate invariant modifier.
+     */
+    modifier exchangeRateInvariant {
+        uint256 currentExchangeRate = getFundBalance().mul(1e18).div(rariFundToken.totalSupply());
+        require(currentExchangeRate >= peakExchangeRate.mul(uint256(1e18).sub(MAX_EXCHANGE_RATE_LOSS)).div(1e18), "INVARIANT BROKEN: RSPT exchange rate has gone down too much since peak.");
+        if (currentExchangeRate > peakExchangeRate) peakExchangeRate = currentExchangeRate;
+        _;
+    }
+
+    /**
+     * @dev Resets the RSPT exchange rate invariant. Pauser only.
+     */
+    function resetExchangeRateInvariant() external onlyPauser {
+        peakExchangeRate = 0;
+    }
+
+    /**
+     * @dev Pauser only modifier.
+     */
+    modifier onlyPauser {
+        require(isPauser[msg.sender]);
+        _;
+    }
+
+    /**
+     * @dev Caches the peak RSPT exchange rate.
+     */
+    mapping(address => bool) public isPauser;
+
+    /**
+     * @dev Resets the RSPT exchange rate invariant. Pauser only.
+     */
+    function setPausers(address[] calldata pausers, bool[] calldata enabled) external onlyOwner {
+        require(pausers.length > 0 && pausers.length == enabled.length, "Array lengths must be equal and greater than 0.");
+        for (uint256 i = 0; i < pausers.length; i++) isPauser[pausers[i]] = enabled[i];
+    }
+
+    enum Action {
+        Deposit,
+        Withdrawal,
+        Rebalance,
+        InterestFeeClaim
+    }
+
+    /**
+     * @dev Paused actions.
+     */
+    mapping(uint8 => bool) public isActionPaused;
+
+    /**
+     * @dev Requires that `action` is not paused.
+     */
+    modifier actionNotPaused(Action action) {
+        require(!isActionPaused[uint8(action)], "Action is paused.");
+        _;
+    }
+
+    /**
+     * @dev Pauses an action.
+     */
+    function setActionPaused(Action action, bool paused) external onlyPauser {
+        isActionPaused[uint8(action)] = paused;
     }
 }
