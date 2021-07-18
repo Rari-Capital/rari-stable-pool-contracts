@@ -612,7 +612,7 @@ contract RariFundManager is Initializable, Ownable {
 
         // Update RGT distribution speeds
         IRariGovernanceTokenDistributor rariGovernanceTokenDistributor = rariFundToken.rariGovernanceTokenDistributor();
-        if (address(rariGovernanceTokenDistributor) != address(0) && block.number < rariGovernanceTokenDistributor.distributionEndBlock()) rariGovernanceTokenDistributor.refreshDistributionSpeeds(IRariGovernanceTokenDistributor.RariPool.Stable, getFundBalance());
+        if (address(rariGovernanceTokenDistributor) != address(0) && block.number < rariGovernanceTokenDistributor.distributionEndBlock()) rariGovernanceTokenDistributor.refreshDistributionSpeeds(IRariGovernanceTokenDistributor.RariPool.Stable, fundBalanceStored);
 
         // Clear _rawFundBalanceCache
         if (!cacheSetPreviously) _rawFundBalanceCache = -1;
@@ -734,7 +734,7 @@ contract RariFundManager is Initializable, Ownable {
 
         // Update RGT distribution speeds
         IRariGovernanceTokenDistributor rariGovernanceTokenDistributor = rariFundToken.rariGovernanceTokenDistributor();
-        if (address(rariGovernanceTokenDistributor) != address(0) && block.number < rariGovernanceTokenDistributor.distributionEndBlock()) rariGovernanceTokenDistributor.refreshDistributionSpeeds(IRariGovernanceTokenDistributor.RariPool.Stable, getFundBalance());
+        if (address(rariGovernanceTokenDistributor) != address(0) && block.number < rariGovernanceTokenDistributor.distributionEndBlock()) rariGovernanceTokenDistributor.refreshDistributionSpeeds(IRariGovernanceTokenDistributor.RariPool.Stable, fundBalanceStored);
 
         // Clear _rawFundBalanceCache
         if (!cacheSetPreviously) _rawFundBalanceCache = -1;
@@ -935,7 +935,7 @@ contract RariFundManager is Initializable, Ownable {
 
         // Update RGT distribution speeds
         IRariGovernanceTokenDistributor rariGovernanceTokenDistributor = rariFundToken.rariGovernanceTokenDistributor();
-        if (address(rariGovernanceTokenDistributor) != address(0) && block.number < rariGovernanceTokenDistributor.distributionEndBlock()) rariGovernanceTokenDistributor.refreshDistributionSpeeds(IRariGovernanceTokenDistributor.RariPool.Stable, getFundBalance());
+        if (address(rariGovernanceTokenDistributor) != address(0) && block.number < rariGovernanceTokenDistributor.distributionEndBlock()) rariGovernanceTokenDistributor.refreshDistributionSpeeds(IRariGovernanceTokenDistributor.RariPool.Stable, fundBalanceStored);
 
         // Return no error
         return 0;
