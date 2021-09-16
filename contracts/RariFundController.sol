@@ -236,9 +236,17 @@ contract RariFundController is Ownable {
      * @dev Throws if called by any account other than the rebalancer.
      */
     modifier onlyRebalancer() {
+        _beforeOnlyRebalancer();
+        _;
+    }
+
+    /**
+     * @dev Split off from `onlyRebalancer` to keep contract below the 24 KB size limit.
+     * Saves space because function modifier code is "inlined" into every function with the modifier).
+     */
+    function _beforeOnlyRebalancer() private {
         require(_rariFundRebalancerAddress == msg.sender, "Caller is not the rebalancer.");
         require(!rariFundManager.isActionPaused(uint8(RariFundManager.Action.Rebalance)), "Rebalances are paused.");
-        _;
     }
 
     /**
